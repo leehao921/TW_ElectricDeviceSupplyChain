@@ -1,4 +1,8 @@
 # Task: Establish Company Coverage Prototype
+
+> **2026-04-24 — SCOPE NARROWED TO ELECTRONICS SUPPLY CHAIN ONLY.**
+> 86 non-electronics sector folders were deleted from `Pilot_Reports/` (~620 reports). The database now covers **926 tickers across 11 electronics sectors**: Semiconductors, Semiconductor Equipment & Materials, Electronic Components, Computer Hardware, Communication Equipment, Consumer Electronics, Electronics & Computer Distribution, Electrical Equipment & Parts, Specialty Industrial Machinery, Software - Infrastructure, Scientific & Technical Instruments. Historical batch entries for deleted sectors remain below as provenance; no new work is scheduled for them. Forward tracking applies only to the 11 electronics sectors above.
+
 **SINGLE SOURCE OF TRUTH**: This document is the definitive reference for batch definitions and task progress. Do not rely on external Excel files for batch tracking.
 **MINIMUM REQUIREMENT POLICY**: The tickers listed in this document are the *minimum* required set. You are authorized to discover and add missing tickers if they are not in the Exception List.
 **SINGLE BATCH PROCESSING**: Process entire batches as single units (e.g., Batch 21: 4908-4967) to minimize authorization interruptions. Do not subdivide.

@@ -1,7 +1,11 @@
-# My TW Coverage — Project Rules
+# TW Electronic Device Supply Chain — Project Rules
 
 ## Purpose
-Equity research coverage of 1,735+ Taiwan-listed companies (TWSE + OTC). Each ticker report maps business overview, supply chain position, and customer/supplier relationships. **Wikilinks `[[...]]` are the core mechanism** — they create a searchable cross-reference graph across all tickers (e.g., find every company serving `[[Apple]]` or participating in `[[矽光子]]` supply chain).
+Equity research coverage of **926 Taiwan-listed electronics companies** (TWSE + OTC) across **11 electronics sectors** — semiconductors, IC packaging & test, IC design, PCB, passive components, semiconductor equipment & materials, and related electronic hardware. Each ticker report maps business overview, supply chain position, and customer/supplier relationships. **Wikilinks `[[...]]` are the core mechanism** — they create a searchable cross-reference graph across all tickers (e.g., find every company serving `[[Apple]]` or participating in `[[矽光子]]` supply chain).
+
+This project pairs with two sibling systems on the same machine:
+- `trading-timescaledb` (Docker, populated by `/Users/lulala/Documents/coding/database/` `tmf-*` stack) — authoritative Taiwan market-data source: ticks, trades, 三大法人 institutional flow, OFI, options IV. **Read-only from this platform.** Any TWSE data gap is fixed in that repo, not here.
+- `knowledge-platform-*` Docker stack (FalkorDB :6380 + pgvector Postgres :5433) — reused for the electronics supply-chain knowledge graph under Graphiti `group_id="tw-electronics"` and a dedicated Postgres DB `tw_electronics`.
 
 ---
 
@@ -122,7 +126,7 @@ Break down by business segment with generic context labels followed by specific 
 Pilot_Reports/{Industry}/{Ticker}_{ChineseName}.md
 ```
 - Filename: `XXXX_中文名.md` (4-digit ticker + Chinese company name)
-- 99 industry sector folders
+- 11 electronics sector folders (Semiconductors, Semiconductor Equipment & Materials, Electronic Components, Computer Hardware, Communication Equipment, Consumer Electronics, Electronics & Computer Distribution, Electrical Equipment & Parts, Specialty Industrial Machinery, Software - Infrastructure, Scientific & Technical Instruments)
 
 ### Report Sections (in order)
 1. `# {Ticker} - [[{Company Name}]]` — Title with wikilinked company name

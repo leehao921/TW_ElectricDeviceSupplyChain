@@ -1,12 +1,21 @@
-# Taiwan Stock Coverage Database
+# Taiwan Electronic Device Supply-Chain Database
 
-A structured equity research database covering **1,735 Taiwan-listed companies** (TWSE + OTC) across **99 industry sectors**. Each report contains a business overview, supply chain mapping, customer/supplier relationships, and financial data — all cross-referenced through **4,900+ wikilinks** that form a searchable knowledge graph.
+A structured equity research database covering **926 Taiwan-listed electronics companies** (TWSE + OTC) across **11 electronics sectors** — semiconductors, IC packaging & test, IC design, PCB, passive components, semiconductor equipment & materials, computer hardware, communication equipment, consumer electronics, and related electronic distribution. Each report contains a business overview, supply chain mapping, customer/supplier relationships, and financial data — all cross-referenced through thousands of wikilinks that form a searchable knowledge graph.
 
 ## Why This Exists
 
-Taiwan's stock market has 1,800+ listed companies, many of which are critical nodes in global supply chains (semiconductors, electronics, automotive, textiles). Public information is fragmented across Chinese-language filings, investor presentations, and industry reports. This database consolidates that research into a consistent, searchable format.
+Taiwan is the global backbone for semiconductor and electronic-device supply chains. Public information is fragmented across Chinese-language filings, investor presentations, and industry reports. This database consolidates supply-chain research into a consistent, searchable format focused on the electronics-device value chain — from upstream materials and equipment through IC design, fabrication, and packaging, to downstream hardware and modules.
 
-**The wikilink graph is the core feature.** Searching `[[Apple]]` reveals 207 Taiwanese companies in Apple's supply chain. Searching `[[CoWoS]]` shows every company involved in TSMC's advanced packaging. Searching `[[光阻液]]` (photoresist) maps every supplier and consumer of that material.
+**The wikilink graph is the core feature.** Searching `[[Apple]]` reveals Taiwanese companies in Apple's supply chain. Searching `[[CoWoS]]` shows every company involved in TSMC's advanced packaging. Searching `[[光阻液]]` (photoresist) maps every supplier and consumer of that material.
+
+## Companion Systems
+
+This repo is the **semantic layer** only. It pairs with two sibling Docker stacks:
+
+- **`trading-timescaledb`** (populated by `/Users/lulala/Documents/coding/database/` `tmf-*` collectors) — authoritative Taiwan market-data source: ticks, trades, 三大法人, OFI, options IV. Read-only from this platform.
+- **`knowledge-platform-*`** (FalkorDB :6380 + pgvector Postgres :5433) — reused for the supply-chain graph and news embeddings under Graphiti `group_id="tw-electronics"` and dedicated Postgres DB `tw_electronics`.
+
+The integration layer (ingestion / graph / MCP / scheduler) is being built in sibling folders of this repo — see `docs/plans/` for the architecture.
 
 ## Quick Start
 
@@ -22,14 +31,23 @@ Reports are markdown files organized by industry:
 
 ```
 Pilot_Reports/
-├── Semiconductors/           (155 tickers)
+├── Semiconductors/
 │   ├── 2330_台積電.md        # TSMC
 │   ├── 2454_聯發科.md        # MediaTek
 │   └── ...
-├── Electronic Components/    (267 tickers)
-├── Computer Hardware/        (114 tickers)
-└── ... (99 sector folders)
+├── Electronic Components/
+├── Computer Hardware/
+├── Communication Equipment/
+├── Consumer Electronics/
+├── Electrical Equipment & Parts/
+├── Electronics & Computer Distribution/
+├── Scientific & Technical Instruments/
+├── Semiconductor Equipment & Materials/
+├── Software - Infrastructure/
+└── Specialty Industrial Machinery/
 ```
+
+**11 electronics sectors, 926 tickers total.**
 
 Each report follows a consistent structure:
 
@@ -248,10 +266,10 @@ The database contains **4,900+ unique wikilinks** across three categories:
 │   ├── build_themes.py        # Generate thematic investment screens
 │   ├── build_network.py       # Generate interactive network graph
 │   └── generators/            # Historical base report generators
-├── Pilot_Reports/             # 1,735 ticker reports across 99 sectors
+├── Pilot_Reports/             # 926 electronics ticker reports across 11 sectors
 │   ├── Semiconductors/
 │   ├── Electronic Components/
-│   └── ... (99 folders)
+│   └── ... (11 folders)
 ├── network/                   # Interactive wikilink network graph (auto-generated)
 │   ├── index.html             # D3.js visualization (open in browser)
 │   └── graph_data.json        # Raw graph data (339 nodes, 1,452 edges)

@@ -1,154 +1,880 @@
 {
   "nodes": [
     {
-      "id": "物聯網",
-      "count": 71,
-      "category": "application",
-      "color": "#9b59b6"
-    },
-    {
-      "id": "鴻海",
-      "count": 73,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "仁寶",
-      "count": 33,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
       "id": "消費性電子",
-      "count": 55,
+      "count": 54,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "Dell",
+      "id": "ASIC",
+      "count": 9,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "AI[[伺服器",
+      "count": 31,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "奇景光電",
+      "count": 12,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "南亞電路板",
+      "count": 9,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "CPO",
+      "count": 14,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "廣達",
+      "count": 52,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "碳化矽",
+      "count": 21,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "台郡",
+      "count": 5,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "IC 設計",
+      "count": 23,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Applied Materials",
+      "count": 19,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "BT 載板",
+      "count": 6,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "NVIDIA",
       "count": 100,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "Qualcomm",
-      "count": 35,
+      "id": "Epson",
+      "count": 10,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "聯華電子",
-      "count": 27,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "Micron",
-      "count": 53,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "電動車",
-      "count": 134,
-      "category": "application",
-      "color": "#9b59b6"
-    },
-    {
-      "id": "Microsoft",
-      "count": 72,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "群創",
-      "count": 82,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "Tesla",
-      "count": 56,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "5G",
-      "count": 129,
-      "category": "technology",
-      "color": "#2ecc71"
-    },
-    {
-      "id": "日月光投控",
-      "count": 66,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "AI 伺服器",
-      "count": 148,
-      "category": "application",
-      "color": "#9b59b6"
-    },
-    {
-      "id": "CoWoS",
-      "count": 39,
-      "category": "technology",
-      "color": "#2ecc71"
-    },
-    {
-      "id": "自動化",
-      "count": 49,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "Intel",
-      "count": 91,
+      "id": "Tokyo Electron",
+      "count": 8,
       "category": "international_company",
       "color": "#3498db"
     },
     {
       "id": "聯電",
-      "count": 69,
+      "count": 47,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "HP",
-      "count": 93,
+      "id": "CSP",
+      "count": 32,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "銅箔",
-      "count": 55,
+      "id": "研磨液",
+      "count": 6,
       "category": "material",
       "color": "#f39c12"
     },
     {
-      "id": "聯發科",
+      "id": "和碩",
+      "count": 15,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "群創",
+      "count": 65,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "太陽能",
+      "count": 14,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "Google Cloud",
+      "count": 6,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Mini LED",
+      "count": 14,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "光收發模組",
+      "count": 9,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "EMS",
+      "count": 32,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "友達光電",
+      "count": 6,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Continental",
+      "count": 16,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "緯創",
+      "count": 32,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "網通",
+      "count": 55,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "技嘉",
+      "count": 10,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "SpaceX",
+      "count": 22,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "AI",
+      "count": 125,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "NXP",
+      "count": 15,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "新唐",
+      "count": 5,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Lenovo",
+      "count": 38,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Wi-Fi 6",
+      "count": 9,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "半導體",
+      "count": 100,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Shin-Etsu",
+      "count": 5,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "工業控制",
+      "count": 8,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "VCSEL",
+      "count": 10,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "記憶體",
+      "count": 37,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "LG",
+      "count": 13,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Cadence",
+      "count": 7,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "TFT-LCD",
+      "count": 9,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "世界先進",
+      "count": 10,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "立錡",
+      "count": 6,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "臻鼎-KY",
+      "count": 7,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "凌華",
+      "count": 7,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "BYD",
+      "count": 13,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "MSI",
+      "count": 7,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Amazon",
+      "count": 56,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "日月光投控",
+      "count": 51,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "PVC",
+      "count": 6,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Cisco",
+      "count": 16,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "IGBT",
+      "count": 22,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "微星",
+      "count": 9,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "5G",
+      "count": 110,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "Teradyne",
+      "count": 6,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "台光電",
+      "count": 13,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "OmniVision",
+      "count": 9,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Aixtron",
+      "count": 5,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "鴻海",
       "count": 56,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "OEM",
-      "count": 60,
+      "id": "Apple",
+      "count": 76,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "NVIDIA",
-      "count": 115,
+      "id": "Meta",
+      "count": 38,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "廣達",
-      "count": 63,
+      "id": "小米",
+      "count": 10,
       "category": "taiwan_company",
       "color": "#e74c3c"
+    },
+    {
+      "id": "AIoT",
+      "count": 20,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "AMD",
+      "count": 62,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "FOPLP",
+      "count": 12,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "自動化",
+      "count": 41,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Synopsys",
+      "count": 10,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "欣興",
+      "count": 27,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "矽光子",
+      "count": 15,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "液冷",
+      "count": 8,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "英業達",
+      "count": 14,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "友達",
+      "count": 65,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "台電",
+      "count": 32,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "億光",
+      "count": 10,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "導線架",
+      "count": 30,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "Intel",
+      "count": 83,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "VR",
+      "count": 10,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "研華",
+      "count": 16,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "ODM",
+      "count": 47,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "玻纖布",
+      "count": 14,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "Micron",
+      "count": 42,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "華新麗華",
+      "count": 11,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Seagate",
+      "count": 8,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "低軌衛星",
+      "count": 42,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "仁寶",
+      "count": 29,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "新竹",
+      "count": 13,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "HP",
+      "count": 79,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "物聯網",
+      "count": 62,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "SoC",
+      "count": 12,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "磊晶",
+      "count": 23,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "儲能",
+      "count": 15,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "瑞鼎",
+      "count": 8,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "PCIe",
+      "count": 13,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "LED",
+      "count": 29,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "DDR5",
+      "count": 9,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "砷化鎵",
+      "count": 7,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "AWS",
+      "count": 20,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Fanuc",
+      "count": 10,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "矽品",
+      "count": 17,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "伺服器",
+      "count": 73,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "MCU",
+      "count": 30,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "氮化鎵",
+      "count": 20,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "連接器",
+      "count": 44,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "PVD",
+      "count": 7,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "ADAS",
+      "count": 42,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "USB",
+      "count": 16,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "FPC",
+      "count": 10,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Sony",
+      "count": 42,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "力成",
+      "count": 15,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "華通",
+      "count": 7,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "HBM",
+      "count": 16,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "群創光電",
+      "count": 6,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "AR",
+      "count": 13,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "華碩",
+      "count": 44,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Samsung",
+      "count": 68,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "台達電",
+      "count": 35,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "OLED",
+      "count": 15,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "Advantest",
+      "count": 9,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Veeco",
+      "count": 5,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "光寶科",
+      "count": 8,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "電動車",
+      "count": 100,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "資料中心",
+      "count": 74,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "LCD",
+      "count": 10,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "Type-C",
+      "count": 12,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "車用電子",
+      "count": 24,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "Wi-Fi 7",
+      "count": 20,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "智易",
+      "count": 5,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "聯發科",
+      "count": 48,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "PCB",
+      "count": 106,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "聯詠",
+      "count": 23,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "探針卡",
+      "count": 13,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "銅箔",
+      "count": 53,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "SK 海力士",
+      "count": 11,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "NAND",
+      "count": 6,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "Panasonic",
+      "count": 20,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Bosch",
+      "count": 23,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "盛群",
+      "count": 7,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "宏碁",
+      "count": 22,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "光通訊",
+      "count": 20,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "ASML",
+      "count": 13,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Microsoft",
+      "count": 43,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "中華電信",
+      "count": 17,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "PON",
+      "count": 8,
+      "category": "international_company",
+      "color": "#3498db"
     },
     {
       "id": "Broadcom",
@@ -157,238 +883,5200 @@
       "color": "#3498db"
     },
     {
-      "id": "東和鋼鐵",
-      "count": 26,
+      "id": "第三代[[半導體",
+      "count": 5,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "PCB",
-      "count": 129,
+      "id": "水冷",
+      "count": 6,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Tesla",
+      "count": 38,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "銀泰",
+      "count": 5,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "散熱",
+      "count": 31,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Infineon",
+      "count": 21,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "瑞昱",
+      "count": 31,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "雲端服務",
+      "count": 21,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "ABF 載板",
+      "count": 11,
       "category": "technology",
       "color": "#2ecc71"
     },
     {
-      "id": "Google",
-      "count": 68,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "Samsung",
-      "count": 80,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "欣興",
-      "count": 40,
+      "id": "機器人",
+      "count": 19,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "伺服器",
-      "count": 84,
+      "id": "京東方",
+      "count": 14,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "亞洲水泥",
-      "count": 28,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "CSP",
-      "count": 36,
+      "id": "CCL",
+      "count": 11,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "AI",
-      "count": 160,
+      "id": "IPC",
+      "count": 19,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "HDMI",
+      "count": 8,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "CVD",
+      "count": 13,
       "category": "technology",
       "color": "#2ecc71"
     },
     {
-      "id": "友達",
-      "count": 83,
+      "id": "MOSFET",
+      "count": 45,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "中磊",
+      "count": 8,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "AMD",
-      "count": 65,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "豐興鋼鐵",
-      "count": 24,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "半導體",
-      "count": 137,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "台灣水泥",
-      "count": 50,
-      "category": "taiwan_company",
-      "color": "#e74c3c"
-    },
-    {
-      "id": "資料中心",
-      "count": 81,
-      "category": "application",
-      "color": "#9b59b6"
-    },
-    {
-      "id": "Lenovo",
-      "count": 47,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "ODM",
-      "count": 82,
-      "category": "international_company",
-      "color": "#3498db"
-    },
-    {
-      "id": "緯創",
-      "count": 40,
+      "id": "聯茂",
+      "count": 13,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
       "id": "台積電",
-      "count": 215,
+      "count": 136,
       "category": "taiwan_company",
       "color": "#e74c3c"
     },
     {
-      "id": "Apple",
-      "count": 96,
+      "id": "環球晶",
+      "count": 8,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "DRAM",
+      "count": 32,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "景碩",
+      "count": 9,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "聯華電子",
+      "count": 27,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "OEM",
+      "count": 31,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "Amazon",
-      "count": 65,
+      "id": "Dell",
+      "count": 80,
       "category": "international_company",
       "color": "#3498db"
     },
     {
-      "id": "Meta",
-      "count": 82,
+      "id": "GM",
+      "count": 7,
       "category": "international_company",
       "color": "#3498db"
+    },
+    {
+      "id": "Broadcom 博通",
+      "count": 5,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Google",
+      "count": 45,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "矽晶圓",
+      "count": 30,
+      "category": "material",
+      "color": "#f39c12"
+    },
+    {
+      "id": "京元電子",
+      "count": 11,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Qualcomm",
+      "count": 33,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "工業電腦",
+      "count": 50,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Arm",
+      "count": 12,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "GPU",
+      "count": 7,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "CMP",
+      "count": 5,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "SSD",
+      "count": 17,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "LG Display",
+      "count": 6,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "EUV",
+      "count": 6,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "OPPO",
+      "count": 7,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "晶元光電",
+      "count": 8,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Siemens",
+      "count": 14,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "MLCC",
+      "count": 15,
+      "category": "technology",
+      "color": "#2ecc71"
+    },
+    {
+      "id": "HDI",
+      "count": 6,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "上銀",
+      "count": 10,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "電源管理 IC",
+      "count": 11,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "Lam Research",
+      "count": 11,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "Wi-Fi",
+      "count": 14,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "XLPE",
+      "count": 7,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "台燿",
+      "count": 7,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "SK Hynix",
+      "count": 16,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "AI 伺服器",
+      "count": 115,
+      "category": "application",
+      "color": "#9b59b6"
+    },
+    {
+      "id": "Microsoft Azure",
+      "count": 10,
+      "category": "international_company",
+      "color": "#3498db"
+    },
+    {
+      "id": "蝕刻",
+      "count": 19,
+      "category": "taiwan_company",
+      "color": "#e74c3c"
+    },
+    {
+      "id": "CoWoS",
+      "count": 32,
+      "category": "technology",
+      "color": "#2ecc71"
     }
   ],
   "links": [
     {
-      "source": "5G",
-      "target": "AI 伺服器",
-      "weight": 22
-    },
-    {
-      "source": "5G",
+      "source": "PCB",
       "target": "電動車",
-      "weight": 24
+      "weight": 9
     },
     {
-      "source": "AI 伺服器",
-      "target": "電動車",
-      "weight": 30
+      "source": "NVIDIA",
+      "target": "台積電",
+      "weight": 20
     },
     {
-      "source": "AI 伺服器",
-      "target": "廣達",
-      "weight": 23
+      "source": "NVIDIA",
+      "target": "聯發科",
+      "weight": 12
     },
     {
-      "source": "亞洲水泥",
-      "target": "台灣水泥",
-      "weight": 27
+      "source": "台積電",
+      "target": "聯發科",
+      "weight": 15
     },
     {
       "source": "AI 伺服器",
       "target": "NVIDIA",
-      "weight": 44
+      "weight": 37
     },
     {
-      "source": "ODM",
-      "target": "OEM",
-      "weight": 47
+      "source": "AI 伺服器",
+      "target": "PCB",
+      "weight": 17
     },
     {
-      "source": "Amazon",
-      "target": "Google",
-      "weight": 22
+      "source": "AI 伺服器",
+      "target": "台積電",
+      "weight": 11
     },
     {
-      "source": "Amazon",
-      "target": "Microsoft",
-      "weight": 22
+      "source": "AI 伺服器",
+      "target": "聯電",
+      "weight": 6
     },
     {
-      "source": "Dell",
-      "target": "HP",
-      "weight": 76
+      "source": "NVIDIA",
+      "target": "PCB",
+      "weight": 18
     },
     {
-      "source": "Dell",
-      "target": "Microsoft",
+      "source": "NVIDIA",
+      "target": "聯電",
+      "weight": 6
+    },
+    {
+      "source": "PCB",
+      "target": "台積電",
+      "weight": 9
+    },
+    {
+      "source": "台積電",
+      "target": "聯電",
+      "weight": 32
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Apple",
+      "weight": 17
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Tesla",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "廣達",
+      "weight": 18
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "緯創",
+      "weight": 16
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "鴻海",
+      "weight": 11
+    },
+    {
+      "source": "Apple",
+      "target": "Tesla",
+      "weight": 13
+    },
+    {
+      "source": "Apple",
+      "target": "廣達",
+      "weight": 8
+    },
+    {
+      "source": "Apple",
+      "target": "緯創",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "鴻海",
+      "weight": 14
+    },
+    {
+      "source": "Tesla",
+      "target": "鴻海",
+      "weight": 7
+    },
+    {
+      "source": "廣達",
+      "target": "緯創",
       "weight": 27
     },
     {
-      "source": "Google",
-      "target": "Meta",
-      "weight": 29
+      "source": "廣達",
+      "target": "鴻海",
+      "weight": 17
+    },
+    {
+      "source": "緯創",
+      "target": "鴻海",
+      "weight": 11
+    },
+    {
+      "source": "ADAS",
+      "target": "Google",
+      "weight": 5
     },
     {
       "source": "Google",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "AMD",
+      "target": "PCB",
+      "weight": 18
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "電動車",
+      "weight": 26
+    },
+    {
+      "source": "NVIDIA",
+      "target": "電動車",
+      "weight": 11
+    },
+    {
+      "source": "Tesla",
+      "target": "電動車",
+      "weight": 22
+    },
+    {
+      "source": "台積電",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "ODM",
+      "target": "Sony",
+      "weight": 8
+    },
+    {
+      "source": "Sony",
+      "target": "聯發科",
+      "weight": 5
+    },
+    {
+      "source": "ADAS",
+      "target": "Amazon",
+      "weight": 6
+    },
+    {
+      "source": "ADAS",
       "target": "Microsoft",
-      "weight": 28
+      "weight": 5
     },
     {
-      "source": "HP",
+      "source": "ADAS",
+      "target": "Sony",
+      "weight": 6
+    },
+    {
+      "source": "Amazon",
+      "target": "Microsoft",
+      "weight": 19
+    },
+    {
+      "source": "Amazon",
+      "target": "Sony",
+      "weight": 6
+    },
+    {
+      "source": "Cisco",
+      "target": "Microsoft",
+      "weight": 6
+    },
+    {
+      "source": "Microsoft",
+      "target": "Sony",
+      "weight": 7
+    },
+    {
+      "source": "OmniVision",
+      "target": "Sony",
+      "weight": 5
+    },
+    {
+      "source": "IPC",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "OEM",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "Panasonic",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "資料中心",
+      "target": "雲端服務",
+      "weight": 9
+    },
+    {
+      "source": "台積電",
+      "target": "聯華電子",
+      "weight": 20
+    },
+    {
+      "source": "力成",
+      "target": "日月光投控",
+      "weight": 10
+    },
+    {
+      "source": "力成",
+      "target": "矽品",
+      "weight": 5
+    },
+    {
+      "source": "導線架",
+      "target": "日月光投控",
+      "weight": 6
+    },
+    {
+      "source": "導線架",
+      "target": "矽品",
+      "weight": 5
+    },
+    {
+      "source": "日月光投控",
+      "target": "矽品",
+      "weight": 16
+    },
+    {
+      "source": "5G",
+      "target": "光通訊",
+      "weight": 9
+    },
+    {
+      "source": "5G",
+      "target": "磊晶",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "資料中心",
+      "weight": 14
+    },
+    {
+      "source": "CPO",
+      "target": "光通訊",
+      "weight": 5
+    },
+    {
+      "source": "CPO",
+      "target": "矽光子",
+      "weight": 8
+    },
+    {
+      "source": "CPO",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "VCSEL",
+      "target": "光通訊",
+      "weight": 5
+    },
+    {
+      "source": "VCSEL",
+      "target": "磊晶",
+      "weight": 5
+    },
+    {
+      "source": "VCSEL",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "光通訊",
+      "target": "磊晶",
+      "weight": 6
+    },
+    {
+      "source": "光通訊",
+      "target": "資料中心",
+      "weight": 15
+    },
+    {
+      "source": "磊晶",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "Shin-Etsu",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "環球晶",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "矽晶圓",
+      "weight": 12
+    },
+    {
+      "source": "環球晶",
+      "target": "矽晶圓",
+      "weight": 8
+    },
+    {
+      "source": "矽晶圓",
+      "target": "磊晶",
+      "weight": 5
+    },
+    {
+      "source": "矽晶圓",
+      "target": "聯華電子",
+      "weight": 5
+    },
+    {
+      "source": "友達光電",
+      "target": "群創光電",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "IGBT",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "導線架",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "蝕刻",
+      "weight": 5
+    },
+    {
+      "source": "IGBT",
+      "target": "Infineon",
+      "weight": 5
+    },
+    {
+      "source": "IGBT",
+      "target": "導線架",
+      "weight": 5
+    },
+    {
+      "source": "IGBT",
+      "target": "電動車",
+      "weight": 7
+    },
+    {
+      "source": "Infineon",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "導線架",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "IC 設計",
+      "target": "聯詠",
+      "weight": 5
+    },
+    {
+      "source": "LCD",
+      "target": "聯詠",
+      "weight": 5
+    },
+    {
+      "source": "奇景光電",
+      "target": "瑞鼎",
+      "weight": 5
+    },
+    {
+      "source": "奇景光電",
+      "target": "聯詠",
+      "weight": 11
+    },
+    {
+      "source": "瑞鼎",
+      "target": "聯詠",
+      "weight": 7
+    },
+    {
+      "source": "Advantest",
+      "target": "Teradyne",
+      "weight": 6
+    },
+    {
+      "source": "Advantest",
+      "target": "京元電子",
+      "weight": 6
+    },
+    {
+      "source": "Teradyne",
+      "target": "京元電子",
+      "weight": 5
+    },
+    {
+      "source": "Google",
       "target": "Microsoft",
       "weight": 20
     },
     {
-      "source": "半導體",
-      "target": "台積電",
-      "weight": 56
+      "source": "Google",
+      "target": "資料中心",
+      "weight": 10
     },
     {
-      "source": "友達",
+      "source": "Microsoft",
+      "target": "資料中心",
+      "weight": 12
+    },
+    {
+      "source": "半導體",
+      "target": "氮化鎵",
+      "weight": 9
+    },
+    {
+      "source": "半導體",
+      "target": "資料中心",
+      "weight": 17
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "MLCC",
+      "weight": 7
+    },
+    {
+      "source": "5G",
+      "target": "半導體",
+      "weight": 11
+    },
+    {
+      "source": "5G",
+      "target": "台積電",
+      "weight": 9
+    },
+    {
+      "source": "5G",
+      "target": "網通",
+      "weight": 17
+    },
+    {
+      "source": "半導體",
+      "target": "台積電",
+      "weight": 39
+    },
+    {
+      "source": "半導體",
+      "target": "網通",
+      "weight": 12
+    },
+    {
+      "source": "台積電",
+      "target": "網通",
+      "weight": 6
+    },
+    {
+      "source": "Aixtron",
+      "target": "Veeco",
+      "weight": 5
+    },
+    {
+      "source": "CVD",
+      "target": "磊晶",
+      "weight": 6
+    },
+    {
+      "source": "砷化鎵",
+      "target": "磊晶",
+      "weight": 5
+    },
+    {
+      "source": "Micron",
+      "target": "PCB",
+      "weight": 6
+    },
+    {
+      "source": "Micron",
+      "target": "台積電",
+      "weight": 14
+    },
+    {
+      "source": "PCB",
+      "target": "蝕刻",
+      "weight": 6
+    },
+    {
+      "source": "力成",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "台積電",
+      "target": "蝕刻",
+      "weight": 10
+    },
+    {
+      "source": "CoWoS",
+      "target": "力成",
+      "weight": 5
+    },
+    {
+      "source": "CoWoS",
+      "target": "半導體",
+      "weight": 14
+    },
+    {
+      "source": "CoWoS",
       "target": "台積電",
       "weight": 26
     },
     {
       "source": "CoWoS",
+      "target": "日月光投控",
+      "weight": 17
+    },
+    {
+      "source": "CoWoS",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "CoWoS",
+      "target": "自動化",
+      "weight": 7
+    },
+    {
+      "source": "半導體",
+      "target": "友達",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "日月光投控",
+      "weight": 17
+    },
+    {
+      "source": "半導體",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "自動化",
+      "weight": 25
+    },
+    {
+      "source": "友達",
       "target": "台積電",
-      "weight": 33
+      "weight": 13
+    },
+    {
+      "source": "友達",
+      "target": "日月光投控",
+      "weight": 6
     },
     {
       "source": "友達",
       "target": "群創",
-      "weight": 67
+      "weight": 55
+    },
+    {
+      "source": "友達",
+      "target": "自動化",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "日月光投控",
+      "weight": 32
     },
     {
       "source": "台積電",
       "target": "群創",
-      "weight": 25
+      "weight": 13
     },
     {
       "source": "台積電",
+      "target": "自動化",
+      "weight": 17
+    },
+    {
+      "source": "日月光投控",
+      "target": "群創",
+      "weight": 8
+    },
+    {
+      "source": "日月光投控",
+      "target": "自動化",
+      "weight": 7
+    },
+    {
+      "source": "CVD",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "CVD",
+      "target": "蝕刻",
+      "weight": 5
+    },
+    {
+      "source": "LED",
+      "target": "磊晶",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "AI",
+      "weight": 19
+    },
+    {
+      "source": "5G",
+      "target": "AMD",
+      "weight": 11
+    },
+    {
+      "source": "5G",
+      "target": "Apple",
+      "weight": 12
+    },
+    {
+      "source": "5G",
+      "target": "NVIDIA",
+      "weight": 15
+    },
+    {
+      "source": "5G",
+      "target": "PCB",
+      "weight": 12
+    },
+    {
+      "source": "5G",
+      "target": "Qualcomm",
+      "weight": 18
+    },
+    {
+      "source": "5G",
+      "target": "聯發科",
+      "weight": 24
+    },
+    {
+      "source": "5G",
+      "target": "記憶體",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "AMD",
+      "weight": 24
+    },
+    {
+      "source": "AI",
+      "target": "Apple",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "NVIDIA",
+      "weight": 38
+    },
+    {
+      "source": "AI",
+      "target": "PCB",
+      "weight": 18
+    },
+    {
+      "source": "AI",
+      "target": "Qualcomm",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "半導體",
+      "weight": 33
+    },
+    {
+      "source": "AI",
+      "target": "台積電",
+      "weight": 28
+    },
+    {
+      "source": "AI",
+      "target": "聯發科",
+      "weight": 13
+    },
+    {
+      "source": "AI",
+      "target": "記憶體",
+      "weight": 17
+    },
+    {
+      "source": "AMD",
+      "target": "Apple",
+      "weight": 10
+    },
+    {
+      "source": "AMD",
+      "target": "NVIDIA",
+      "weight": 41
+    },
+    {
+      "source": "AMD",
+      "target": "Qualcomm",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "半導體",
+      "weight": 9
+    },
+    {
+      "source": "AMD",
+      "target": "台積電",
+      "weight": 9
+    },
+    {
+      "source": "AMD",
+      "target": "聯發科",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "記憶體",
+      "weight": 10
+    },
+    {
+      "source": "Apple",
+      "target": "NVIDIA",
+      "weight": 9
+    },
+    {
+      "source": "Apple",
+      "target": "PCB",
+      "weight": 9
+    },
+    {
+      "source": "Apple",
+      "target": "Qualcomm",
+      "weight": 6
+    },
+    {
+      "source": "Apple",
+      "target": "半導體",
+      "weight": 7
+    },
+    {
+      "source": "Apple",
+      "target": "台積電",
+      "weight": 8
+    },
+    {
+      "source": "Apple",
+      "target": "聯發科",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "Qualcomm",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "半導體",
+      "weight": 17
+    },
+    {
+      "source": "NVIDIA",
+      "target": "記憶體",
+      "weight": 10
+    },
+    {
+      "source": "PCB",
+      "target": "半導體",
+      "weight": 15
+    },
+    {
+      "source": "PCB",
+      "target": "探針卡",
+      "weight": 9
+    },
+    {
+      "source": "PCB",
+      "target": "記憶體",
+      "weight": 8
+    },
+    {
+      "source": "Qualcomm",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "Qualcomm",
+      "target": "聯發科",
+      "weight": 20
+    },
+    {
+      "source": "半導體",
+      "target": "探針卡",
+      "weight": 5
+    },
+    {
+      "source": "半導體",
+      "target": "記憶體",
+      "weight": 17
+    },
+    {
+      "source": "台積電",
+      "target": "記憶體",
+      "weight": 10
+    },
+    {
+      "source": "聯發科",
+      "target": "記憶體",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "Broadcom",
+      "weight": 11
+    },
+    {
+      "source": "AI",
+      "target": "SoC",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "自動化",
+      "weight": 19
+    },
+    {
+      "source": "AMD",
+      "target": "Broadcom",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "自動化",
+      "weight": 9
+    },
+    {
+      "source": "Broadcom",
+      "target": "NVIDIA",
+      "weight": 6
+    },
+    {
+      "source": "Broadcom",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "Broadcom",
+      "target": "聯發科",
+      "weight": 21
+    },
+    {
+      "source": "NVIDIA",
+      "target": "自動化",
+      "weight": 12
+    },
+    {
+      "source": "PCB",
+      "target": "自動化",
+      "weight": 10
+    },
+    {
+      "source": "聯發科",
+      "target": "自動化",
+      "weight": 5
+    },
+    {
+      "source": "Applied Materials",
+      "target": "CVD",
+      "weight": 5
+    },
+    {
+      "source": "Applied Materials",
+      "target": "Lam Research",
+      "weight": 11
+    },
+    {
+      "source": "Applied Materials",
+      "target": "PVD",
+      "weight": 6
+    },
+    {
+      "source": "Applied Materials",
+      "target": "台積電",
+      "weight": 11
+    },
+    {
+      "source": "CVD",
+      "target": "PVD",
+      "weight": 5
+    },
+    {
+      "source": "Lam Research",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "京東方",
+      "target": "群創",
+      "weight": 9
+    },
+    {
+      "source": "群創",
       "target": "聯電",
-      "weight": 52
+      "weight": 5
+    },
+    {
+      "source": "半導體",
+      "target": "矽晶圓",
+      "weight": 17
+    },
+    {
+      "source": "台積電",
+      "target": "研磨液",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "CSP",
+      "weight": 8
+    },
+    {
+      "source": "5G",
+      "target": "Meta",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "物聯網",
+      "weight": 16
+    },
+    {
+      "source": "AI",
+      "target": "CSP",
+      "weight": 17
+    },
+    {
+      "source": "AI",
+      "target": "Meta",
+      "weight": 13
+    },
+    {
+      "source": "AI",
+      "target": "OEM",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "物聯網",
+      "weight": 11
+    },
+    {
+      "source": "AI",
+      "target": "聯詠",
+      "weight": 5
+    },
+    {
+      "source": "CSP",
+      "target": "Meta",
+      "weight": 10
+    },
+    {
+      "source": "CSP",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "CSP",
+      "target": "自動化",
+      "weight": 6
+    },
+    {
+      "source": "Cadence",
+      "target": "Synopsys",
+      "weight": 7
+    },
+    {
+      "source": "Cadence",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "Synopsys",
+      "target": "台積電",
+      "weight": 8
+    },
+    {
+      "source": "台積電",
+      "target": "物聯網",
+      "weight": 11
+    },
+    {
+      "source": "台積電",
+      "target": "聯詠",
+      "weight": 6
+    },
+    {
+      "source": "物聯網",
+      "target": "聯發科",
+      "weight": 9
+    },
+    {
+      "source": "物聯網",
+      "target": "自動化",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "伺服器",
+      "weight": 19
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "半導體",
+      "weight": 12
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "散熱",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "資料中心",
+      "weight": 17
+    },
+    {
+      "source": "IPC",
+      "target": "伺服器",
+      "weight": 5
+    },
+    {
+      "source": "IPC",
+      "target": "工業電腦",
+      "weight": 14
+    },
+    {
+      "source": "IPC",
+      "target": "自動化",
+      "weight": 5
+    },
+    {
+      "source": "伺服器",
+      "target": "半導體",
+      "weight": 23
+    },
+    {
+      "source": "伺服器",
+      "target": "台積電",
+      "weight": 11
+    },
+    {
+      "source": "伺服器",
+      "target": "工業電腦",
+      "weight": 11
+    },
+    {
+      "source": "伺服器",
+      "target": "散熱",
+      "weight": 17
+    },
+    {
+      "source": "伺服器",
+      "target": "自動化",
+      "weight": 10
+    },
+    {
+      "source": "伺服器",
+      "target": "資料中心",
+      "weight": 26
+    },
+    {
+      "source": "半導體",
+      "target": "工業電腦",
+      "weight": 10
+    },
+    {
+      "source": "半導體",
+      "target": "散熱",
+      "weight": 14
+    },
+    {
+      "source": "台積電",
+      "target": "工業電腦",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "資料中心",
+      "weight": 13
+    },
+    {
+      "source": "工業電腦",
+      "target": "自動化",
+      "weight": 9
+    },
+    {
+      "source": "工業電腦",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "散熱",
+      "target": "自動化",
+      "weight": 5
+    },
+    {
+      "source": "散熱",
+      "target": "資料中心",
+      "weight": 10
+    },
+    {
+      "source": "自動化",
+      "target": "資料中心",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "MOSFET",
+      "weight": 10
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "矽晶圓",
+      "weight": 6
+    },
+    {
+      "source": "IGBT",
+      "target": "MOSFET",
+      "weight": 15
+    },
+    {
+      "source": "IGBT",
+      "target": "矽晶圓",
+      "weight": 6
+    },
+    {
+      "source": "IGBT",
+      "target": "碳化矽",
+      "weight": 10
+    },
+    {
+      "source": "MOSFET",
+      "target": "矽晶圓",
+      "weight": 6
+    },
+    {
+      "source": "MOSFET",
+      "target": "碳化矽",
+      "weight": 12
+    },
+    {
+      "source": "MOSFET",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "導線架",
+      "target": "碳化矽",
+      "weight": 5
+    },
+    {
+      "source": "矽晶圓",
+      "target": "碳化矽",
+      "weight": 6
+    },
+    {
+      "source": "矽晶圓",
+      "target": "車用電子",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "低軌衛星",
+      "weight": 18
+    },
+    {
+      "source": "低軌衛星",
+      "target": "半導體",
+      "weight": 5
+    },
+    {
+      "source": "半導體",
+      "target": "磊晶",
+      "weight": 7
+    },
+    {
+      "source": "氮化鎵",
+      "target": "磊晶",
+      "weight": 7
+    },
+    {
+      "source": "Applied Materials",
+      "target": "蝕刻",
+      "weight": 6
+    },
+    {
+      "source": "CMP",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "Applied Materials",
+      "target": "Tokyo Electron",
+      "weight": 7
+    },
+    {
+      "source": "Tokyo Electron",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "CoWoS",
+      "weight": 10
+    },
+    {
+      "source": "AI",
+      "target": "日月光投控",
+      "weight": 10
+    },
+    {
+      "source": "AI",
+      "target": "AR",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "DRAM",
+      "weight": 6
+    },
+    {
+      "source": "AI",
+      "target": "Google",
+      "weight": 19
+    },
+    {
+      "source": "AI",
+      "target": "Intel",
+      "weight": 22
+    },
+    {
+      "source": "AI",
+      "target": "VR",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "消費性電子",
+      "weight": 15
+    },
+    {
+      "source": "AI",
+      "target": "網通",
+      "weight": 15
+    },
+    {
+      "source": "AR",
+      "target": "Apple",
+      "weight": 6
+    },
+    {
+      "source": "AR",
+      "target": "VR",
+      "weight": 9
+    },
+    {
+      "source": "Apple",
+      "target": "Google",
+      "weight": 9
+    },
+    {
+      "source": "Apple",
+      "target": "Intel",
+      "weight": 11
+    },
+    {
+      "source": "Apple",
+      "target": "Meta",
+      "weight": 8
+    },
+    {
+      "source": "Apple",
+      "target": "VR",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "消費性電子",
+      "weight": 10
+    },
+    {
+      "source": "DRAM",
+      "target": "Intel",
+      "weight": 10
+    },
+    {
+      "source": "DRAM",
+      "target": "消費性電子",
+      "weight": 6
+    },
+    {
+      "source": "DRAM",
+      "target": "記憶體",
+      "weight": 7
+    },
+    {
+      "source": "Google",
+      "target": "Intel",
+      "weight": 8
+    },
+    {
+      "source": "Google",
+      "target": "Meta",
+      "weight": 17
+    },
+    {
+      "source": "Google",
+      "target": "網通",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "網通",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "記憶體",
+      "weight": 10
+    },
+    {
+      "source": "Type-C",
+      "target": "消費性電子",
+      "weight": 5
+    },
+    {
+      "source": "Type-C",
+      "target": "網通",
+      "weight": 6
+    },
+    {
+      "source": "消費性電子",
+      "target": "網通",
+      "weight": 17
+    },
+    {
+      "source": "消費性電子",
+      "target": "記憶體",
+      "weight": 12
+    },
+    {
+      "source": "網通",
+      "target": "記憶體",
+      "weight": 6
+    },
+    {
+      "source": "ABF 載板",
+      "target": "AMD",
+      "weight": 5
+    },
+    {
+      "source": "ABF 載板",
+      "target": "BT 載板",
+      "weight": 6
+    },
+    {
+      "source": "ABF 載板",
+      "target": "南亞電路板",
+      "weight": 6
+    },
+    {
+      "source": "ABF 載板",
+      "target": "欣興",
+      "weight": 9
+    },
+    {
+      "source": "ABF 載板",
+      "target": "銅箔",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "Micron",
+      "weight": 11
+    },
+    {
+      "source": "AMD",
+      "target": "Samsung",
+      "weight": 12
+    },
+    {
+      "source": "AMD",
+      "target": "和碩",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "欣興",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "銅箔",
+      "weight": 7
+    },
+    {
+      "source": "Apple",
+      "target": "Broadcom",
+      "weight": 9
+    },
+    {
+      "source": "Apple",
+      "target": "Micron",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "Samsung",
+      "weight": 16
+    },
+    {
+      "source": "Apple",
+      "target": "和碩",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "欣興",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "銅箔",
+      "weight": 12
+    },
+    {
+      "source": "BT 載板",
+      "target": "欣興",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "Qualcomm",
+      "weight": 15
+    },
+    {
+      "source": "Micron",
+      "target": "NVIDIA",
+      "weight": 13
+    },
+    {
+      "source": "Micron",
+      "target": "Samsung",
+      "weight": 24
+    },
+    {
+      "source": "NVIDIA",
+      "target": "Samsung",
+      "weight": 14
+    },
+    {
+      "source": "NVIDIA",
+      "target": "和碩",
+      "weight": 6
+    },
+    {
+      "source": "NVIDIA",
+      "target": "欣興",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "銅箔",
+      "weight": 9
+    },
+    {
+      "source": "Samsung",
+      "target": "和碩",
+      "weight": 5
+    },
+    {
+      "source": "Samsung",
+      "target": "銅箔",
+      "weight": 6
+    },
+    {
+      "source": "南亞電路板",
+      "target": "欣興",
+      "weight": 9
+    },
+    {
+      "source": "欣興",
+      "target": "銅箔",
+      "weight": 13
+    },
+    {
+      "source": "Infineon",
+      "target": "NXP",
+      "weight": 6
+    },
+    {
+      "source": "Infineon",
+      "target": "半導體",
+      "weight": 6
+    },
+    {
+      "source": "Infineon",
+      "target": "氮化鎵",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "第三代[[半導體",
+      "weight": 5
+    },
+    {
+      "source": "半導體",
+      "target": "電動車",
+      "weight": 14
+    },
+    {
+      "source": "氮化鎵",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "矽晶圓",
+      "target": "電動車",
+      "weight": 6
+    },
+    {
+      "source": "自動化",
+      "target": "電動車",
+      "weight": 7
+    },
+    {
+      "source": "ASIC",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "Arm",
+      "target": "Synopsys",
+      "weight": 5
+    },
+    {
+      "source": "Arm",
+      "target": "台積電",
+      "weight": 7
+    },
+    {
+      "source": "PCIe",
+      "target": "USB",
+      "weight": 5
+    },
+    {
+      "source": "PCIe",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "Applied Materials",
+      "target": "半導體",
+      "weight": 5
+    },
+    {
+      "source": "半導體",
+      "target": "蝕刻",
+      "weight": 5
+    },
+    {
+      "source": "ASML",
+      "target": "Applied Materials",
+      "weight": 7
+    },
+    {
+      "source": "ASML",
+      "target": "EUV",
+      "weight": 5
+    },
+    {
+      "source": "ASML",
+      "target": "半導體",
+      "weight": 5
+    },
+    {
+      "source": "SpaceX",
+      "target": "低軌衛星",
+      "weight": 16
+    },
+    {
+      "source": "半導體",
+      "target": "導線架",
+      "weight": 9
+    },
+    {
+      "source": "半導體",
+      "target": "消費性電子",
+      "weight": 28
+    },
+    {
+      "source": "半導體",
+      "target": "車用電子",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "消費性電子",
+      "target": "自動化",
+      "weight": 7
+    },
+    {
+      "source": "消費性電子",
+      "target": "車用電子",
+      "weight": 6
+    },
+    {
+      "source": "消費性電子",
+      "target": "連接器",
+      "weight": 10
+    },
+    {
+      "source": "自動化",
+      "target": "連接器",
+      "weight": 7
+    },
+    {
+      "source": "5G",
+      "target": "AI[[伺服器",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "電動車",
+      "weight": 21
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "EMS",
+      "weight": 7
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "網通",
+      "weight": 12
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "電動車",
+      "weight": 6
+    },
+    {
+      "source": "EMS",
+      "target": "網通",
+      "weight": 7
+    },
+    {
+      "source": "網通",
+      "target": "電動車",
+      "weight": 10
+    },
+    {
+      "source": "ADAS",
+      "target": "Tesla",
+      "weight": 9
+    },
+    {
+      "source": "ADAS",
+      "target": "散熱",
+      "weight": 6
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "半導體",
+      "weight": 16
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "散熱",
+      "weight": 14
+    },
+    {
+      "source": "SpaceX",
+      "target": "Tesla",
+      "weight": 5
+    },
+    {
+      "source": "Tesla",
+      "target": "低軌衛星",
+      "weight": 7
+    },
+    {
+      "source": "光通訊",
+      "target": "半導體",
+      "weight": 6
+    },
+    {
+      "source": "IC 設計",
+      "target": "USB",
+      "weight": 5
+    },
+    {
+      "source": "IC 設計",
+      "target": "工業控制",
+      "weight": 5
+    },
+    {
+      "source": "仁寶",
+      "target": "廣達",
+      "weight": 26
+    },
+    {
+      "source": "仁寶",
+      "target": "英業達",
+      "weight": 8
+    },
+    {
+      "source": "廣達",
+      "target": "英業達",
+      "weight": 12
+    },
+    {
+      "source": "氮化鎵",
+      "target": "碳化矽",
+      "weight": 8
+    },
+    {
+      "source": "碳化矽",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "AI",
+      "target": "IPC",
+      "weight": 6
+    },
+    {
+      "source": "AI",
+      "target": "伺服器",
+      "weight": 31
+    },
+    {
+      "source": "AI",
+      "target": "工業電腦",
+      "weight": 9
+    },
+    {
+      "source": "AI",
+      "target": "資料中心",
+      "weight": 23
+    },
+    {
+      "source": "IPC",
+      "target": "NVIDIA",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "伺服器",
+      "weight": 22
+    },
+    {
+      "source": "NVIDIA",
+      "target": "工業電腦",
+      "weight": 11
+    },
+    {
+      "source": "NVIDIA",
+      "target": "資料中心",
+      "weight": 18
+    },
+    {
+      "source": "Tesla",
+      "target": "台達電",
+      "weight": 7
+    },
+    {
+      "source": "XLPE",
+      "target": "台電",
+      "weight": 7
+    },
+    {
+      "source": "低軌衛星",
+      "target": "電動車",
+      "weight": 7
+    },
+    {
+      "source": "儲能",
+      "target": "台電",
+      "weight": 5
+    },
+    {
+      "source": "台達電",
+      "target": "電動車",
+      "weight": 12
+    },
+    {
+      "source": "台電",
+      "target": "太陽能",
+      "weight": 9
+    },
+    {
+      "source": "台電",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "群創",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "台電",
+      "weight": 5
+    },
+    {
+      "source": "PVC",
+      "target": "XLPE",
+      "weight": 5
+    },
+    {
+      "source": "PVC",
+      "target": "台電",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "台電",
+      "weight": 6
+    },
+    {
+      "source": "台電",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Dell",
+      "weight": 26
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "HP",
+      "weight": 22
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Microsoft",
+      "weight": 15
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "SpaceX",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "低軌衛星",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "HP",
+      "weight": 66
+    },
+    {
+      "source": "Dell",
+      "target": "MOSFET",
+      "weight": 8
+    },
+    {
+      "source": "Dell",
+      "target": "Microsoft",
+      "weight": 17
+    },
+    {
+      "source": "Dell",
+      "target": "PCB",
+      "weight": 7
+    },
+    {
+      "source": "Dell",
+      "target": "伺服器",
+      "weight": 11
+    },
+    {
+      "source": "Dell",
+      "target": "半導體",
+      "weight": 6
+    },
+    {
+      "source": "HP",
+      "target": "MOSFET",
+      "weight": 8
+    },
+    {
+      "source": "HP",
+      "target": "Microsoft",
+      "weight": 16
+    },
+    {
+      "source": "HP",
+      "target": "PCB",
+      "weight": 7
+    },
+    {
+      "source": "HP",
+      "target": "伺服器",
+      "weight": 8
+    },
+    {
+      "source": "HP",
+      "target": "低軌衛星",
+      "weight": 5
+    },
+    {
+      "source": "HP",
+      "target": "半導體",
+      "weight": 5
+    },
+    {
+      "source": "MOSFET",
+      "target": "伺服器",
+      "weight": 9
+    },
+    {
+      "source": "MOSFET",
+      "target": "半導體",
+      "weight": 9
+    },
+    {
+      "source": "MOSFET",
+      "target": "氮化鎵",
+      "weight": 8
+    },
+    {
+      "source": "Microsoft",
+      "target": "PCB",
+      "weight": 5
+    },
+    {
+      "source": "Microsoft",
+      "target": "伺服器",
+      "weight": 7
+    },
+    {
+      "source": "PCB",
+      "target": "伺服器",
+      "weight": 13
+    },
+    {
+      "source": "PCB",
+      "target": "低軌衛星",
+      "weight": 8
+    },
+    {
+      "source": "伺服器",
+      "target": "低軌衛星",
+      "weight": 7
+    },
+    {
+      "source": "Amazon",
+      "target": "Apple",
+      "weight": 7
+    },
+    {
+      "source": "HDMI",
+      "target": "USB",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "AI 伺服器",
+      "weight": 17
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Type-C",
+      "weight": 5
+    },
+    {
+      "source": "Infineon",
+      "target": "MOSFET",
+      "weight": 9
+    },
+    {
+      "source": "MOSFET",
+      "target": "電動車",
+      "weight": 9
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Lenovo",
+      "weight": 14
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "英業達",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "Lenovo",
+      "weight": 33
+    },
+    {
+      "source": "Dell",
+      "target": "Tesla",
+      "weight": 5
+    },
+    {
+      "source": "Dell",
+      "target": "廣達",
+      "weight": 20
+    },
+    {
+      "source": "Dell",
+      "target": "緯創",
+      "weight": 16
+    },
+    {
+      "source": "Dell",
+      "target": "英業達",
+      "weight": 9
+    },
+    {
+      "source": "GM",
+      "target": "Tesla",
+      "weight": 6
+    },
+    {
+      "source": "HP",
+      "target": "Lenovo",
+      "weight": 31
+    },
+    {
+      "source": "HP",
+      "target": "廣達",
+      "weight": 16
+    },
+    {
+      "source": "HP",
+      "target": "緯創",
+      "weight": 13
+    },
+    {
+      "source": "HP",
+      "target": "英業達",
+      "weight": 6
+    },
+    {
+      "source": "Lenovo",
+      "target": "廣達",
+      "weight": 10
+    },
+    {
+      "source": "Lenovo",
+      "target": "緯創",
+      "weight": 8
+    },
+    {
+      "source": "緯創",
+      "target": "英業達",
+      "weight": 8
+    },
+    {
+      "source": "ASML",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "物聯網",
+      "weight": 6
+    },
+    {
+      "source": "HP",
+      "target": "物聯網",
+      "weight": 5
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "PCB",
+      "weight": 6
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "伺服器",
+      "weight": 18
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "廣達",
+      "weight": 5
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "PCB",
+      "target": "網通",
+      "weight": 12
+    },
+    {
+      "source": "伺服器",
+      "target": "廣達",
+      "weight": 11
+    },
+    {
+      "source": "伺服器",
+      "target": "網通",
+      "weight": 16
+    },
+    {
+      "source": "伺服器",
+      "target": "連接器",
+      "weight": 9
+    },
+    {
+      "source": "低軌衛星",
+      "target": "網通",
+      "weight": 7
+    },
+    {
+      "source": "廣達",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "網通",
+      "target": "連接器",
+      "weight": 10
+    },
+    {
+      "source": "Micron",
+      "target": "聯電",
+      "weight": 7
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Amazon",
+      "weight": 17
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Meta",
+      "weight": 14
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Samsung",
+      "weight": 17
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Sony",
+      "weight": 7
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "光寶科",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "台達電",
+      "weight": 14
+    },
+    {
+      "source": "Amazon",
+      "target": "Meta",
+      "weight": 14
+    },
+    {
+      "source": "Amazon",
+      "target": "Samsung",
+      "weight": 12
+    },
+    {
+      "source": "Amazon",
+      "target": "伺服器",
+      "weight": 6
+    },
+    {
+      "source": "Amazon",
+      "target": "資料中心",
+      "weight": 13
+    },
+    {
+      "source": "Meta",
+      "target": "Samsung",
+      "weight": 7
+    },
+    {
+      "source": "Meta",
+      "target": "Sony",
+      "weight": 5
+    },
+    {
+      "source": "Meta",
+      "target": "伺服器",
+      "weight": 7
+    },
+    {
+      "source": "Meta",
+      "target": "資料中心",
+      "weight": 8
+    },
+    {
+      "source": "Samsung",
+      "target": "Sony",
+      "weight": 13
+    },
+    {
+      "source": "Samsung",
+      "target": "伺服器",
+      "weight": 7
+    },
+    {
+      "source": "Samsung",
+      "target": "資料中心",
+      "weight": 9
+    },
+    {
+      "source": "Sony",
+      "target": "伺服器",
+      "weight": 5
+    },
+    {
+      "source": "Sony",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "伺服器",
+      "target": "台達電",
+      "weight": 7
+    },
+    {
+      "source": "光寶科",
+      "target": "台達電",
+      "weight": 7
+    },
+    {
+      "source": "5G",
+      "target": "HP",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "Microsoft",
+      "weight": 5
+    },
+    {
+      "source": "HP",
+      "target": "Sony",
+      "weight": 13
+    },
+    {
+      "source": "HP",
+      "target": "資料中心",
+      "weight": 7
+    },
+    {
+      "source": "5G",
+      "target": "伺服器",
+      "weight": 8
+    },
+    {
+      "source": "5G",
+      "target": "消費性電子",
+      "weight": 10
+    },
+    {
+      "source": "CSP",
+      "target": "PCB",
+      "weight": 6
+    },
+    {
+      "source": "CSP",
+      "target": "伺服器",
+      "weight": 17
+    },
+    {
+      "source": "CSP",
+      "target": "半導體",
+      "weight": 8
+    },
+    {
+      "source": "CSP",
+      "target": "消費性電子",
+      "weight": 5
+    },
+    {
+      "source": "CSP",
+      "target": "網通",
+      "weight": 10
+    },
+    {
+      "source": "CSP",
+      "target": "雲端服務",
+      "weight": 15
+    },
+    {
+      "source": "IGBT",
+      "target": "伺服器",
+      "weight": 6
+    },
+    {
+      "source": "IGBT",
+      "target": "半導體",
+      "weight": 8
+    },
+    {
+      "source": "Infineon",
+      "target": "碳化矽",
+      "weight": 6
+    },
+    {
+      "source": "MOSFET",
+      "target": "消費性電子",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "消費性電子",
+      "weight": 8
+    },
+    {
+      "source": "伺服器",
+      "target": "消費性電子",
+      "weight": 14
+    },
+    {
+      "source": "伺服器",
+      "target": "雲端服務",
+      "weight": 15
+    },
+    {
+      "source": "伺服器",
+      "target": "電動車",
+      "weight": 12
+    },
+    {
+      "source": "半導體",
+      "target": "碳化矽",
+      "weight": 7
+    },
+    {
+      "source": "半導體",
+      "target": "雲端服務",
+      "weight": 6
+    },
+    {
+      "source": "消費性電子",
+      "target": "電動車",
+      "weight": 12
+    },
+    {
+      "source": "網通",
+      "target": "雲端服務",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "Samsung",
+      "weight": 17
+    },
+    {
+      "source": "Dell",
+      "target": "Sony",
+      "weight": 10
+    },
+    {
+      "source": "Dell",
+      "target": "電動車",
+      "weight": 7
+    },
+    {
+      "source": "HP",
+      "target": "LG",
+      "weight": 7
+    },
+    {
+      "source": "HP",
+      "target": "Samsung",
+      "weight": 19
+    },
+    {
+      "source": "HP",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "LG",
+      "target": "Samsung",
+      "weight": 9
+    },
+    {
+      "source": "LG",
+      "target": "Sony",
+      "weight": 8
+    },
+    {
+      "source": "Microsoft",
+      "target": "Samsung",
+      "weight": 8
+    },
+    {
+      "source": "Microsoft",
+      "target": "電動車",
+      "weight": 7
+    },
+    {
+      "source": "Sony",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "AI",
+      "target": "AI 伺服器",
+      "weight": 13
+    },
+    {
+      "source": "AI",
+      "target": "Amazon",
+      "weight": 13
+    },
+    {
+      "source": "AI",
+      "target": "Microsoft",
+      "weight": 13
+    },
+    {
+      "source": "AI",
+      "target": "電動車",
+      "weight": 14
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "CSP",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "消費性電子",
+      "weight": 7
+    },
+    {
+      "source": "Amazon",
+      "target": "CSP",
+      "weight": 6
+    },
+    {
+      "source": "Amazon",
+      "target": "電動車",
+      "weight": 6
+    },
+    {
+      "source": "Apple",
+      "target": "Lenovo",
+      "weight": 7
+    },
+    {
+      "source": "Apple",
+      "target": "Microsoft",
+      "weight": 6
+    },
+    {
+      "source": "Apple",
+      "target": "電動車",
+      "weight": 14
+    },
+    {
+      "source": "CSP",
+      "target": "Microsoft",
+      "weight": 7
+    },
+    {
+      "source": "CSP",
+      "target": "資料中心",
+      "weight": 14
+    },
+    {
+      "source": "Lenovo",
+      "target": "Microsoft",
+      "weight": 8
+    },
+    {
+      "source": "消費性電子",
+      "target": "資料中心",
+      "weight": 7
+    },
+    {
+      "source": "資料中心",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "Google",
+      "target": "廣達",
+      "weight": 7
+    },
+    {
+      "source": "Panasonic",
+      "target": "華碩",
+      "weight": 6
+    },
+    {
+      "source": "仁寶",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "廣達",
+      "target": "華碩",
+      "weight": 10
+    },
+    {
+      "source": "Amazon",
+      "target": "Dell",
+      "weight": 14
+    },
+    {
+      "source": "Amazon",
+      "target": "HP",
+      "weight": 12
+    },
+    {
+      "source": "MOSFET",
+      "target": "工業電腦",
+      "weight": 5
+    },
+    {
+      "source": "工業電腦",
+      "target": "研華",
+      "weight": 6
+    },
+    {
+      "source": "ADAS",
+      "target": "電動車",
+      "weight": 8
+    },
+    {
+      "source": "資料中心",
+      "target": "連接器",
+      "weight": 7
+    },
+    {
+      "source": "IGBT",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "Dell",
+      "weight": 20
+    },
+    {
+      "source": "Apple",
+      "target": "HP",
+      "weight": 17
+    },
+    {
+      "source": "Apple",
+      "target": "宏碁",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "華碩",
+      "weight": 10
+    },
+    {
+      "source": "Dell",
+      "target": "Panasonic",
+      "weight": 5
+    },
+    {
+      "source": "Dell",
+      "target": "宏碁",
+      "weight": 10
+    },
+    {
+      "source": "Dell",
+      "target": "消費性電子",
+      "weight": 5
+    },
+    {
+      "source": "Dell",
+      "target": "華碩",
+      "weight": 13
+    },
+    {
+      "source": "Dell",
+      "target": "資料中心",
+      "weight": 8
+    },
+    {
+      "source": "HP",
+      "target": "宏碁",
+      "weight": 13
+    },
+    {
+      "source": "HP",
+      "target": "消費性電子",
+      "weight": 6
+    },
+    {
+      "source": "HP",
+      "target": "華碩",
+      "weight": 14
+    },
+    {
+      "source": "Samsung",
+      "target": "宏碁",
+      "weight": 11
+    },
+    {
+      "source": "Samsung",
+      "target": "消費性電子",
+      "weight": 5
+    },
+    {
+      "source": "Samsung",
+      "target": "華碩",
+      "weight": 9
+    },
+    {
+      "source": "伺服器",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "宏碁",
+      "target": "華碩",
+      "weight": 10
+    },
+    {
+      "source": "華碩",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "聯電",
+      "weight": 18
+    },
+    {
+      "source": "AI",
+      "target": "Dell",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "HP",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "機器人",
+      "weight": 9
+    },
+    {
+      "source": "AWS",
+      "target": "NVIDIA",
+      "weight": 5
+    },
+    {
+      "source": "Meta",
+      "target": "Microsoft",
+      "weight": 14
+    },
+    {
+      "source": "Meta",
+      "target": "NVIDIA",
+      "weight": 15
+    },
+    {
+      "source": "Microsoft",
+      "target": "NVIDIA",
+      "weight": 15
+    },
+    {
+      "source": "電動車",
+      "target": "鴻海",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "Tesla",
+      "weight": 8
+    },
+    {
+      "source": "AI",
+      "target": "連接器",
+      "weight": 9
+    },
+    {
+      "source": "Amazon",
+      "target": "Google",
+      "weight": 19
+    },
+    {
+      "source": "Amazon",
+      "target": "NVIDIA",
+      "weight": 14
+    },
+    {
+      "source": "Amazon",
+      "target": "連接器",
+      "weight": 6
+    },
+    {
+      "source": "Bosch",
+      "target": "Tesla",
+      "weight": 8
+    },
+    {
+      "source": "Bosch",
+      "target": "電動車",
+      "weight": 7
+    },
+    {
+      "source": "Dell",
+      "target": "Google",
+      "weight": 12
+    },
+    {
+      "source": "Dell",
+      "target": "NVIDIA",
+      "weight": 15
+    },
+    {
+      "source": "Dell",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "Google",
+      "target": "HP",
+      "weight": 8
+    },
+    {
+      "source": "Google",
+      "target": "NVIDIA",
+      "weight": 14
+    },
+    {
+      "source": "Google",
+      "target": "連接器",
+      "weight": 7
+    },
+    {
+      "source": "Google",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "HP",
+      "target": "NVIDIA",
+      "weight": 13
+    },
+    {
+      "source": "HP",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "連接器",
+      "weight": 6
+    },
+    {
+      "source": "Tesla",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "連接器",
+      "target": "電動車",
+      "weight": 13
+    },
+    {
+      "source": "EMS",
+      "target": "半導體",
+      "weight": 18
+    },
+    {
+      "source": "EMS",
+      "target": "消費性電子",
+      "weight": 16
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "ODM",
+      "weight": 5
+    },
+    {
+      "source": "MCU",
+      "target": "MOSFET",
+      "weight": 6
+    },
+    {
+      "source": "MCU",
+      "target": "半導體",
+      "weight": 6
+    },
+    {
+      "source": "MCU",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "ODM",
+      "target": "伺服器",
+      "weight": 11
+    },
+    {
+      "source": "ODM",
+      "target": "半導體",
+      "weight": 9
+    },
+    {
+      "source": "ODM",
+      "target": "資料中心",
+      "weight": 8
+    },
+    {
+      "source": "Samsung",
+      "target": "半導體",
+      "weight": 5
+    },
+    {
+      "source": "Samsung",
+      "target": "台積電",
+      "weight": 9
+    },
+    {
+      "source": "LG Display",
+      "target": "Samsung",
+      "weight": 5
+    },
+    {
+      "source": "LG Display",
+      "target": "友達",
+      "weight": 6
+    },
+    {
+      "source": "LG Display",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "MSI",
+      "target": "華碩",
+      "weight": 7
+    },
+    {
+      "source": "ODM",
+      "target": "OEM",
+      "weight": 24
+    },
+    {
+      "source": "ODM",
+      "target": "Samsung",
+      "weight": 5
+    },
+    {
+      "source": "OLED",
+      "target": "友達",
+      "weight": 6
+    },
+    {
+      "source": "OLED",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "Samsung",
+      "target": "友達",
+      "weight": 11
+    },
+    {
+      "source": "Samsung",
+      "target": "小米",
+      "weight": 7
+    },
+    {
+      "source": "Samsung",
+      "target": "群創",
+      "weight": 11
+    },
+    {
+      "source": "BYD",
+      "target": "Tesla",
+      "weight": 5
+    },
+    {
+      "source": "BYD",
+      "target": "台達電",
+      "weight": 5
+    },
+    {
+      "source": "BYD",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "華碩",
+      "weight": 9
+    },
+    {
+      "source": "CSP",
+      "target": "Dell",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "中華電信",
+      "target": "台電",
+      "weight": 6
+    },
+    {
+      "source": "台電",
+      "target": "華新麗華",
+      "weight": 6
+    },
+    {
+      "source": "GPU",
+      "target": "NVIDIA",
+      "weight": 7
+    },
+    {
+      "source": "Infineon",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "華碩",
+      "weight": 9
+    },
+    {
+      "source": "AI",
+      "target": "AI[[伺服器",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "廣達",
+      "weight": 13
+    },
+    {
+      "source": "AI",
+      "target": "散熱",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "鴻海",
+      "weight": 11
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "NVIDIA",
+      "weight": 14
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "資料中心",
+      "weight": 9
+    },
+    {
+      "source": "NVIDIA",
+      "target": "廣達",
+      "weight": 13
+    },
+    {
+      "source": "NVIDIA",
+      "target": "散熱",
+      "weight": 10
+    },
+    {
+      "source": "NVIDIA",
+      "target": "鴻海",
+      "weight": 10
+    },
+    {
+      "source": "伺服器",
+      "target": "鴻海",
+      "weight": 7
+    },
+    {
+      "source": "半導體",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "廣達",
+      "target": "散熱",
+      "weight": 5
+    },
+    {
+      "source": "廣達",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "散熱",
+      "target": "水冷",
+      "weight": 5
+    },
+    {
+      "source": "散熱",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "自動化",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "資料中心",
+      "target": "鴻海",
+      "weight": 7
+    },
+    {
+      "source": "CoWoS",
+      "target": "FOPLP",
+      "weight": 6
+    },
+    {
+      "source": "FOPLP",
+      "target": "台積電",
+      "weight": 7
+    },
+    {
+      "source": "FOPLP",
+      "target": "日月光投控",
+      "weight": 6
+    },
+    {
+      "source": "Fanuc",
+      "target": "Siemens",
+      "weight": 8
+    },
+    {
+      "source": "Fanuc",
+      "target": "上銀",
+      "weight": 8
+    },
+    {
+      "source": "Siemens",
+      "target": "上銀",
+      "weight": 7
+    },
+    {
+      "source": "Micron",
+      "target": "友達",
+      "weight": 11
+    },
+    {
+      "source": "CoWoS",
+      "target": "矽品",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "矽品",
+      "weight": 8
+    },
+    {
+      "source": "AI",
+      "target": "低軌衛星",
+      "weight": 5
+    },
+    {
+      "source": "世界先進",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "上銀",
+      "target": "銀泰",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "EMS",
+      "weight": 7
+    },
+    {
+      "source": "EMS",
+      "target": "自動化",
+      "weight": 5
+    },
+    {
+      "source": "半導體",
+      "target": "機器人",
+      "weight": 6
+    },
+    {
+      "source": "機器人",
+      "target": "自動化",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "華通",
+      "weight": 6
+    },
+    {
+      "source": "CoWoS",
+      "target": "欣興",
+      "weight": 6
+    },
+    {
+      "source": "Apple",
+      "target": "連接器",
+      "weight": 6
+    },
+    {
+      "source": "Micron",
+      "target": "半導體",
+      "weight": 7
+    },
+    {
+      "source": "Micron",
+      "target": "群創",
+      "weight": 9
+    },
+    {
+      "source": "半導體",
+      "target": "新竹",
+      "weight": 5
+    },
+    {
+      "source": "友達",
+      "target": "機器人",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "新竹",
+      "weight": 10
+    },
+    {
+      "source": "新竹",
+      "target": "聯電",
+      "weight": 6
+    },
+    {
+      "source": "日月光投控",
+      "target": "聯電",
+      "weight": 8
+    },
+    {
+      "source": "ABF 載板",
+      "target": "Intel",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "欣興",
+      "weight": 5
+    },
+    {
+      "source": "CoWoS",
+      "target": "NVIDIA",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "日月光投控",
+      "weight": 6
+    },
+    {
+      "source": "台積電",
+      "target": "欣興",
+      "weight": 9
+    },
+    {
+      "source": "日月光投控",
+      "target": "欣興",
+      "weight": 7
+    },
+    {
+      "source": "景碩",
+      "target": "欣興",
+      "weight": 8
+    },
+    {
+      "source": "南亞電路板",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "台光電",
+      "target": "聯茂",
+      "weight": 11
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Google",
+      "weight": 11
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "液冷",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "Meta",
+      "weight": 10
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "CCL",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "台光電",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "台燿",
+      "weight": 7
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "聯茂",
+      "weight": 8
+    },
+    {
+      "source": "CCL",
+      "target": "台光電",
+      "weight": 7
+    },
+    {
+      "source": "CCL",
+      "target": "台燿",
+      "weight": 5
+    },
+    {
+      "source": "CCL",
+      "target": "聯茂",
+      "weight": 7
+    },
+    {
+      "source": "台光電",
+      "target": "台燿",
+      "weight": 6
+    },
+    {
+      "source": "台燿",
+      "target": "聯茂",
+      "weight": 7
+    },
+    {
+      "source": "PCB",
+      "target": "景碩",
+      "weight": 6
+    },
+    {
+      "source": "PCB",
+      "target": "欣興",
+      "weight": 14
+    },
+    {
+      "source": "CoWoS",
+      "target": "Intel",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "台積電",
+      "weight": 12
+    },
+    {
+      "source": "Intel",
+      "target": "日月光投控",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "Intel",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "群創",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "友達",
+      "weight": 7
+    },
+    {
+      "source": "PCB",
+      "target": "日月光投控",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "欣興",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "Intel",
+      "weight": 8
+    },
+    {
+      "source": "5G",
+      "target": "Samsung",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "友達",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "AMD",
+      "weight": 18
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "HBM",
+      "weight": 5
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Intel",
+      "weight": 20
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Micron",
+      "weight": 10
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "SK 海力士",
+      "weight": 7
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "仁寶",
+      "weight": 8
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "和碩",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "宏碁",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "HBM",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "HP",
+      "weight": 6
+    },
+    {
+      "source": "AMD",
+      "target": "Intel",
+      "weight": 48
+    },
+    {
+      "source": "AMD",
+      "target": "SK 海力士",
+      "weight": 8
+    },
+    {
+      "source": "AMD",
+      "target": "友達",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "宏碁",
+      "weight": 6
+    },
+    {
+      "source": "AMD",
+      "target": "廣達",
+      "weight": 8
+    },
+    {
+      "source": "AMD",
+      "target": "緯創",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "HBM",
+      "target": "Intel",
+      "weight": 7
+    },
+    {
+      "source": "HBM",
+      "target": "Micron",
+      "weight": 9
+    },
+    {
+      "source": "HBM",
+      "target": "NVIDIA",
+      "weight": 9
+    },
+    {
+      "source": "HBM",
+      "target": "Samsung",
+      "weight": 7
+    },
+    {
+      "source": "HP",
+      "target": "Intel",
+      "weight": 9
+    },
+    {
+      "source": "HP",
+      "target": "仁寶",
+      "weight": 8
+    },
+    {
+      "source": "HP",
+      "target": "友達",
+      "weight": 6
+    },
+    {
+      "source": "HP",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "Micron",
+      "weight": 12
+    },
+    {
+      "source": "Intel",
+      "target": "NVIDIA",
+      "weight": 41
+    },
+    {
+      "source": "Intel",
+      "target": "SK 海力士",
+      "weight": 8
+    },
+    {
+      "source": "Intel",
+      "target": "Samsung",
+      "weight": 13
+    },
+    {
+      "source": "Intel",
+      "target": "仁寶",
+      "weight": 7
+    },
+    {
+      "source": "Intel",
+      "target": "友達",
+      "weight": 8
+    },
+    {
+      "source": "Intel",
+      "target": "和碩",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "宏碁",
+      "weight": 7
+    },
+    {
+      "source": "Intel",
+      "target": "廣達",
+      "weight": 8
+    },
+    {
+      "source": "Intel",
+      "target": "緯創",
+      "weight": 9
+    },
+    {
+      "source": "Micron",
+      "target": "SK 海力士",
+      "weight": 10
+    },
+    {
+      "source": "Micron",
+      "target": "宏碁",
+      "weight": 5
+    },
+    {
+      "source": "Micron",
+      "target": "廣達",
+      "weight": 5
+    },
+    {
+      "source": "Micron",
+      "target": "緯創",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "SK 海力士",
+      "weight": 8
+    },
+    {
+      "source": "NVIDIA",
+      "target": "友達",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "宏碁",
+      "weight": 6
+    },
+    {
+      "source": "NVIDIA",
+      "target": "緯創",
+      "weight": 10
+    },
+    {
+      "source": "NVIDIA",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "SK 海力士",
+      "target": "Samsung",
+      "weight": 9
+    },
+    {
+      "source": "SK 海力士",
+      "target": "友達",
+      "weight": 5
+    },
+    {
+      "source": "SK 海力士",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "Samsung",
+      "target": "廣達",
+      "weight": 5
+    },
+    {
+      "source": "仁寶",
+      "target": "友達",
+      "weight": 5
+    },
+    {
+      "source": "仁寶",
+      "target": "緯創",
+      "weight": 12
+    },
+    {
+      "source": "仁寶",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "友達",
+      "target": "宏碁",
+      "weight": 5
+    },
+    {
+      "source": "友達",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "和碩",
+      "target": "緯創",
+      "weight": 5
+    },
+    {
+      "source": "宏碁",
+      "target": "廣達",
+      "weight": 5
+    },
+    {
+      "source": "宏碁",
+      "target": "緯創",
+      "weight": 5
+    },
+    {
+      "source": "宏碁",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "廣達",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "聯發科",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "鴻海",
+      "weight": 8
+    },
+    {
+      "source": "聯發科",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "AIoT",
+      "target": "AMD",
+      "weight": 8
+    },
+    {
+      "source": "AIoT",
+      "target": "Intel",
+      "weight": 8
+    },
+    {
+      "source": "AIoT",
+      "target": "NVIDIA",
+      "weight": 6
+    },
+    {
+      "source": "Arm",
+      "target": "Intel",
+      "weight": 5
+    },
+    {
+      "source": "Cisco",
+      "target": "NVIDIA",
+      "weight": 7
+    },
+    {
+      "source": "Intel",
+      "target": "Qualcomm",
+      "weight": 6
+    },
+    {
+      "source": "AWS",
+      "target": "Google Cloud",
+      "weight": 5
+    },
+    {
+      "source": "AWS",
+      "target": "Microsoft Azure",
+      "weight": 9
+    },
+    {
+      "source": "京東方",
+      "target": "友達",
+      "weight": 8
+    },
+    {
+      "source": "5G",
+      "target": "工業電腦",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "工業電腦",
+      "weight": 12
+    },
+    {
+      "source": "Intel",
+      "target": "工業電腦",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "ODM",
+      "weight": 11
+    },
+    {
+      "source": "AI",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "IPC",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "物聯網",
+      "weight": 9
+    },
+    {
+      "source": "AMD",
+      "target": "華碩",
+      "weight": 9
+    },
+    {
+      "source": "IPC",
+      "target": "Intel",
+      "weight": 9
+    },
+    {
+      "source": "IPC",
+      "target": "PCB",
+      "weight": 5
+    },
+    {
+      "source": "IPC",
+      "target": "記憶體",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "ODM",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "PCB",
+      "weight": 15
+    },
+    {
+      "source": "Intel",
+      "target": "物聯網",
+      "weight": 13
+    },
+    {
+      "source": "Intel",
+      "target": "自動化",
+      "weight": 8
+    },
+    {
+      "source": "Intel",
+      "target": "華碩",
+      "weight": 10
+    },
+    {
+      "source": "ODM",
+      "target": "PCB",
+      "weight": 9
+    },
+    {
+      "source": "ODM",
+      "target": "物聯網",
+      "weight": 6
+    },
+    {
+      "source": "ODM",
+      "target": "記憶體",
+      "weight": 5
+    },
+    {
+      "source": "OEM",
+      "target": "PCB",
+      "weight": 9
+    },
+    {
+      "source": "PCB",
+      "target": "工業電腦",
+      "weight": 10
+    },
+    {
+      "source": "PCB",
+      "target": "物聯網",
+      "weight": 8
+    },
+    {
+      "source": "工業電腦",
+      "target": "物聯網",
+      "weight": 9
+    },
+    {
+      "source": "工業電腦",
+      "target": "記憶體",
+      "weight": 9
+    },
+    {
+      "source": "物聯網",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "物聯網",
+      "target": "記憶體",
+      "weight": 14
+    },
+    {
+      "source": "自動化",
+      "target": "記憶體",
+      "weight": 11
+    },
+    {
+      "source": "友達",
+      "target": "電動車",
+      "weight": 6
+    },
+    {
+      "source": "DDR5",
+      "target": "Intel",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "Seagate",
+      "weight": 5
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "CSP",
+      "weight": 13
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "ODM",
+      "weight": 5
+    },
+    {
+      "source": "CSP",
+      "target": "ODM",
+      "weight": 5
+    },
+    {
+      "source": "CSP",
+      "target": "散熱",
+      "weight": 9
+    },
+    {
+      "source": "ODM",
+      "target": "散熱",
+      "weight": 5
+    },
+    {
+      "source": "MCU",
+      "target": "物聯網",
+      "weight": 6
+    },
+    {
+      "source": "AI",
+      "target": "Micron",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "Samsung",
+      "weight": 8
+    },
+    {
+      "source": "Micron",
+      "target": "SK Hynix",
+      "weight": 12
+    },
+    {
+      "source": "Micron",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "SK Hynix",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "Samsung",
+      "weight": 7
+    },
+    {
+      "source": "SK Hynix",
+      "target": "Samsung",
+      "weight": 14
+    },
+    {
+      "source": "AMD",
+      "target": "DRAM",
+      "weight": 6
+    },
+    {
+      "source": "AMD",
+      "target": "Dell",
+      "weight": 8
+    },
+    {
+      "source": "DRAM",
+      "target": "HBM",
+      "weight": 8
+    },
+    {
+      "source": "DRAM",
+      "target": "Micron",
+      "weight": 12
+    },
+    {
+      "source": "DRAM",
+      "target": "NVIDIA",
+      "weight": 8
+    },
+    {
+      "source": "DRAM",
+      "target": "SK Hynix",
+      "weight": 7
+    },
+    {
+      "source": "DRAM",
+      "target": "Samsung",
+      "weight": 10
+    },
+    {
+      "source": "Dell",
+      "target": "Intel",
+      "weight": 12
+    },
+    {
+      "source": "Dell",
+      "target": "Micron",
+      "weight": 6
+    },
+    {
+      "source": "Samsung",
+      "target": "工業電腦",
+      "weight": 6
+    },
+    {
+      "source": "網通",
+      "target": "自動化",
+      "weight": 7
+    },
+    {
+      "source": "網通",
+      "target": "資料中心",
+      "weight": 12
+    },
+    {
+      "source": "ADAS",
+      "target": "NVIDIA",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "聯電",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "聯電",
+      "weight": 9
+    },
+    {
+      "source": "NAND",
+      "target": "記憶體",
+      "weight": 6
+    },
+    {
+      "source": "半導體",
+      "target": "物聯網",
+      "weight": 9
+    },
+    {
+      "source": "台積電",
+      "target": "消費性電子",
+      "weight": 6
+    },
+    {
+      "source": "消費性電子",
+      "target": "物聯網",
+      "weight": 8
+    },
+    {
+      "source": "消費性電子",
+      "target": "聯電",
+      "weight": 8
+    },
+    {
+      "source": "物聯網",
+      "target": "聯電",
+      "weight": 5
+    },
+    {
+      "source": "聯電",
+      "target": "記憶體",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "Amazon",
+      "weight": 7
+    },
+    {
+      "source": "Amazon",
+      "target": "Micron",
+      "weight": 10
+    },
+    {
+      "source": "Amazon",
+      "target": "SK 海力士",
+      "weight": 5
+    },
+    {
+      "source": "SSD",
+      "target": "Samsung",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "Lenovo",
+      "weight": 8
+    },
+    {
+      "source": "Lenovo",
+      "target": "華碩",
+      "weight": 9
+    },
+    {
+      "source": "AMD",
+      "target": "Google",
+      "weight": 7
+    },
+    {
+      "source": "華碩",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "DRAM",
+      "target": "伺服器",
+      "weight": 6
+    },
+    {
+      "source": "DRAM",
+      "target": "資料中心",
+      "weight": 7
+    },
+    {
+      "source": "HBM",
+      "target": "資料中心",
+      "weight": 6
+    },
+    {
+      "source": "Epson",
+      "target": "HP",
+      "weight": 5
+    },
+    {
+      "source": "Cisco",
+      "target": "Dell",
+      "weight": 5
+    },
+    {
+      "source": "Cisco",
+      "target": "HP",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "Amazon",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "Microsoft",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "液冷",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "Amazon",
+      "target": "DRAM",
+      "weight": 6
+    },
+    {
+      "source": "Amazon",
+      "target": "Intel",
+      "weight": 7
+    },
+    {
+      "source": "Amazon",
+      "target": "緯創",
+      "weight": 5
+    },
+    {
+      "source": "DRAM",
+      "target": "PCB",
+      "weight": 5
+    },
+    {
+      "source": "HBM",
+      "target": "液冷",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "Microsoft",
+      "weight": 7
+    },
+    {
+      "source": "Intel",
+      "target": "液冷",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "資料中心",
+      "weight": 7
+    },
+    {
+      "source": "Meta",
+      "target": "緯創",
+      "weight": 6
+    },
+    {
+      "source": "Microsoft",
+      "target": "緯創",
+      "weight": 6
+    },
+    {
+      "source": "NVIDIA",
+      "target": "液冷",
+      "weight": 6
+    },
+    {
+      "source": "EMS",
+      "target": "NVIDIA",
+      "weight": 5
+    },
+    {
+      "source": "EMS",
+      "target": "伺服器",
+      "weight": 8
+    },
+    {
+      "source": "EMS",
+      "target": "記憶體",
+      "weight": 5
+    },
+    {
+      "source": "伺服器",
+      "target": "記憶體",
+      "weight": 7
+    },
+    {
+      "source": "5G",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "工業電腦",
+      "weight": 5
+    },
+    {
+      "source": "AMD",
+      "target": "鴻海",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "物聯網",
+      "weight": 9
+    },
+    {
+      "source": "PCB",
+      "target": "友達",
+      "weight": 7
+    },
+    {
+      "source": "PCB",
+      "target": "鴻海",
+      "weight": 9
+    },
+    {
+      "source": "友達",
+      "target": "工業電腦",
+      "weight": 6
+    },
+    {
+      "source": "物聯網",
+      "target": "鴻海",
+      "weight": 7
+    },
+    {
+      "source": "Dell",
+      "target": "仁寶",
+      "weight": 10
+    },
+    {
+      "source": "Dell",
+      "target": "友達",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "Lenovo",
+      "target": "NVIDIA",
+      "weight": 8
+    },
+    {
+      "source": "Lenovo",
+      "target": "Samsung",
+      "weight": 9
+    },
+    {
+      "source": "Lenovo",
+      "target": "仁寶",
+      "weight": 5
+    },
+    {
+      "source": "Lenovo",
+      "target": "友達",
+      "weight": 5
+    },
+    {
+      "source": "Lenovo",
+      "target": "宏碁",
+      "weight": 8
+    },
+    {
+      "source": "Lenovo",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "Samsung",
+      "target": "物聯網",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "資料中心",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "ADAS",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "Google",
+      "weight": 6
+    },
+    {
+      "source": "ADAS",
+      "target": "AI 伺服器",
+      "weight": 9
+    },
+    {
+      "source": "ADAS",
+      "target": "Apple",
+      "weight": 8
+    },
+    {
+      "source": "ADAS",
+      "target": "Dell",
+      "weight": 7
+    },
+    {
+      "source": "ADAS",
+      "target": "HP",
+      "weight": 6
+    },
+    {
+      "source": "ADAS",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "ADAS",
+      "target": "物聯網",
+      "weight": 6
+    },
+    {
+      "source": "Amazon",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "Apple",
+      "target": "友達",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "物聯網",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "群創",
+      "weight": 7
+    },
+    {
+      "source": "Google",
+      "target": "Samsung",
+      "weight": 5
+    },
+    {
+      "source": "HP",
+      "target": "Meta",
+      "weight": 8
+    },
+    {
+      "source": "Meta",
+      "target": "廣達",
+      "weight": 7
+    },
+    {
+      "source": "Microsoft",
+      "target": "宏碁",
+      "weight": 5
+    },
+    {
+      "source": "Microsoft",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "Amazon",
+      "target": "低軌衛星",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "低軌衛星",
+      "weight": 5
+    },
+    {
+      "source": "微星",
+      "target": "技嘉",
+      "weight": 7
+    },
+    {
+      "source": "微星",
+      "target": "華碩",
+      "weight": 7
+    },
+    {
+      "source": "技嘉",
+      "target": "華碩",
+      "weight": 8
+    },
+    {
+      "source": "EMS",
+      "target": "PCB",
+      "weight": 6
+    },
+    {
+      "source": "AMD",
+      "target": "伺服器",
+      "weight": 6
+    },
+    {
+      "source": "Intel",
+      "target": "伺服器",
+      "weight": 6
+    },
+    {
+      "source": "DRAM",
+      "target": "物聯網",
+      "weight": 5
+    },
+    {
+      "source": "緯創",
+      "target": "華碩",
+      "weight": 7
+    },
+    {
+      "source": "AMD",
+      "target": "CSP",
+      "weight": 7
+    },
+    {
+      "source": "Amazon",
+      "target": "鴻海",
+      "weight": 8
+    },
+    {
+      "source": "CSP",
+      "target": "Google",
+      "weight": 10
+    },
+    {
+      "source": "CSP",
+      "target": "NVIDIA",
+      "weight": 17
+    },
+    {
+      "source": "CSP",
+      "target": "廣達",
+      "weight": 5
+    },
+    {
+      "source": "CSP",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "Dell",
+      "target": "鴻海",
+      "weight": 8
+    },
+    {
+      "source": "Google",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "HP",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "AI",
+      "target": "雲端服務",
+      "weight": 11
+    },
+    {
+      "source": "Google",
+      "target": "雲端服務",
+      "weight": 9
+    },
+    {
+      "source": "Intel",
+      "target": "雲端服務",
+      "weight": 6
+    },
+    {
+      "source": "NVIDIA",
+      "target": "雲端服務",
+      "weight": 11
+    },
+    {
+      "source": "記憶體",
+      "target": "雲端服務",
+      "weight": 5
+    },
+    {
+      "source": "Intel",
+      "target": "半導體",
+      "weight": 10
+    },
+    {
+      "source": "ABF 載板",
+      "target": "AI 伺服器",
+      "weight": 5
+    },
+    {
+      "source": "CSP",
+      "target": "Intel",
+      "weight": 5
+    },
+    {
+      "source": "凌華",
+      "target": "研華",
+      "weight": 7
+    },
+    {
+      "source": "AI",
+      "target": "Cisco",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "光通訊",
+      "weight": 6
+    },
+    {
+      "source": "Meta",
+      "target": "雲端服務",
+      "weight": 6
+    },
+    {
+      "source": "Microsoft",
+      "target": "雲端服務",
+      "weight": 5
+    },
+    {
+      "source": "ODM",
+      "target": "雲端服務",
+      "weight": 5
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "雲端服務",
+      "weight": 9
+    },
+    {
+      "source": "散熱",
+      "target": "雲端服務",
+      "weight": 7
+    },
+    {
+      "source": "工業電腦",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "Apple",
+      "target": "Sony",
+      "weight": 8
+    },
+    {
+      "source": "Microsoft",
+      "target": "台積電",
+      "weight": 5
+    },
+    {
+      "source": "Sony",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "台積電",
+      "target": "華碩",
+      "weight": 5
+    },
+    {
+      "source": "ADAS",
+      "target": "PCB",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "仁寶",
+      "weight": 6
+    },
+    {
+      "source": "AI",
+      "target": "仁寶",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "緯創",
+      "weight": 5
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "消費性電子",
+      "weight": 6
+    },
+    {
+      "source": "CSP",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "Meta",
+      "target": "連接器",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "消費性電子",
+      "weight": 7
+    },
+    {
+      "source": "NVIDIA",
+      "target": "網通",
+      "weight": 9
+    },
+    {
+      "source": "光通訊",
+      "target": "網通",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "ODM",
+      "weight": 6
+    },
+    {
+      "source": "NVIDIA",
+      "target": "ODM",
+      "weight": 5
+    },
+    {
+      "source": "Amazon",
+      "target": "SK Hynix",
+      "weight": 6
+    },
+    {
+      "source": "Micron",
+      "target": "記憶體",
+      "weight": 6
+    },
+    {
+      "source": "Sony",
+      "target": "鴻海",
+      "weight": 10
+    },
+    {
+      "source": "EMS",
+      "target": "物聯網",
+      "weight": 5
+    },
+    {
+      "source": "Wi-Fi 7",
+      "target": "瑞昱",
+      "weight": 6
+    },
+    {
+      "source": "EMS",
+      "target": "ODM",
+      "weight": 6
+    },
+    {
+      "source": "EMS",
+      "target": "工業電腦",
+      "weight": 6
+    },
+    {
+      "source": "ODM",
+      "target": "消費性電子",
+      "weight": 7
+    },
+    {
+      "source": "ODM",
+      "target": "網通",
+      "weight": 7
+    },
+    {
+      "source": "工業電腦",
+      "target": "消費性電子",
+      "weight": 9
+    },
+    {
+      "source": "工業電腦",
+      "target": "網通",
+      "weight": 13
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "Cisco",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "群創",
+      "weight": 6
+    },
+    {
+      "source": "MOSFET",
+      "target": "廣達",
+      "weight": 6
+    },
+    {
+      "source": "AI",
+      "target": "Sony",
+      "weight": 8
+    },
+    {
+      "source": "PCB",
+      "target": "Sony",
+      "weight": 7
+    },
+    {
+      "source": "連接器",
+      "target": "鴻海",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "台積電",
+      "weight": 12
+    },
+    {
+      "source": "HP",
+      "target": "台積電",
+      "weight": 10
+    },
+    {
+      "source": "OPPO",
+      "target": "Samsung",
+      "weight": 5
+    },
+    {
+      "source": "AI",
+      "target": "AWS",
+      "weight": 9
+    },
+    {
+      "source": "AI",
+      "target": "Microsoft Azure",
+      "weight": 6
+    },
+    {
+      "source": "自動化",
+      "target": "雲端服務",
+      "weight": 5
+    },
+    {
+      "source": "OEM",
+      "target": "Sony",
+      "weight": 7
+    },
+    {
+      "source": "Dell",
+      "target": "ODM",
+      "weight": 6
+    },
+    {
+      "source": "Qualcomm",
+      "target": "瑞昱",
+      "weight": 7
+    },
+    {
+      "source": "Dell",
+      "target": "新竹",
+      "weight": 5
+    },
+    {
+      "source": "OPPO",
+      "target": "小米",
+      "weight": 5
+    },
+    {
+      "source": "SpaceX",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "低軌衛星",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "PCB",
+      "target": "銅箔",
+      "weight": 32
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "連接器",
+      "weight": 7
+    },
+    {
+      "source": "伺服器",
+      "target": "緯創",
+      "weight": 7
+    },
+    {
+      "source": "工業電腦",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "LED",
+      "target": "億光",
+      "weight": 6
+    },
+    {
+      "source": "LED",
+      "target": "晶元光電",
+      "weight": 5
+    },
+    {
+      "source": "廣達",
+      "target": "消費性電子",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "網通",
+      "weight": 5
+    },
+    {
+      "source": "Google",
+      "target": "伺服器",
+      "weight": 7
     },
     {
       "source": "5G",
@@ -397,298 +6085,543 @@
     },
     {
       "source": "5G",
-      "target": "聯發科",
-      "weight": 26
+      "target": "Tesla",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "Wi-Fi 7",
+      "weight": 14
     },
     {
       "source": "Broadcom",
+      "target": "Wi-Fi 7",
+      "weight": 13
+    },
+    {
+      "source": "Wi-Fi 7",
       "target": "聯發科",
-      "weight": 21
+      "weight": 15
     },
     {
-      "source": "AI",
-      "target": "Google",
-      "weight": 27
+      "source": "PCB",
+      "target": "台光電",
+      "weight": 8
     },
     {
-      "source": "AI",
-      "target": "Microsoft",
-      "weight": 23
+      "source": "PCB",
+      "target": "聯茂",
+      "weight": 8
     },
     {
-      "source": "AI",
-      "target": "NVIDIA",
-      "weight": 42
+      "source": "台光電",
+      "target": "銅箔",
+      "weight": 10
     },
     {
-      "source": "AI 伺服器",
-      "target": "Dell",
-      "weight": 29
+      "source": "工業電腦",
+      "target": "銅箔",
+      "weight": 6
     },
     {
-      "source": "AI 伺服器",
-      "target": "HP",
-      "weight": 24
+      "source": "網通",
+      "target": "銅箔",
+      "weight": 8
     },
     {
-      "source": "Qualcomm",
-      "target": "聯發科",
-      "weight": 21
+      "source": "聯茂",
+      "target": "銅箔",
+      "weight": 11
     },
     {
-      "source": "AI",
-      "target": "資料中心",
-      "weight": 27
+      "source": "群創",
+      "target": "聯詠",
+      "weight": 5
     },
     {
-      "source": "AI",
-      "target": "伺服器",
-      "weight": 35
-    },
-    {
-      "source": "AI",
-      "target": "台積電",
-      "weight": 33
-    },
-    {
-      "source": "伺服器",
-      "target": "資料中心",
-      "weight": 28
+      "source": "Type-C",
+      "target": "連接器",
+      "weight": 6
     },
     {
       "source": "5G",
-      "target": "AI",
-      "weight": 23
+      "target": "SpaceX",
+      "weight": 9
     },
     {
       "source": "5G",
-      "target": "物聯網",
-      "weight": 20
+      "target": "銅箔",
+      "weight": 12
     },
     {
-      "source": "AI 伺服器",
-      "target": "AMD",
-      "weight": 20
+      "source": "低軌衛星",
+      "target": "銅箔",
+      "weight": 10
     },
     {
-      "source": "AI 伺服器",
-      "target": "Intel",
-      "weight": 21
+      "source": "散熱",
+      "target": "銅箔",
+      "weight": 5
     },
     {
-      "source": "AMD",
-      "target": "Intel",
-      "weight": 50
+      "source": "Bosch",
+      "target": "Continental",
+      "weight": 12
     },
     {
-      "source": "AMD",
-      "target": "NVIDIA",
-      "weight": 44
+      "source": "Continental",
+      "target": "Tesla",
+      "weight": 6
     },
     {
-      "source": "Intel",
-      "target": "NVIDIA",
-      "weight": 45
-    },
-    {
-      "source": "台積電",
-      "target": "日月光投控",
-      "weight": 39
-    },
-    {
-      "source": "Dell",
-      "target": "Lenovo",
-      "weight": 40
-    },
-    {
-      "source": "HP",
-      "target": "Lenovo",
-      "weight": 39
-    },
-    {
-      "source": "Dell",
-      "target": "廣達",
-      "weight": 25
-    },
-    {
-      "source": "Micron",
-      "target": "Samsung",
-      "weight": 24
-    },
-    {
-      "source": "仁寶",
-      "target": "廣達",
-      "weight": 30
-    },
-    {
-      "source": "廣達",
-      "target": "緯創",
-      "weight": 31
-    },
-    {
-      "source": "AI",
-      "target": "AMD",
-      "weight": 25
-    },
-    {
-      "source": "AI",
-      "target": "Intel",
-      "weight": 26
-    },
-    {
-      "source": "HP",
-      "target": "Samsung",
-      "weight": 21
-    },
-    {
-      "source": "HP",
-      "target": "廣達",
-      "weight": 21
-    },
-    {
-      "source": "Apple",
-      "target": "Dell",
-      "weight": 23
-    },
-    {
-      "source": "Apple",
-      "target": "HP",
-      "weight": 20
-    },
-    {
-      "source": "Apple",
-      "target": "Samsung",
-      "weight": 25
-    },
-    {
-      "source": "AI 伺服器",
-      "target": "PCB",
-      "weight": 23
-    },
-    {
-      "source": "AI 伺服器",
-      "target": "伺服器",
-      "weight": 22
-    },
-    {
-      "source": "NVIDIA",
-      "target": "PCB",
-      "weight": 20
-    },
-    {
-      "source": "NVIDIA",
-      "target": "伺服器",
-      "weight": 26
-    },
-    {
-      "source": "NVIDIA",
-      "target": "資料中心",
-      "weight": 20
-    },
-    {
-      "source": "NVIDIA",
-      "target": "台積電",
-      "weight": 20
-    },
-    {
-      "source": "廣達",
-      "target": "鴻海",
-      "weight": 23
-    },
-    {
-      "source": "CSP",
-      "target": "伺服器",
-      "weight": 20
+      "source": "Continental",
+      "target": "銅箔",
+      "weight": 5
     },
     {
       "source": "Tesla",
-      "target": "電動車",
-      "weight": 28
+      "target": "銅箔",
+      "weight": 5
+    },
+    {
+      "source": "和碩",
+      "target": "鴻海",
+      "weight": 5
     },
     {
       "source": "AI",
-      "target": "自動化",
-      "weight": 21
+      "target": "銅箔",
+      "weight": 7
     },
     {
-      "source": "AI",
-      "target": "半導體",
-      "weight": 35
+      "source": "PCB",
+      "target": "玻纖布",
+      "weight": 11
+    },
+    {
+      "source": "仁寶",
+      "target": "銅箔",
+      "weight": 5
     },
     {
       "source": "伺服器",
-      "target": "半導體",
-      "weight": 24
-    },
-    {
-      "source": "半導體",
-      "target": "自動化",
-      "weight": 28
-    },
-    {
-      "source": "半導體",
-      "target": "消費性電子",
-      "weight": 29
-    },
-    {
-      "source": "半導體",
-      "target": "聯電",
-      "weight": 24
-    },
-    {
-      "source": "PCB",
-      "target": "半導體",
-      "weight": 20
-    },
-    {
-      "source": "Micron",
-      "target": "台積電",
-      "weight": 25
-    },
-    {
-      "source": "PCB",
       "target": "銅箔",
-      "weight": 32
+      "weight": 9
     },
     {
-      "source": "PCB",
-      "target": "欣興",
-      "weight": 21
+      "source": "玻纖布",
+      "target": "銅箔",
+      "weight": 14
+    },
+    {
+      "source": "EMS",
+      "target": "銅箔",
+      "weight": 7
     },
     {
       "source": "半導體",
-      "target": "日月光投控",
-      "weight": 22
+      "target": "銅箔",
+      "weight": 6
     },
     {
-      "source": "亞洲水泥",
-      "target": "東和鋼鐵",
-      "weight": 21
+      "source": "消費性電子",
+      "target": "銅箔",
+      "weight": 10
     },
     {
-      "source": "亞洲水泥",
-      "target": "豐興鋼鐵",
-      "weight": 21
+      "source": "Apple",
+      "target": "EMS",
+      "weight": 5
     },
     {
-      "source": "台灣水泥",
-      "target": "東和鋼鐵",
-      "weight": 21
+      "source": "LED",
+      "target": "友達",
+      "weight": 5
     },
     {
-      "source": "台灣水泥",
-      "target": "豐興鋼鐵",
-      "weight": 21
+      "source": "LED",
+      "target": "群創",
+      "weight": 5
     },
     {
-      "source": "東和鋼鐵",
-      "target": "豐興鋼鐵",
-      "weight": 21
+      "source": "銅箔",
+      "target": "電動車",
+      "weight": 12
+    },
+    {
+      "source": "AI",
+      "target": "矽晶圓",
+      "weight": 7
+    },
+    {
+      "source": "散熱",
+      "target": "消費性電子",
+      "weight": 5
+    },
+    {
+      "source": "消費性電子",
+      "target": "矽晶圓",
+      "weight": 11
+    },
+    {
+      "source": "FPC",
+      "target": "銅箔",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "欣興",
+      "weight": 7
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "銅箔",
+      "weight": 12
+    },
+    {
+      "source": "欣興",
+      "target": "華通",
+      "weight": 5
+    },
+    {
+      "source": "CCL",
+      "target": "PCB",
+      "weight": 8
+    },
+    {
+      "source": "CCL",
+      "target": "銅箔",
+      "weight": 10
+    },
+    {
+      "source": "HDI",
+      "target": "PCB",
+      "weight": 5
+    },
+    {
+      "source": "HDI",
+      "target": "銅箔",
+      "weight": 6
+    },
+    {
+      "source": "AI 伺服器",
+      "target": "玻纖布",
+      "weight": 5
+    },
+    {
+      "source": "CCL",
+      "target": "玻纖布",
+      "weight": 5
+    },
+    {
+      "source": "NVIDIA",
+      "target": "玻纖布",
+      "weight": 5
+    },
+    {
+      "source": "Samsung",
+      "target": "聯電",
+      "weight": 5
+    },
+    {
+      "source": "台燿",
+      "target": "銅箔",
+      "weight": 6
+    },
+    {
+      "source": "欣興",
+      "target": "玻纖布",
+      "weight": 6
+    },
+    {
+      "source": "玻纖布",
+      "target": "聯茂",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "台達電",
+      "weight": 7
+    },
+    {
+      "source": "Apple",
+      "target": "低軌衛星",
+      "weight": 5
+    },
+    {
+      "source": "臻鼎-KY",
+      "target": "銅箔",
+      "weight": 5
+    },
+    {
+      "source": "Continental",
+      "target": "電動車",
+      "weight": 5
+    },
+    {
+      "source": "AI[[伺服器",
+      "target": "銅箔",
+      "weight": 6
+    },
+    {
+      "source": "Google",
+      "target": "銅箔",
+      "weight": 5
+    },
+    {
+      "source": "台郡",
+      "target": "銅箔",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "物聯網",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "鴻海",
+      "weight": 5
+    },
+    {
+      "source": "Lenovo",
+      "target": "台積電",
+      "weight": 6
+    },
+    {
+      "source": "MCU",
+      "target": "聯電",
+      "weight": 7
+    },
+    {
+      "source": "物聯網",
+      "target": "網通",
+      "weight": 9
+    },
+    {
+      "source": "蝕刻",
+      "target": "銅箔",
+      "weight": 5
+    },
+    {
+      "source": "Mini LED",
+      "target": "友達",
+      "weight": 5
+    },
+    {
+      "source": "Mini LED",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "TFT-LCD",
+      "target": "群創",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "中磊",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "中磊",
+      "weight": 6
+    },
+    {
+      "source": "Qualcomm",
+      "target": "Wi-Fi 7",
+      "weight": 10
+    },
+    {
+      "source": "Qualcomm",
+      "target": "中磊",
+      "weight": 5
+    },
+    {
+      "source": "Wi-Fi 7",
+      "target": "中磊",
+      "weight": 5
+    },
+    {
+      "source": "中磊",
+      "target": "聯發科",
+      "weight": 6
+    },
+    {
+      "source": "ODM",
+      "target": "廣達",
+      "weight": 8
+    },
+    {
+      "source": "ODM",
+      "target": "緯創",
+      "weight": 6
+    },
+    {
+      "source": "5G",
+      "target": "Wi-Fi 6",
+      "weight": 7
+    },
+    {
+      "source": "5G",
+      "target": "中華電信",
+      "weight": 6
+    },
+    {
+      "source": "Dell",
+      "target": "聯電",
+      "weight": 9
+    },
+    {
+      "source": "HP",
+      "target": "聯電",
+      "weight": 8
+    },
+    {
+      "source": "矽晶圓",
+      "target": "聯電",
+      "weight": 7
+    },
+    {
+      "source": "IC 設計",
+      "target": "SoC",
+      "weight": 7
+    },
+    {
+      "source": "IC 設計",
+      "target": "聯華電子",
+      "weight": 5
+    },
+    {
+      "source": "MOSFET",
+      "target": "世界先進",
+      "weight": 5
+    },
+    {
+      "source": "DRAM",
+      "target": "矽晶圓",
+      "weight": 5
     },
     {
       "source": "台積電",
-      "target": "聯華電子",
-      "weight": 20
+      "target": "瑞昱",
+      "weight": 6
+    },
+    {
+      "source": "瑞昱",
+      "target": "聯電",
+      "weight": 5
+    },
+    {
+      "source": "矽晶圓",
+      "target": "記憶體",
+      "weight": 5
+    },
+    {
+      "source": "MCU",
+      "target": "盛群",
+      "weight": 5
+    },
+    {
+      "source": "新唐",
+      "target": "盛群",
+      "weight": 5
+    },
+    {
+      "source": "Qualcomm",
+      "target": "物聯網",
+      "weight": 7
+    },
+    {
+      "source": "Wi-Fi",
+      "target": "聯發科",
+      "weight": 6
+    },
+    {
+      "source": "物聯網",
+      "target": "瑞昱",
+      "weight": 8
+    },
+    {
+      "source": "瑞昱",
+      "target": "聯發科",
+      "weight": 11
+    },
+    {
+      "source": "物聯網",
+      "target": "矽晶圓",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "瑞昱",
+      "weight": 14
+    },
+    {
+      "source": "MOSFET",
+      "target": "電源管理 IC",
+      "weight": 5
+    },
+    {
+      "source": "立錡",
+      "target": "電源管理 IC",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "瑞昱",
+      "weight": 11
+    },
+    {
+      "source": "5G",
+      "target": "Wi-Fi",
+      "weight": 7
+    },
+    {
+      "source": "Broadcom",
+      "target": "Wi-Fi",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom 博通",
+      "target": "網通",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "PON",
+      "weight": 8
+    },
+    {
+      "source": "PON",
+      "target": "Qualcomm",
+      "weight": 7
+    },
+    {
+      "source": "PON",
+      "target": "聯發科",
+      "weight": 7
+    },
+    {
+      "source": "中磊",
+      "target": "智易",
+      "weight": 5
+    },
+    {
+      "source": "5G",
+      "target": "PON",
+      "weight": 6
+    },
+    {
+      "source": "PON",
+      "target": "Wi-Fi 7",
+      "weight": 5
+    },
+    {
+      "source": "Broadcom",
+      "target": "光收發模組",
+      "weight": 5
     }
   ]
 }

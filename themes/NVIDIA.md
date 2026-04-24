@@ -2,13 +2,13 @@
 
 > NVIDIA GPU 及 AI 平台台灣供應鏈
 
-**涵蓋公司數:** 104
+**涵蓋公司數:** 91
 
-**相關主題:** [[CoWoS]] (39) | [[HBM]] (16) | [[AI 伺服器]] (148) | [[台積電]] (182)
+**相關主題:** [[CoWoS]] (32) | [[HBM]] (16) | [[AI 伺服器]] (115) | [[台積電]] (114)
 
 ---
 
-## 上游 (42)
+## 上游 (37)
 
 - **2345 智邦** (Communication Equipment)
 - **6245 立端** (Communication Equipment)
@@ -47,13 +47,8 @@
 - **3048 益登** (Electronics & Computer Distribution)
 - **3709 鑫聯大投控** (Electronics & Computer Distribution)
 - **6227 茂綸** (Electronics & Computer Distribution)
-- **4550 長佳** (Engineering & Construction)
-- **5484 慧友** (Security & Protection Services)
-- **6231 系微** (Software - Application)
-- **6882 甲尚** (Software - Application)
-- **3045 台灣大** (Specialty Retail)
 
-## 下游 (16)
+## 下游 (15)
 
 - **3163 波若威** (Communication Equipment)
 - **3324 雙鴻** (Computer Hardware)
@@ -70,11 +65,9 @@
 - **3189 景碩** (Semiconductor Equipment & Materials)
 - **2449 京元電子** (Semiconductors)
 - **7749 意騰-KY** (Software - Infrastructure)
-- **5607 遠雄港** (Specialty Business Services)
 
-## 相關公司 (46)
+## 相關公司 (39)
 
-- **2256 歐特明** (Auto Parts)
 - **6134 萬旭** (Communication Equipment)
 - **6190 萬泰科** (Communication Equipment)
 - **6715 嘉基** (Communication Equipment)
@@ -109,14 +102,8 @@
 - **6123 上奇** (Electronics & Computer Distribution)
 - **6189 豐藝** (Electronics & Computer Distribution)
 - **6776 展�眥篕�** (Electronics & Computer Distribution)
-- **2059 川湖** (Furnishings, Fixtures & Appliances)
-- **6584 南俊國際** (Furnishings, Fixtures & Appliances)
 - **6223 旺矽** (Semiconductor Equipment & Materials)
 - **2330 台積電** (Semiconductors)
-- **5203 訊連** (Software - Application)
 - **7547 碩網** (Software - Infrastructure)
-- **1303 南亞** (Specialty Chemicals)
 - **3167 大量** (Specialty Industrial Machinery)
 - **6125 廣運** (Specialty Industrial Machinery)
-- **6561 是方** (Telecom Services)
-- **5475 德宏** (Textile Manufacturing)

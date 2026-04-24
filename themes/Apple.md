@@ -2,13 +2,13 @@
 
 > 蘋果公司台灣供應鏈成員
 
-**涵蓋公司數:** 80
+**涵蓋公司數:** 62
 
-**相關主題:** [[台積電]] (182) | [[鴻海]] (63)
+**相關主題:** [[台積電]] (114) | [[鴻海]] (48)
 
 ---
 
-## 上游 (14)
+## 上游 (11)
 
 - **2414 精技** (Computer Hardware)
 - **3406 玉晶光** (Computer Hardware)
@@ -17,20 +17,17 @@
 - **2347 聯強** (Electronics & Computer Distribution)
 - **2450 神腦** (Electronics & Computer Distribution)
 - **6154 順發** (Electronics & Computer Distribution)
-- **1569 濱川** (Metal Fabrication)
-- **3376 新日興** (Metal Fabrication)
 - **3105 穩懋** (Semiconductors)
 - **3711 日月光投控** (Semiconductors)
 - **4966 譜瑞-KY** (Semiconductors)
 - **3518 柏騰** (Specialty Industrial Machinery)
-- **2430 燦坤** (Specialty Retail)
 
 ## 中游 (2)
 
 - **2367 燿華** (Electronic Components)
 - **6821 聯寶** (Electronic Components)
 
-## 下游 (39)
+## 下游 (31)
 
 - **2382 廣達** (Computer Hardware)
 - **2385 群光** (Computer Hardware)
@@ -57,24 +54,15 @@
 - **6114 久威** (Electronic Components)
 - **6176 瑞儀** (Electronic Components)
 - **6854 錼創科技-KY創** (Electronic Components)
-- **4994 傳奇** (Electronic Gaming & Multimedia)
 - **2354 鴻準** (Electronics & Computer Distribution)
-- **2636 台驊控股** (Integrated Freight & Logistics)
-- **5223 安力-KY** (Metal Fabrication)
-- **6859 伯特光** (Metal Fabrication)
-- **7610 聯友金屬-創** (Other Industrial Metals & Mining)
 - **3030 德律** (Scientific & Technical Instruments)
 - **3034 聯詠** (Semiconductors)
 - **6937 天虹** (Semiconductors)
-- **6146 耕興** (Specialty Business Services)
-- **6585 鼎基** (Specialty Chemicals)
 - **1590 亞德客-KY** (Specialty Industrial Machinery)
 - **6706 惠特** (Specialty Industrial Machinery)
-- **1444 力麗** (Textile Manufacturing)
 
-## 相關公司 (25)
+## 相關公司 (18)
 
-- **8438 昶昕** (Chemicals)
 - **3419 譁裕** (Communication Equipment)
 - **3057 喬鼎** (Computer Hardware)
 - **3044 健鼎** (Electronic Components)
@@ -88,14 +76,8 @@
 - **6165 浪凡** (Electronic Components)
 - **6217 中探針** (Electronic Components)
 - **8046 南電** (Electronic Components)
-- **5278 尚凡** (Internet Content & Information)
 - **3189 景碩** (Semiconductor Equipment & Materials)
 - **6278 台表科** (Semiconductors)
 - **6488 環球晶** (Semiconductors)
-- **1717 長興** (Specialty Chemicals)
 - **2476 鉅祥** (Specialty Industrial Machinery)
 - **8996 高力** (Specialty Industrial Machinery)
-- **3045 台灣大** (Specialty Retail)
-- **6281 全國電** (Specialty Retail)
-- **2412 中華電** (Telecom Services)
-- **4904 遠傳** (Telecom Services)

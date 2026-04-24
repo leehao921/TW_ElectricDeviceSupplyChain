@@ -2,15 +2,14 @@
 
 > AI 訓練與推論伺服器完整供應鏈，從晶片到系統到散熱
 
-**涵蓋公司數:** 148
+**涵蓋公司數:** 115
 
-**相關主題:** [[CoWoS]] (39) | [[HBM]] (16) | [[NVIDIA]] (104) | [[CPO]] (13) | [[資料中心]] (77)
+**相關主題:** [[CoWoS]] (32) | [[HBM]] (16) | [[NVIDIA]] (91) | [[CPO]] (13) | [[資料中心]] (70)
 
 ---
 
-## 上游 (10)
+## 上游 (8)
 
-- **1587 吉茂** (Auto Parts)
 - **2324 仁寶** (Computer Hardware)
 - **2356 英業達** (Computer Hardware)
 - **2357 華碩** (Computer Hardware)
@@ -19,9 +18,8 @@
 - **2382 廣達** (Computer Hardware)
 - **3231 緯創** (Computer Hardware)
 - **6982 大井泵浦** (Specialty Industrial Machinery)
-- **2025 千興** (Steel)
 
-## 中游 (17)
+## 中游 (16)
 
 - **6190 萬泰科** (Communication Equipment)
 - **6245 立端** (Communication Equipment)
@@ -38,14 +36,10 @@
 - **6834 天二科技** (Electronic Components)
 - **6862 三集瑞-KY** (Electronic Components)
 - **7861 貝爾威勒** (Electronic Components)
-- **3691 碩禾** (Solar)
 - **8996 高力** (Specialty Industrial Machinery)
 
-## 下游 (43)
+## 下游 (31)
 
-- **2618 長榮航** (Airlines)
-- **2646 星宇航空** (Airlines)
-- **4543 萬在** (Auto Parts)
 - **6134 萬旭** (Communication Equipment)
 - **8054 安國** (Computer Hardware)
 - **2420 新巨** (Electrical Equipment & Parts)
@@ -67,11 +61,6 @@
 - **8358 金居** (Electronic Components)
 - **3048 益登** (Electronics & Computer Distribution)
 - **3483 力致** (Electronics & Computer Distribution)
-- **6584 南俊國際** (Furnishings, Fixtures & Appliances)
-- **2643 捷迅** (Integrated Freight & Logistics)
-- **5609 中菲行** (Integrated Freight & Logistics)
-- **5426 振發** (Metal Fabrication)
-- **4304 勝昱** (Packaging & Containers)
 - **2360 致茂** (Scientific & Technical Instruments)
 - **4549 桓達** (Scientific & Technical Instruments)
 - **2351 順德** (Semiconductor Equipment & Materials)
@@ -80,20 +69,11 @@
 - **4760 勤凱** (Semiconductor Equipment & Materials)
 - **6920 恆勁科技** (Semiconductor Equipment & Materials)
 - **3260 威剛** (Semiconductors)
-- **5607 遠雄港** (Specialty Business Services)
-- **4722 國精化** (Specialty Chemicals)
 - **2421 建準** (Specialty Industrial Machinery)
 - **6831 邁科** (Specialty Industrial Machinery)
-- **5498 凱崴** (Tools & Accessories)
-- **8390 金益鼎** (Waste Management)
 
-## 相關公司 (78)
+## 相關公司 (60)
 
-- **2610 華航** (Airlines)
-- **6175 立敦** (Aluminum)
-- **4551 智伸科** (Auto Parts)
-- **1802 台玻** (Building Materials)
-- **8438 昶昕** (Chemicals)
 - **2345 智邦** (Communication Equipment)
 - **3221 台嘉碩** (Communication Equipment)
 - **6220 岳豐** (Communication Equipment)
@@ -103,7 +83,6 @@
 - **3564 其陽** (Computer Hardware)
 - **6669 緯穎** (Computer Hardware)
 - **6805 富世達** (Computer Hardware)
-- **5288 豐祥-KY** (Conglomerates)
 - **1514 亞力** (Electrical Equipment & Parts)
 - **1519 華城** (Electrical Equipment & Parts)
 - **1608 華榮** (Electrical Equipment & Parts)
@@ -144,9 +123,6 @@
 - **2347 聯強** (Electronics & Computer Distribution)
 - **3540 曜越** (Electronics & Computer Distribution)
 - **6761 穩得** (Electronics & Computer Distribution)
-- **6903 巨漢** (Engineering & Construction)
-- **2059 川湖** (Furnishings, Fixtures & Appliances)
-- **4569 六方科-KY** (Metal Fabrication)
 - **3030 德律** (Scientific & Technical Instruments)
 - **6425 易發** (Semiconductor Equipment & Materials)
 - **2329 華泰** (Semiconductors)
@@ -155,15 +131,6 @@
 - **6415 矽力-KY** (Semiconductors)
 - **6435 大中** (Semiconductors)
 - **6693 廣閎科** (Semiconductors)
-- **2406 國碩** (Solar)
-- **1303 南亞** (Specialty Chemicals)
-- **3388 崇越電** (Specialty Chemicals)
 - **3219 倚強科** (Specialty Industrial Machinery)
 - **6618 永虹先進** (Specialty Industrial Machinery)
 - **6727 亞泰金屬** (Specialty Industrial Machinery)
-- **5340 建榮** (Textile Manufacturing)
-- **5475 德宏** (Textile Manufacturing)
-- **4999 鑫禾** (Tools & Accessories)
-- **6234 高僑** (Tools & Accessories)
-- **6705 振躍精密** (Tools & Accessories)
-- **8021 尖點** (Tools & Accessories)
