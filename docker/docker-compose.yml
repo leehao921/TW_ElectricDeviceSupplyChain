@@ -1,0 +1,21 @@
+services:
+  tw-electronics-scheduler:
+    container_name: tw-electronics-scheduler
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - .env
+    environment:
+      TZ: ${TZ:-Asia/Taipei}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ..:/app:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import asyncpg"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
