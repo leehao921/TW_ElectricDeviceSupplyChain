@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Sample TW Electronics Feed</title>
+    <link>https://example.com/</link>
+    <description>Fixture for unit tests</description>
+    <item>
+      <title>台積電 2330 擴大 CoWoS 產能，HBM 需求強勁</title>
+      <link>https://example.com/news/1</link>
+      <pubDate>Mon, 21 Apr 2026 06:00:00 GMT</pubDate>
+      <description><![CDATA[台積電 (2330) 宣布擴大 CoWoS 封裝產能，回應 NVIDIA 與 AMD 對 HBM 配套的強勁需求。]]></description>
+      <content:encoded><![CDATA[<p>台積電 (2330) 宣布擴大 CoWoS 封裝產能，回應 [[NVIDIA]] 與 AMD 對 HBM 配套的強勁需求。</p>]]></content:encoded>
+    </item>
+    <item>
+      <title>今日天氣晴朗適合出遊</title>
+      <link>https://example.com/news/2</link>
+      <pubDate>Mon, 21 Apr 2026 07:00:00 GMT</pubDate>
+      <description><![CDATA[今天全台氣溫回升，是踏青好天氣。]]></description>
+    </item>
+    <item>
+      <title>聯發科發表新 5G 晶片</title>
+      <link>https://example.com/news/3</link>
+      <pubDate>Mon, 21 Apr 2026 08:00:00 GMT</pubDate>
+      <description><![CDATA[聯發科 (2454) 宣布新款 5G 基頻晶片，採用 MediaTek 自研架構。]]></description>
+    </item>
+  </channel>
+</rss>
