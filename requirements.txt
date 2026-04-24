@@ -14,3 +14,7 @@ feedparser>=6.0
 # Unit 5 — Search + fundamentals collectors
 beautifulsoup4>=4.12
 lxml>=5.0
+
+# Unit 6 — Graph layer (Graphiti + FalkorDB)
+graphiti-core>=0.3
+falkordb>=1.0
