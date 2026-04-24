@@ -8,6 +8,14 @@ Taiwan's stock market has 1,800+ listed companies, many of which are critical no
 
 **The wikilink graph is the core feature.** Searching `[[Apple]]` reveals 207 Taiwanese companies in Apple's supply chain. Searching `[[CoWoS]]` shows every company involved in TSMC's advanced packaging. Searching `[[光阻液]]` (photoresist) maps every supplier and consumer of that material.
 
+## Architecture at a glance
+
+- **Semantic layer** — this repo: Markdown reports, wikilinks, themes, network graph.
+- **Ingestion layer** — `ingestion/` daemon pulls MOPS, CNA/UDN/CTEE RSS, Yahoo/Google News, FinMind into Postgres (`tw_electronics` DB).
+- **Graph layer** — `graph/` writes supply-chain edges into FalkorDB under `group_id="tw-electronics"`.
+- **Research layer** — `mcp_server/` exposes 10 tools (`find_tickers_exposed_to`, `get_supply_chain`, `get_recent_news`, `get_institutional_flow`, ...) over FastMCP stdio.
+- Full architecture and phasing: see [`docs/plans/2026-04-24-electronics-platform.md`](docs/plans/2026-04-24-electronics-platform.md).
+
 ## Quick Start
 
 ### Prerequisites
