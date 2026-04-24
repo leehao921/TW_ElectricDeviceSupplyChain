@@ -10,3 +10,7 @@ pydantic-settings>=2.0
 
 # Unit 4 — RSS collectors
 feedparser>=6.0
+
+# Unit 5 — Search + fundamentals collectors
+beautifulsoup4>=4.12
+lxml>=5.0

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+<title>2330 台積電 - Google 新聞</title>
+<link>https://news.google.com/search?q=2330</link>
+<description>Google News</description>
+<item>
+  <title>台積電 2330 Q3 毛利率再創新高</title>
+  <link>https://news.google.com/rss/articles/abc123</link>
+  <guid isPermaLink="false">abc123</guid>
+  <pubDate>Thu, 14 Nov 2024 08:30:00 GMT</pubDate>
+  <description>台積電公布 2024 年 Q3 財報，毛利率達 57.8%。關鍵字：[[CoWoS]] [[AI 伺服器]]</description>
+  <source url="https://www.example.com">聯合新聞網</source>
+</item>
+<item>
+  <title>聯發科與台積電合作 2nm 試產</title>
+  <link>https://news.google.com/rss/articles/def456</link>
+  <guid isPermaLink="false">def456</guid>
+  <pubDate>Wed, 13 Nov 2024 02:15:00 GMT</pubDate>
+  <description>[[聯發科]] 與 [[台積電]] 在 2nm 節點展開合作，預計 2026 年量產。</description>
+  <source url="https://www.example.com">經濟日報</source>
+</item>
+<item>
+  <title>Empty link should be skipped</title>
+  <link></link>
+  <pubDate>Wed, 13 Nov 2024 01:00:00 GMT</pubDate>
+  <description>no link here</description>
+</item>
+</channel></rss>
