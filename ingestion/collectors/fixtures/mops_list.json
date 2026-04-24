@@ -1,0 +1,65 @@
+{
+  "code": 200,
+  "message": "查詢成功",
+  "result": {
+    "data": [
+      [
+        "115/04/21",
+        "17:32:05",
+        "2454",
+        "聯發科",
+        "公告本公司115年第1季合併財務報告董事會預計召開日期為\r\n115年04月30日",
+        {
+          "apiName": "t05st02_detail",
+          "parameters": {
+            "companyId": "2454",
+            "marketKind": "sii",
+            "enterDate": "1150420",
+            "serialNumber": 1
+          }
+        }
+      ],
+      [
+        "115/04/21",
+        "17:37:18",
+        "2330",
+        "台積電",
+        "本公司代子公司 TSMC Global Ltd. 公告取得固定收益證券",
+        {
+          "apiName": "t05st02_detail",
+          "parameters": {
+            "companyId": "2330",
+            "marketKind": "sii",
+            "enterDate": "1150421",
+            "serialNumber": 1
+          }
+        }
+      ],
+      [
+        "115/04/21",
+        "17:38:58",
+        "2539",
+        "櫻花建",
+        "公告本公司董事會通過與子公司櫻雄營造簽訂工程承攬合約案",
+        {
+          "apiName": "t05st02_detail",
+          "parameters": {
+            "companyId": "2539",
+            "marketKind": "sii",
+            "enterDate": "1150421",
+            "serialNumber": 1
+          }
+        }
+      ]
+    ],
+    "titles": [
+      {"main": "發言日期", "sub": []},
+      {"main": "發言時間", "sub": []},
+      {"main": "公司代號", "sub": []},
+      {"main": "公司名稱", "sub": []},
+      {"main": "主旨", "sub": []},
+      {"main": "詳細資料", "sub": []}
+    ]
+  },
+  "datetime": "115/04/24 15:33:00"
+}
