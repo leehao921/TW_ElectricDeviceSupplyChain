@@ -1,0 +1,43 @@
+name: Audit Ticker Reports
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install tabulate
+
+      - name: Run audit
+        run: |
+          set -o pipefail
+          python scripts/audit_batch.py --all -v | tee audit.log
+
+      - name: Fail on regressions
+        run: |
+          # audit_batch.py prints "Total tickers needing quality fix: N".
+          # Any N > 0 is a regression.
+          fail_line=$(grep -E "^Total tickers needing quality fix: " audit.log | tail -1)
+          if [ -z "$fail_line" ]; then
+            echo "ERROR: audit summary line not found in output"
+            exit 1
+          fi
+          count=$(echo "$fail_line" | awk '{print $NF}')
+          echo "Regression count: $count"
+          if [ "$count" != "0" ]; then
+            echo "ERROR: $count tickers failed quality audit"
+            exit 1
+          fi

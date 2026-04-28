@@ -17,6 +17,14 @@ This repo is the **semantic layer** only. It pairs with two sibling Docker stack
 
 The integration layer (ingestion / graph / MCP / scheduler) is being built in sibling folders of this repo — see `docs/plans/` for the architecture.
 
+## Architecture at a glance
+
+- **Semantic layer** — this repo: Markdown reports, wikilinks, themes, network graph.
+- **Ingestion layer** — `ingestion/` daemon pulls MOPS, CNA/UDN/CTEE RSS, Yahoo/Google News, FinMind into Postgres (`tw_electronics` DB).
+- **Graph layer** — `graph/` writes supply-chain edges into FalkorDB under `group_id="tw-electronics"`.
+- **Research layer** — `mcp_server/` exposes 10 tools (`find_tickers_exposed_to`, `get_supply_chain`, `get_recent_news`, `get_institutional_flow`, ...) over FastMCP stdio.
+- Full architecture and phasing: see [`docs/plans/2026-04-24-electronics-platform.md`](docs/plans/2026-04-24-electronics-platform.md).
+
 ## Quick Start
 
 ### Prerequisites
