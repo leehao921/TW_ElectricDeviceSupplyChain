@@ -29,6 +29,7 @@ ELECTRONICS_SECTORS = frozenset({
     "Solar",
     "Specialty Industrial Machinery",
     "Scientific & Technical Instruments",
+    "Software - Infrastructure",
 })
 
 _FILENAME_RE = re.compile(r"^(\d{4})_(.+)\.md$")
@@ -72,3 +73,14 @@ def ticker_to_name(repo_root: Optional[Path] = None) -> dict[str, str]:
     """Return ``{"2330": "台積電", ...}`` for every electronics ticker."""
     key = str(repo_root) if repo_root else ""
     return dict(_scan_cached(key))
+
+
+def all_tickers(repo_root: Optional[Path] = None) -> set[str]:
+    """Alias of :func:`electronics_tickers`. Used by per-ticker collectors."""
+    return electronics_tickers(repo_root)
+
+
+def ticker_name(ticker: str, repo_root: Optional[Path] = None) -> Optional[str]:
+    """Return the Chinese company name for ``ticker``, or None if unknown."""
+    key = str(repo_root) if repo_root else ""
+    return _scan_cached(key).get(ticker)

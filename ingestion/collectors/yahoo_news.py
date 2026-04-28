@@ -34,14 +34,14 @@ class YahooNewsItem:
     body: str
 
     def as_row(self) -> dict:
-        tickers, wikilinks = ner_extract(f"{self.title}\n{self.body}")
+        ner = ner_extract(f"{self.title}\n{self.body}")
         return {
             "source_url": self.source_url,
             "published_at": self.published_at,
             "title": self.title,
             "body": self.body,
-            "tickers": tickers,
-            "wikilinks": wikilinks,
+            "tickers": ner.tickers,
+            "wikilinks": ner.wikilinks,
         }
 
 

@@ -17,7 +17,7 @@ import feedparser
 import httpx
 
 from ..ner import extract as ner_extract
-from ..universe import all_tickers, ticker_to_name
+from ..universe import all_tickers, ticker_name
 from ._common import make_client, run_news_collector
 
 SOURCE = "google"
@@ -35,14 +35,14 @@ class GoogleNewsItem:
     body: str
 
     def as_row(self) -> dict:
-        tickers, wikilinks = ner_extract(f"{self.title}\n{self.body}")
+        ner = ner_extract(f"{self.title}\n{self.body}")
         return {
             "source_url": self.source_url,
             "published_at": self.published_at,
             "title": self.title,
             "body": self.body,
-            "tickers": tickers,
-            "wikilinks": wikilinks,
+            "tickers": ner.tickers,
+            "wikilinks": ner.wikilinks,
         }
 
 
@@ -85,7 +85,7 @@ async def collect(
     limit: int = 20,
     client: httpx.AsyncClient | None = None,
 ) -> list[GoogleNewsItem]:
-    url = build_feed_url(ticker, ticker_to_name(ticker))
+    url = build_feed_url(ticker, ticker_name(ticker))
     own_client = client is None
     client = client or make_client()
     try:

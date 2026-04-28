@@ -105,14 +105,15 @@ async def _embed_or_none(text: str) -> Optional[list[float]]:
 
 
 async def ingest_rss(source: str, feed_url: str, *, dry_run: bool, limit: int) -> int:
-    """Fetch, filter, embed, insert. Returns rows_written (0 on dry-run)."""
-    try:
-        raw = await _fetch_feed_bytes(feed_url)
-    except Exception as exc:
-        print(f"[fetch] {source} failed: {exc}", file=sys.stderr)
-        if not dry_run:
-            await db.log_run(source, "error", 0)
-        return 0
+    """Fetch, filter, embed, insert. Returns rows_written (0 on dry-run).
+
+    Status logging is the SCHEDULER's responsibility (see
+    ``ingestion.scheduler._run_job_async``). This function just returns the
+    row count or raises — the wrapper writes ``ingest_runs``. Letting the
+    inner write its own row produced confusing duplicate entries
+    (``cna`` + ``rss_cna``) and racy double-writes.
+    """
+    raw = await _fetch_feed_bytes(feed_url)
 
     relevant: list[dict] = []
     skipped = 0
@@ -137,30 +138,24 @@ async def ingest_rss(source: str, feed_url: str, *, dry_run: bool, limit: int) -
         return 0
 
     rows_written = 0
-    try:
-        pool = await db.get_pool()
-        async with pool.acquire() as conn:
-            for row in relevant:
-                embedding = await _embed_or_none(row["title"] + "\n" + row["body"][:EMBED_BODY_LIMIT])
-                result = await conn.execute(
-                    INSERT_SQL,
-                    source,
-                    row["source_url"],
-                    row["published_at"],
-                    row["title"],
-                    row["body"],
-                    row["tickers"],
-                    row["wikilinks"],
-                    db.vector_literal(embedding),
-                )
-                # asyncpg returns "INSERT 0 N" — 0 when ON CONFLICT skipped.
-                if result.endswith(" 1"):
-                    rows_written += 1
-        await db.log_run(source, "ok", rows_written)
-    except Exception as exc:
-        print(f"[{source}] DB error: {exc}", file=sys.stderr)
-        await db.log_run(source, "error", rows_written)
-        raise
+    pool = await db.get_pool()
+    async with pool.acquire() as conn:
+        for row in relevant:
+            embedding = await _embed_or_none(row["title"] + "\n" + row["body"][:EMBED_BODY_LIMIT])
+            result = await conn.execute(
+                INSERT_SQL,
+                source,
+                row["source_url"],
+                row["published_at"],
+                row["title"],
+                row["body"],
+                row["tickers"],
+                row["wikilinks"],
+                db.vector_literal(embedding),
+            )
+            # asyncpg returns "INSERT 0 N" — 0 when ON CONFLICT skipped.
+            if result.endswith(" 1"):
+                rows_written += 1
 
     print(f"[{source}] inserted={rows_written}", file=sys.stderr)
     return rows_written

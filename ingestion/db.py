@@ -32,6 +32,27 @@ async def get_pool():
     return _pool
 
 
+async def connect():
+    """Open a single short-lived asyncpg connection (caller closes it).
+
+    Used by collectors that don't need a long-lived pool — e.g. one-shot
+    backfills via the CLI.
+    """
+    import asyncpg  # local import keeps optional dep lazy
+    return await asyncpg.connect(dsn=settings.pg_news_dsn)
+
+
+def vector_literal(values: Optional[list[float]]) -> Optional[str]:
+    """Format an embedding for ``$N::vector`` parameters; None passes through.
+
+    pgvector accepts a string of the form ``'[0.1,0.2,...]'`` cast to
+    ``vector``. asyncpg ships no native codec for it, so we hand-format.
+    """
+    if values is None:
+        return None
+    return "[" + ",".join(f"{v:.6f}" for v in values) + "]"
+
+
 async def _get_http_client():
     global _http_client
     if _http_client is None:
@@ -71,8 +92,9 @@ async def log_run(
     async with pool.acquire() as conn:
         await conn.execute(
             """
-            INSERT INTO ingest_runs (job_name, status, rows_written, error, run_at)
-            VALUES ($1, $2, $3, $4, NOW())
+            INSERT INTO ingest_runs
+                (job_name, started_at, finished_at, status, rows_written, error)
+            VALUES ($1, NOW(), NOW(), $2, $3, $4)
             """,
             job_name,
             status,
@@ -90,3 +112,8 @@ async def close() -> None:
     if _http_client is not None:
         await _http_client.aclose()
         _http_client = None
+
+
+# Alias kept for collectors that only want to release the connection pool
+# (HTTP client may still be needed by the same process).
+close_pool = close

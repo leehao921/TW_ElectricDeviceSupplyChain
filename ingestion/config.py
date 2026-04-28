@@ -21,6 +21,14 @@ _DEFAULT_EMBEDDING_MODEL = "bge-m3"
 _DEFAULT_EMBEDDING_DIM = 1024
 _DEFAULT_TZ = "Asia/Taipei"
 
+# Browser-shaped UA shared by every HTTP client in the ingestion package.
+# CTEE behind Cloudflare (and a few others) 403 obvious bot UAs, so we mimic
+# desktop Chrome here. Keep this in sync with `_rss_base.USER_AGENT`.
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
 
 try:
     from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -64,3 +72,8 @@ except ImportError:  # pragma: no cover - exercised only without pydantic-settin
 
 # Module-level singleton used by other ingestion modules.
 settings = Settings()
+
+# Convenience module-level export so collectors can `from ..config import FINMIND_TOKEN`
+# without reaching through `settings`. Resolved at import time — set the env
+# var before importing collectors that use it.
+FINMIND_TOKEN: Optional[str] = settings.finmind_token

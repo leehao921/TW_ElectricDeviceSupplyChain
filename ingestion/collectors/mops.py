@@ -22,7 +22,7 @@ from typing import Iterable, Optional, Sequence
 
 import httpx
 
-from ..db import connect, log_run
+from ..db import connect
 from ..universe import electronics_tickers
 
 LOGGER = logging.getLogger("ingestion.collectors.mops")
@@ -257,8 +257,9 @@ async def collect(
         return enriched
 
     rows_written = await _write_disclosures(enriched)
-    status = "ok" if rows_written == len(enriched) else "partial" if rows_written else "fail"
-    await log_run("mops", status, rows_written)
+    # ingest_runs row is owned by the scheduler wrapper; collectors only
+    # return the rows-written count or raise (single source of truth, no
+    # double-logging). See _rss_base.ingest_rss for the same convention.
     LOGGER.info("MOPS collector wrote %d/%d rows", rows_written, len(enriched))
     return enriched
 

@@ -48,12 +48,28 @@ def _unique_in_order(items):
     return result
 
 
+class NerResult(dict):
+    """Mapping with ``tickers`` / ``wikilinks`` exposed as attributes too.
+
+    Lets older call sites use ``result["tickers"]`` (test_shared.py) while
+    new ones use ``result.tickers`` (test_rss.py, _rss_base.py).
+    """
+
+    @property
+    def tickers(self) -> list[str]:
+        return self["tickers"]
+
+    @property
+    def wikilinks(self) -> list[str]:
+        return self["wikilinks"]
+
+
 def extract(
     text: str,
     *,
     ticker_set: Optional[set[str]] = None,
     wikilink_vocab: Optional[set[str]] = None,
-) -> dict[str, list[str]]:
+) -> "NerResult":
     """Extract tickers and wikilink vocab terms from ``text``.
 
     - ``tickers``: 4-digit runs, filtered by ``ticker_set`` when provided.
@@ -85,4 +101,4 @@ def extract(
         hits.sort(key=lambda pair: pair[0])
         wikilinks = _unique_in_order(term for _, term in hits)
 
-    return {"tickers": tickers, "wikilinks": wikilinks}
+    return NerResult(tickers=tickers, wikilinks=wikilinks)
