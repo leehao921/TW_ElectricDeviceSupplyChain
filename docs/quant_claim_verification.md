@@ -78,3 +78,73 @@ descriptor enters, the protocol is mandatory.
   pattern; 803-day distribution against trailing 60d z-scores)
 - `analysis/reports/market_view_2026-04-29_close.md` — first report following
   this protocol
+
+---
+
+## § 8 — Implied-Sharpe sanity check
+
+Adopted from rule #2 of the Jay (Two Sigma) 3-rule SOP (epic
+[#13](https://github.com/leehao921/TW_ElectricDeviceSupplyChain/issues/13)). Standalone CLI: `scripts/implied_sharpe.py`.
+
+### When this protocol applies
+
+Run after **any** signal-construction change — new weights, new factor added,
+new universe, new aggregation horizon. Specifically:
+
+- After running `analysis/backtest_overnight_signal.py` and getting grid-best
+  weights — before promoting them to `ingestion/snapshots/overnight_signal.py`.
+- Whenever a "diversified composite" claim appears in a report or commit
+  message.
+- Quarterly even when nothing changed, to detect regime drift in component
+  correlations.
+
+### Procedure
+
+1. Run the CLI:
+   ```bash
+   python3 scripts/implied_sharpe.py --start 2023-01-01 --as-of 2026-04-29
+   ```
+2. Read the **Pearson correlation matrix** for the 5 overnight components
+   (foreign_net / usdtwd / sp500 / tsm / sox). Note pairs within the
+   `(sp500, tsm, sox)` US-overnight triplet — they are co-driven by US-session
+   risk-on/off and typically have ρ ≈ 0.6-0.8.
+3. Read the **Implied Sharpe — Floored cov** table. Each component's value is
+   `w_i · IC_i · √252 / sqrt(component_variance_contribution)`.
+4. Apply the thresholds (defined as constants in the script):
+   - `IS_THRESHOLD = 2.0` — any |implied_sharpe| > 2 → false precision
+   - `RHO_FLOOR = 0.5` — any |ρ| < 0.5 within the US triplet gets floored to
+     ±0.5 before the implied-Sharpe computation
+5. If the verdict is `⚠️ FALSE PRECISION`, **swap weights** to `grid_top[0]`
+   from the floored grid output (5%-step grid, sum=1, max single weight ≤ 0.7).
+6. Paste the verifier output into the relevant report's *Verification log*.
+
+### Why this matters (Jay's rule)
+
+> "After cov matrix shrinkage and portfolio construction, reverse-calc each
+> idea's implied Sharpe in the portfolio. If alt-data shows implied Sharpe = 3,
+> you know you trust it too much. Short history + understated correlation =
+> false precision. Rule of thumb: if cov says ρ=0.1 between two factors, force
+> ρ=0.5 and rerun. Diversification is your only true friend — diversification
+> ratio < 1.5 means the portfolio is effectively concentrated."
+
+### Empirical baseline (sample 2023-01-05 → 2026-04-28, 861 days)
+
+The first run on production weights (`foreign_net`=+0.25, `usdtwd`=−0.15,
+`sp500`=+0.15, `tsm`=+0.25, `sox`=+0.20) gave:
+
+- ρ(sp500, tsm) = +0.619, ρ(sp500, sox) = +0.792, ρ(tsm, sox) = +0.785 — all
+  already ≥ 0.5, no flooring needed.
+- Implied Sharpes: foreign_net +0.16, usdtwd +1.10, **sp500 +3.89, tsm +4.69,
+  sox +4.26** — three components flag false precision.
+- Diversification ratio = 1.49 (≈ 5-factor portfolio behaving like a 2-factor
+  portfolio — the US-overnight triplet collapses into a single risk).
+
+The grid-best floored replacement is `(0.00, −0.10, 0.35, 0.35, 0.20)` with
+IC +0.5057. **Decision (deferred to a follow-up PR):** whether to swap, given
+that dropping foreign_net to 0 trades one symptom (false precision) for another
+(losing the 籌碼 read in the body of `news_items`).
+
+### See also
+
+- `analysis/backtest_overnight_signal.py:DEFAULT_WEIGHTS` — current weights.
+- `ingestion/snapshots/overnight_signal.py:WEIGHTS` — production weights.
