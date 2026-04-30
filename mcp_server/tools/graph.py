@@ -98,11 +98,26 @@ async def get_supply_chain(ticker: str, depth: int = 2) -> dict:
     try:
         db = FalkorDB(host=FALKORDB_HOST, port=FALKORDB_PORT)
         graph = db.select_graph(GRAPHITI_GROUP_ID)
+        # Graphiti writes (:Episodic {name=ticker})-[:MENTIONS]->(:Entity)
+        # -[:RELATES_TO]->(:Entity). Variable-length depth is interpolated
+        # outside the param dict because Cypher disallows path-length params.
+        # FalkorDB returns the *1..N relationship variable as a single Edge
+        # (not a List) when the matched length is 1, which breaks list
+        # comprehensions over it. Bind the full path with `p` and use
+        # `relationships(p)` instead — that's always a List.
         query = (
-            "MATCH path = (n {ticker: $ticker})-[*1..%d]-(m) "
-            "RETURN path LIMIT 200"
+            "MATCH p = (e:Episodic {name: $ticker, group_id: $group_id}) "
+            "-[:MENTIONS]->(center:Entity) "
+            "-[:RELATES_TO*1..%d]-(neighbor:Entity) "
+            "RETURN center.name AS center, "
+            "       neighbor.name AS neighbor, "
+            "       [x IN relationships(p) WHERE type(x) = 'RELATES_TO' | x.fact] AS facts "
+            "LIMIT 200"
         ) % max(1, int(depth))
-        result = graph.query(query, {"ticker": ticker})
+        result = graph.query(
+            query,
+            {"ticker": ticker, "group_id": GRAPHITI_GROUP_ID},
+        )
         rows = [list(r) for r in (result.result_set or [])]
         return {"source": "falkordb", "rows": rows}
     except Exception as e:  # graph unreachable or query failed
