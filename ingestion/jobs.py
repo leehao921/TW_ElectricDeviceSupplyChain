@@ -137,6 +137,30 @@ async def _job_overnight_signal_daily() -> int:
     return await build_and_upsert_signal()
 
 
+async def _job_market_monitor_intraday() -> int:
+    """Intraday alert monitor — piggybacks on rss_cna (:15) / rss_udn (:35)
+    cadence so we don't add a new high-frequency cron tick. Cron expression
+    ``15,35 9-13 * * 1-5``. Returns the count of alerts emitted (0 = quiet).
+
+    Auto-skips weekends + holidays via the ``is_tw_market_open`` check inside
+    the script (no recent TXF futures bar ⇒ exit early).
+    """
+    import subprocess
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[1]
+    script = repo_root / "analysis" / "market_monitor.py"
+    proc = await asyncio.create_subprocess_exec(
+        "python3", str(script),
+        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+    )
+    _, stderr = await proc.communicate()
+    if proc.returncode < 0:
+        raise RuntimeError(f"market_monitor died: {stderr.decode()}")
+    # The script returns the alert count via exit code (0 = quiet, N = alerts).
+    return max(proc.returncode, 0)
+
+
 async def _job_db_vacuum_weekly() -> int:
     from . import maintenance
     return await maintenance.vacuum_analyze()
@@ -198,6 +222,10 @@ JOBS["tpu_snapshot_daily"] = ("30 16 * * 1-5", _job_tpu_snapshot_daily)
 
 # Overnight composite signal — 15 min before TWSE 09:00 open, weekdays only
 JOBS["overnight_signal_daily"] = ("45 8 * * 1-5", _job_overnight_signal_daily)
+
+# Intraday market monitor — piggybacks on rss_cna (:15) / rss_udn (:35) cadence.
+# Auto-quiet on weekends/holidays via is_tw_market_open() inside the script.
+JOBS["market_monitor_intraday"] = ("15,35 9-13 * * 1-5", _job_market_monitor_intraday)
 
 # Database maintenance — weekly VACUUM + run-log cleanup, hourly freshness check
 JOBS["db_vacuum_weekly"] = ("0 3 * * 0", _job_db_vacuum_weekly)
