@@ -15,7 +15,7 @@ from . import reports as _reports
 
 FALKORDB_HOST = os.environ.get("FALKORDB_HOST", "localhost")
 FALKORDB_PORT = int(os.environ.get("FALKORDB_PORT", "6380"))
-GRAPHITI_GROUP_ID = os.environ.get("GRAPHITI_GROUP_ID", "tw-electronics")
+GRAPHITI_GROUP_ID = os.environ.get("GRAPHITI_GROUP_ID", "tw_electronics")
 
 _WIKILINK_RE = re.compile(r"\[\[([^\]\n|]+?)(?:\|[^\]\n]+)?\]\]")
 

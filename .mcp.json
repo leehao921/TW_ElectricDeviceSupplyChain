@@ -16,7 +16,7 @@
         "PG_TRADING_DSN": "postgresql://tmf:tmf_dev_2026@localhost:5432/tmf_market_data",
         "FALKORDB_HOST": "localhost",
         "FALKORDB_PORT": "6380",
-        "GRAPHITI_GROUP_ID": "tw-electronics",
+        "GRAPHITI_GROUP_ID": "tw_electronics",
         "OLLAMA_BASE_URL": "http://localhost:11434",
         "EMBEDDING_MODEL": "bge-m3",
         "REPO_ROOT": "/Users/lulala/Documents/coding/My-TW-Coverage"

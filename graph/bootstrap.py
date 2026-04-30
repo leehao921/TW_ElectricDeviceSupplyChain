@@ -205,16 +205,41 @@ async def ingest(reports: list[ParsedReport], dry_run: bool) -> None:
             print(f"[err] {r.ticker} {r.company_name}: {e}")
 
 
-def collect_reports(sector: str | None, limit: int | None) -> list[ParsedReport]:
+def _load_skip_tickers(path: str | None) -> set[str]:
+    """Load 4-digit tickers (one per line) from ``path``; return empty set if None."""
+    if not path:
+        return set()
+    skip: set[str] = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            t = line.strip()
+            if len(t) == 4 and t.isdigit():
+                skip.add(t)
+    return skip
+
+
+def collect_reports(
+    sector: str | None,
+    limit: int | None,
+    skip_tickers: set[str] | None = None,
+) -> list[ParsedReport]:
     paths = list(_iter_report_paths(sector))
     if limit is not None:
         paths = paths[:limit]
     parsed: list[ParsedReport] = []
+    skipped = 0
     for p in paths:
         try:
-            parsed.append(parse_report(p))
+            report = parse_report(p)
         except Exception as e:  # noqa: BLE001
             print(f"[skip] {p}: {e}")
+            continue
+        if skip_tickers and report.ticker in skip_tickers:
+            skipped += 1
+            continue
+        parsed.append(report)
+    if skipped:
+        print(f"[skip-tickers] skipped {skipped} reports already in graph")
     return parsed
 
 
@@ -223,9 +248,12 @@ def _main() -> None:
     parser.add_argument("--limit", type=int, default=None, help="Process only the first N reports")
     parser.add_argument("--dry-run", action="store_true", help="Print episode payloads without calling Graphiti")
     parser.add_argument("--sector", type=str, default=None, help="Process one sector only (folder name under Pilot_Reports)")
+    parser.add_argument("--skip-tickers", type=str, default=None,
+                        help="Path to a file with one 4-digit ticker per line; those tickers are skipped.")
     args = parser.parse_args()
 
-    reports = collect_reports(args.sector, args.limit)
+    skip = _load_skip_tickers(args.skip_tickers)
+    reports = collect_reports(args.sector, args.limit, skip_tickers=skip)
     if not reports:
         print("No reports matched.")
         return

@@ -11,6 +11,11 @@ This project pairs with two sibling systems on the same machine:
 
 ## Golden Rules
 
+### 0. 量化主張必先驗證 (Quant Claim Verification)
+任何含「σ」「罕見」「極端」「outlier」「percentile」「最大/最高/最低」之類分布性形容詞的主張，**寫入報告前必須先跑** `scripts/verify_flow_zscore.py`，並把輸出貼入該報告的 *Verification log* 區段。沒有驗證 → 不可使用該形容詞。詳見 `docs/quant_claim_verification.md`。
+
+> 起源: 2026-04-29 一份分析將 −1,386 億 3-day 外資外流誤稱「3σ 罕見」，實測 z=−1.04σ (17.2 percentile)。此後此類措辭一律先驗證。
+
 ### 1. Wikilinks Must Be Specific Proper Nouns (MOST IMPORTANT RULE)
 Every `[[wikilink]]` MUST resolve to a **specific, searchable proper noun**: a company name, product name, named technology, named material, or named process. Generic category words must NEVER be wikilinked.
 

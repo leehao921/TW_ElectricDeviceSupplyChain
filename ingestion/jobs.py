@@ -130,6 +130,13 @@ async def _job_tpu_snapshot_daily() -> int:
     return await build_and_upsert_snapshot()
 
 
+async def _job_overnight_signal_daily() -> int:
+    """Compute the TXF overnight composite signal (5-factor z-score) and upsert
+    to ``news_items``. Runs at 08:45 TPE, before the 09:00 open."""
+    from .snapshots.overnight_signal import build_and_upsert_signal
+    return await build_and_upsert_signal()
+
+
 async def _job_db_vacuum_weekly() -> int:
     from . import maintenance
     return await maintenance.vacuum_analyze()
@@ -188,6 +195,9 @@ JOBS["graphiti_news_incremental"] = (
 
 # TPU snapshot — 1 hour after market close, weekdays only
 JOBS["tpu_snapshot_daily"] = ("30 16 * * 1-5", _job_tpu_snapshot_daily)
+
+# Overnight composite signal — 15 min before TWSE 09:00 open, weekdays only
+JOBS["overnight_signal_daily"] = ("45 8 * * 1-5", _job_overnight_signal_daily)
 
 # Database maintenance — weekly VACUUM + run-log cleanup, hourly freshness check
 JOBS["db_vacuum_weekly"] = ("0 3 * * 0", _job_db_vacuum_weekly)

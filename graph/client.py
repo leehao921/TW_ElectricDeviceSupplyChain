@@ -1,7 +1,7 @@
 """Graphiti client wrapper for the Taiwan-electronics supply-chain graph.
 
 Configures Graphiti against a local FalkorDB + Ollama stack, partitioned by
-``group_id="tw-electronics"``. Mirrors the reference implementation at
+``group_id="tw_electronics"``. Mirrors the reference implementation at
 ``Knowledge_manager/mcp_servers/graphiti_server.py`` so both personal and
 project namespaces share the same infrastructure.
 """
@@ -20,7 +20,7 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "bge-m3")
 EMBEDDING_DIM = int(os.getenv("EMBEDDING_DIM", "1024"))
 LLM_MODEL = os.getenv("GRAPHITI_LLM_MODEL", "qwen2.5:7b")
-GROUP_ID = os.getenv("GRAPHITI_GROUP_ID", "tw-electronics")
+GROUP_ID = os.getenv("GRAPHITI_GROUP_ID", "tw_electronics")
 
 _client: Any | None = None
 _client_lock = asyncio.Lock()

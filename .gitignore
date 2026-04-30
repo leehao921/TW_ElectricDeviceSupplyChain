@@ -12,3 +12,11 @@ enrichment*.json
 
 # Scheduler runtime config — copy from docker/.env.example, fill locally
 docker/.env
+
+# Claude Code agent scratch worktrees
+.claude/worktrees/
+
+# Graphiti bootstrap runtime state (skip-lists, log snapshots)
+.graph_*.txt
+.graph_bootstrap_*.log
+.graph_bootstrap_snapshot_*.log
