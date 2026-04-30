@@ -137,6 +137,36 @@ async def _job_overnight_signal_daily() -> int:
     return await build_and_upsert_signal()
 
 
+async def _job_event_factor_refresh() -> int:
+    """Re-extract emergent factor baskets from the event calendar.
+
+    Runs ``analysis/event_factor_extractor.py --all`` as a subprocess. Each
+    event's row-set is replaced (DELETE + INSERT) idempotently. Returns the
+    total rows upserted.
+    """
+    import subprocess
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[1]
+    script = repo_root / "analysis" / "event_factor_extractor.py"
+    proc = await asyncio.create_subprocess_exec(
+        "python3", str(script), "--all",
+        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+    )
+    _, stderr = await proc.communicate()
+    if proc.returncode != 0:
+        raise RuntimeError(f"event_factor_extractor failed: {stderr.decode()}")
+    # Parse the trailing "upserted N rows across M events" line.
+    rows = 0
+    for line in stderr.decode().splitlines():
+        if "upserted" in line and "rows across" in line:
+            try:
+                rows = int(line.split("upserted")[1].split("rows")[0].strip())
+            except (ValueError, IndexError):
+                rows = 0
+    return rows
+
+
 async def _job_db_vacuum_weekly() -> int:
     from . import maintenance
     return await maintenance.vacuum_analyze()
@@ -198,6 +228,9 @@ JOBS["tpu_snapshot_daily"] = ("30 16 * * 1-5", _job_tpu_snapshot_daily)
 
 # Overnight composite signal — 15 min before TWSE 09:00 open, weekdays only
 JOBS["overnight_signal_daily"] = ("45 8 * * 1-5", _job_overnight_signal_daily)
+
+# Event factor refresh — Sunday 02:00 TPE, re-extract all emergent baskets
+JOBS["event_factor_refresh_weekly"] = ("0 2 * * 0", _job_event_factor_refresh)
 
 # Database maintenance — weekly VACUUM + run-log cleanup, hourly freshness check
 JOBS["db_vacuum_weekly"] = ("0 3 * * 0", _job_db_vacuum_weekly)

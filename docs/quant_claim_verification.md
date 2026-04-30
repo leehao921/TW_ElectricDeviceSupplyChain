@@ -238,3 +238,94 @@ that dropping foreign_net to 0 trades one symptom (false precision) for another
 
 - `analysis/backtest_overnight_signal.py:DEFAULT_WEIGHTS` — current weights.
 - `ingestion/snapshots/overnight_signal.py:WEIGHTS` — production weights.
+
+---
+
+## § 9 — Lean-forward event-driven factor extraction
+
+Adopted from rule #3 of the Jay (Two Sigma) 3-rule SOP (epic
+[#13](https://github.com/leehao921/TW_ElectricDeviceSupplyChain/issues/13)). Standalone CLI: `analysis/event_factor_extractor.py`.
+
+### The principle
+
+Standard risk models (Barra, Northfield) are backward-looking — they update
+factor exposures only after a narrative has been priced for months. For
+emergent narratives (TPU supply chain, Trump tariff, Mag-7 spillover, 外資
+capitulation), the cleanest read on "what's the new risk" is the **event-day
+cross-section**: when the narrative re-priced everything, who moved together?
+
+This protocol turns canonical event days into emergent factor baskets that
+can be checked weekly against the active portfolio.
+
+### When to use
+
+- Whenever a major narrative shock hits Taiwan electronics (Mag-7 sell-off,
+  US tariff announcement, Google/Apple announcing TW-supply-chain partnership,
+  central bank surprise).
+- Quarterly review even when no obvious shock — pick up regime-change events
+  that didn't make the headlines but moved the cross-section.
+
+### Procedure
+
+1. Add the event to `analysis/event_calendar.yaml`:
+   ```yaml
+   - date: 2026-MM-DD
+     name: my_event_name
+     narrative: "What happened, in one sentence"
+   ```
+2. Run the extractor:
+   ```bash
+   # Single event
+   python3 analysis/event_factor_extractor.py --event my_event_name
+
+   # Refresh every event in the calendar
+   python3 analysis/event_factor_extractor.py --all
+   ```
+3. The script:
+   - Reads the calendar
+   - For each event date `E`, fetches yfinance daily Close for 29 TW
+     electronics tickers across `[E-5, E+10]`
+   - Computes cumulative event-window return:
+     `(Close[E+1] − Close[E-1]) / Close[E-1]`, with `E+2` fallback if `E+1` is
+     non-trading
+   - Standardizes the cross-section (z-score across tickers within the event)
+   - DELETE + INSERT the top-15 long + top-15 short loadings into
+     `emergent_factor_baskets`
+4. Weekly cron: `event_factor_refresh_weekly` runs `--all` every Sunday
+   02:00 TPE. Registered in `ingestion/jobs.py`. Schema lives in
+   `ingestion/migrations/002_emergent_factors.sql`.
+
+### Inspecting baskets via SQL
+
+```sql
+-- Long basket for the TPU rally peak
+SELECT ticker, loading, rank
+  FROM emergent_factor_baskets
+ WHERE event_name = 'tpu_rally_peak' AND side = 'long'
+ ORDER BY rank;
+
+-- Tickers that recur as long across multiple events (persistent winners)
+SELECT ticker, count(*) AS n_events,
+       array_agg(event_name ORDER BY event_date) AS events
+  FROM emergent_factor_baskets
+ WHERE side = 'long'
+ GROUP BY ticker
+ ORDER BY n_events DESC;
+```
+
+### Why this matters (Jay's rule)
+
+> "Standard risk models are backward-looking. When 2024 election, COVID
+> vaccine, Russia-Ukraine, AI capex hit, the risk model hasn't 'learned' the
+> factor yet. Use the event day itself as the market's own risk-model output.
+> Pick a canonical event trading day, regress the cross-section, infer which
+> stocks are 'Trump basket' or 'AI basket', then measure portfolio exposure
+> to that emergent factor. Use the market to tell you what the risk is —
+> don't wait for Barra to update half a year later."
+
+### See also
+
+- `analysis/event_calendar.yaml` — canonical events.
+- `ingestion/migrations/002_emergent_factors.sql` — table schema.
+- `ingestion/jobs.py:JOBS["event_factor_refresh_weekly"]` — Sunday cron.
+- `analysis/reports/event_factor_tpu_rally_peak.md` — first commentary.
