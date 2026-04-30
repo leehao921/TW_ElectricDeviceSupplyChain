@@ -12,6 +12,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 from typing import Any
 
 FALKORDB_HOST = os.getenv("FALKORDB_HOST", "localhost")
@@ -66,6 +67,39 @@ async def get_client() -> Any:
         await client.build_indices_and_constraints()
         _client = client
         return _client
+
+
+# Characters that break RediSearch's query parser when inlined into a fulltext
+# search string. Replaced with a single ASCII space by sanitize_for_redisearch.
+_REDISEARCH_HOSTILE = re.compile(
+    r"[。、，：；（）「」『』《》！？\u3000\:@\-\(\)\[\]\{\}\"]+"
+)
+
+
+def sanitize_for_redisearch(query: str) -> str:
+    """Strip CJK punctuation + RediSearch-reserved chars; collapse whitespace.
+
+    Graphiti's ``client.search()`` pastes the raw query into a RediSearch
+    fulltext expression. CJK punctuation like ``。 、 ， （ ）`` and the
+    ideographic space U+3000 trigger ``RediSearch: Syntax error`` and the
+    whole search returns empty. Run user-supplied free text through this
+    helper before handing it to Graphiti.
+    """
+    cleaned = _REDISEARCH_HOSTILE.sub(" ", query)
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+async def safe_search(query: str, *, num_results: int = 10):
+    """Run ``client.search()`` with input sanitized for RediSearch.
+
+    Returns the same edge-result list ``client.search()`` returns; returns
+    an empty list if sanitization leaves nothing to search for.
+    """
+    cleaned = sanitize_for_redisearch(query)
+    if not cleaned:
+        return []
+    client = await get_client()
+    return await client.search(cleaned, group_ids=[GROUP_ID], num_results=num_results)
 
 
 async def health_check() -> dict:
