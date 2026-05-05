@@ -25,6 +25,7 @@ import feedparser
 import httpx
 
 from .. import db, ner
+from ..universe import electronics_tickers, name_to_ticker
 
 INSERT_SQL = """
 INSERT INTO news_items (source, source_url, published_at, title, body, tickers, wikilinks, embedding)
@@ -85,7 +86,11 @@ def parse_feed(raw: bytes) -> Iterable[dict]:
             continue
         body = _extract_body(entry)
         text = f"{title}\n{body}"
-        ner_result = ner.extract(text)
+        ner_result = ner.extract(
+            text,
+            ticker_set=electronics_tickers(),
+            name_map=name_to_ticker(),
+        )
         yield {
             "title": title,
             "body": body,

@@ -18,6 +18,7 @@ import httpx
 from bs4 import BeautifulSoup
 
 from ..ner import extract as ner_extract
+from ..universe import electronics_tickers, name_to_ticker
 from ..universe import all_tickers
 from ._common import make_client, parse_relative_time, run_news_collector
 
@@ -34,7 +35,11 @@ class YahooNewsItem:
     body: str
 
     def as_row(self) -> dict:
-        ner = ner_extract(f"{self.title}\n{self.body}")
+        ner = ner_extract(
+            f"{self.title}\n{self.body}",
+            ticker_set=electronics_tickers(),
+            name_map=name_to_ticker(),
+        )
         return {
             "source_url": self.source_url,
             "published_at": self.published_at,

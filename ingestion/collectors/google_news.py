@@ -17,7 +17,7 @@ import feedparser
 import httpx
 
 from ..ner import extract as ner_extract
-from ..universe import all_tickers, ticker_name
+from ..universe import all_tickers, electronics_tickers, name_to_ticker, ticker_name
 from ._common import make_client, run_news_collector
 
 SOURCE = "google"
@@ -35,7 +35,11 @@ class GoogleNewsItem:
     body: str
 
     def as_row(self) -> dict:
-        ner = ner_extract(f"{self.title}\n{self.body}")
+        ner = ner_extract(
+            f"{self.title}\n{self.body}",
+            ticker_set=electronics_tickers(),
+            name_map=name_to_ticker(),
+        )
         return {
             "source_url": self.source_url,
             "published_at": self.published_at,
