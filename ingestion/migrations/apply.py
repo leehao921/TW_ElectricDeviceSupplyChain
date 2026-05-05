@@ -28,7 +28,8 @@ import asyncpg
 
 DEFAULT_ADMIN_DSN = "postgresql://knowledge:knowledge@localhost:5433/postgres"
 DEFAULT_NEWS_DSN = "postgresql://knowledge:knowledge@localhost:5433/tw_electronics"
-MIGRATION_FILE = Path(__file__).parent / "001_init.sql"
+MIGRATIONS_DIR = Path(__file__).parent
+MIGRATION_FILE = MIGRATIONS_DIR / "001_init.sql"  # kept for tests/back-compat
 
 
 def _replace_dsn_db(dsn: str, db_name: str) -> str:
@@ -54,11 +55,18 @@ async def _ensure_database(admin_dsn: str, db_name: str) -> bool:
         await conn.close()
 
 
-async def _apply_migration(dsn: str, sql: str) -> list[str]:
-    """Run ``sql`` against ``dsn`` and return the list of public-schema tables."""
+def _discover_migrations() -> list[Path]:
+    """Return all ``NNN_*.sql`` files in MIGRATIONS_DIR, ordered by filename."""
+    return sorted(MIGRATIONS_DIR.glob("[0-9][0-9][0-9]_*.sql"))
+
+
+async def _apply_migration(dsn: str, sql_files: list[Path]) -> list[str]:
+    """Run each SQL file in order against ``dsn``; return public-schema tables."""
     conn = await asyncpg.connect(dsn)
     try:
-        await conn.execute(sql)
+        for path in sql_files:
+            await conn.execute(path.read_text(encoding="utf-8"))
+            print(f"[apply]   - {path.name}")
         rows = await conn.fetch(
             """
             SELECT tablename
@@ -80,14 +88,13 @@ async def run(target_db: str, admin_dsn: str, news_dsn: str) -> int:
     created = await _ensure_database(admin_dsn, target_db)
     print(f"[apply] database {target_db!r}: {'created' if created else 'exists'}")
 
-    try:
-        sql = MIGRATION_FILE.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        print(f"[apply] ERROR: migration file not found: {MIGRATION_FILE}", file=sys.stderr)
+    sql_files = _discover_migrations()
+    if not sql_files:
+        print(f"[apply] ERROR: no migration files in {MIGRATIONS_DIR}", file=sys.stderr)
         return 1
 
-    tables = await _apply_migration(news_dsn, sql)
-    print(f"[apply] migration {MIGRATION_FILE.name} applied")
+    print(f"[apply] applying {len(sql_files)} migration(s):")
+    tables = await _apply_migration(news_dsn, sql_files)
     print("[apply] tables in public schema:")
     for t in tables:
         print(f"  - {t}")
