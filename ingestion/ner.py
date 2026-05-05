@@ -69,17 +69,30 @@ def extract(
     *,
     ticker_set: Optional[set[str]] = None,
     wikilink_vocab: Optional[set[str]] = None,
+    name_map: Optional[dict[str, str]] = None,
 ) -> "NerResult":
     """Extract tickers and wikilink vocab terms from ``text``.
 
-    - ``tickers``: 4-digit runs, filtered by ``ticker_set`` when provided.
+    - ``tickers``: 4-digit runs filtered by ``ticker_set`` when provided,
+      plus any tickers resolved by matching company-name aliases from
+      ``name_map`` against the text. Names are matched longest-first so
+      ``臻鼎-KY`` wins over the bare ``臻鼎`` alias.
     - ``wikilinks``: substring matches (case-sensitive) of every term in
       ``wikilink_vocab``; if no vocab is given, returns terms already
       wrapped in ``[[...]]`` inside the text.
     """
-    tickers_raw = _TICKER_RE.findall(text or "")
+    body = text or ""
+    tickers_raw = _TICKER_RE.findall(body)
     if ticker_set is not None:
         tickers_raw = [t for t in tickers_raw if t in ticker_set]
+    if name_map:
+        # Longest-first: prevents "臻鼎" from masking a longer "臻鼎-KY" match
+        # when both alias to the same ticker (no harm) AND prevents shorter
+        # 2-char prefixes (e.g. "聯詠") from cannibalizing longer names that
+        # happen to start with the same chars.
+        for alias in sorted(name_map.keys(), key=len, reverse=True):
+            if alias and alias in body:
+                tickers_raw.append(name_map[alias])
     tickers = _unique_in_order(tickers_raw)
 
     if wikilink_vocab is None:
