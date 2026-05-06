@@ -16,7 +16,7 @@ from urllib.parse import quote_plus
 import feedparser
 import httpx
 
-from ..ner import extract as ner_extract
+from ..ner import extract as ner_extract, load_wikilink_vocab
 from ..universe import all_tickers, electronics_tickers, name_to_ticker, ticker_name
 from ._common import make_client, run_news_collector
 
@@ -39,6 +39,7 @@ class GoogleNewsItem:
             f"{self.title}\n{self.body}",
             ticker_set=electronics_tickers(),
             name_map=name_to_ticker(),
+            wikilink_vocab=load_wikilink_vocab(),
         )
         return {
             "source_url": self.source_url,

@@ -45,9 +45,14 @@ WIKILINK_WINDOW_DAYS = 7
 
 FLOW_THRESHOLD = 2.0
 NEWS_THRESHOLD = 2.0
-WIKILINK_THRESHOLD = 5
-
-WEIGHTS = {"flow": 0.5, "news": 0.3, "wikilink": 0.2}
+# Weights revised 2026-05-06 after V3 long-window backtest. The 0.5
+# flow weight made composite ranking anti-predictive: a 5σ flow_z spike
+# on a falling-knife ticker (e.g. 2395 研華 Mar-2026) topped composite
+# while the forward 10d return was deeply negative. Demoting flow to
+# 0.2 and elevating news + wiki to 0.4 each makes composite favour
+# "narrative momentum + thematic novelty" over "institutions catching
+# the dip" — matches the actual edge of the 3-of-3 gate.
+WEIGHTS = {"flow": 0.2, "news": 0.4, "wikilink": 0.4}
 
 
 # -- Trading-DB connection (read-only) --------------------------------------
@@ -171,35 +176,103 @@ async def _compute_news_z(ticker: str, as_of: datetime) -> Optional[dict]:
 # -- Factor 3: wikilink heat -----------------------------------------------
 
 
-_WIKILINK_HEAT_SQL = """
-WITH agg AS (
-  SELECT w AS wikilink, count(*) AS hits
+# Wikilink heat — mean IDF of the ticker's 7d wikilink set.
+#   df_w   := number of distinct tickers w co-occurred with in the
+#             trailing 90d-to-7d corpus baseline.
+#   idf_w  := log(N_total_tickers / df_w).
+#   heat   := mean(idf_w for w in this ticker's last-7d wikilinks).
+# Rationale: a small-cap with 5 wikilinks dominated by rare terms scores
+# higher than a big-cap with 50 wikilinks dominated by [[CoWoS]] +
+# [[台積電]] + [[聯電]]. Novelty was the original idea but proved too
+# strict — wikilinks that NEVER appeared with a ticker before are
+# essentially zero in a 90d window because tickers are consistently
+# tagged. Mean IDF keeps the rarity intuition without the strictness.
+# Empirically (2026-04 sanity): mean IDF ≈ 1.0 for big-cap-with-common-
+# wikilinks, 3-4 for niche/thematic stocks. Trigger threshold 2.0.
+WIKILINK_THRESHOLD = 2.0
+
+
+_WIKILINK_IDF_SQL = """
+WITH baseline AS (
+  SELECT t AS ticker, w AS wikilink
     FROM news_items, unnest(tickers) t, unnest(wikilinks) w
-   WHERE published_at > $1::timestamptz - ($2::text || ' days')::interval
-     AND published_at <= $1::timestamptz
-     AND t = $3
-   GROUP BY w
+   WHERE published_at > $1::timestamptz - INTERVAL '90 days'
+     AND published_at <= $1::timestamptz - INTERVAL '7 days'
+), df AS (
+  SELECT wikilink, count(DISTINCT ticker) AS df
+    FROM baseline GROUP BY wikilink
 )
-SELECT
-  (SELECT count(*) FROM agg) AS heat,
-  (SELECT json_agg(row_to_json(t)) FROM (
-     SELECT wikilink, hits FROM agg ORDER BY hits DESC LIMIT 20
-   ) t) AS top;
+SELECT (SELECT count(DISTINCT ticker) FROM baseline) AS n_tickers,
+       (SELECT json_agg(row_to_json(d)) FROM df d) AS rows;
 """
 
 
-async def _compute_wikilink_heat(ticker: str, as_of: datetime) -> dict:
-    """Return ``{heat, top}`` — true distinct count + top 20 (wikilink, hits)."""
+_WIKILINK_RECENT_SQL = """
+SELECT DISTINCT w AS wikilink
+  FROM news_items, unnest(tickers) t, unnest(wikilinks) w
+ WHERE published_at > $1::timestamptz - INTERVAL '7 days'
+   AND published_at <= $1::timestamptz
+   AND t = $2;
+"""
+
+
+_WIKILINK_IDF_CACHE: dict = {}
+
+
+async def _get_wikilink_idf(as_of: datetime) -> tuple[int, dict[str, float]]:
+    """Return ``(n_tickers, {wikilink: idf})`` over the trailing 90d-to-7d
+    baseline. Cached per as_of date — IDF over a 90d window is stable
+    across all tickers within the same trading day.
+    """
+    import math
+    key = as_of.date()
+    cached = _WIKILINK_IDF_CACHE.get(key)
+    if cached is not None:
+        return cached
+
     pool = await db.get_pool()
     async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            _WIKILINK_HEAT_SQL, as_of, str(WIKILINK_WINDOW_DAYS), ticker,
-        )
-    top_raw = row["top"]
-    if isinstance(top_raw, str):
-        top_raw = json.loads(top_raw)
-    top = [(t["wikilink"], int(t["hits"])) for t in (top_raw or [])]
-    return {"heat": int(row["heat"] or 0), "top": top}
+        row = await conn.fetchrow(_WIKILINK_IDF_SQL, as_of)
+    n = max(int(row["n_tickers"] or 0), 1)
+    rows = row["rows"]
+    if isinstance(rows, str):
+        rows = json.loads(rows)
+    idf = {
+        r["wikilink"]: math.log(n / max(int(r["df"]), 1))
+        for r in (rows or [])
+    }
+    _WIKILINK_IDF_CACHE[key] = (n, idf)
+    return n, idf
+
+
+async def _compute_wikilink_heat(ticker: str, as_of: datetime) -> dict:
+    """Return ``{heat, top}`` where ``heat`` is the mean IDF of the
+    ticker's last-7d wikilink set.
+
+    A wikilink absent from the corpus baseline (brand new to the corpus
+    too, not just the ticker) gets the floor IDF of ``log(n_tickers)`` —
+    treated as maximally informative. Returns 0 for tickers with no
+    7d wikilinks.
+    """
+    import math
+    n_tickers, idf = await _get_wikilink_idf(as_of)
+    floor_idf = math.log(n_tickers) if n_tickers > 1 else 0.0
+
+    pool = await db.get_pool()
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(_WIKILINK_RECENT_SQL, as_of, ticker)
+
+    weighted: list[tuple[str, float]] = []
+    for r in rows:
+        w = r["wikilink"]
+        weighted.append((w, idf.get(w, floor_idf)))
+
+    if not weighted:
+        return {"heat": 0.0, "top": []}
+
+    weighted.sort(key=lambda t: t[1], reverse=True)
+    heat = sum(s for _, s in weighted) / len(weighted)
+    return {"heat": heat, "top": [(w, round(s, 2)) for w, s in weighted[:20]]}
 
 
 # -- Public: per-ticker compute --------------------------------------------
@@ -219,8 +292,14 @@ async def compute_factors(ticker: str, as_of: Optional[datetime] = None) -> dict
     news = await _compute_news_z(ticker, as_of)
     wiki = await _compute_wikilink_heat(ticker, as_of)
 
+    # Positive-tail-only gates. Backtest 2026-04 (analysis/reports/backtest_
+    # signal_2026-05-05.md) showed the worst false-positives were "negative
+    # flow_z + positive news_z" — institutions selling INTO a news pump
+    # (fade-the-news pattern, classic bull-trap). Gating flow on flow_z >=
+    # +2 only kills that whole failure mode while keeping all true buy-side
+    # signals.
     fired = 0
-    if flow is not None and abs(flow["z"]) >= FLOW_THRESHOLD:
+    if flow is not None and flow["z"] >= FLOW_THRESHOLD:
         fired += 1
     if news is not None and news["z"] >= NEWS_THRESHOLD:
         fired += 1
@@ -256,7 +335,10 @@ def _composite_score(flow: Optional[dict], news: Optional[dict], wiki: dict) -> 
     if news is not None:
         news_term = _cap(news["z"], 4.0)
         parts.append((WEIGHTS["news"], news_term))
-    wiki_term = min(wiki["heat"], 10) / 2.0  # 0..5 scale
+    # IDF-weighted novelty score: typical alert range 3-15 (one rare-novel
+    # wikilink ≈ 5, multiple common novels ≈ 0.7 each). Cap at 10 to keep
+    # the scale comparable to the capped-±4 flow/news z-scores.
+    wiki_term = min(wiki["heat"], 10.0) / 2.5
     parts.append((WEIGHTS["wikilink"], wiki_term))
 
     total_w = sum(w for w, _ in parts)
