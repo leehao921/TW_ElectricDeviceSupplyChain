@@ -17,7 +17,7 @@ from urllib.parse import urljoin
 import httpx
 from bs4 import BeautifulSoup
 
-from ..ner import extract as ner_extract
+from ..ner import extract as ner_extract, load_wikilink_vocab
 from ..universe import electronics_tickers, name_to_ticker
 from ..universe import all_tickers
 from ._common import make_client, parse_relative_time, run_news_collector
@@ -39,6 +39,7 @@ class YahooNewsItem:
             f"{self.title}\n{self.body}",
             ticker_set=electronics_tickers(),
             name_map=name_to_ticker(),
+            wikilink_vocab=load_wikilink_vocab(),
         )
         return {
             "source_url": self.source_url,
