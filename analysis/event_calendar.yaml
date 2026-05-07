@@ -1,0 +1,20 @@
+# Canonical event days for lean-forward factor extraction.
+# Each entry → one row-set in `emergent_factor_baskets` (top-15 long + top-15 short).
+# Refresh weekly via the `event_factor_refresh_weekly` cron in ingestion/jobs.py.
+# Add new events as they happen; rotate stale (>180 days, non-canonical) out manually.
+events:
+  - date: 2024-11-06
+    name: trump_election_day
+    narrative: "Trump victory; reshoring/tariff theme. The day US tariff narrative re-priced TW supply chain."
+  - date: 2026-03-05
+    name: foreign_outflow_extreme
+    narrative: "Foreign net -1208 億 single-day; the worst single-day TW outflow in 60d at the time. Mag-7 spillover."
+  - date: 2026-04-24
+    name: tpu_rally_peak
+    narrative: "MediaTek + Google TPU 8t supply-chain rally peak. Foreign +439 億 day; ASIC + advanced packaging beneficiaries up >5%."
+  - date: 2026-04-27
+    name: foreign_3day_capitulation_start
+    narrative: "外資 4/27 starts the 1,386 億 3-day outflow (4/27 -512 + 4/28 -393 + 4/29 -481). Inflection day."
+  - date: 2026-04-29
+    name: defensive_rotation
+    narrative: "中華電 imb_l1 surge to +0.85 in afternoon; risk-off rotation into telecom/utilities + financials."
