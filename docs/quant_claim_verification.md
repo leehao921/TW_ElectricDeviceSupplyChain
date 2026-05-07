@@ -81,6 +81,96 @@ descriptor enters, the protocol is mandatory.
 
 ---
 
+
+## § 7 — Mediation-first backtesting
+
+Adopted from rule #1 of the Jay (Two Sigma) 3-rule SOP (epic
+[#13](https://github.com/leehao921/TW_ElectricDeviceSupplyChain/issues/13)). Standalone CLI: `analysis/backtest_mediation.py`.
+
+### The principle
+
+Don't backtest `alt-data → return` directly when alt-data history is short
+(2-3 years). The return target is too noisy and the sample size (~800 days for
+daily, ~36 months for monthly TW data) gives weak statistical power. With 5
+factors and a noisy target, grid-search will find spurious-IC weights every
+time.
+
+Instead, split the chain:
+
+1. **Stage 1: alt-data → fundamentals** (this is where mediation lives).
+   Fundamentals (monthly revenue, quarterly earnings) are large panel data.
+   For a Taiwan electronics universe of ~50 large-caps over 3 years, that's
+   ~1,800 (ticker × month) observations versus ~800 daily-return samples.
+   Power is much higher and overfitting risk is much lower.
+2. **Stage 2: fundamentals → return** (already validated literature; Bartov,
+   La Porta, Sloan). If Stage 1 holds for our specific panel, Stage 2 is
+   transitively valid.
+
+If you can't show Stage 1 with statistical significance, your alt-data
+return-prediction IC is unreliable — even if it looks great on the 800-day
+sample.
+
+### Procedure
+
+1. Run the CLI:
+   ```bash
+   python3 analysis/backtest_mediation.py --start 2023-01-01 --as-of 2026-04-29
+   ```
+2. The script:
+   - pulls daily 5-factor panel via the same helpers as
+     `analysis/backtest_overnight_signal.py`
+   - aggregates each factor to month-end (sum for `foreign_net`, sum of daily
+     simple returns for the four price factors)
+   - pulls `TaiwanStockMonthRevenue` from FinMind for 10 large-cap electronics
+     names: 2330, 2317, 2454, 2308, 2382, 3711, 3037, 2303, 2379, 2002
+   - computes revenue surprise = YoY − trailing-12-month median(YoY)
+   - Spearman-IC each factor's month-M against month-(M+1) surprise per ticker,
+     plus a pooled-panel IC across all `(month × ticker)` pairs
+3. Pass criteria per factor:
+   - `|panel_IC| > 0.05` AND `|t_stat| > 2.0`
+4. Verdict: report PASS/FAIL per factor.
+
+### Empirical baseline (sample 2023-01 → 2026-04, n=220 obs/factor)
+
+First run on the production 5-factor panel:
+
+| Factor | Panel IC | t-stat | Verdict |
+|---|---:|---:|---|
+| `foreign_net` | −0.1720 | −2.58 | ✅ PASS |
+| `usdtwd` | +0.0450 | +0.66 | ❌ FAIL |
+| `sp500` | −0.0894 | −1.32 | ❌ FAIL |
+| `tsm` | −0.1543 | −2.31 | ✅ PASS |
+| `sox` | −0.2217 | −3.36 | ✅ PASS |
+
+Three factors pass with **negative** panel IC — meaning a high overnight value
+in month M predicts a *lower-than-expected* revenue YoY surprise in month M+1
+(contrarian/mean-reversion at the monthly horizon, opposite the same factors'
+*daily* IC sign). The fundamentals chain validates the signals, but the
+production composite's daily-positive weights may be eating signal.
+
+### When to apply
+
+Run before promoting any alt-data → return signal to production. Specifically:
+
+- New signal added to `ingestion/snapshots/`.
+- Weights changed materially in
+  `ingestion/snapshots/overnight_signal.py:WEIGHTS` or
+  `analysis/backtest_overnight_signal.py:DEFAULT_WEIGHTS`.
+- New factor introduced (universe expansion).
+
+If mediation fails, the signal should NOT be deployed even if the direct-
+return IC looks great. The production module
+`ingestion/snapshots/overnight_signal.py` will eventually carry a
+`mediation_passed: bool` flag in its body — that work is deferred to a
+follow-up consolidation PR.
+
+### See also
+
+- `analysis/backtest_overnight_signal.py` — the direct-return backtest.
+- `scripts/implied_sharpe.py` (§ 8) — the *next* check to run after this one.
+
+---
+
 ## § 8 — Implied-Sharpe sanity check
 
 Adopted from rule #2 of the Jay (Two Sigma) 3-rule SOP (epic
