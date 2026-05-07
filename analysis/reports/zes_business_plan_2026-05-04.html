@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>Zero-Error Systems — Taiwan Market Entry Business Plan (2026-05-04)</title>
+<style>
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm 16mm;
+  @bottom-right {
+    content: counter(page) " / " counter(pages);
+    font-size: 9pt;
+    color: #666;
+  }
+}
+* { box-sizing: border-box; }
+html { font-family: "Helvetica Neue", "PingFang TC", "Heiti TC", Arial, sans-serif; }
+body { font-size: 10.5pt; line-height: 1.55; color: #1a1a1a; max-width: 100%; margin: 0; padding: 0; }
+h1 { font-size: 22pt; color: #0d3b66; border-bottom: 3px solid #0d3b66; padding-bottom: 6pt; margin-top: 0; page-break-after: avoid; }
+h2 { font-size: 16pt; color: #0d3b66; border-bottom: 1px solid #ccc; padding-bottom: 4pt; margin-top: 18pt; page-break-after: avoid; }
+h3 { font-size: 13pt; color: #1a4a7a; margin-top: 14pt; page-break-after: avoid; }
+h4 { font-size: 11.5pt; color: #2a5a8a; margin-top: 10pt; page-break-after: avoid; }
+.cover { text-align: center; padding-top: 90pt; padding-bottom: 90pt; page-break-after: always; break-after: page; }
+.cover h1 { border: none; font-size: 30pt; margin-bottom: 16pt; }
+.cover .subtitle { font-size: 14pt; color: #444; margin-bottom: 60pt; }
+.cover .meta { font-size: 11pt; color: #666; line-height: 1.8; }
+.toc { page-break-after: always; break-after: page; }
+.toc ol { padding-left: 1.4em; }
+.toc li { margin: 4pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 8pt 0; font-size: 9.8pt; page-break-inside: avoid; break-inside: avoid; }
+th, td { border: 1px solid #bbb; padding: 5pt 7pt; vertical-align: top; text-align: left; }
+th { background: #e8f0fa; color: #0d3b66; font-weight: 600; }
+tr:nth-child(even) { background: #f7f9fc; }
+.callout { background: #fff8e1; border-left: 4px solid #f9a825; padding: 8pt 12pt; margin: 10pt 0; page-break-inside: avoid; }
+.callout-info { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 8pt 12pt; margin: 10pt 0; page-break-inside: avoid; }
+.callout-risk { background: #fdecea; border-left: 4px solid #c62828; padding: 8pt 12pt; margin: 10pt 0; page-break-inside: avoid; }
+code { background: #eee; padding: 1pt 4pt; border-radius: 2pt; font-family: "SF Mono", "Menlo", monospace; font-size: 9.5pt; }
+.tier-A { background: #c8e6c9; padding: 1pt 6pt; border-radius: 3pt; font-weight: 600; }
+.tier-B { background: #fff9c4; padding: 1pt 6pt; border-radius: 3pt; font-weight: 600; }
+.tier-C { background: #ffe0b2; padding: 1pt 6pt; border-radius: 3pt; font-weight: 600; }
+.tier-D { background: #e1bee7; padding: 1pt 6pt; border-radius: 3pt; font-weight: 600; }
+.section { page-break-before: always; break-before: page; }
+.no-break { page-break-inside: avoid; }
+ul, ol { margin: 4pt 0 8pt 0; }
+li { margin: 2pt 0; }
+.small { font-size: 9pt; color: #555; }
+.right { text-align: right; }
+.product-card { border: 1px solid #ccc; padding: 8pt 12pt; margin: 6pt 0; border-radius: 4pt; page-break-inside: avoid; }
+.product-card h4 { margin-top: 0; }
+hr { border: none; border-top: 1px solid #ccc; margin: 14pt 0; }
+.footnote { font-size: 9pt; color: #555; margin-top: 8pt; }
+em { color: #0d3b66; }
+strong { color: #1a1a1a; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="cover">
+  <h1>Zero-Error Systems</h1>
+  <div class="subtitle">Taiwan Market Entry &amp; Diversification Business Plan</div>
+  <div class="subtitle"><em>From Space-Heritage Radiation Protection<br>to Automotive ASIL-D &amp; Industrial Functional Safety</em></div>
+  <div class="meta">
+    Working draft · For internal review<br>
+    Prepared: 2026-05-04<br>
+    Author: Compiled from 2026-04-30 / 2026-05-04 research session<br>
+    Source data: My-TW-Coverage Pilot_Reports + FalkorDB tw_electronics graph + public web research
+  </div>
+</section>
+
+<!-- TOC -->
+<section class="toc">
+<h2 style="border:none;">Table of Contents</h2>
+<ol>
+  <li>Executive Summary</li>
+  <li>Company &amp; Product Overview</li>
+  <li>Core Technology Stack</li>
+  <li>Origin Market — LEO Satellite &amp; Radiation Protection</li>
+  <li>Diversification Strategy — Beyond Radiation</li>
+  <li>Functional Safety Deep-Dive (ASIL-D / SIL4)</li>
+  <li>SpaceX Rad-Hardening Supply Chain Reference</li>
+  <li>Taiwan LEO Satellite Supply Chain Map</li>
+  <li>Taiwan Customer Segmentation</li>
+  <li>Go-to-Market Strategy</li>
+  <li>Competitive Landscape</li>
+  <li>Risk &amp; Mitigation</li>
+  <li>Recommended Next Steps</li>
+  <li>Appendix A — Pricing &amp; Commercial Terms (Indicative)</li>
+  <li>Appendix B — Source Material &amp; References</li>
+</ol>
+</section>
+
+<!-- 1. EXECUTIVE SUMMARY -->
+<section class="section">
+<h1>1. Executive Summary</h1>
+
+<p><strong>Zero-Error Systems (ZES)</strong> 是 2019 年自新加坡南洋理工大學 (NTU) 衍生 (spin-off) 之高可靠半導體新創。其核心 IP 為 <em>Radiation Hardening by Design (RHBD)</em> 衍生之保護電路與系統模組，原始市場為小衛星與低軌衛星 (LEO) 的太空電子。</p>
+
+<p>本計畫的核心論點是：<strong>ZES 的核心技術不應被「太空抗輻射」標籤侷限</strong>。其 (1) 偵測 / 切換 / 復位、(2) 限流、(3) 三模冗餘投票、(4) 高可靠電源轉換、(5) RHBD 方法論等核心 IP，1:1 對映到地球上最嚴苛的功能安全 (Functional Safety) 應用 — 包括汽車 <strong>ASIL-D</strong>、工業 <strong>SIL3-SIL4</strong>、AI 資料中心電源保護、軍規地面系統。一旦敘事翻轉，可定址市場規模從「**幾十顆衛星級客戶**」擴張為「**整個工業 + 汽車 + AI 伺服器 + 醫療**」，差距至少兩個數量級。</p>
+
+<div class="callout">
+<strong>核心訊息</strong> — ZES 不是「太空 IC 廠」，是「<strong>把 COTS 商規元件變成高可靠元件的保護電路廠</strong>」。「能上太空」是 credibility 證明，不是市場本身。
+</div>
+
+<h3>1.1 三大策略支柱</h3>
+<table>
+<tr><th>支柱</th><th>內容</th><th>主要受惠</th></tr>
+<tr><td><strong>S1. 太空原始市場</strong></td><td>持續耕耘 LEO / CubeSat / 國防衛星，作為技術 heritage 與認證背書</td><td>TASA、Tron Future、Foxconn 衛星部門、TASA 承包鏈</td></tr>
+<tr><td><strong>S2. 功能安全敘事翻轉</strong></td><td>切入車規 ASIL-D 與工規 SIL3-SIL4，賣「外掛保護 IC」而非整合 SoC</td><td>鴻海 MIH、Tier 1 ECU 廠、研華 / 凌華工業電腦、台達電 EV 充電</td></tr>
+<tr><td><strong>S3. AI 基礎建設保護</strong></td><td>切入 AI 伺服器電源軌微秒級保護、Edge AI 模組高可靠化</td><td>廣達、緯穎、鴻海雲端事業群、光寶科電源</td></tr>
+</table>
+
+<h3>1.2 台灣市場的時機條件 (Timing)</h3>
+<ul>
+  <li><strong>TASA Formosat-8A</strong> 將於 2025-10 發射 — 台灣首顆自製光學遙測衛星，串連 3 顆 8U CubeSat (Bellbird-1、Black Kite-1、TORO-1)，啟動國產衛星電子鏈</li>
+  <li><strong>Foxconn TASTI 2024</strong> 公開展示衛星本體技術，目標「1 衛星 / 日」量產 — 是 ZES 系統模組單一最大潛在客戶</li>
+  <li><strong>ISO 26262 第三版過渡期 (2024-2026)</strong> + 中國 GB ASIL-D 法規同步 — 車廠在重新評估 ASIL-D 鏈</li>
+  <li><strong>EU AI Act</strong> 對自駕主決策 2026 強制執行「冗餘架構」要求 — 創造 Safety Cage 市場</li>
+  <li><strong>太陽極大期 2025-2026</strong> 持續 — SpaceX 2022 年 40 顆衛星因輻射損失事件後，整個 LEO 鏈重新評估 COTS 保護需求</li>
+</ul>
+
+<h3>1.3 12-Month Action Plan 摘要</h3>
+<table>
+<tr><th>月份</th><th>里程碑</th></tr>
+<tr><td>M1-M3</td><td>建立台灣銷售辦公室 (1-2 BD + 1 FAE) 或簽約專業代理 (敦吉 / 益登)；接觸 TASA、Tron Future、Foxconn 衛星部門</td></tr>
+<tr><td>M4-M6</td><td>完成 NTU CubeSat 技轉示範案；於 NCKU/NTU 部署 ZSOM 學術版；發表 ASIL-D 白皮書</td></tr>
+<tr><td>M7-M9</td><td>啟動 AEC-Q100 認證流程；與鴻海 MIH 平台 BD; 跑進工業電腦廠 (研華 / 凌華) 樣機</td></tr>
+<tr><td>M10-M12</td><td>第一筆量產車規訂單；第一筆台廠衛星訂單；台灣年營收目標 USD 2-5M</td></tr>
+</table>
+
+</section>
+
+<!-- 2. COMPANY & PRODUCT -->
+<section class="section">
+<h1>2. Company &amp; Product Overview</h1>
+
+<h3>2.1 公司沿革</h3>
+<table>
+<tr><th>項目</th><th>內容</th></tr>
+<tr><td>成立</td><td>2019，新加坡 (NTU spin-off)</td></tr>
+<tr><td>創辦背景</td><td>Nanyang Technological University 電機與電子工程學院；具備 RHBD 與電源管理多項專利</td></tr>
+<tr><td>融資</td><td>2019 Seed: USD 2.4M | Series A: USD 7.5M (Airbus Ventures、Dart Family Office 領投)</td></tr>
+<tr><td>北美通路</td><td>2024-10 簽約 <strong>Spirit Electronics</strong> (亞利桑那州) 為北美獨家代理，主攻國防 / 航太</td></tr>
+<tr><td>主要客群至今</td><td>太空 (LEO 衛星整合商、CubeSat 開發商、國防)</td></tr>
+</table>
+
+<h3>2.2 產品線總覽</h3>
+
+<div class="product-card">
+<h4>A. 保護單晶片 IC (Radiation-Hardened Protection ICs)</h4>
+<table>
+<tr><th>產品</th><th>功能</th><th>應用</th></tr>
+<tr><td><strong>LDAP-IC</strong> (Latch-up Detection And Protection)</td><td>偵測 SEL (Single-Event Latch-up) 並瞬間斷電復位</td><td>保護 COTS FPGA / MCU / SoC</td></tr>
+<tr><td><strong>Smart-LCL</strong> (Latch-up Current Limiter)</td><td>微秒級電流限流，防 SEL 演變為永久損壞</td><td>下游負載保護、AI 伺服器電源軌</td></tr>
+<tr><td><strong>TMR Voter-IC</strong> (Triple Modular Redundancy)</td><td>三套同邏輯 + 多數投票表決</td><td>SEU / SET 過濾、ASIL-D / SIL4 1oo3 / 2oo3 認證</td></tr>
+</table>
+</div>
+
+<div class="product-card">
+<h4>B. 高可靠電源管理 (Power Management)</h4>
+<table>
+<tr><th>產品</th><th>功能</th></tr>
+<tr><td><strong>PoL DC-DC</strong> (rad-tolerant)</td><td>太空 / 工業板卡內模組低壓軌轉換，內建 SEL/SEU 防護</td></tr>
+</table>
+</div>
+
+<div class="product-card">
+<h4>C. ZSOM™ 系列 — 系統模組 (旗艦產品)</h4>
+<table>
+<tr><th>產品</th><th>規格</th></tr>
+<tr><td><strong>ZSOM™-F01</strong></td><td>業界首款 COTS FPGA 為基的 rad-tolerant SoM。Xilinx Zynq UltraScale+ ZU3EG + ZES 自家保護電路 + PoL DC-DC，可直接焊到衛星板卡</td></tr>
+<tr><td><strong>ZSOM™ MCU 版</strong></td><td>ARM Cortex-M0+ 為主，瞄準 CubeSat / SmallSat 次系統控制器</td></tr>
+</table>
+</div>
+
+<div class="product-card">
+<h4>D. 認證實驗服務 (Lab-as-a-Service)</h4>
+<p>對外提供 SEL / SEU 重離子輻照測試 (用迴旋加速器)，幫客戶驗證自有 COTS 元件 LET 門檻。屬於 lock-in 服務 + 顧問收入來源。</p>
+</div>
+
+</section>
+
+<!-- 3. CORE TECHNOLOGY -->
+<section class="section">
+<h1>3. Core Technology Stack</h1>
+
+<h3>3.1 RHBD 三層設計手段</h3>
+<p>ZES 的所有產品都建立在 RHBD (Radiation Hardening by Design) 方法論之上。RHBD 與另一條路 RHBP (Radiation Hardening by Process) 的對比：</p>
+<table>
+<tr><th>維度</th><th><strong>RHBD</strong> (ZES 路線)</th><th>RHBP (傳統 BAE / Honeywell)</th></tr>
+<tr><td>製程</td><td>標準商用 (TSMC / GF / 三星 / Intel)</td><td>專用 SOI / Sapphire / 磊晶層加厚</td></tr>
+<tr><td>成本</td><td>蹭主流 foundry，便宜</td><td>專線開模，貴一個數量級</td></tr>
+<tr><td>設計工作</td><td><strong>重</strong> — 電路 + 佈局 + 架構三層改</td><td>輕 — 用現成 PDK</td></tr>
+<tr><td>上市時間</td><td>較快、跟得上摩爾定律</td><td>慢、落後 2-3 製程世代</td></tr>
+<tr><td>代表廠商</td><td>BAE Systems、Cobham Gaisler、Microchip RT PolarFire、Xilinx Versal Space-grade、<strong>Zero-Error Systems</strong></td><td>Honeywell HX5000、舊 Sandia / NRL 製程</td></tr>
+</table>
+
+<h3>3.2 RHBD 三層設計手段細節</h3>
+
+<h4>3.2.1 電路層 (Circuit-Level)</h4>
+<table>
+<tr><th>技術</th><th>對抗效應</th><th>原理</th></tr>
+<tr><td><strong>DICE</strong> (Dual Interlocked Cell)</td><td>SEU</td><td>2 對交叉鎖存取代單一鎖存器，必兩個節點同時翻轉才會 upset</td></tr>
+<tr><td><strong>TMR</strong> (Triple Modular Redundancy)</td><td>SEU / SET</td><td>三套同邏輯 + 投票表決</td></tr>
+<tr><td>EDAC / Hamming / BCH / Reed-Solomon</td><td>記憶體 SEU</td><td>編碼糾錯，1-2 bit 自我修復</td></tr>
+<tr><td>時間冗餘 (Temporal Redundancy)</td><td>SET</td><td>同邏輯三個時間點取樣 + 投票</td></tr>
+<tr><td><strong>保護環</strong> (Guard Ring)</td><td>SEL</td><td>PMOS / NMOS 之間插 N+/P+ 環，截斷寄生 SCR</td></tr>
+<tr><td><strong>電流限流器</strong> (Smart-LCL)</td><td>SEL</td><td>監測異常電流並切電源</td></tr>
+</table>
+
+<h4>3.2.2 佈局層 (Layout-Level)</h4>
+<table>
+<tr><th>技術</th><th>對抗</th><th>原理</th></tr>
+<tr><td><strong>ELT</strong> (Enclosed Layout Transistor)</td><td>TID</td><td>NMOS 閘極做成環狀，消除 STI 邊緣漏電路徑</td></tr>
+<tr><td>Body Tie / Substrate Contact 加密</td><td>SEL</td><td>縮短寄生 BJT 基極阻抗</td></tr>
+<tr><td>節點間距加大 / Charge-Sharing 防護</td><td>Multi-bit Upset</td><td>同字元位元在物理上拉開</td></tr>
+</table>
+
+<h4>3.2.3 架構層 (Architecture-Level)</h4>
+<ul>
+  <li><strong>Lockstep CPU</strong>：多顆 CPU 跑同一指令流，比對結果不一致就 reset</li>
+  <li><strong>Scrubbing</strong>：定期掃描 SRAM / Configuration RAM、修復 EDAC 標記</li>
+  <li><strong>Watchdog + Auto-Reset</strong>：對抗 SEFI</li>
+  <li><strong>Voltage / Frequency Margining</strong>：留 TID 累積後仍可工作的餘裕</li>
+</ul>
+
+<h3>3.3 三大太空輻射效應 (回顧)</h3>
+<table>
+<tr><th>效應</th><th>全名</th><th>後果</th></tr>
+<tr><td><strong>TID</strong></td><td>Total Ionizing Dose</td><td>累積劑量改變閾值電壓 → 漏電上升 → IC 失效</td></tr>
+<tr><td><strong>SEE</strong></td><td>Single Event Effect</td><td>單顆高能粒子 → 即時故障 (SEU/SET/SEL/SEFI)</td></tr>
+<tr><td><strong>DD</strong></td><td>Displacement Damage</td><td>晶格缺陷累積 → 載子壽命下降</td></tr>
+</table>
+
+<div class="callout-info">
+<strong>洞見：RHBD 方法論 ≈ 功能安全方法論的姊妹</strong><br>
+ZES 在太空鏈裡學到的東西，幾乎 1:1 對映到車規 / SIL4 需求：DICE → SafeRAM；TMR Voter → 1oo3 / 2oo3；EDAC → CRC-protected safety bus；Guard Ring + ELT → Latch-up immunity (ISO 26262 Part 5 強制要求)；Smart-LCL → SIL3 認證硬體保護元件；Watchdog → ISO 26262 safety mechanism for SEFI。<br><br>
+<strong>因此 ZES 不需重新研發即可進車規 / SIL4 市場。只需做認證文件 + 通過 TÜV SÜD / Exida 審查。</strong>
+</div>
+
+</section>
+
+<!-- 4. ORIGIN MARKET -->
+<section class="section">
+<h1>4. Origin Market — LEO Satellite &amp; Radiation Protection</h1>
+
+<h3>4.1 LEO 為何成為 RHBD-COTS 主流</h3>
+<p>LEO 軌道輻射通量遠低於 GEO 或深空，但仍有：</p>
+<ul>
+  <li>南大西洋異常區 (SAA) 通過時的高粒子通量</li>
+  <li>內輻射帶邊緣 + 銀河宇宙射線 (GCR)</li>
+  <li>太陽質子事件 (SPE) 突發 (2022 年 SpaceX 失去 40 顆衛星就是這類事件)</li>
+</ul>
+<p>LEO 又對成本敏感 (一個星系數千顆衛星)，所以 <strong>RHBD + COTS</strong> 變成主流選擇：</p>
+<ul>
+  <li><strong>SpaceX Starlink</strong> 明確走「COTS + 自有冗餘」(類 RHBD 思路)</li>
+  <li><strong>Amazon Kuiper</strong> 同方向</li>
+  <li><strong>Eutelsat OneWeb</strong> 較傳統，仍用一定比例 RHBP rad-hard 元件</li>
+</ul>
+
+<h3>4.2 ZES 在太空市場的價值主張</h3>
+<table>
+<tr><th>對手</th><th>典型價格 / 交期</th><th>ZSOM 對比</th></tr>
+<tr><td>BAE RAD5545 (rad-hard PowerPC)</td><td>USD 50K+ / 18+ 個月</td><td rowspan="3"><strong>ZSOM-F01 ≈ USD 5K / 4-12 週</strong> (約 1 個數量級成本優勢)</td></tr>
+<tr><td>Microchip RT PolarFire SoC</td><td>USD 30K+ / 12+ 個月</td></tr>
+<tr><td>Xilinx Versal Space-grade</td><td>USD 40K+ / 12+ 個月</td></tr>
+</table>
+
+<h3>4.3 LEO 太空段供應鏈分層</h3>
+<p><span class="small">(完整 49 檔台廠分類見 §8 Taiwan LEO Supply Chain Map)</span></p>
+<table>
+<tr><th>段</th><th>環節</th></tr>
+<tr><td>太空段 (Space)</td><td>衛星本體：OBC / 酬載控制 / 電源 / RF / 天線 / 機構</td></tr>
+<tr><td>地面段 (Ground)</td><td>Gateway 地面站、用戶終端 (UT / CPE)、追星天線</td></tr>
+<tr><td>服務段 (Service)</td><td>SpaceX Starlink、Amazon Kuiper、Eutelsat OneWeb</td></tr>
+</table>
+
+</section>
+
+<!-- 5. DIVERSIFICATION -->
+<section class="section">
+<h1>5. Diversification Strategy — Beyond Radiation</h1>
+
+<div class="callout-info">
+本章為本 BP 的核心。ZES 的所有產品線都可以在不修改核心 IP 的情況下重新包裝給五個 <strong>地球上的</strong> 高可靠市場。
+</div>
+
+<h3>5.1 五個再包裝敘事 (Re-positioning Narratives)</h3>
+
+<h4>A. Automotive ASIL-D / SIL4 Safety Cage</h4>
+<p>ZES 之 TMR Voter-IC + LDAP-IC + Smart-LCL = 車規最高安全等級的硬體基礎。</p>
+<table>
+<tr><th>痛點</th><th>ZES 解</th></tr>
+<tr><td>NVIDIA Orin / Qualcomm Ride 主晶片只到 ASIL-B；軟體 voter 認證困難</td><td>外掛 TMR Voter-IC + LDAP，純硬體路徑直達 ASIL-D</td></tr>
+<tr><td>Lockstep dual-core CPU 面積 / 成本翻倍</td><td>外掛保護 IC 不需修主晶片</td></tr>
+<tr><td>Latch-up 在 28nm 以下車規 SoC 已是真實風險</td><td>Smart-LCL 微秒級反應，比熔斷保險絲快 1000×</td></tr>
+</table>
+<p><strong>賣點包裝</strong>：<em>「Make any commercial SoC ASIL-D capable in 1 IC」</em></p>
+<p><strong>潛在客戶</strong>：鴻海 MIH 平台、和大 (1536)、東陽 (1319)、敦泰 (3545)、矽創 (8016) 之車用 SoC / ECU 設計部門。</p>
+
+<h4>B. Industrial 4.0 / Edge AI 高可靠平台</h4>
+<table>
+<tr><th>痛點</th><th>ZES 解</th></tr>
+<tr><td>鋼鐵 / 化工 / 半導體 fab 環境惡劣，COTS SoM (Variscite / Toradex) 可靠度不夠</td><td>ZSOM-F01 = 商規價格 + 工規可靠度</td></tr>
+<tr><td>NVIDIA Jetson 在 fab 環境有意外 reset / SEU</td><td>ZSOM 內建 LDAP + TMR + EDAC SafeRAM</td></tr>
+</table>
+<p><strong>賣點包裝</strong>：<em>「Industrial NVIDIA Jetson alternative — 50% the cost, 5× the reliability」</em></p>
+<p><strong>潛在客戶</strong>：研華 (2395)、凌華 (6166)、廣積 (8050)、樺漢 (6414)、艾訊 (3088)。</p>
+
+<h4>C. Process Industry / Medical SIL3-SIL4</h4>
+<table>
+<tr><th>痛點</th><th>ZES 解</th></tr>
+<tr><td>核電儀控、醫療呼吸器、開放手術機械人需要硬體 SIL3 / SIL4 元件</td><td>LDAP + TMR Voter + 硬體 watchdog 構成 SIL4 認證材料</td></tr>
+<tr><td>全球能做這層的廠商僅 Honeywell + 部分 TI 高端產品，貴</td><td>ZES 提供「外掛 add-on」path</td></tr>
+</table>
+<p><strong>賣點包裝</strong>：<em>「IEC 61508 SIL3 hardware enabler — bolt-on, no SoC change」</em></p>
+
+<h4>D. AI 伺服器 / 資料中心電源穩定</h4>
+<table>
+<tr><th>痛點</th><th>ZES 解</th></tr>
+<tr><td>AI 伺服器機櫃 100kW+，單顆 GPU 1kW+；電源軌突波或下游短路會燒主板</td><td>Smart-LCL 微秒級反應，比現有 eFuse 快 100-1000×</td></tr>
+<tr><td>傳統熔斷保險絲毫秒級反應，太慢</td><td>Smart-LCL = 「保險絲 2.0」</td></tr>
+</table>
+<p><strong>賣點包裝</strong>：<em>「Microsecond eFuse for 1kW+ AI accelerator power rails」</em></p>
+<p><strong>潛在客戶</strong>：廣達 (2382)、緯穎 (6669)、鴻海 (2317) AI 伺服器代工、台達電 (2308) 電源、光寶科 (2301) 電源 (已是 SpaceX 衛星電源 60% 市占大戶)。</p>
+
+<h4>E. Ground Defense / Military</h4>
+<table>
+<tr><th>痛點</th><th>ZES 解</th></tr>
+<tr><td>戰場高 EMI、高溫、高震動，COTS 元件易出 SEU-like 暫態錯誤</td><td>LDAP + Smart-LCL + TMR Voter 整套保護</td></tr>
+<tr><td>傳統軍規元件交期長 / 認證貴</td><td>ZES 走 Spirit Electronics 模式快速進場</td></tr>
+</table>
+<p><strong>賣點包裝</strong>：<em>「Ground-defense COTS protection — battlefield-grade in days, not years」</em></p>
+<p><strong>潛在客戶</strong>：漢翔 (2634)、雷虎 (8033) 軍用無人機、中科院 (NCSIST)、鴻佰 (Hon Hai) 國防事業群。</p>
+
+<h3>5.2 跨市場核心差異化</h3>
+<table>
+<tr><th>差異化點</th><th>對手比較</th></tr>
+<tr><td><strong>是 IC 不是 IP</strong></td><td>BAE / Microchip 賣整顆設計好的 SoC；ZES 是外掛保護 IC，客戶可保留現有主晶片</td></tr>
+<tr><td><strong>純 hardware 不依賴 firmware</strong></td><td>軟體 voter (NVIDIA Drive / Mobileye EyeQ 內部) 仍有 firmware bug 風險，認證機構打折扣</td></tr>
+<tr><td><strong>新加坡 NTU 出身，無 ITAR / 出口管制</strong></td><td>不像 BAE / Honeywell 有 export control，亞太客戶採購阻力低</td></tr>
+<tr><td><strong>模組化策略：可選 IC、PoL、SoM 任一層</strong></td><td>客戶不必整套導入；先用一顆 LDAP 試試，逐步擴展</td></tr>
+</table>
+
+</section>
+
+<!-- 6. FUNCTIONAL SAFETY -->
+<section class="section">
+<h1>6. Functional Safety Deep-Dive (ASIL-D / SIL4)</h1>
+
+<h3>6.1 ASIL-D 與 SIL4 是什麼</h3>
+<p>兩者皆為「<strong>功能安全 (Functional Safety) 等級</strong>」的最高級分類，衡量「<strong>系統壞掉時，人會不會死，以及死的機率有多低</strong>」。</p>
+<table>
+<tr><th>等級</th><th>來源標準</th><th>領域</th></tr>
+<tr><td><strong>ASIL-D</strong></td><td>ISO 26262 (Automotive Safety Integrity Level)</td><td>汽車</td></tr>
+<tr><td><strong>SIL4</strong></td><td>IEC 61508 (Safety Integrity Level)</td><td>工業通用基礎標準</td></tr>
+<tr><td>SIL3-SIL4 衍生</td><td>IEC 61511 流程工業 / IEC 62061 機械 / EN 50128 鐵路 / IEC 62304 醫療 / DO-178C 航空</td><td>工廠、核電、火車、醫療、飛機</td></tr>
+</table>
+
+<h3>6.2 等級量化定義 — 隨機硬體故障率</h3>
+<table>
+<tr><th>等級</th><th>故障率上限</th><th>等同</th><th>場景例子</th></tr>
+<tr><td>ASIL-A</td><td>&lt; 10⁻⁶ /h</td><td>&lt; 1 次 / 100 萬小時</td><td>車內娛樂、雨刷</td></tr>
+<tr><td>ASIL-B</td><td>&lt; 10⁻⁷ /h</td><td>&lt; 1 次 / 1,000 萬小時</td><td>大燈、後視鏡</td></tr>
+<tr><td>ASIL-C</td><td>&lt; 10⁻⁷ /h</td><td>&lt; 1 次 / 1,000 萬小時</td><td>部分動力控制</td></tr>
+<tr><td><strong>ASIL-D</strong></td><td><strong>&lt; 10⁻⁸ /h</strong></td><td><strong>&lt; 1 次 / 1 億小時</strong></td><td><strong>剎車、方向盤、引擎主控、自駕主決策</strong></td></tr>
+<tr><td>SIL1</td><td>10⁻⁵ — 10⁻⁶ /h</td><td>—</td><td>一般工廠機台保護</td></tr>
+<tr><td>SIL2</td><td>10⁻⁶ — 10⁻⁷ /h</td><td>—</td><td>化工製程多數場景</td></tr>
+<tr><td>SIL3</td><td>10⁻⁷ — 10⁻⁸ /h</td><td>—</td><td>高危化工、煉油廠 SIS</td></tr>
+<tr><td><strong>SIL4</strong></td><td><strong>10⁻⁸ — 10⁻⁹ /h</strong></td><td><strong>&lt; 1 次 / 10 億小時</strong></td><td><strong>核電儀控、火車剎車、彈藥引信</strong></td></tr>
+</table>
+<p>實務上 ASIL-D ≈ SIL3，業界做工程驗證時通常並列討論。SIL4 比 ASIL-D 還高一個數量級。</p>
+
+<h3>6.3 認證的兩個量化要求</h3>
+<ol>
+  <li><strong>SPFM</strong> (Single Point Fault Metric) ≥ 99% — 99% 的單點故障被偵測或避免</li>
+  <li><strong>LFM</strong> (Latent Fault Metric) ≥ 90% — 90% 的潛在隱性故障被偵測</li>
+</ol>
+<p>達成手段三條：(1) Diagnostic Coverage、(2) Hardware Redundancy、(3) Process Quality (ISO 26262 全套生命週期文件)。三者缺一不可。</p>
+
+<h3>6.4 客戶五大痛點</h3>
+
+<div class="callout-risk">
+<strong>痛點 1: 硬體 SPFM ≥ 99% 幾乎不可能單顆 SoC 達成</strong><br>
+NVIDIA DRIVE Orin、Qualcomm Snapdragon Ride、Mobileye EyeQ、NXP S32G、Renesas R-Car 大多只能宣稱 ASIL-B 或「ASIL-D ready」(ready ≠ certified)。要達真 ASIL-D，現有方案：(X) lockstep dual-core 面積 / 功耗 / 成本翻倍；(Y) 軟體 TMR / safety island，認證痛苦且貴 5-10M USD/年。
+</div>
+
+<div class="callout-risk">
+<strong>痛點 2: 軟體 voter 不能算 1oo2D 純硬體保護</strong><br>
+ISO 26262 與 IEC 61508 對 1oo2D / 2oo3 投票電路要求嚴苛 — 必須獨立、不共因、確定性反應時間。Firmware 路徑天生違反「不共因」原則 (兩個跑同 firmware 的核可能因同一 bug 同時掛掉)。
+</div>
+
+<div class="callout-risk">
+<strong>痛點 3: Latch-up 在地面也是真實問題</strong><br>
+過去業界以為 SEL 是太空才有的問題。實測證實：海拔 3000m 以上中子通量增加 (高山氣象站 / 高海拔 DC)；EMI / ESD 突波 (工廠焊接、汽車啟動)；製程縮小 (28nm → 7nm) 節點越小 latch-up 容忍越差。
+</div>
+
+<div class="callout-risk">
+<strong>痛點 4: 認證生態時間 + 金錢成本</strong><br>
+從零做一顆 ASIL-D 認證 IC 需 3-5 年完整生命週期 + 5-15M USD 認證審查。客戶若能「外掛已認證的 ASIL-D 元件」就能達標，沒人想自己做。
+</div>
+
+<div class="callout-risk">
+<strong>痛點 5: AI / SDV 的 ASIL-D 鴻溝</strong><br>
+Tesla / Xpeng / NIO / 華為 推 SDV，主控用高效能 SoC 跑 AI 模型決策。AI 模型本身無法 ASIL-D 認證 (不確定性 + 黑箱)，只能用「Safety Cage」設計 — 在 AI 主路徑外加獨立 ASIL-D 安全籠做底線檢查。這層 Safety Cage 必須是純硬體，不能依賴 AI 主晶片。
+</div>
+
+<h3>6.5 ZES 對應每個痛點的方案</h3>
+<table>
+<tr><th>痛點</th><th>ZES 產品</th><th>原理</th></tr>
+<tr><td>無法用單顆 SoC 達 SPFM ≥ 99%</td><td>TMR Voter-IC</td><td>三套同邏輯 + 投票 = 1oo3 / 2oo3 純硬體決策</td></tr>
+<tr><td>軟體 voter 認證困難</td><td>TMR Voter-IC</td><td>全 hardware path、不共因、確定性反應時間</td></tr>
+<tr><td>Latch-up 在 < 28nm SoC 真實風險</td><td>LDAP-IC + Smart-LCL</td><td>微秒級反應，比熔斷保險絲快 1000×</td></tr>
+<tr><td>認證流程貴且久</td><td>ZES IC 已具 RHBD heritage、認證資料齊備</td><td>客戶用「現成已認證元件」path</td></tr>
+<tr><td>AI 主晶片 ASIL-B 升 D 困難</td><td>ZSOM 安全島架構</td><td>ZSOM 作為主晶片旁的 Safety Cage 獨立硬體層</td></tr>
+</table>
+
+<h3>6.6 競品分析</h3>
+<table>
+<tr><th>現有方案</th><th>問題</th></tr>
+<tr><td>TI Hercules MCU (TMS570 / TMS320)</td><td>整合 dual-core lockstep，但已是 MCU，無法當 add-on 給 NVIDIA Orin / Qualcomm Ride 用</td></tr>
+<tr><td>Infineon AURIX TC4xx</td><td>同上，是 SoC 不是 add-on</td></tr>
+<tr><td>NXP S32G + S32K3</td><td>同上</td></tr>
+<tr><td>Renesas RH850</td><td>同上</td></tr>
+<tr><td>Analog Devices safety supervisor</td><td>部分功能但無 TMR Voter</td></tr>
+<tr><td>Cypress / 主流 PMIC 廠 e-fuse</td><td>反應慢、無 TMR、無 latch-up specific</td></tr>
+</table>
+<p><strong>ZES 是少數做「獨立外掛 ASIL-D add-on IC」的廠</strong>。整個產業缺這層。</p>
+
+<div class="callout">
+<strong>核心邏輯</strong>：今天的 ASIL-D MCU 廠都把保護整合進主晶片裡賣，這意味客戶必須<strong>換主晶片</strong>才能升級。ZES 反過來，<strong>保留客戶現有主晶片，只賣外掛保護</strong>，這是產業最大的市場縫隙。
+</div>
+
+</section>
+
+<!-- 7. SPACEX REFERENCE -->
+<section class="section">
+<h1>7. SpaceX Rad-Hardening Supply Chain Reference</h1>
+
+<p><strong>重要前提</strong>：SpaceX 是全球最不依賴傳統 rad-hard 晶片的衛星營運商。Starlink V2/V3 衛星壽命設計 5-7 年、LEO 軌道累積劑量 &lt; 30 krad，所以 SpaceX 走「<strong>商規 (COTS) + 三模冗餘 (TMR) + 系統層除錯</strong>」路線 — 這正是 ZES 的甜蜜點 (validation 第三方 reference)。</p>
+
+<h3>7.1 SpaceX 設計哲學</h3>
+<ul>
+  <li>Falcon 9 / Dragon 飛行電腦：x86 商規 CPU + 三套互檢</li>
+  <li>Merlin 引擎 ECU：商規微控制器 × 3 (TMR)</li>
+  <li>Starlink 衛星主處理器：Xilinx Zynq UltraScale+ MPSoC (4× Cortex-A53 + FPGA) 工業級，非 RT 等級</li>
+  <li>2022 年事件：太陽風暴一次擊毀 40 顆 Starlink V1.5 衛星 — 證實 LEO 仍有真實輻射風險，迫使加強保護電路</li>
+</ul>
+
+<h3>7.2 SpaceX 真正 rad-hard 元件供應商</h3>
+<table>
+<tr><th>供應商</th><th>產品</th><th>用途</th></tr>
+<tr><td>BAE Systems</td><td>RAD750 / RAD5545 (4-core 64-bit PowerPC, 45nm SOI, 466 MHz)</td><td>載人 Dragon 關鍵控制電腦、Starshield</td></tr>
+<tr><td>Microchip</td><td>RTG4 / RT PolarFire SoC FPGA (RISC-V + FPGA fabric, rad-tolerant)</td><td>飛行控制週邊邏輯</td></tr>
+<tr><td>Xilinx (AMD) Versal AI Edge Space-grade、Kintex UltraScale XQRKU060</td><td>rad-tolerant 20nm FPGA</td><td>高吞吐酬載信號處理</td></tr>
+<tr><td>NASA HPSC × Microchip (2025 上市)</td><td>rad-tolerant + rad-hard RISC-V</td><td>新世代主力，Starshield 候選</td></tr>
+<tr><td>Honeywell</td><td>HX5000 系列 rad-hard ASIC</td><td>載人 Dragon 緊急逃生控制</td></tr>
+</table>
+
+<h3>7.3 Starlink 主力商規元件供應商 (大宗訂單所在)</h3>
+<table>
+<tr><th>供應商</th><th>供貨內容</th><th>量級</th></tr>
+<tr><td><strong>STMicroelectronics (ST)</strong> ★</td><td>Starlink Dish 內 RFIC、相控陣列驅動 IC、毫米波控制晶片；V3 衛星關鍵供應商</td><td>過去 10 年累計 50 億顆；目前每天 500 萬顆；2027 雙倍</td></tr>
+<tr><td>Xilinx / AMD</td><td>Starlink 主處理器 Zynq UltraScale+ MPSoC</td><td>每顆衛星 1 顆主處理器</td></tr>
+<tr><td>Tesla Terafab AI7</td><td>rad-tolerant 商規衍生 ML 加速器</td><td>跨 Cybercab + Optimus + Starlink 共線生產</td></tr>
+<tr><td>NVIDIA</td><td>rad-tolerant Jetson 衍生 + ML inference</td><td>LEO 衛星酬載端推論</td></tr>
+<tr><td>Intel</td><td>x86 商規 CPU (Falcon 9 / Dragon)</td><td>TMR 後上太空</td></tr>
+<tr><td>Qualcomm</td><td>蜂巢式衛星直連基頻 (Direct-to-Cell)</td><td>與 T-Mobile / AT&amp;T / Verizon 合作</td></tr>
+<tr><td>Broadcom</td><td>Starlink 用戶終端 Wi-Fi 路由器 SoC</td><td>Dishy 衍生</td></tr>
+</table>
+
+<div class="callout-info">
+<strong>對 ZES 的啟示</strong>：SpaceX 模式 = 商規 + 保護 + 冗餘 = ZES 整套產品哲學的市場驗證。ZES 可在 BD pitch 中明示「<strong>SpaceX 的設計哲學就是 ZES 想為更多公司複製的方法論</strong>」。
+</div>
+
+</section>
+
+<!-- 8. TAIWAN LEO MAP -->
+<section class="section">
+<h1>8. Taiwan LEO Satellite Supply Chain Map</h1>
+<p>本專案 Pilot_Reports 涵蓋 49 檔涉及 [[低軌衛星]] / SpaceX / Starlink / Kuiper / OneWeb 之台股報告。以下按角色分層整理。</p>
+
+<h3>8.1 上游 — 材料與被動元件</h3>
+<table>
+<tr><th>角色</th><th>代表台廠</th><th>內容</th></tr>
+<tr><td>高頻 PCB 板材 (PTFE / 低 Dk Df)</td><td>台光電 (2383)、台燿 (6274)、騰輝電子-KY (6672)</td><td>衛星本體 + 地面站射頻板基板</td></tr>
+<tr><td>高頻 PCB 製造</td><td>華通 (2313)、燿華 (2367)、敬鵬 (2355)、榮昌 (3684)、連騰 (6818)</td><td>載板、天線板、Tx/Rx 模組板</td></tr>
+<tr><td>軟板 (FPC)</td><td>台郡 (6269)</td><td>終端機構內走線</td></tr>
+<tr><td>連接器 / 線材</td><td>宣德 (5457)、連展投控 (3710)、萬旭 (6134)、邑昇 (5291)</td><td>RF 連接器、終端線束</td></tr>
+<tr><td>高頻陶瓷 / MLCC</td><td>璟德 (3152)、詠業 (6792)、台嘉碩 (3221)</td><td>高頻濾波器、振盪器</td></tr>
+</table>
+
+<h3>8.2 中游 — RF / 微波 / 毫米波元件</h3>
+<table>
+<tr><th>角色</th><th>代表台廠</th></tr>
+<tr><td>微波 / 毫米波被動元件 (Filter、Diplexer、追星天線)</td><td><strong>昇達科 (3491)</strong> ← 台灣唯一專注此領域的領導廠</td></tr>
+<tr><td>GaAs 化合物半導體晶圓 (PA、LNA)</td><td>穩懋 (3105)</td></tr>
+<tr><td>GaN 高功率元件 / RF MMIC</td><td>全訊 (5222)</td></tr>
+<tr><td>微波模組封測</td><td>同欣電 (6271)</td></tr>
+<tr><td>相控陣列 / Phased Array 天線</td><td>稜研科技 (7812)、耀登 (3138)、譁裕 (3419)</td></tr>
+<tr><td>RF 結構件 / 衛星機構</td><td>公準 (3178)、新復興 (4909)</td></tr>
+</table>
+
+<h3>8.3 中游 — 用戶終端 (UT/CPE) 與地面站</h3>
+<table>
+<tr><th>角色</th><th>代表台廠</th></tr>
+<tr><td>Starlink CPE / VSAT 終端代工</td><td>啟碁 (6285)、攸泰科技 (6928)、兆赫 (2485)、大眾控 (3701)</td></tr>
+<tr><td>終端電源供應器</td><td>光寶科 (2301)、群電 (6412)、維熹 (3501)、良得電 (2462)、隴華 (2424)</td></tr>
+<tr><td>機構 / 結構</td><td>信錦 (1582)、乙盛-KY (5243)、富田-創 (4590)</td></tr>
+<tr><td>通訊用銅線 / 線纜</td><td>大亞 (1609)、金橋 (6133)</td></tr>
+</table>
+
+<h3>8.4 焦點公司：昇達科 (3491)</h3>
+<p>1999 年成立，台灣唯一專注微波 / 毫米波通訊元件之領導廠。低軌衛星營收佔比已突破 80%。</p>
+<table>
+<tr><th>客戶</th><th>關係</th></tr>
+<tr><td>SpaceX / Starlink</td><td>最大客戶 — 地面站 + 衛星本體雙端供應</td></tr>
+<tr><td>Amazon / Kuiper</td><td>四年合約，多數產品具獨家供應資格</td></tr>
+<tr><td>Eutelsat OneWeb</td><td>第三大 LEO 客戶</td></tr>
+<tr><td>Ericsson / Nokia / Ceragon</td><td>5G/4G 微波回傳網路</td></tr>
+</table>
+<p><strong>財報觀察</strong>：</p>
+<table>
+<tr><th>期間</th><th>營收 (M NTD)</th><th>毛利率</th><th>營益率</th></tr>
+<tr><td>2023</td><td>1,585</td><td>40.4%</td><td>12.8%</td></tr>
+<tr><td>2024</td><td>2,335</td><td>51.3%</td><td>26.7%</td></tr>
+<tr><td>2025</td><td>2,452</td><td>51.1%</td><td>23.4%</td></tr>
+<tr><td>2025 Q4 (單季)</td><td><strong>834</strong></td><td><strong>58.6%</strong></td><td><strong>27.6%</strong></td></tr>
+</table>
+<p>2025 全年 CAPEX 高達 −816M NTD (前年 −548M)，表示正在大幅擴產接 Kuiper / Starlink 後續訂單。</p>
+
+</section>
+
+<!-- 9. CUSTOMER SEGMENTATION -->
+<section class="section">
+<h1>9. Taiwan Customer Segmentation</h1>
+
+<h3>9.1 太空原始市場 (Tier A — 高契合度、有實際需求)</h3>
+<table>
+<tr><th>客戶</th><th>級別</th><th>為何 fit</th><th>ZES 對應產品</th></tr>
+<tr><td><strong>Foxconn 鴻海 (2317)</strong></td><td><span class="tier-A">A</span></td><td>TASTI 2024 公開展示衛星本體；MIH B7 衛星計畫；目標「1 衛星 / 日量產」</td><td>ZSOM-F01 (主 OBC)、LDAP-IC、Smart-LCL、PoL DC-DC (大量)</td></tr>
+<tr><td><strong>Tron Future 創未來 (未上市)</strong></td><td><span class="tier-A">A</span></td><td>已自製 CubeSat 通訊酬載 + AESA 相控陣列 + T.SpaceRouter；台灣唯一有衛星酬載硬體出貨記錄</td><td>ZSOM MCU 版、TMR Voter-IC、SEL/SEU 認證測試</td></tr>
+<tr><td><strong>TASA 國家太空中心 + 衛星承包鏈</strong></td><td><span class="tier-A">A</span></td><td>Formosat-8A (2025-10) + 3 顆 8U CubeSat (Bellbird-1、Black Kite-1、TORO-1) "Startup Star Catcher" 計畫</td><td>整套 ZES 產品線</td></tr>
+<tr><td><strong>攸泰科技 (6928)</strong></td><td><span class="tier-A">A</span></td><td>業務文件明示「精準卡位 LEO 與國防無人機，與 TASA、ITRI 緊密合作」</td><td>ZSOM 系列 + LDAP-IC</td></tr>
+</table>
+
+<h3>9.2 衛星 / 太空鄰接 (Tier B — 需產品線上移才會買)</h3>
+<table>
+<tr><th>客戶</th><th>級別</th><th>觸發條件</th></tr>
+<tr><td>稜研科技 (7812)</td><td><span class="tier-B">B</span></td><td>切入太空段相控陣列 (酬載側)，需 rad-tolerant 控制器</td></tr>
+<tr><td>耀登 (3138)</td><td><span class="tier-B">B</span></td><td>衛星天線設計商；天線控制板上太空</td></tr>
+<tr><td>譁裕 (3419)</td><td><span class="tier-B">B</span></td><td>同上</td></tr>
+<tr><td>同欣電 (6271)</td><td><span class="tier-B">B</span></td><td>高可靠封測；可能是 ZES 封裝合作夥伴或其 IC 在飛行模組的客戶</td></tr>
+<tr><td>公準 (3178) / 新復興 (4909)</td><td><span class="tier-B">B</span></td><td>衛星機構件廠，若擴散到電子模組會用 ZES</td></tr>
+</table>
+
+<h3>9.3 太空電源題 (Tier C)</h3>
+<table>
+<tr><th>客戶</th><th>級別</th><th>說明</th></tr>
+<tr><td>光寶科 (2301)</td><td><span class="tier-C">C</span></td><td>SpaceX 全球最大低軌衛星電源供應商，市占逾六成；可能用 ZES Smart-LCL 強化下游負載保護</td></tr>
+<tr><td>群電 (6412)</td><td><span class="tier-C">C</span></td><td>電源代工，類似邏輯</td></tr>
+<tr><td>康舒 (6282)</td><td><span class="tier-C">C</span></td><td>軍工 / 航太電源經驗</td></tr>
+</table>
+
+<h3>9.4 學界 / 研究機構 (Tier D)</h3>
+<table>
+<tr><th>客戶</th><th>級別</th><th>計畫</th></tr>
+<tr><td>ITRI 工研院</td><td><span class="tier-D">D</span></td><td>技轉到攸泰等廠商；TASA 主要承包方</td></tr>
+<tr><td>NCKU / NTU / NCU CubeSat 實驗室</td><td><span class="tier-D">D</span></td><td>TORO-1、Bellbird-1、Black Kite-1 等 8U CubeSat</td></tr>
+</table>
+
+<h3>9.5 功能安全敘事新拓展 (跨 Tier、按應用)</h3>
+<table>
+<tr><th>應用</th><th>對應 ZES 產品</th><th>潛在台廠</th></tr>
+<tr><td>AI 伺服器 / 資料中心</td><td>Smart-LCL</td><td>鴻海 (2317)、廣達 (2382)、緯穎 (6669)</td></tr>
+<tr><td>電源代工</td><td>PoL DC-DC、Smart-LCL</td><td>台達電 (2308)、光寶科 (2301)</td></tr>
+<tr><td>工業電腦</td><td>ZSOM-F01</td><td>研華 (2395)、凌華 (6166)、廣積 (8050)、樺漢 (6414)、艾訊 (3088)</td></tr>
+<tr><td>車用 ECU (ASIL-D)</td><td>TMR Voter-IC、LDAP</td><td>鴻海 MIH、和大 (1536)、東陽 (1319)、敦泰 (3545)、矽創 (8016)</td></tr>
+<tr><td>軍規 / 國防</td><td>整套</td><td>漢翔 (2634)、雷虎 (8033)、中科院 (NCSIST)</td></tr>
+</table>
+
+<div class="callout">
+<strong>結構契合：ZES 既有產品 ≈ 安全籠標準解決方案</strong><br>
+ZES 在台灣的最大潛在客戶清單按優先序：<strong>Foxconn 鴻海 → Tron Future 創未來 → TASA / ITRI → 攸泰科技 (6928) → 同欣電 (6271)</strong>。前兩家是「規模 + 急迫性」最高的，但 Foxconn 通常會自製或內部 IP 化；Tron Future 反而是 ZES 最自然、最可能立刻簽約的 Tier-A 客戶。
+</div>
+
+</section>
+
+<!-- 10. GO-TO-MARKET -->
+<section class="section">
+<h1>10. Go-to-Market Strategy</h1>
+
+<h3>10.1 三條進場路徑 (依優先序)</h3>
+<table>
+<tr><th>路徑</th><th>說明</th><th>候選夥伴</th><th>時程</th></tr>
+<tr><td><strong>1. 學界 / 研究種子</strong> (低門檻先行)</td><td>NCKU / NTU CubeSat 實驗室先用，建立 flight heritage 後反向擴散到產業</td><td>NCKU 太空與電漿研究所、NTU 太空研究中心、ITRI</td><td>M1-M6</td></tr>
+<tr><td><strong>2. 戰略合作 / 投資</strong></td><td>透過 TASA 直接導入；或被 Foxconn 投資 (對應 MIH 衛星模組計畫)</td><td>TASA、Foxconn 雲端事業群、Hon Hai 子公司</td><td>M3-M9</td></tr>
+<tr><td><strong>3. 代理通路簽約</strong> (學 Spirit Electronics 美國模式)</td><td>找小型專業代理建立通路。大型代理 (益登 / 文曄 / 大聯大) 量太小不會接</td><td>金邦 (4123) 衛星專業代理、敦吉 (2459)、益登 (3048)</td><td>M2-M8</td></tr>
+</table>
+
+<h3>10.2 BD Pitch Deck 建議架構</h3>
+<ol>
+  <li><strong>30 秒 Elevator Pitch</strong>：「我們做 hardware-level 保護電路，讓你的 COTS SoC 在嚴苛環境跟 rad-hard 一樣可靠，但成本是十分之一」</li>
+  <li><strong>不要先講太空</strong> — 講客戶會關心的場景 (車用 ASIL-D / 工業 SIL3 / AI 電源 / 軍規)</li>
+  <li><strong>三層產品架構</strong>：保護 IC (一顆) → PoL DC-DC (供電) → ZSOM (一塊模組) — 客戶可任選一層導入</li>
+  <li><strong>太空 heritage</strong> 放最後 — 當 credibility 證明 (「能上太空 = 給你工廠用絕對沒問題」)</li>
+  <li><strong>Lab service 收尾</strong> — 提供 SEL/SEU 認證測試，作為 lock-in 服務</li>
+</ol>
+
+<h3>10.3 客戶接觸優先序 (Pipeline)</h3>
+<table>
+<tr><th>客戶類型</th><th>對應產品線</th><th>對應市場敘事</th></tr>
+<tr><td>鴻海 / 廣達 / 緯穎 (AI 伺服器)</td><td>Smart-LCL</td><td>微秒級電源保護</td></tr>
+<tr><td>台達電 / 光寶科 (電源代工)</td><td>PoL DC-DC</td><td>高可靠電源軌</td></tr>
+<tr><td>研華 / 凌華 / 廣積 (工業電腦)</td><td>ZSOM-F01</td><td>工業 SoM 升級</td></tr>
+<tr><td>鴻海 MIH / 車用 ECU 廠</td><td>TMR Voter-IC</td><td>ASIL-D 一片解決</td></tr>
+<tr><td>漢翔 / 中科院 / 國防無人機</td><td>全套</td><td>軍規可靠度</td></tr>
+<tr><td>Tron Future / TASA / 攸泰</td><td>ZSOM</td><td>太空原生市場 (本來就會買)</td></tr>
+</table>
+
+<h3>10.4 24 個月里程碑路線圖</h3>
+<table>
+<tr><th>季度</th><th>目標</th></tr>
+<tr><td>Q1 2026</td><td>建立台灣 BD 辦公室或代理；MOU 給 TASA + NCKU CubeSat 實驗室</td></tr>
+<tr><td>Q2 2026</td><td>第一筆 NCKU / NTU 學術試用；發表 ASIL-D 白皮書 + 媒體曝光</td></tr>
+<tr><td>Q3 2026</td><td>啟動 AEC-Q100 認證；接觸鴻海 MIH 平台、研華工業電腦 BD</td></tr>
+<tr><td>Q4 2026</td><td>第一筆台灣商業訂單 (估 USD 200K-500K，主為樣品 + 認證費)</td></tr>
+<tr><td>Q1 2027</td><td>Tron Future / 攸泰之 ZSOM 量產採購單；台灣年營收目標 USD 2-5M</td></tr>
+<tr><td>Q2 2027</td><td>AEC-Q100 認證完成；首筆車規 ASIL-D 設計案</td></tr>
+<tr><td>Q3-Q4 2027</td><td>第二輪募資 (Series B)；以亞太總部模式擴張</td></tr>
+</table>
+
+</section>
+
+<!-- 11. COMPETITIVE LANDSCAPE -->
+<section class="section">
+<h1>11. Competitive Landscape</h1>
+
+<h3>11.1 Rad-Hard / Rad-Tolerant IC 市場</h3>
+<table>
+<tr><th>對手</th><th>定位</th><th>vs ZES</th></tr>
+<tr><td>BAE Systems</td><td>Rad-Hard 整合 SoC (RAD750/RAD5545)</td><td>價格 10× 以上、交期 18+ 月；ZES 走 RHBD COTS 路線完全不同層</td></tr>
+<tr><td>Microchip (RT PolarFire)</td><td>Rad-Tolerant FPGA + RISC-V SoC</td><td>對手；但仍是整合 SoC 模式，不能外掛保護給其他主晶片</td></tr>
+<tr><td>Xilinx (AMD) Versal Space-grade</td><td>Rad-Tolerant FPGA</td><td>同上</td></tr>
+<tr><td>Honeywell HX5000</td><td>Rad-Hard ASIC</td><td>軍規航太貴、ZES 走 commercial 路線</td></tr>
+<tr><td>Aethero / Vorago Technologies / Coherent Logix</td><td>新興 rad-tolerant 玩家</td><td>同層次競爭，但 ZES 已具 NTU 學術背景與 Spirit Electronics 通路</td></tr>
+</table>
+
+<h3>11.2 ASIL-D / SIL4 Add-On 市場 (ZES 主力 differentiation 點)</h3>
+<table>
+<tr><th>對手</th><th>問題 (對 ZES 有利)</th></tr>
+<tr><td>TI Hercules MCU (TMS570 / TMS320)</td><td>整合 dual-core lockstep 但是 MCU，無法給 NVIDIA Orin / Qualcomm Ride 等 high-end SoC 用</td></tr>
+<tr><td>Infineon AURIX TC4xx</td><td>整合 SoC 不是 add-on</td></tr>
+<tr><td>NXP S32G + S32K3</td><td>同上</td></tr>
+<tr><td>Renesas RH850</td><td>同上</td></tr>
+<tr><td>Analog Devices safety supervisor</td><td>部分功能但無 TMR Voter</td></tr>
+<tr><td>Cypress / 主流 PMIC e-fuse</td><td>反應慢、無 TMR、無 latch-up specific</td></tr>
+</table>
+<p>ZES 是少數做「<strong>獨立外掛 ASIL-D add-on IC</strong>」的廠 — 此為市場縫隙。</p>
+
+<h3>11.3 工業 SoM 市場</h3>
+<table>
+<tr><th>對手</th><th>問題</th></tr>
+<tr><td>Variscite (以色列)</td><td>商規 SoM，可靠度普通</td></tr>
+<tr><td>Toradex (瑞士)</td><td>同上</td></tr>
+<tr><td>NVIDIA Jetson 系列</td><td>強 AI 算力但無內建保護電路；fab 環境會 reset / SEU</td></tr>
+<tr><td>Advantech / Adlink (台廠)</td><td>主要是 Jetson 整合，無自家保護 IC</td></tr>
+</table>
+<p>ZSOM 訴求「<strong>商規價格 + 工規可靠度</strong>」，定位獨特。</p>
+
+</section>
+
+<!-- 12. RISKS -->
+<section class="section">
+<h1>12. Risk &amp; Mitigation</h1>
+
+<h3>12.1 Top 8 Risks</h3>
+<table>
+<tr><th>#</th><th>風險</th><th>嚴重度</th><th>對策</th></tr>
+<tr><td>1</td><td>AEC-Q100 車規認證 (1-2 年 + 數百萬 USD)</td><td>⚠️⚠️⚠️ High</td><td>分階段：先做 NTU/NCKU 試點 → 工業 SIL3 → AEC-Q100；尋找代工夥伴分擔投資</td></tr>
+<tr><td>2</td><td>車廠 PPAP / IATF 16949 流程長 (2-3 年 sample-to-volume)</td><td>⚠️⚠️ Med</td><td>透過 Tier 1 (鴻海 MIH) 切入而非自己直接接觸 OEM</td></tr>
+<tr><td>3</td><td>Common Cause Failure 認證機構審查嚴</td><td>⚠️⚠️ Med</td><td>聘請 ISO 26262 顧問補強文件；引用 Airbus Ventures 投資作為航太背書</td></tr>
+<tr><td>4</td><td>Foxconn 自製傾向 — 可能複製而非採購</td><td>⚠️⚠️ Med</td><td>Tron Future 為主、Foxconn 為次；爭取 Foxconn 投資而非銷售</td></tr>
+<tr><td>5</td><td>量產供應穩定性 (車廠要求 15 年供貨保證)</td><td>⚠️⚠️ Med</td><td>找代工二供保證 (TSMC 或 GF)；建立庫存</td></tr>
+<tr><td>6</td><td>Graphiti 競品 (Tesla Terafab AI7) 殺入車規</td><td>⚠️ Low</td><td>Tesla Terafab 仍封閉系統；ZES 走中立市場戰略</td></tr>
+<tr><td>7</td><td>太陽極小期 (2030+) 降低 LEO 輻射議題討論度</td><td>⚠️ Low</td><td>太空僅是 30% 收入來源；其他 70% 不受太空週期影響</td></tr>
+<tr><td>8</td><td>地緣政治：兩岸關係影響台灣業務</td><td>⚠️⚠️ Med</td><td>新加坡 NTU 出身，無 ITAR / 中國敏感性；可雙向經營兩岸 + 東南亞</td></tr>
+</table>
+
+<h3>12.2 失敗情境 (Worst-Case Plan)</h3>
+<ul>
+  <li><strong>若 12 個月內無法簽下 Tier A 客戶</strong> — 退守學界 + 國防小型訂單，靠 Spirit Electronics 北美業務維持現金流</li>
+  <li><strong>若 AEC-Q100 認證延遲</strong> — 跳過車規，全力推工業 SIL3 (門檻較低、市場仍大)</li>
+  <li><strong>若被 Tier 1 / Foxconn 自製複製</strong> — IP 訴訟 + 與 Microchip / TI 等大廠尋求授權合作</li>
+</ul>
+
+</section>
+
+<!-- 13. NEXT STEPS -->
+<section class="section">
+<h1>13. Recommended Next Steps</h1>
+
+<h3>13.1 立即執行 (Next 30 Days)</h3>
+<ol>
+  <li>準備中文版 ZES 公司簡介 + 產品 datasheet (兩份目標族群：太空 / 功能安全)</li>
+  <li>聯繫 NCKU 太空與電漿研究所 + NTU 太空研究中心，提案 ZSOM 試用</li>
+  <li>透過 LinkedIn / 業界活動接觸 Tron Future 創未來 BD 主管</li>
+  <li>製作 ASIL-D 白皮書中文版本，預備在 Computex 2026 / SEMICON Taiwan 發表</li>
+  <li>找 1-2 位前 Tier 1 (Bosch Taiwan / Continental Taiwan) 出身的 BD 顧問</li>
+</ol>
+
+<h3>13.2 90 天里程碑</h3>
+<ol>
+  <li>簽下台灣代理 (敦吉、益登或金邦)</li>
+  <li>完成第一場 TASA / ITRI 客戶說明會</li>
+  <li>2 個學術試用案開始</li>
+  <li>1 個工業電腦廠樣品評估開始</li>
+</ol>
+
+<h3>13.3 12 個月目標</h3>
+<table>
+<tr><th>領域</th><th>2026 目標</th></tr>
+<tr><td>太空 / 衛星</td><td>3-5 個 active customers (Tron Future + TASA 合作 + 1-2 大學)</td></tr>
+<tr><td>工業 / SIL3</td><td>1-2 個工業電腦廠樣品中</td></tr>
+<tr><td>車規 / ASIL-D</td><td>AEC-Q100 認證 kick-off + 1 個 Tier 1 設計案 (sample)</td></tr>
+<tr><td>AI 伺服器</td><td>1 個電源廠樣品 (台達電 / 光寶科)</td></tr>
+<tr><td>台灣年營收</td><td>USD 2-5M (主為樣品 + 認證費 + 第一批量產)</td></tr>
+</table>
+
+</section>
+
+<!-- APPENDIX A -->
+<section class="section">
+<h1>Appendix A — Pricing &amp; Commercial Terms (Indicative)</h1>
+<p class="small">所有數字為 ZES 公開資料 + 業界 benchmark 推估，實際商業簽約以 ZES 與客戶談判結果為準。</p>
+
+<table>
+<tr><th>產品</th><th>單價區間 (USD)</th><th>MOQ</th><th>典型出貨形式</th></tr>
+<tr><td>LDAP-IC</td><td>$50 - $200 / pc</td><td>100</td><td>QFN / BGA 封裝</td></tr>
+<tr><td>Smart-LCL</td><td>$30 - $100 / pc</td><td>500</td><td>QFN 封裝</td></tr>
+<tr><td>TMR Voter-IC</td><td>$80 - $250 / pc</td><td>100</td><td>QFN / BGA</td></tr>
+<tr><td>PoL DC-DC (rad-tolerant)</td><td>$200 - $600 / pc</td><td>50</td><td>模組</td></tr>
+<tr><td>ZSOM-F01 (FPGA SoM)</td><td>$3,000 - $8,000 / pc</td><td>10</td><td>SoM 板卡</td></tr>
+<tr><td>ZSOM MCU 版</td><td>$500 - $1,500 / pc</td><td>20</td><td>SoM 板卡</td></tr>
+<tr><td>SEL/SEU Lab Service</td><td>$10,000 - $50,000 / project</td><td>—</td><td>顧問 + 測試報告</td></tr>
+</table>
+
+<p class="small"><strong>注意</strong>：以上價格遠低於 BAE / Microchip rad-hard 整合 SoC (USD 30K-50K+)，但仍高於商規元件，符合「中間價格帶」定位。</p>
+
+</section>
+
+<!-- APPENDIX B -->
+<section class="section">
+<h1>Appendix B — Source Material &amp; References</h1>
+
+<h3>B.1 本專案內部資料</h3>
+<ul>
+  <li>Pilot_Reports/Communication Equipment/3491_昇達科.md</li>
+  <li>Pilot_Reports/Computer Hardware/6928_攸泰科技.md</li>
+  <li>Pilot_Reports/Semiconductors/3105_穩懋.md</li>
+  <li>Pilot_Reports/Semiconductor Equipment &amp; Materials/5222_全訊.md</li>
+  <li>Pilot_Reports/Semiconductor Equipment &amp; Materials/6271_同欣電.md</li>
+  <li>Pilot_Reports/Computer Hardware/2301_光寶科.md</li>
+  <li>Pilot_Reports/Communication Equipment/3138_耀登.md</li>
+  <li>Pilot_Reports/Communication Equipment/7812_稜研科技.md</li>
+  <li>FalkorDB <code>tw_electronics</code> graph (1,072 episodes / 5,813 entities / 6,244 RELATES_TO edges)</li>
+  <li>analysis/reports/leo_satellite_research_2026-04-30.md (本系列研究第一篇)</li>
+</ul>
+
+<h3>B.2 ZES 官方資料</h3>
+<ul>
+  <li>https://zero-errorsystems.com/</li>
+  <li>https://zero-errorsystems.com/about-us/</li>
+  <li>https://zero-errorsystems.com/zero-error-systems-launches-industrys-first-cots-fpga-based-radiation-tolerant-system-on-module-for-space-applications/</li>
+  <li>https://zero-errorsystems.com/zes-debuts-radiation-tolerant-system-onmodule-for-space/</li>
+  <li>https://spiritelectronics.com/linecard/zero-errorsystems/ (US distributor)</li>
+  <li>https://sg.linkedin.com/company/zero-error-systems-zes</li>
+  <li>https://www.cbinsights.com/company/zero-error-systems</li>
+</ul>
+
+<h3>B.3 SpaceX / 航太半導體</h3>
+<ul>
+  <li>Bloc Ventures - The road to high-performance and robust satellite compute</li>
+  <li>Evertiq 2025-12-19 — STMicroelectronics supplies billions of components for Starlink</li>
+  <li>TeslaNorth 2025-12-15 — SpaceX's Starlink Chip Supplier Signals Massive Expansion</li>
+  <li>Domain-b — STMicroelectronics ships over 5 billion chips for Starlink</li>
+  <li>All About Circuits — SpaceX Loses 40 Satellites to Radiation</li>
+  <li>satsearch — Space-grade FPGA-based OBCs and payload processors</li>
+  <li>Xilinx (AMD) Space portfolio</li>
+  <li>Microchip Radiation-Tolerant FPGAs</li>
+</ul>
+
+<h3>B.4 台灣太空產業</h3>
+<ul>
+  <li>Tron Future 創未來科技 - https://www.tronfuture.com/</li>
+  <li>DigiTimes 2025-08 — Tron Future bets on AI-powered defense</li>
+  <li>SpaceDaily — Foxconn Unveils Advanced Technologies at TASTI 2024</li>
+  <li>DigiTimes 2025-07 — Taiwan's first optical remote sensing satellite + 3 homegrown CubeSats</li>
+  <li>CommonWealth 2025-11 — Satellite Conference Shines Light on Taiwan's Space Supply Chain</li>
+  <li>TASA — Taiwan Space Agency (https://www.tasa.org.tw/en-US)</li>
+</ul>
+
+<h3>B.5 功能安全標準</h3>
+<ul>
+  <li>ISO 26262 (Automotive Safety Integrity Level)</li>
+  <li>IEC 61508 (Safety Integrity Level)</li>
+  <li>IEC 61511 (Process Industry Safety)</li>
+  <li>IEC 62061 (Machinery Safety)</li>
+  <li>EN 50128 (Railway Signalling Software)</li>
+  <li>IEC 62304 (Medical Device Software)</li>
+  <li>DO-178C (Airborne Software)</li>
+  <li>AEC-Q100 (Automotive Electronic Component Qualification)</li>
+</ul>
+
+<hr>
+<p class="footnote"><strong>End of document.</strong> 本 BP 為內部討論草稿，所有財務 / 商務數字為 working estimate；正式 BP 應由 ZES 與夥伴共同填補實際合約條件。 — Compiled 2026-05-04</p>
+
+</section>
+
+</body>
+</html>

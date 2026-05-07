@@ -143,6 +143,13 @@ async def _job_event_factor_refresh() -> int:
     Runs ``analysis/event_factor_extractor.py --all`` as a subprocess. Each
     event's row-set is replaced (DELETE + INSERT) idempotently. Returns the
     total rows upserted.
+async def _job_market_monitor_intraday() -> int:
+    """Intraday alert monitor — piggybacks on rss_cna (:15) / rss_udn (:35)
+    cadence so we don't add a new high-frequency cron tick. Cron expression
+    ``15,35 9-13 * * 1-5``. Returns the count of alerts emitted (0 = quiet).
+
+    Auto-skips weekends + holidays via the ``is_tw_market_open`` check inside
+    the script (no recent TXF futures bar ⇒ exit early).
     """
     import subprocess
     from pathlib import Path
@@ -165,6 +172,16 @@ async def _job_event_factor_refresh() -> int:
             except (ValueError, IndexError):
                 rows = 0
     return rows
+    script = repo_root / "analysis" / "market_monitor.py"
+    proc = await asyncio.create_subprocess_exec(
+        "python3", str(script),
+        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+    )
+    _, stderr = await proc.communicate()
+    if proc.returncode < 0:
+        raise RuntimeError(f"market_monitor died: {stderr.decode()}")
+    # The script returns the alert count via exit code (0 = quiet, N = alerts).
+    return max(proc.returncode, 0)
 
 
 async def _job_db_vacuum_weekly() -> int:
@@ -231,6 +248,9 @@ JOBS["overnight_signal_daily"] = ("45 8 * * 1-5", _job_overnight_signal_daily)
 
 # Event factor refresh — Sunday 02:00 TPE, re-extract all emergent baskets
 JOBS["event_factor_refresh_weekly"] = ("0 2 * * 0", _job_event_factor_refresh)
+# Intraday market monitor — piggybacks on rss_cna (:15) / rss_udn (:35) cadence.
+# Auto-quiet on weekends/holidays via is_tw_market_open() inside the script.
+JOBS["market_monitor_intraday"] = ("15,35 9-13 * * 1-5", _job_market_monitor_intraday)
 
 # Database maintenance — weekly VACUUM + run-log cleanup, hourly freshness check
 JOBS["db_vacuum_weekly"] = ("0 3 * * 0", _job_db_vacuum_weekly)
