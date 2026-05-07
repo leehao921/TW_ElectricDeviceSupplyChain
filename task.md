@@ -15,7 +15,7 @@
     - [x] Draft extraction logic (Financials via yfinance) <!-- id: 2 -->
     - [x] Define AI Research Workflow (Supply Chain/Customers) <!-- id: 3 -->
     - [x] Create implementation plan <!-- id: 4 -->
-- [/] Execution Phase <!-- id: 5 -->
+- [x] Execution Phase <!-- id: 5 -->
     - [x] Create `01_prototype.py` for base data (Financials + Basic Info) <!-- id: 6 -->
     - [x] Run prototype on sample batch (5 tickers) <!-- id: 7 -->
     - [x] **AI Agent Enrichment**: Supply Chain, Customers, and **Company Intro Translation** <!-- id: 8 -->
@@ -23,11 +23,11 @@
     - [x] **Simplification**: Refactor script to show 12 key financial metrics and margins <!-- id: 10 -->
     - [x] **Quarterly Data**: Add latest 4 quarters for the same metrics <!-- id: 11 -->
     - [x] Re-run prototype and enrichment <!-- id: 12 -->
-- [/] Scale-Up Phase <!-- id: 13 -->
+- [x] Scale-Up Phase <!-- id: 13 -->
     - [x] **Batch Generation**: Launched `02_generate_base_reports.py` for ALL tickers <!-- id: 14 -->
         - [x] **OTC Cleanup**: Updated script to handle `.TWO` suffix for 900+ OTC stocks (Completed: 1737 Total Reports)
     - [x] **Report Organization**: Organizing base reports into folders by Industry
-    - [/] **Batch Enrichment**: Systematically enrich reports with AI research (Intro + Supply Chain) <!-- id: 15 -->
+    - [x] **Batch Enrichment**: Systematically enrich reports with AI research (Intro + Supply Chain) <!-- id: 15 -->
         - [x] **Batch 1** (Advertising Agencies): 6136
         - [x] **Batch 2** (Aerospace & Defense): 2208, 2630, 2634, 2644, 2645, 4541, 4546, 4572, 6753, 8222
         - [x] **Batch 3** (Agricultural Inputs): 1712, 1722, 6508
@@ -159,6 +159,6 @@
         - [x] **Batch 130** (Utilities - Regulated Water): 6977
         - [x] **Batch 131** (Utilities - Renewable): 6806, 6869, 6994, 7833, 8087
         - [x] **Batch 132** (Waste Management): 6581, 6624, 6771, 6803, 6887, 6923, 6947, 6951, 7507, 7578, 8341, 8390, 8422, 8440, 8473, 8476
-- [/] Verification Phase <!-- id: 16 -->
+- [x] Verification Phase <!-- id: 16 -->
     - [x] **Unit Verification**: Verify `yfinance` raw data units (Ones vs Thousands) <!-- id: 17 -->
     - [x] **Wikilinking**: Update enrichment to link key entities (e.g., `[[TSMC]]`) <!-- id: 18 -->
