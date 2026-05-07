@@ -90,6 +90,7 @@ def parse_feed(raw: bytes) -> Iterable[dict]:
             text,
             ticker_set=electronics_tickers(),
             name_map=name_to_ticker(),
+            wikilink_vocab=ner.load_wikilink_vocab(),
         )
         yield {
             "title": title,
