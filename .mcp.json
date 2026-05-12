@@ -21,6 +21,38 @@
         "EMBEDDING_MODEL": "bge-m3",
         "REPO_ROOT": "/Users/lulala/Documents/coding/My-TW-Coverage"
       }
+    },
+    "postgres-tw-electronics": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "PGEDGE_DB_HOST",
+        "-e", "PGEDGE_DB_PORT",
+        "-e", "PGEDGE_DB_NAME",
+        "-e", "PGEDGE_DB_USER",
+        "-e", "PGEDGE_DB_PASSWORD",
+        "ghcr.io/pgedge/postgres-mcp:latest"
+      ],
+      "env": {
+        "PGEDGE_DB_HOST": "host.docker.internal",
+        "PGEDGE_DB_PORT": "5433",
+        "PGEDGE_DB_NAME": "tw_electronics",
+        "PGEDGE_DB_USER": "knowledge",
+        "PGEDGE_DB_PASSWORD": "knowledge"
+      }
+    },
+    "redis-trading": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "REDIS_URL",
+        "mcp/redis:latest"
+      ],
+      "env": {
+        "REDIS_URL": "redis://host.docker.internal:6379"
+      }
     }
   }
 }
