@@ -20,3 +20,23 @@ docker/.env
 .graph_*.txt
 .graph_bootstrap_*.log
 .graph_bootstrap_snapshot_*.log
+
+# --- Analysis report artifacts (regenerate from .md sources) ---
+# See docs/git-policy.md §1 "analysis/reports/ rule"
+analysis/reports/*.pdf
+analysis/reports/*.html
+
+# Ephemeral tick / quote / scan CSV dumps. Re-pull from trading-timescaledb.
+# Allow specific CSVs by overriding with `git add -f` when they back an .md claim.
+analysis/reports/tick_*.csv
+analysis/reports/ofi_*.csv
+analysis/reports/snapshot_*.csv
+
+# Editor & IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Notebook checkpoints
+.ipynb_checkpoints/

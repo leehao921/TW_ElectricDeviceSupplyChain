@@ -1,0 +1,35 @@
+# Normalize line endings on commit; check out native on each OS.
+* text=auto eol=lf
+
+# Source / data — always LF, never CRLF
+*.py        text eol=lf
+*.md        text eol=lf working-tree-encoding=UTF-8
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.toml      text eol=lf
+*.csv       text eol=lf
+*.html      text eol=lf
+*.sql       text eol=lf
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+
+# Binary — never touch
+*.pdf       binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.zip       binary
+*.parquet   binary
+*.db        binary
+*.sqlite    binary
+
+# Linguist hints — keep GitHub language stats honest
+Pilot_Reports/**  linguist-documentation
+docs/**           linguist-documentation
+
+# Reproducibility note for reviewers:
+# Run `git config core.quotepath false` once per clone to display Chinese
+# filenames natively in `git status` / `git log` instead of \345\217... escapes.
