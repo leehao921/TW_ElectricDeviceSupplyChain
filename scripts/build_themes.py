@@ -112,6 +112,21 @@ THEME_DEFINITIONS = {
         "desc": "Ajinomoto Build-up Film 載板，高階 IC 封裝基板",
         "related": ["CoWoS", "AI 伺服器", "PCB"],
     },
+    "FOPLP": {
+        "name": "FOPLP 扇出型面板級封裝",
+        "desc": "Fan-Out Panel Level Packaging — 利用大尺寸玻璃/PI 面板取代矽晶圓做先進封裝，2026 年導入 SpaceX 低軌衛星地面終端及台積電龍潭廠 AI/HPC 應用",
+        "related": ["玻璃基板", "TGV", "面板", "ABF 載板", "CoWoS"],
+    },
+    "玻璃基板": {
+        "name": "玻璃基板 (Glass Substrate)",
+        "desc": "FOPLP 與下世代 AI 封裝關鍵載體，群創 3.5 代線改造支援 700×700mm 大面板，與 ABF 載板形成替代關係",
+        "related": ["FOPLP", "TGV", "ABF 載板"],
+    },
+    "TGV": {
+        "name": "TGV 玻璃通孔",
+        "desc": "Through-Glass-Via 玻璃通孔技術，FOPLP 玻璃基板的關鍵製程",
+        "related": ["FOPLP", "玻璃基板"],
+    },
     "矽晶圓": {
         "name": "矽晶圓",
         "desc": "半導體製造最基礎的原材料",
