@@ -34,6 +34,7 @@ from utils import (
     find_ticker_files, parse_scope_args, setup_stdout,
     build_valuation_table, update_metadata,
 )
+from valuation_snapshot import build_snapshot, save_snapshot
 
 # ---------------------------------------------------------------------------
 # Bulk data fetchers
@@ -367,6 +368,16 @@ def main():
 
     print(f"\nDone. Updated: {updated} | Skipped: {skipped} | Failed: {failed}")
     print(f"Bulk hits: {sum(1 for t in files if t in bulk)} / {n}")
+
+    # Persist daily snapshot of all bulk entries (regardless of dry_run on
+    # individual files) — anomaly detector reads this. Skip when scope is
+    # narrow (single ticker, single sector) because partial snapshots would
+    # corrupt the day-over-day comparison.
+    if not dry_run and tickers is None and sector is None:
+        today = date.today().strftime("%Y-%m-%d")
+        snapshot = build_snapshot(bulk, snapshot_date=today)
+        path = save_snapshot(snapshot)
+        print(f"Snapshot written: {path} ({len(snapshot['tickers'])} tickers)")
 
 
 if __name__ == "__main__":
