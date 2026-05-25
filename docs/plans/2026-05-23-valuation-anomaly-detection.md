@@ -38,7 +38,7 @@ This feature adds:
 | **R1** | `\|ΔPrice%\| > 7%` (TW daily limit boundary) | HIGH |
 | **R2** | `\|ΔP/E%\| > 20%` **AND** `\|absolute ΔP/E\| > 3` | MEDIUM |
 | **R3** | `\|ΔP/B%\| > 25%` **AND** `\|absolute ΔP/B\| > 0.5` | MEDIUM |
-| **R4** | `\|ΔMktCap%\| > 10%` **AND** divergence from ΔPrice% > 5pp (capital action) | HIGH |
+| **R4** | `\|ΔMktCap%\| > 10%` **AND** divergence from ΔPrice% > 5pp (capital action) — *only fires for yfinance-sourced rows (~60 tickers/week); TWSE/TPEX bulk feeds omit market cap* | HIGH |
 | **R5** | yesterday had price/pe/pb but today is None / missing (suspension / delisting) | HIGH |
 | **R6** | yesterday `yield_pct > 0` and today `yield_pct == 0` (除息日) | INFO |
 
