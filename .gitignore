@@ -40,3 +40,20 @@ analysis/reports/snapshot_*.csv
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Asia panel pipeline outputs — regenerable from scripts/{fetch,validate,compute}_asia_*.py
+# Source of truth is trading-timescaledb (see CLAUDE.md "Purpose")
+data/asia_market_panel.parquet
+data/cov_3y.parquet
+data/corr_3y.parquet
+data/rolling_corr_twii.parquet
+data/twii_dxy_beta.parquet
+data/regime_shifts.parquet
+data/twii_corr_ranked.parquet
+data/raw/
+
+# Note: Vera Rubin VR200 BOM parquets (data/vera_rubin_bom/) ARE tracked —
+# they are research outputs from a parallel batch, not regenerable from scripts.
+
+# Obsidian per-user workspace config (vault content stays tracked)
+vault/.obsidian/
