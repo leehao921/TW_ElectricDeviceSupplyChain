@@ -72,3 +72,16 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 ## [2026-06-01 11:29 TWT] lint | 11 orphans, 0 stale, 1 contradictions, 11 missing-from-index, 0 stale-in-index
 
 ## [2026-06-01 11:29 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index
+
+## [2026-06-01 17:30 TWT] ingest | Institutional Alpha batch (6 parallel workers) — 法人/外資跨產業潛力股 + 為什麼買
+
+**6 個 unit slice (~1500 行):**
+- 28 半導體晶圓+記憶體 — 2344 華邦電 ★★★★★ 雙引擎冠軍 (Q4 GM 41.86%, NOR Flash Vera Rubin 隱形瓶頸); 6770/5347/2408 ★★★★
+- 29 AI server ODM — 外資 vs 投信「估值修復 vs AI 純度」分歧; 2324 仁寶兩派對立差 401K 張; 排序 2317 > 3231 > 2324 > 2356 > 2382
+- 30 HVDC + grid — 1605 華新 conviction high (隱性 008004 sleeve, 集團持 2492+6173); 6282 康舒 P/E 319 透支警戒
+- 31 HBM 周邊 — 3711 日月光 #1 (Q1 OpM 10.10% 創高 + PEG 1.4); 2449 hold; 6147 警戒
+- 32 金融股 — 外資 TWD+壽險EV+ETF (2881/2882/2891); 投信 殖利率+公股 (2887/2880/2886); 2885 mixed
+- 33 傳產 — 1303 南亞 ✅✅✅ (集團 SOTP + CCL/玻纖布) + 2027 大成鋼 (Trump 50% 關稅); 2609/1216 防禦
+
+**Top 5 真潛力股**: 2344 華邦電 / 3711 日月光 / 1605 華新 / 1303 南亞 / 2317 鴻海
+**警戒清單**: 6147 / 2449 / 6282 / 2382 / 2356 / 2481
