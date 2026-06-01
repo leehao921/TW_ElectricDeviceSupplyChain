@@ -96,6 +96,18 @@
 
 ---
 
+## PCB 同步受惠 (cross-theme, 共同 demand wave)
+
+008004 微小化 + AI 伺服器高用量 + iPhone 17/18 BOM 升級背後,**PCB 主板與 ABF 載板供應商是同一波 demand 的另一條腿**。Apple 客戶端 + [[NVIDIA]] [[GB300]] / [[Vera Rubin]] BOM 的 MLCC 跟 PCB 是並列同步成長,**[[Morgan Stanley]] 數據 Vera Rubin VR200 機櫃 PCB BoM +233%**(>MLCC +182%)。
+
+- **2313 [[華通]]** (Electronic Components) — 高階 HDI 主板 + [[低軌衛星]] LEO (2025 營收 151 億,占 20%;同時供 [[SpaceX Starlink]] 與 [[Amazon Project Kuiper]]);6M +254%, EPS 5.51 近 20 年次高
+- **3037 [[欣興]]** (Electronic Components) — [[ABF 載板]] 龍頭,6M +518% (PCB 族群最猛)
+- **4958 [[臻鼎-KY]]** (Electronic Components) — 全球 PCB 第一,Apple 軟板主力
+- **8046 [[南電]]** (Electronic Components) — ABF 載板雙雄,服務 [[Intel]] + [[NVIDIA]]
+- **2383 [[台光電]]** / **6213 [[聯茂]]** / **6274 [[台燿]]** — 上游 [[銅箔]] 基板 CCL
+
+---
+
 ## 全球競品結構 (Big-4 為主)
 
 | 廠商 | 整體 MLCC 市占 | AI server 高階 MLCC | 008004 status | 2026 漲價 |
