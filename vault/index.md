@@ -51,6 +51,11 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [10_rd_pipeline](research/008004/10_rd_pipeline.md) — 2327/2492 R&D pipeline 6 維度驗證
 - [11_catalyst_calendar](research/008004/11_catalyst_calendar.md) — Catalyst calendar 2026/6 – 2027/H1
 
+`vault/research/cleanup/` — repo 整理 audit 報告 (2026-06-01):
+- [pilot_audit](research/cleanup/pilot_audit_2026-06-01.md) — Pilot_Reports 品質 (1734/1735 clean, 1 ticker 3622 < 8 wikilinks)
+- [untracked_audit](research/cleanup/untracked_audit_2026-06-01.md) — 27 untracked files 分類 (a/b/c/d)
+- [system_audit](research/cleanup/system_audit_2026-06-01.md) — 14 stale plans + 21 worktrees + /tmp leftover
+
 ## Inbox (Redis → Vault weekly dumps)
 
 - (no dumps yet — first sync scheduled for next Sunday 22:00 TWT)
@@ -85,7 +90,7 @@ Vault `entities/` holds 1-line stubs that link back to `../Pilot_Reports/{Indust
 | projects | 3 |
 | concepts | 8 |
 | trading | 2 |
-| inbox | 0 (dynamic) |
+| inbox | 1 (2026-W20 snapshot) |
 | meta | 2 |
 | entities | 0 (on-demand) |
-| **Total** | **18** |
+| **Total** | **19** |

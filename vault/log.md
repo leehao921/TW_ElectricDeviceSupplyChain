@@ -72,3 +72,21 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 ## [2026-06-01 11:29 TWT] lint | 11 orphans, 0 stale, 1 contradictions, 11 missing-from-index, 0 stale-in-index
 
 ## [2026-06-01 11:29 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index
+
+## [2026-06-01 14:00 TWT] ingest | 008004 PR #23 MERGED to master (commit 2b440cd)
+
+## [2026-06-01 15:30 TWT] ingest | repo cleanup batch (4 parallel workers) — Git 整理 + Untracked → git + Vault audit + PR merge
+
+**4 個 unit slice (cleanup):**
+- 12. β_60d contradiction 解決 (commit 46ebeaa) — 5 vault 頁統一 β 口徑;真實 contradiction 為 lint over-match (「<−0.6」是 playbook 觸發條件, 不是 β 量測);正確 β: 3y avg −0.37, 60d 5/16 −1.47, 4× regime shift
+- 13. Pilot_Reports audit — **1734/1735 clean (99.94%)**, 0 placeholder / 0 metadata gap / 0 banned-word wikilinks; 唯 1 違規: 3622 洋華 6 wikilinks (< 8 floor)
+- 14. Untracked 27 files — (a) TRACK MUST 6 (vault scripts + themes) (b) TRACK SHOULD 19 (Asia panel + vault skeleton) (c) GITIGNORE data/ + .obsidian/ (d) EVALUATE 2 ingestion scripts (default TRACK)
+- 15. Stale plans + 21 worktrees + system audit — 14 plans (13 屬 sibling repos 可刪);21 worktrees (19 clean+landed, 2 dirty);/tmp 2 enrichment JSON 可刪
+
+**Coordinator actions:**
+- PR #23 (008004 batch) MERGED → personal/master + 8 stale remote branches deleted
+- cleanup/repo-organize branch + Unit 12/13/14 cherry-pick + 25 untracked files 加入 git
+- .gitignore 加 data/*.parquet, data/raw/, vault/.obsidian/
+- 13 stale plans + 2 /tmp enrichment 待刪;21 worktrees + 21 worktree-agent-* branches 待 prune
+
+**Out of scope:** 921 modified Pilot_Reports (用戶前期 WIP), 其他 feature branches, PR #22
