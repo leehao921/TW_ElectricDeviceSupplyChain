@@ -40,3 +40,11 @@ analysis/reports/snapshot_*.csv
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Asia panel pipeline outputs — regenerable from scripts/{fetch,validate,compute}_asia_*.py
+# Source of truth is trading-timescaledb (see CLAUDE.md "Purpose")
+data/*.parquet
+data/raw/
+
+# Obsidian per-user workspace config (vault content stays tracked)
+vault/.obsidian/
