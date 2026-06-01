@@ -53,3 +53,22 @@ Catalyst: 2327 +194.7% / 2492 +173.6% 過去 6 個月,99.9 percentile 3Y,5/14-5/
 ## [2026-06-01 09:29 TWT] lint | 1 orphans, 0 stale, 1 contradictions, 1 missing-from-index, 0 stale-in-index (pre-aggregation snapshot)
 
 ## [2026-06-01 09:30 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index
+
+## [2026-06-01 14:00 TWT] ingest | 008004 第二輪深度驗證 batch (5 parallel worktrees) + 2 個新概念頁 + slice 01 補 Murata GRM011 SKU
+
+5 個新 unit slice 在 `vault/research/008004/`:
+7. 8043/3090 代理通路深度驗證 (305 行) — **Murata 4/1 漲價不利於 8043** (非 8043 principal);8043 008004 占 rev 6-9% (非 5.6%);Q3 OCF -405.82M = 70% A/R + 30% inventory, Q4 已收斂;3090 alpha 已 reversed 反超 8043 (+52% vs +37% 5/19-6/1)
+8. 6173/4760 上游材料深度驗證 (276 行) — **6173 100nm 目標是 NP0/C0G (Class I), 不是 X7R**;6173 明確避開 0201 微小化, 主攻 1206+ 大尺寸高壓 NP0;**TW 零 Ni paste/nano-Ni 玩家** (科揚 只代理 MMS), 35-50% MLCC 成本卡死 TW 008004 整合;4760 日本仍在 cultivation
+9. TW 隱藏候選 (291 行) — **新增 3030 德律 ★★★ (AXI X-ray AI server GPU PCBA 焊接後檢測, 一塊上千顆 008004)**;**新增 3189 景碩 (ABF 載板第三家, ECiP)**;觀察 3455 由田 + 6187 萬潤;ticker 修正 4977 眾達-KY 非 ABF (光通訊模組 OEM);排除 9 家 noise
+10. 2327/2492 R&D pipeline (285 行) — **隱藏 R&D 強度 = 1/5 (極低)**, 跨 6 維度一致負向:專利 0 件 sub-0.4mm claim (vs Murata ≥ 3 件 US12,482,604/US20240282522A1/WO2024247128A1);0 篇 ECTC/CIPS 論文;Yageo Apple supplier list 但 design-in 止於 0402/01005;馬廠無 Hirano Tecseed/光洋熱工 high-end 設備訊號;Kemet 鉭電容才是 Yageo AI 武器
+11. Catalyst calendar (372 行) — Top 3: **(1) 6/10 處置股結束 (2) 10/14-18 CEATEC (Murata 006003) (3) 11/14 前 Q3 法說 (8043 AI 占比 50%)**;25 個 catalyst rows;5 個 risk events;2026/12-2027/H1 = ASP cliff window
+
+2 個新概念頁 (vault/concepts/):
+- MLCC_008004_technical_deep_dive.md — 永久技術 reference (350+ 行, 10 段):規格命名陷阱 + 技術門檻 4 維度 + Murata GRM011 SKU 詳表 + Big-4 對照 + ASP 倍數 + 應用 4 類 + 漲價 + 006003 + TW 排序 + 檔案索引
+- MLCC_008004_TW_verification.md — 6/1 驗證補丁:修正 Tier 排序 (3090 升 #1, 6173/4760 降);新增 3030/3189;TW Ni paste 0 玩家 critical finding;隱藏 R&D = 1/5;修正版 pair trade (LONG basket {3090+8043+3030}, SHORT 2327 比 2492 更乾淨)
+
+Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R61A101KE01L 100pF / C0G 1pF-0.1µF / X5R 100pF-0.1µF) + Izumo 新廠 JPY 47B 4/3 完工。
+
+## [2026-06-01 11:29 TWT] lint | 11 orphans, 0 stale, 1 contradictions, 11 missing-from-index, 0 stale-in-index
+
+## [2026-06-01 11:29 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index

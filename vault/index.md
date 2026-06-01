@@ -28,11 +28,28 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [FOPLP](concepts/FOPLP.md) — Glass-substrate-vs-ABF rotation basket: LONG 3481/2408/2454, SHORT 8046/3037/3017
 - [edge_ai_inference](concepts/edge_ai_inference.md) — Nano-tier (5-67 TOPS) competitor analysis; NVDA Q1 FY27 ACIE $37B catalyst; L1-L4 TW alpha paths
 - [MLCC_008004](concepts/MLCC_008004.md) — 008004 (0.25×0.125mm) Big-4 獨占,TW 真實受惠 8043/3090 (Tier 1) > 6173/4760 (Tier 2);2327/2492 漲價 ≠ 008004 切入
+- [MLCC_008004_technical_deep_dive](concepts/MLCC_008004_technical_deep_dive.md) — 永久技術 reference:規格命名陷阱 + 技術門檻 4 維度 + Murata GRM011 SKU 詳表 + 006003 next-gen
+- [MLCC_008004_TW_verification](concepts/MLCC_008004_TW_verification.md) — 6/1 驗證版:3090 升 #1, 新增 3030 德律 + 3189 景碩;TW Ni paste 0 玩家為結構性卡點;隱藏 R&D = 1/5
 
 ## Trading
 
 - [positions](trading/positions.md) — 00763U @ 31.47 cost · take-profit ladder 36.5/37.5/39/41 · stop 34/33/31
 - [playbooks](trading/playbooks.md) — TWD breach 31.80 · DXY macro sensitivity (β −1.47) · Basis extreme short · 00763U ladder · Pair trade rules
+
+## Research (詳細研究 slice, subordinate to concepts)
+
+`vault/research/008004/` — 11 個 unit slice 支撐 MLCC_008004 系列概念頁 (各 200-400 行, 全部 sourced):
+- [01_spec_and_global_leaders](research/008004/01_spec_and_global_leaders.md) — 規格 + Big-4 量產 + Murata GRM011 SKU 詳表
+- [02_tw_mid_2327_2492](research/008004/02_tw_mid_2327_2492.md) — TW 中游 2327/2492 對 008004 exposure (零)
+- [03_tw_niche_3026_6173](research/008004/03_tw_niche_3026_6173.md) — TW 利基 3026/6173 (與 008004 反方向)
+- [04_tw_upstream_materials](research/008004/04_tw_upstream_materials.md) — TW 上游 BaTiO₃ + paste
+- [05_tw_distributors_3090_8043](research/008004/05_tw_distributors_3090_8043.md) — TW 代理通路 3090/8043
+- [06_downstream_and_takeaway](research/008004/06_downstream_and_takeaway.md) — 下游 BOM + pair trade + 風險
+- [07_distributors_deep](research/008004/07_distributors_deep.md) — 8043/3090 深度驗證 (6/1)
+- [08_upstream_deep](research/008004/08_upstream_deep.md) — 6173/4760 深度驗證 (6/1)
+- [09_hidden_candidates](research/008004/09_hidden_candidates.md) — TW 隱藏候選 (3030 德律 / 3189 景碩)
+- [10_rd_pipeline](research/008004/10_rd_pipeline.md) — 2327/2492 R&D pipeline 6 維度驗證
+- [11_catalyst_calendar](research/008004/11_catalyst_calendar.md) — Catalyst calendar 2026/6 – 2027/H1
 
 ## Inbox (Redis → Vault weekly dumps)
 
@@ -66,9 +83,9 @@ Vault `entities/` holds 1-line stubs that link back to `../Pilot_Reports/{Indust
 |---|---:|
 | user | 3 |
 | projects | 3 |
-| concepts | 6 |
+| concepts | 8 |
 | trading | 2 |
 | inbox | 0 (dynamic) |
 | meta | 2 |
 | entities | 0 (on-demand) |
-| **Total** | **16** |
+| **Total** | **18** |

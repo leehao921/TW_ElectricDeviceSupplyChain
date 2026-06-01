@@ -155,6 +155,33 @@ Sources:
 
 ---
 
+## Murata GRM011 量產 SKU 詳表 (補充 2026-06-01)
+
+從 DigiKey / Mouser / TME 商業庫存可確認的 [[Murata]] GRM011 series (008004 inch / 0.25 × 0.125 mm) 公開 part number:
+
+| Part Number | 容值 | 耐壓 | 介電 | 公差 | 用途 / 備註 |
+|---|---|---|---|---|---|
+| **GRM011R60J104M** | **0.1 µF** | 6.3V | X5R | ±20% | **世界首發 0.1 µF in 008004, 2019/12 量產**, 5G 智慧手機 PoP 模組去耦核心 |
+| **GRM011R60J104ME01L** | 0.1 µF | 6.3V | X5R | ±20% | DigiKey/Mouser 商業庫存 (上述 0.1µF SKU 完整 part code) |
+| GRM011R61A101KE01L | 100 pF | 10V | X5R | ±10% | 通用去耦, TME 商業庫存 |
+| GRM011 C0G (Class I) 系列 | 1 pF – 0.1 µF | 4-6.3V | C0G (NP0) | ±5% | RF / 高 Q / 高頻去耦, 溫度補償型 |
+| GRM011 X5R (Class II) 系列 | 100 pF – 0.1 µF | 4-10V | X5R | ±10-20% | 一般去耦, 容值較高 |
+
+**容值範圍**: GRM011 C0G 系列覆蓋 1 pF 至 0.1 µF;X5R 系列覆蓋 100 pF 至 0.1 µF。
+
+**2026/04 [[Murata]] 升級**: 推出 008004 0.1 µF GRM011R60J104M 量產量, 搭配 [[Murata]] **Izumo 新廠 JPY 47B (~EUR 254.6M)、70,000 m² (10 樓 clean room class 100)** 於 4/3 完工 — 預計 2026 H2 出貨爬升。
+
+Sources (本節):
+- [Murata GRM011 0.1µF 008004 世界首發 — Murata 官方 press 2019/12/05](https://www.murata.com/en-us/news/capacitor/ceramiccapacitor/2019/1205)
+- [GRM Series Lineup — Murata 官方](https://www.murata.com/en-us/products/capacitor/ceramiccapacitor/overview/lineup/smd/grm)
+- [GRM011R60G104ME01L — DigiKey 商業庫存](https://www.digikey.com/en/products/detail/murata-electronics/GRM011R60G104ME01L/16821057)
+- [GRM011R61A101KE01L 100pF 10V X5R — TME](https://www.tme.com/us/en-us/details/grm011r61a101ke01l/mlcc-smd-capacitors/murata/)
+- [Murata 008004 100pF Class I 世界首發 — Passive Components EU](https://passive-components.eu/murata-world-first-008004-size-temperature-compensation-type-100pf-mlcc/)
+- [Murata Develops 0.1µF in 008004 — Passive Components EU](https://passive-components.eu/murata-develops-the-worlds-first-0-1uf-multilayer-ceramic-capacitor-in-008004-size/)
+- [Murata Izumo New Building Completion — evertiq 2026/04/07](https://evertiq.com/design/2026-04-07-murata-completes-new-mlcc-production-building-in-japan)
+
+---
+
 ## ASP 對比 (估算)
 
 > 本節無公開 1:1 ASP 對照 (Big-4 並不揭露單顆 ASP，distributor 通路報價亦會混合 spec)。以下為**業界口耳相傳的相對倍數**，建議標為「unverified industry estimate」並由 Unit 5/6 補強。
