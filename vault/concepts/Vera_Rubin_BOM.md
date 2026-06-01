@@ -142,15 +142,31 @@ WHERE supplier_tw_proxy ILIKE '%欣興%' AND platform='VR200';
 
 ## 觀察 catalyst (next 12 月)
 
+> **6 月密集事件 (來自 [[../research/macro_calendar_2026-06]] YouTube 尼可拉斯楊Live精)**
+
 | 時間 | 事件 | 對 thesis 影響 |
 |---|---|---|
+| **2026/6/1 (今天)** | **黃仁勳 [[Computex]] Taipei keynote** | **VR200 量產時程 / Rubin Ultra 預告 — 整個 BOM 數據 reality check** |
+| **2026/6/3** | **[[Broadcom]] 財報** | AI 基建客戶 capex (custom ASIC vs NVIDIA 競爭) — 影響光通訊/NVLink supply chain |
 | 2026/6/2-6/6 | [[Computex]] 2026 — VR200 量產時程確認 | 觸發短期動能 |
+| **2026/6/9** | **[[Apple]] WWDC** | iPhone 17 + Apple Intelligence → 3711 [[日月光投控]] (Apple OSAT) + 2344 (NOR Flash) + 008004 PoP |
+| **2026/6/10** | **美國 [[CPI]]** | 6月最重要單一數據, 影響 6/17 FOMC + risk-on/off |
+| **2026/6/17-18** | **[[FOMC]] 利率決議** | 全球金融市場核心事件 — 影響 DXY/TWD + 整體 risk appetite |
+| **2026/6/18** | **大型期權到期週高峰** | 機構避險 + 程式交易 → 波動放大,**Vera Rubin Tier 1 標的可能異常波動** |
+| **2026/6/24** | **[[NVIDIA]] 股東大會 + [[Micron]] 財報 (同日!)** | **整月最重要 HBM4 cycle reality check** — 直接驗證 Unit 18 HBM4 +67% thesis + 2344 [[華邦電]] + 3711 [[日月光投控]] institutional alpha |
+| 2026/6/27 | Russell 指數年度 rebalance | ETF 被迫換倉 (小型股機械式波動,影響中小型 Tier 2 標的) |
 | 2026/8-9 | NVIDIA Q2 FY27 季報 — VR200 ramp 訊號 | beat → 加碼 basket |
 | 2026/9 | iPhone 17 拆機 (008004 驗證) | 順便看 [[Murata]] 006003 訊號 |
 | 2026/10/14-18 | [[CEATEC]] JAPAN — Murata 006003 公開 | ASP cliff timer 啟動 |
 | 2026/11 | Q3 法說 (台廠 ODM/PCB/CCL) | VR200 訂單能見度真實揭露 |
 | 2026/12-2027/H1 | VR200 量產出貨爬升 | Tier 1 basket 加碼窗 |
 | 2027 H2 | Rubin Ultra (CPO 全面導入) | 階段切換, 重新評估 basket |
+
+### Top 3 必看 6 月 catalyst (本月最關鍵)
+
+1. **6/24 NVIDIA + Micron 同日** — HBM/AI 共振, 2x buying/selling 強度;直接 reality check 2344 ★★★★★ 評等
+2. **6/17-18 FOMC** — 影響 [[Institutional_Alpha_2026-06]] 金融股 cluster 的外資 thesis (TWD+壽險 EV)
+3. **6/1 (今天晚上) Computex** — VR200 量產時程 / Rubin Ultra 進度,本 PR #25 BoM 數據 reality check
 
 ---
 
