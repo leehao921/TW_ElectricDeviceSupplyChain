@@ -90,3 +90,43 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 13 stale plans + 2 /tmp enrichment 待刪;21 worktrees + 21 worktree-agent-* branches 待 prune
 
 **Out of scope:** 921 modified Pilot_Reports (用戶前期 WIP), 其他 feature branches, PR #22
+
+## [2026-06-01 13:26 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index
+
+## [2026-06-01 13:28 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index
+
+## [2026-06-01 16:30 TWT] ingest | Vera Rubin VR200 BOM 12 細類 batch — DB + parquet 雙路存證
+
+**12 個 worker slice (Unit 16-27, ~3000 行) in `vault/research/vera_rubin_bom/`:**
+- 16 Rubin GPU silicon (+57%, TSMC N3P + CoWoS-L 4x reticle)
+- 17 Vera CPU silicon (+86%, 88 ARM Olympus cores)
+- 18 HBM4 memory (+67%, price-driven, capacity 持平)
+- 19 DRAM/SSD (+60%/+12% tier)
+- 20 MLCC + 鉭電容 (+171%, anchor $4,335 ✓ MS $4,300)
+- 21 PCB + HDI (+234%, anchor MS +233% ✓)
+- 22 CCL 銅箔基板 (+265%, M6→M8)
+- 23 ABF substrate (+82%, anchor MS +82% ✓)
+- 24 Power HVDC (新規格, 800V sidecar)
+- 25 Liquid cooling (+12%, anchor MS +12% ✓)
+- 26 Connectors + Network (+200%, NVLink 6 1.8→3.6 TB/s + 224G)
+- 27 Optical pluggable (+51%, 800G+1.6T mix, CPO <15% 試樣)
+
+**Coordinator deliverables:**
+- 新 TimescaleDB table `bom_components` (84 rows, 12 cat × 2 platform; PK platform/category/sub_category/source)
+- `scripts/load_vera_rubin_bom.py` — schema normalize + UPSERT
+- `data/vera_rubin_bom.parquet` (merged) + 12 per-unit parquet
+- `themes/Vera_Rubin.md` (族群供應鏈圖, 35+ TW tickers)
+- `vault/concepts/Vera_Rubin_BOM.md` (trader decision page)
+- `analysis/reports/2026-06-01_vera_rubin_bom.md` (anchor 對齊 reconciliation)
+
+**核心結論:**
+- 總計 **VR200 $13.17M vs GB300 $8.10M = +62.6% YoY** (本 batch);[[Morgan Stanley]] 公開估 ~$7.8M (差距主因 Optical scale-out 認列差異);扣 Optical 多算後 ~$8.17M 與 MS 對齊
+- 4 個細類完美對齊 MS anchor: MLCC ($4,335/$4,300) + ABF (+82%) + Cooling (+12%) + PCB (+234%)
+- TW alpha Tier 1: **2330 [[TSMC]] + 2383 [[台光電]] + 3037 [[欣興]] + 2313 [[華通]] + 3533 [[嘉澤]]**;2308 [[台達電]] 為 800V HVDC TW 唯一 reference design
+
+**Ticker 校正 (Golden Rule #2):**
+- 力致 = 3483 (Unit 25 修正,不是 6919)
+- 太極 = 4934 (Unit 18 修正,4956 是光鋐);改用 1717 [[長興]] (HBM4 underfill/EMC 真實 proxy)
+- 光環 = 3234 (Unit 27 修正,3454 是晶睿監控攝影機)
+
+## [2026-06-01 14:54 TWT] lint | 0 orphans, 0 stale, 1 contradictions, 0 missing-from-index, 0 stale-in-index

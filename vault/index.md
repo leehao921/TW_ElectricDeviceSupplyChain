@@ -30,6 +30,7 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [MLCC_008004](concepts/MLCC_008004.md) — 008004 (0.25×0.125mm) Big-4 獨占,TW 真實受惠 8043/3090 (Tier 1) > 6173/4760 (Tier 2);2327/2492 漲價 ≠ 008004 切入
 - [MLCC_008004_technical_deep_dive](concepts/MLCC_008004_technical_deep_dive.md) — 永久技術 reference:規格命名陷阱 + 技術門檻 4 維度 + Murata GRM011 SKU 詳表 + 006003 next-gen
 - [MLCC_008004_TW_verification](concepts/MLCC_008004_TW_verification.md) — 6/1 驗證版:3090 升 #1, 新增 3030 德律 + 3189 景碩;TW Ni paste 0 玩家為結構性卡點;隱藏 R&D = 1/5
+- [Vera_Rubin_BOM](concepts/Vera_Rubin_BOM.md) — VR200 12 細類 BOM (DB store);+62.6% YoY vs GB300;CCL +265% / PCB +234% / Connector +200%;TW alpha: 2330/2383/3037/2313/3533
 
 ## Trading
 
@@ -50,6 +51,20 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [09_hidden_candidates](research/008004/09_hidden_candidates.md) — TW 隱藏候選 (3030 德律 / 3189 景碩)
 - [10_rd_pipeline](research/008004/10_rd_pipeline.md) — 2327/2492 R&D pipeline 6 維度驗證
 - [11_catalyst_calendar](research/008004/11_catalyst_calendar.md) — Catalyst calendar 2026/6 – 2027/H1
+
+`vault/research/vera_rubin_bom/` — 12 個 BOM 細類 slice (Unit 16-27, 共 ~3000 行) 支撐 Vera_Rubin_BOM 概念頁:
+- [16_gpu_silicon](research/vera_rubin_bom/16_gpu_silicon.md) — Rubin GPU TSMC N3P + CoWoS-L 4x reticle (+57%)
+- [17_cpu_silicon](research/vera_rubin_bom/17_cpu_silicon.md) — Vera ARM Olympus 88 cores (+86%)
+- [18_hbm4](research/vera_rubin_bom/18_hbm4.md) — HBM4 8-stack 12-Hi 22 TB/s (+67%, price-driven)
+- [19_dram_ssd](research/vera_rubin_bom/19_dram_ssd.md) — LPDDR5X 27TB + SSD 774TB
+- [20_passives](research/vera_rubin_bom/20_passives.md) — MLCC + 鉭電容 $4,335 (+171%)
+- [21_pcb_hdi](research/vera_rubin_bom/21_pcb_hdi.md) — PCB +234% (Megtron 9 + HVDC backplane)
+- [22_ccl](research/vera_rubin_bom/22_ccl.md) — CCL +265% (M6→M8)
+- [23_abf](research/vera_rubin_bom/23_abf.md) — ABF +82% (Morgan Stanley anchor)
+- [24_power](research/vera_rubin_bom/24_power.md) — 800V HVDC sidecar (+32%)
+- [25_cooling](research/vera_rubin_bom/25_cooling.md) — Liquid cooling +12% (anchor)
+- [26_connectors_network](research/vera_rubin_bom/26_connectors_network.md) — NVLink 6 + 224G (+200%)
+- [27_optical_chassis](research/vera_rubin_bom/27_optical_chassis.md) — 800G+1.6T + CPO <15% 試樣
 
 `vault/research/cleanup/` — repo 整理 audit 報告 (2026-06-01):
 - [pilot_audit](research/cleanup/pilot_audit_2026-06-01.md) — Pilot_Reports 品質 (1734/1735 clean, 1 ticker 3622 < 8 wikilinks)
@@ -72,7 +87,7 @@ Vault `entities/` holds 1-line stubs that link back to `../Pilot_Reports/{Indust
 ## External raw sources (NOT in vault, linked from concepts)
 
 - `../Pilot_Reports/` — 926 ticker .md (raw research)
-- `../themes/` — 28 thematic supply chain .md (added MLCC.md 5/26, 邊緣運算.md 5/20)
+- `../themes/` — 29 thematic supply chain .md (added Vera_Rubin.md 6/1, MLCC.md 5/26, 邊緣運算.md 5/20)
 - `../analysis/reports/` — Dated analysis CSV + MD
 - `../analysis/dashboards/latest/` — HTML covariance dashboard
 
@@ -88,9 +103,9 @@ Vault `entities/` holds 1-line stubs that link back to `../Pilot_Reports/{Indust
 |---|---:|
 | user | 3 |
 | projects | 3 |
-| concepts | 8 |
+| concepts | 9 |
 | trading | 2 |
 | inbox | 1 (2026-W20 snapshot) |
 | meta | 2 |
 | entities | 0 (on-demand) |
-| **Total** | **19** |
+| **Total** | **20** |
