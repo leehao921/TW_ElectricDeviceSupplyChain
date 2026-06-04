@@ -1,0 +1,295 @@
+# wikilinks_baseline.txt — auto-generated, do not edit by hand
+# Lines below are wikilink targets that were broken at baseline time.
+# New broken wikilinks not in this list will fail tests/test_wikilinks.py.
+# Shrink over time by fixing references or adding to WIKILINKS.md / vault.
+# Rebuild: python3 tests/test_wikilinks.py --rebuild-baseline
+...
+../../themes/MLCC.md
+0050
+0056
+006003
+006208
+008004
+00878
+1216
+1303
+1605
+2027
+2603
+2609
+2615
+A19
+AI 加速器
+AI 資料中心
+AMB 基板
+ASE
+ASM Pacific
+ASX
+Aisin
+Alro Steel
+Atotech
+Azoteq
+B300
+BCD
+BaTiO₃
+Blackwell
+C0G
+CDMS
+CEATEC
+CIPS
+CMA CGM
+CMoney
+COF
+COSCO
+CPI
+CapEx
+Chilisin
+Chroma ATE
+Cogne
+Compal
+Computex
+Computex 2026
+DDR3
+Daiken
+Daiken Chemical
+Decoupling capacitor
+Disco
+DuPont
+ECTC
+EPTC
+ETF
+Eastman
+Eirich
+Embedded Capacitor in Package
+FOMC
+FTSE
+FTSE TWSE 50
+FTSE TWSE Taiwan 50
+Fenghua
+Ferro
+Foxconn
+Foxconn AI
+Fuji Machine
+Fuji Titanium
+Future Electronics
+Goepel
+HBM3e
+HBM4
+HGX
+HMM
+HP Enterprise
+HPE
+HVDC
+Hapag-Lloyd
+Hirano Tecseed
+Holy Stone
+IBM
+IEEE
+IEEE EPTC
+Ibiden
+JFE
+JFE Mineral
+Juneteenth
+KCTECH
+KEMET
+KOA
+Kemet
+Kyocera AVX
+LINE Pay
+LPDDR5X
+Lintec
+Low Dk/Df
+MMS
+MR-MUF
+MSCI
+MSCI Taiwan
+MSCI 台灣指數
+MediaTek
+Mega Cap
+Mitsubishi Gas Chemical
+Mitsui
+Mitsui Mining & Smelting
+Murata Machinery
+Murata Manufacturing
+Murata 子公司
+NB
+NP0
+NVL72
+NYSE
+Ni
+Nichidenbo
+Nippon Chemi-con
+Nippon Chemical
+Nippon Chemical Industrial
+Noritake
+OBC
+ONE
+OOCL
+PSU
+Pixel
+Prince International
+Pulse
+Quanta
+RCBC
+Reliance Steel & Aluminum
+Richart
+Rubin
+Rubin Ultra
+Ryerson
+SEMCO
+SOI
+Sakai 化學
+Sekisui
+Serial NOR Flash
+Shandong Sinocera
+Shioaji
+Shoei
+Shoei Chemical
+Sinoceramics
+Stop loss
+Sumitomo Metal Mining
+TAIEX
+TAIFEX
+TOKIN
+TPEx
+TPU
+TWD
+TWSE
+TWSE 50
+TXF
+TXO
+Tanaka Kikinzoku
+Tata
+Tata Electronics
+Test Research Inc
+Toho Titanium
+Toray
+Tower Semiconductor
+UBE
+USD/TWD
+USI
+VIF
+VR200
+VSMC
+Vanguard
+Vera Rubin BOM
+Vera Rubin BoM
+Vera_Rubin_BOM
+Walsin Specialty Steel
+Walsin Technology
+Wistron
+X5R
+X7R
+Yageo
+Zhaorong
+busbar
+delta hedging
+iPhone 12
+七星電子
+不鏽鋼
+世禾
+中信
+中信證券
+中信金
+中國信託商業銀行
+中砂
+中興電
+交通部
+佳邦
+信昌電
+優分析
+元大
+元大投信
+元大期貨
+元大證券
+元大金
+兆豐證券
+兆豐金
+兆豐銀行
+光洋熱工
+全科
+公股銀行
+凱基
+凱基證券
+勤凱
+千如
+台化
+台塑化
+台新金
+台灣國際造船
+台聚
+嘉澤
+國揚實
+國泰人壽
+國泰投信
+國泰金
+國立交通大學
+國立陽明交通大學
+國精化
+士電
+壹蘋新聞網
+大成鋼
+奇力新
+好望角
+宏泰
+富士多
+富邦人壽
+富邦投信
+富邦證券
+富邦金
+康舒
+德律
+新光人壽
+新光金 (舊)
+新台幣
+新東工業
+日電貿
+村田 PSU
+永光
+永豐
+永豐證券
+沃旭能源
+海底電纜
+瀚宇博德
+由田
+眾達-KY
+科揚
+科揚企業
+精成科技
+精測
+紅海危機
+統一企業
+統一企業中國
+統一投信
+統一證券
+經濟日報
+美元清算銀行
+群益證券
+致茂
+舶鈞
+芝浦電子
+華南金
+華城
+華新
+華新科技
+華東科技
+萬潤
+蜜望實
+證交所
+豐田通商
+豐雲學堂
+財政部
+起而行綠能
+達方
+金管會
+鉅亨網
+銀
+銅
+鎳
+鎳粉
+長叡國際興業
+長興
+雙酚A
+雙鴻
+電線電纜
+鴻鈞 / 宏泰應用材料

@@ -1,29 +1,30 @@
 #!/bin/bash
-# Pre-commit hook: 若 commit 動到 vault/concepts/*.md 或 tests/*.py, 跑 test_alpha_concepts.py
-# 阻止過時 thesis 進入 master.
+# Pre-commit hook: 跑 tests/ 全集當動到 vault / tests / BOM data / WIKILINKS
+# 阻止過時 thesis、schema drift、broken wikilink 進入 master.
 #
-# Bypass with: git commit --no-verify (use sparingly, eg 你已知 DB 暫時 down)
+# Bypass with: git commit --no-verify (use sparingly)
 
-set -eo pipefail   # pipefail 關鍵:確保 pytest 失敗能傳遞
+set -eo pipefail
 
 CHANGED=$(git diff --cached --name-only --diff-filter=ACM)
 
-# 只有當動到 concept page 或 test 本身才跑
-if echo "$CHANGED" | grep -qE '^(vault/concepts/.*\.md|tests/.*\.py)$'; then
-    echo "[pre-commit] 偵測到 concept page / test 變更, 跑 thesis 驗證..."
+TRIGGERS='^(vault/.*\.md|tests/.*\.py|data/vera_rubin_bom/.*\.parquet|WIKILINKS\.md)$'
+if echo "$CHANGED" | grep -qE "$TRIGGERS"; then
+    echo "[pre-commit] 偵測到 vault/tests/BOM 變更, 跑 tests/ 全集..."
 
-    # 直接跑 pytest, 不要 pipe, exit code 直接傳遞
-    if ! python3 -m pytest tests/test_alpha_concepts.py -x --tb=short -q; then
+    if ! python3 -m pytest tests/ -x --tb=short -q; then
         echo ""
-        echo "❌ Thesis 驗證失敗 — 概念頁 testable_claims 與 DB 真實數據不符"
-        echo "   修正方法 (3 選 1):"
-        echo "   (a) 修正 concept page Top 5 排序 (thesis 已過時)"
-        echo "   (b) 調整 testable_claims threshold 反映現況"
-        echo "   (c) git commit --no-verify (僅在 DB 暫時無法 query 時使用)"
+        echo "❌ Test 失敗 — 概念頁 thesis 與 DB 不符, BOM schema drift, 或 wikilink broken"
+        echo "   修正方法 (依 test 訊息):"
+        echo "   (a) 修正 concept page 內容 (thesis / wikilink / referenced file)"
+        echo "   (b) 補 vault/Pilot_Reports 對應檔案"
+        echo "   (c) 跑 scripts/build_wikilink_index.py 重產 WIKILINKS.md"
+        echo "   (d) python3 tests/test_wikilinks.py --rebuild-baseline (若是合法新外部名稱)"
+        echo "   (e) git commit --no-verify (僅 DB 暫時無法 query)"
         exit 1
     fi
 
-    echo "[pre-commit] ✓ thesis 驗證通過"
+    echo "[pre-commit] ✓ 全 tests 通過"
 fi
 
 exit 0

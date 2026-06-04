@@ -237,3 +237,4 @@ ORDER BY SUM(foreign_net) + SUM(trust_net) DESC;
 **Source**: 6 unit slice research (Unit 28-33 in `vault/research/institutional_alpha/`) + trading-timescaledb 5/16-5/29 institutional_stock query + Pilot_Reports 財務概況 + vault prior batch (Vera_Rubin_BOM + MLCC_008004 + FOPLP).
 
 **Status**: monitoring — 6/10 後重新撈一次 5/30-6/9 法人變化驗證 thesis 持續性。
+
