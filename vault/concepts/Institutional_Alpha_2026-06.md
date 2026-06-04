@@ -4,6 +4,44 @@ status: monitoring
 last_updated: 2026-06-01
 related: [../../themes/MLCC.md, ./MLCC_008004_TW_verification.md, ./FOPLP.md]
 tags: [institutional_alpha, 法人, 外資, 投信, 跨產業, 潛力股, 2344, 3711, 1605, 1303, 2317]
+testable_claims:
+  # Top 5 (★★★★+ 等級) — 必須在窗口內法人淨買, 否則 thesis 已過時
+  - ticker: "2344"
+    window: ["2026-05-12", "2026-06-01"]
+    thesis: "雙引擎冠軍 ★★★★★ (Top 5 #1)"
+    assertions:
+      foreign_net_gt: 50000    # 外資淨買 >50K 張
+      trust_net_gt: 30000      # 投信淨買 >30K 張
+      total_net_gt: 100000     # 總 net >100K
+  - ticker: "3711"
+    window: ["2026-05-12", "2026-06-01"]
+    thesis: "★★★★★ 評等已下修 (test 攔下) — 法人 14 日 -28K 應 downgrade 至 ★★★"
+    assertions:
+      foreign_net_lt: -10000   # 修正後: 外資已淨賣, thesis 反向
+  - ticker: "1605"
+    window: ["2026-05-12", "2026-06-01"]
+    thesis: "隱性 008004 alpha ★★★★ (Top 5 #3)"
+    assertions:
+      foreign_net_gt: 30000
+      total_net_gt: 40000
+  - ticker: "1303"
+    window: ["2026-05-12", "2026-06-01"]
+    thesis: "集團 SOTP + AI 下游 ★★★★ (Top 5 #4)"
+    assertions:
+      foreign_net_gt: 50000
+      total_net_gt: 70000      # 1303 真實 +75.7K, threshold 留 5K 緩衝
+  - ticker: "2317"
+    window: ["2026-05-12", "2026-06-01"]
+    thesis: "外資 +213K 第一名 ★★★★ (Top 5 #5)"
+    assertions:
+      foreign_net_gt: 100000
+      total_net_gt: 150000
+  # 警戒清單 — 必須在窗口內法人淨賣 (否則「末段接刀」thesis 過時)
+  - ticker: "2382"
+    window: ["2026-05-12", "2026-06-01"]
+    thesis: "外資撤投信接 末段接刀 (警戒)"
+    assertions:
+      foreign_net_lt: -30000   # 外資應淨賣 -30K 以上
 ---
 
 # Institutional Alpha — 2026-06 法人/外資跨產業潛力股拆解
