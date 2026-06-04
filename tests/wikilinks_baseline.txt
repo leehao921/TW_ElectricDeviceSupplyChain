@@ -22,6 +22,7 @@ A19
 AI 加速器
 AI 資料中心
 AMB 基板
+ARM
 ASE
 ASM Pacific
 ASX
@@ -35,7 +36,9 @@ BaTiO₃
 Blackwell
 C0G
 CDMS
+CDNS
 CEATEC
+CEVA
 CIPS
 CMA CGM
 CMoney
@@ -72,6 +75,8 @@ Foxconn AI
 Fuji Machine
 Fuji Titanium
 Future Electronics
+GB200
+GB300
 Goepel
 HBM3e
 HBM4
@@ -109,6 +114,7 @@ Mega Cap
 Mitsubishi Gas Chemical
 Mitsui
 Mitsui Mining & Smelting
+Murata
 Murata Machinery
 Murata Manufacturing
 Murata 子公司
@@ -131,14 +137,17 @@ Prince International
 Pulse
 Quanta
 RCBC
+Rambus
 Reliance Steel & Aluminum
 Richart
 Rubin
 Rubin Ultra
 Ryerson
 SEMCO
+SNPS
 SOI
 Sakai 化學
+Samsung Electro-Mechanics
 Sekisui
 Serial NOR Flash
 Shandong Sinocera
@@ -158,6 +167,7 @@ TWSE
 TWSE 50
 TXF
 TXO
+Taiyo Yuden
 Tanaka Kikinzoku
 Tata
 Tata Electronics
@@ -172,6 +182,7 @@ VIF
 VR200
 VSMC
 Vanguard
+Vera Rubin
 Vera Rubin BOM
 Vera Rubin BoM
 Vera_Rubin_BOM
@@ -248,11 +259,11 @@ iPhone 12
 永光
 永豐
 永豐證券
-沃旭能源
 海底電纜
 瀚宇博德
 由田
 眾達-KY
+禾伸堂
 科揚
 科揚企業
 精成科技
