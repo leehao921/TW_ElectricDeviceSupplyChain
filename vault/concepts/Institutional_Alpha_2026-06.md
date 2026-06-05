@@ -42,6 +42,23 @@ testable_claims:
     thesis: "外資撤投信接 末段接刀 (警戒)"
     assertions:
       foreign_net_lt: -30000   # 外資應淨賣 -30K 以上
+  # ASIC service / IP cascade (2026-06-04 IP_Ecosystem_Database batch 追補)
+  - ticker: "3661"
+    window: ["2026-03-06", "2026-06-04"]
+    thesis: "世芯-KY ★★★★★ — Amazon Trainium ASIC, CDNS IP +22% YoY 受惠"
+    assertions:
+      foreign_net_gt: 5000     # 外資淨買 >5K 張
+      total_net_gt: 4000       # 總 net >4K
+  - ticker: "3443"
+    window: ["2026-03-06", "2026-06-04"]
+    thesis: "創意 ★★★★ — TSMC OIP 嫡系 ASIC service, 雙引擎"
+    assertions:
+      total_net_gt: 1500       # 總 net >1.5K (3147 actual, buffer)
+  - ticker: "6533"
+    window: ["2026-03-06", "2026-06-04"]
+    thesis: "晶心科 警戒 — RISC-V CPU IP 對應 ARM RPO 收縮, 法人撤"
+    assertions:
+      total_net_lt: 0          # 應淨賣 (actual -1302)
 ---
 
 # Institutional Alpha — 2026-06 法人/外資跨產業潛力股拆解
@@ -73,6 +90,21 @@ testable_claims:
 | **2356** | [[英業達]] | 外資 -14K / 投信 +50K — 同上但較緩 | 避開 |
 | **2327** | [[國巨]] | (已在 008004 batch 驗證) 外資 -32K / 投信 +28K, 真正 AI 武器是 Kemet 鉭電容不是 micro-MLCC | 避開 (008004 結論延伸) |
 | **2481** | [[強茂]] | (已在 HVDC 潛力股分析) 外資 -23K / 投信 +20K, 末段接刀 | 避開 |
+
+---
+
+## 追補: ASIC Service / IP 動能受惠 (2026-06-04 [[IP_Ecosystem_Database]] batch 發現)
+
+| Ticker | 公司 | 90d 法人累計 (張) | 受惠路徑 | ★ |
+|---|---|---:|---|---:|
+| **3661** | [[3661_世芯-KY]] (Alchip) | **外資 +7,329 / 投信 -626 / 總 +6,794** | [[Amazon]] Trainium ASIC service, 對應 [[CDNS]] IP segment **+22% YoY** record backlog | ★★★★★ |
+| **3443** | [[3443_創意]] (GUC) | 外資 +1,140 / 投信 +2,148 / **總 +3,147 雙引擎** | [[台積電]] OIP 嫡系 ASIC service, FY25 Q4 營收 **124 億 TWD** (TW IP 板塊最大) | ★★★★ |
+
+警戒新增:
+- **[[6533_晶心科]]** — 90d 法人**淨賣 -1,302 張** (TW IP 唯一淨賣); 對應 [[ARM]] Holdings RPO -7.8% 收縮 (US 母市場 IP 簽約動能弱化); RISC-V 取代 ARM 敘事尚未轉成 [[NVIDIA]]/Hyperscaler 量級訂單
+- **[[ARM]] Holdings** (US, 非台股) — RPO 6 個月 -7.8% vs P/E 100+;簽約動能與估值嚴重背離
+
+完整資料 + 證據鏈 + 跨家對拍見 [[IP_Ecosystem_Database]]。
 
 ---
 
