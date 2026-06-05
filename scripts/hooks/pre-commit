@@ -1,0 +1,30 @@
+#!/bin/bash
+# Pre-commit hook: 跑 tests/ 全集當動到 vault / tests / BOM data / WIKILINKS
+# 阻止過時 thesis、schema drift、broken wikilink 進入 master.
+#
+# Bypass with: git commit --no-verify (use sparingly)
+
+set -eo pipefail
+
+CHANGED=$(git diff --cached --name-only --diff-filter=ACM)
+
+TRIGGERS='^(vault/.*\.md|tests/.*\.py|data/vera_rubin_bom/.*\.parquet|WIKILINKS\.md)$'
+if echo "$CHANGED" | grep -qE "$TRIGGERS"; then
+    echo "[pre-commit] 偵測到 vault/tests/BOM 變更, 跑 tests/ 全集..."
+
+    if ! python3 -m pytest tests/ -x --tb=short -q; then
+        echo ""
+        echo "❌ Test 失敗 — 概念頁 thesis 與 DB 不符, BOM schema drift, 或 wikilink broken"
+        echo "   修正方法 (依 test 訊息):"
+        echo "   (a) 修正 concept page 內容 (thesis / wikilink / referenced file)"
+        echo "   (b) 補 vault/Pilot_Reports 對應檔案"
+        echo "   (c) 跑 scripts/build_wikilink_index.py 重產 WIKILINKS.md"
+        echo "   (d) python3 tests/test_wikilinks.py --rebuild-baseline (若是合法新外部名稱)"
+        echo "   (e) git commit --no-verify (僅 DB 暫時無法 query)"
+        exit 1
+    fi
+
+    echo "[pre-commit] ✓ 全 tests 通過"
+fi
+
+exit 0

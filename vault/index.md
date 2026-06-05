@@ -30,6 +30,7 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [MLCC_008004](concepts/MLCC_008004.md) — 008004 (0.25×0.125mm) Big-4 獨占,TW 真實受惠 8043/3090 (Tier 1) > 6173/4760 (Tier 2);2327/2492 漲價 ≠ 008004 切入
 - [MLCC_008004_technical_deep_dive](concepts/MLCC_008004_technical_deep_dive.md) — 永久技術 reference:規格命名陷阱 + 技術門檻 4 維度 + Murata GRM011 SKU 詳表 + 006003 next-gen
 - [MLCC_008004_TW_verification](concepts/MLCC_008004_TW_verification.md) — 6/1 驗證版:3090 升 #1, 新增 3030 德律 + 3189 景碩;TW Ni paste 0 玩家為結構性卡點;隱藏 R&D = 1/5
+- [Institutional_Alpha_2026-06](concepts/Institutional_Alpha_2026-06.md) — 法人 5/16-5/29 跨產業潛力股;Top 5: 2344 華邦電(雙引擎冠軍) / 3711 日月光 / 1605 華新(隱性 008004) / 1303 南亞 / 2317 鴻海
 
 ## Trading
 
@@ -50,6 +51,14 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [09_hidden_candidates](research/008004/09_hidden_candidates.md) — TW 隱藏候選 (3030 德律 / 3189 景碩)
 - [10_rd_pipeline](research/008004/10_rd_pipeline.md) — 2327/2492 R&D pipeline 6 維度驗證
 - [11_catalyst_calendar](research/008004/11_catalyst_calendar.md) — Catalyst calendar 2026/6 – 2027/H1
+
+`vault/research/institutional_alpha/` — 6 個 cluster slice 支撐 Institutional_Alpha_2026-06 概念頁:
+- [28_semi_memory](research/institutional_alpha/28_semi_memory.md) — 6770 力積電 / 5347 世界先進 / 2344 華邦電 ★★★★★ / 2408 南亞科
+- [29_ai_server_odm](research/institutional_alpha/29_ai_server_odm.md) — 2317 鴻海 / 3231 緯創 / 2324 仁寶 / 2356 / 2382 法人輪動
+- [30_hvdc_grid_supplements](research/institutional_alpha/30_hvdc_grid_supplements.md) — 1605 華新 (隱性 008004 sleeve) / 6282 康舒
+- [31_hbm_packaging](research/institutional_alpha/31_hbm_packaging.md) — 3711 日月光 #1 / 2449 京元電子 / 6147 頎邦 警戒
+- [32_financials](research/institutional_alpha/32_financials.md) — 7 金控法人輪動 (外資 vs 投信 thesis 分流)
+- [33_traditional](research/institutional_alpha/33_traditional.md) — 1303 南亞 / 2027 大成鋼 / 2609 陽明 / 1216 統一 (2/4 仍是 AI 下游)
 
 ## Inbox (Redis → Vault weekly dumps)
 
@@ -83,9 +92,9 @@ Vault `entities/` holds 1-line stubs that link back to `../Pilot_Reports/{Indust
 |---|---:|
 | user | 3 |
 | projects | 3 |
-| concepts | 8 |
+| concepts | 9 |
 | trading | 2 |
 | inbox | 0 (dynamic) |
 | meta | 2 |
 | entities | 0 (on-demand) |
-| **Total** | **18** |
+| **Total** | **19** |
