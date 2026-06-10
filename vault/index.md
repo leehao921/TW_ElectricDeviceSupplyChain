@@ -32,6 +32,7 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 - [MLCC_008004_TW_verification](concepts/MLCC_008004_TW_verification.md) — 6/1 驗證版:3090 升 #1, 新增 3030 德律 + 3189 景碩;TW Ni paste 0 玩家為結構性卡點;隱藏 R&D = 1/5
 - [Institutional_Alpha_2026-06](concepts/Institutional_Alpha_2026-06.md) — 法人 5/16-5/29 跨產業潛力股;Top 5: 2344 華邦電(雙引擎冠軍) / 3711 日月光 / 1605 華新(隱性 008004) / 1303 南亞 / 2317 鴻海
 - [IP_Ecosystem_Database](concepts/IP_Ecosystem_Database.md) — 半導體 IP/EDA 動能監測:CDNS IP +22%/SNPS Design IP -5.8%/ARM RPO -7.8%;TW cascade 3661+3443 雙引擎 vs 6533 法人撤;PatentsView 失效已文件化
+- [PMIC_Sector_EFA_2026-06](concepts/PMIC_Sector_EFA_2026-06.md) — 7 PMIC ticker × 16 季 EFA:KMO 0.692 ✓ / Bartlett p=1e-17 / Horn k=1 / F1 解釋 72.3%;通嘉 0.94 純板塊 vs 茂達 0.78 idiosyncratic (跟國巨收購一致);2023 Q1 -2.68σ 是教科書級買點
 
 ## Trading
 

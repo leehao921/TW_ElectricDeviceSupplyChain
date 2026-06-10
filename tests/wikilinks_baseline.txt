@@ -4,20 +4,43 @@
 # Shrink over time by fixing references or adding to WIKILINKS.md / vault.
 # Rebuild: python3 tests/test_wikilinks.py --rebuild-baseline
 ...
+../../Pilot_Reports/Computer Hardware/6579_研揚
+../../Pilot_Reports/Electronic Components/2317_鴻海
+../../Pilot_Reports/Electronic Components/2383_台光電
+../../Pilot_Reports/Electronic Components/2408_南亞科
+../../Pilot_Reports/Electronic Components/3481_群創
+../../Pilot_Reports/Electronic Components/5469_瀚宇博
+../../Pilot_Reports/Semiconductors/2330_台積電
+../../Pilot_Reports/Semiconductors/2408_南亞科
+../../Pilot_Reports/Semiconductors/2454_聯發科
+../../themes/AI_伺服器.md
 ../../themes/MLCC.md
+../../themes/NVIDIA.md
+../../themes/Vera_Rubin.md
+../../themes/邊緣運算.md
+../Pilot_Reports/Semiconductors/2330_台積電
+../research/macro_calendar_2026-06
 0050
 0056
 006003
 006208
 008004
 00878
+01005
+1.6T
 1216
 1303
 1605
 2027
+2456 奇力新
+2492 華新
 2603
 2609
 2615
+3454
+5285 啟碁
+800G
+800V HVDC
 A19
 AI 加速器
 AI 資料中心
@@ -26,20 +49,31 @@ ARM
 ASE
 ASM Pacific
 ASX
+AT&S
 Aisin
 Alro Steel
 Atotech
+Ayar Labs
 Azoteq
+B200
 B300
 BCD
+BT 樹脂
 BaTiO₃
 Blackwell
+Blackwell Ultra
+BlueField
+BlueField-3
+BlueField-4
+Bus bar
 C0G
 CDMS
 CDNS
+CDU
 CEATEC
 CEVA
 CIPS
+CLAUDE.md
 CMA CGM
 CMoney
 COF
@@ -48,36 +82,53 @@ CPI
 CapEx
 Chilisin
 Chroma ATE
+CoPoS
+CoWoS-L
 Cogne
+Coherent
+Cold plate
 Compal
 Computex
 Computex 2026
+ConnectX
+ConnectX-9 SuperNIC
 DDR3
 Daiken
 Daiken Chemical
 Decoupling capacitor
 Disco
 DuPont
+E1.S
+E3.S
 ECTC
 EPTC
 ETF
 Eastman
 Eirich
 Embedded Capacitor in Package
+Eoptolink
+FOCoS
+FOCoS-Bridge
 FOMC
+FR4
 FTSE
 FTSE TWSE 50
 FTSE TWSE Taiwan 50
 Fenghua
 Ferro
+Flip Chip
 Foxconn
 Foxconn AI
 Fuji Machine
 Fuji Titanium
 Future Electronics
-GB200
-GB300
+GRM011
+Gen6
 Goepel
+Grace
+Grace CPU
+H100
+H200
 HBM3e
 HBM4
 HGX
@@ -85,89 +136,141 @@ HMM
 HP Enterprise
 HPE
 HVDC
+HVLP3
+HVLP4
 Hapag-Lloyd
+Hashrate Index
 Hirano Tecseed
 Holy Stone
 IBM
 IEEE
 IEEE EPTC
+ITO 薄膜
 Ibiden
+InP
+InfiniBand
+Innolight
 JFE
 JFE Mineral
+JIC
+Jetson Orin Nano Super
 Juneteenth
 KCTECH
 KEMET
 KOA
+KOSPI
 Kemet
 Kyocera AVX
 LINE Pay
 LPDDR5X
+LPDDR6
 Lintec
+Liquid cooling
 Low Dk/Df
+Lumentum
+M.2
+M4 CCL
+M6 CCL
+M7 CCL
+M8 CCL
 MMS
+MPS
 MR-MUF
 MSCI
 MSCI Taiwan
 MSCI 台灣指數
+Manifold
 MediaTek
 Mega Cap
+Mellanox
 Mitsubishi Gas Chemical
 Mitsui
 Mitsui Mining & Smelting
-Murata
+Morgan Stanley
 Murata Machinery
 Murata Manufacturing
 Murata 子公司
+N3P
+N4
+N4P
+N5
 NB
 NP0
+NVIDIA Grace
 NVL72
+NVLink
+NVLink-C2C
+NVMe
+NVSwitch
+NVSwitch 6
 NYSE
+Neoverse
 Ni
 Nichidenbo
+Nikkei
 Nippon Chemi-con
 Nippon Chemical
 Nippon Chemical Industrial
 Noritake
+Notebookcheck
+Nvidia
 OBC
 ONE
 OOCL
+Oberon
+Omdia
+PCIe Gen5
+POS 機
 PSU
+PTFE
+Phison
 Pixel
+Point of Load
 Prince International
 Pulse
 Quanta
+Quick disconnect
 RCBC
 Rambus
 Reliance Steel & Aluminum
 Richart
+Rogers
 Rubin
+Rubin GPU
 Rubin Ultra
 Ryerson
 SEMCO
 SNPS
 SOI
 Sakai 化學
-Samsung Electro-Mechanics
+Samsung Electronics
 Sekisui
+SemiAnalysis
 Serial NOR Flash
+ServeTheHome
 Shandong Sinocera
+Shinko Electric
 Shioaji
 Shoei
 Shoei Chemical
+Silicon Analysts
 Sinoceramics
+Solidigm
+SpaceX Starlink
 Stop loss
+Sumitomo
 Sumitomo Metal Mining
+Switch tray
 TAIEX
 TAIFEX
 TOKIN
 TPEx
 TPU
+TSMC
 TWD
 TWSE
 TWSE 50
-TXF
 TXO
-Taiyo Yuden
 Tanaka Kikinzoku
 Tata
 Tata Electronics
@@ -175,22 +278,29 @@ Test Research Inc
 Toho Titanium
 Toray
 Tower Semiconductor
+TrendForce
+U.2
+UAV
 UBE
 USD/TWD
 USI
+Unimicron-JP
 VIF
 VR200
+VRM
 VSMC
 Vanguard
-Vera Rubin
+Vera
+Vera CPU
 Vera Rubin BOM
 Vera Rubin BoM
-Vera_Rubin_BOM
 Walsin Specialty Steel
 Walsin Technology
 Wistron
+X
 X5R
 X7R
+XXX
 Yageo
 Zhaorong
 busbar
@@ -208,6 +318,7 @@ iPhone 12
 交通部
 佳邦
 信昌電
+健和興
 優分析
 元大
 元大投信
@@ -218,17 +329,24 @@ iPhone 12
 兆豐金
 兆豐銀行
 光洋熱工
+光環
 全科
 公股銀行
 凱基
 凱基證券
+創見
+力致
 勤凱
+勤誠
+北美大型車廠
 千如
+古河電氣
 台化
 台塑化
 台新金
 台灣國際造船
 台聚
+味之素
 嘉澤
 國揚實
 國泰人壽
@@ -237,9 +355,11 @@ iPhone 12
 國立交通大學
 國立陽明交通大學
 國精化
+國際農藥原廠
 士電
 壹蘋新聞網
 大成鋼
+太極
 奇力新
 好望角
 宏泰
@@ -248,22 +368,29 @@ iPhone 12
 富邦投信
 富邦證券
 富邦金
+局部矽橋
 康舒
 德律
+控制 IC
 新光人壽
 新光金 (舊)
 新台幣
 新東工業
 日電貿
+晶碩
 村田 PSU
 永光
 永豐
 永豐證券
+沃旭能源
+沉浸式冷卻
+波若威
+洋華
 海底電纜
 瀚宇博德
+生益科技
 由田
 眾達-KY
-禾伸堂
 科揚
 科揚企業
 精成科技
@@ -276,6 +403,7 @@ iPhone 12
 經濟日報
 美元清算銀行
 群益證券
+聯亞
 致茂
 舶鈞
 芝浦電子
@@ -283,24 +411,38 @@ iPhone 12
 華城
 華新
 華新科技
+華星光
 華東科技
 萬潤
 蜜望實
+詮欣
 證交所
 豐田通商
 豐雲學堂
 財政部
+貿聯-KY
 起而行綠能
+跨國農化公司
+載板
 達方
 金管會
 鉅亨網
+鉭電容
 銀
 銅
+銅纜
+鋼筋
 鎳
 鎳粉
 長叡國際興業
 長興
 雙酚A
 雙鴻
+電信營運商
+電子紙
 電線電纜
+電鍍銅
+順德
+預拌混凝土
+鴻準
 鴻鈞 / 宏泰應用材料
