@@ -44,25 +44,44 @@ PMIC_DIR = REPO / "data" / "pmic_efa"
 CHARTS_DIR = REPO / "analysis" / "charts"
 CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 
-PARQUETS = [
+QUARTERLY_PARQUETS = [
     "pmic_core4_quarterly.parquet",
     "pmic_tail3_quarterly.parquet",
     "pmic_china_quarterly.parquet",
     "pmic_context_quarterly.parquet",
 ]
 
-MIN_QUARTERS_PER_TICKER = 18
-MIN_TICKERS_PER_QUARTER = 5  # Lowered from 8: after IPO-truncation cuts (6719/688484.SS/context),
-                              # at most ~7 tickers survive; ≥5 is enough for cross-sectional density.
+MONTHLY_PARQUETS = [
+    "pmic_monthly_revenue.parquet",
+]
+
+# Frequency-dependent thresholds
+FREQ_CONFIG = {
+    "quarterly": {
+        "parquets": QUARTERLY_PARQUETS,
+        "lag": 4,                         # YoY = 4-quarter shift
+        "min_obs_per_ticker": 18,         # 4.5 years quarterly
+        "min_tickers_per_obs": 5,
+        "out_suffix": "",                  # legacy v1 outputs
+    },
+    "monthly": {
+        "parquets": MONTHLY_PARQUETS,
+        "lag": 12,                        # YoY = 12-month shift
+        "min_obs_per_ticker": 36,         # 3 years monthly
+        "min_tickers_per_obs": 6,
+        "out_suffix": "_monthly",
+    },
+}
+
 KMO_THRESHOLD = 0.6
 BARTLETT_THRESHOLD = 0.001
 OBLIQUE_TRIGGER_CORR = 0.30
 RANDOM_SEED = 42
 
 
-def load_all() -> pd.DataFrame:
+def load_all(parquets) -> pd.DataFrame:
     frames = []
-    for fname in PARQUETS:
+    for fname in parquets:
         p = PMIC_DIR / fname
         if not p.exists():
             print(f"WARN: {p.name} missing — skipping", file=sys.stderr)
@@ -74,8 +93,7 @@ def load_all() -> pd.DataFrame:
 
 
 def build_revenue_panel(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Pivot revenue → wide (rows=quarter, cols=ticker). Filter to local currency rows."""
-    # Take TWD_M for TW tickers, CNY_M for China (one row per quarter per ticker)
+    """Pivot revenue → wide (rows=period, cols=ticker). Filter to local currency rows."""
     rev = df[(df.tag == "revenue") & (df.val_unit.isin(["TWD_M", "CNY_M"]))].copy()
     rev["end"] = pd.to_datetime(rev["end"]).dt.normalize()
     rev = rev[["end", "entity_id", "entity_name", "val"]].drop_duplicates(
@@ -90,18 +108,17 @@ def build_revenue_panel(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     return panel, name_map
 
 
-def to_yoy_log(panel: pd.DataFrame) -> pd.DataFrame:
-    """YoY log-return: log(rev_t / rev_{t-4})."""
-    return np.log(panel / panel.shift(4))
+def to_yoy_log(panel: pd.DataFrame, lag: int) -> pd.DataFrame:
+    """YoY log-return: log(rev_t / rev_{t-lag})."""
+    return np.log(panel / panel.shift(lag))
 
 
-def trim_panel(yoy: pd.DataFrame) -> pd.DataFrame:
-    """Drop tickers with <MIN_QUARTERS and quarters with <MIN_TICKERS."""
-    cols_keep = yoy.notna().sum(axis=0) >= MIN_QUARTERS_PER_TICKER
+def trim_panel(yoy: pd.DataFrame, min_obs: int, min_tickers: int) -> pd.DataFrame:
+    """Drop tickers with <min_obs and obs with <min_tickers."""
+    cols_keep = yoy.notna().sum(axis=0) >= min_obs
     yoy = yoy.loc[:, cols_keep]
-    rows_keep = yoy.notna().sum(axis=1) >= MIN_TICKERS_PER_QUARTER
+    rows_keep = yoy.notna().sum(axis=1) >= min_tickers
     yoy = yoy.loc[rows_keep]
-    # Final clean: drop quarters where any kept ticker has NaN (EFA can't handle NaN directly)
     yoy = yoy.dropna()
     return yoy
 
@@ -192,21 +209,25 @@ def factor_correlation(fa: FactorAnalyzer) -> np.ndarray | None:
 
 
 def main(args):
+    cfg = FREQ_CONFIG[args.frequency]
+    period_word = "month" if args.frequency == "monthly" else "quarter"
+    suffix = cfg["out_suffix"]
     print("=" * 72)
-    print("PMIC Sector Exploratory Factor Analysis")
+    print(f"PMIC Sector EFA — frequency={args.frequency}")
     print("=" * 72)
 
-    df = load_all()
-    print(f"Loaded {len(df)} rows from {len(PARQUETS)} parquets")
+    df = load_all(cfg["parquets"])
+    print(f"Loaded {len(df)} rows from {len(cfg['parquets'])} parquets")
 
     panel, name_map = build_revenue_panel(df)
-    print(f"Pivoted revenue panel: {panel.shape[0]} quarters × {panel.shape[1]} tickers")
+    print(f"Pivoted revenue panel: {panel.shape[0]} {period_word}s × {panel.shape[1]} tickers")
 
-    yoy = to_yoy_log(panel)
-    yoy_trimmed = trim_panel(yoy)
+    yoy = to_yoy_log(panel, cfg["lag"])
+    yoy_trimmed = trim_panel(yoy, cfg["min_obs_per_ticker"], cfg["min_tickers_per_obs"])
     print(
-        f"After trim (≥{MIN_QUARTERS_PER_TICKER} q/ticker, ≥{MIN_TICKERS_PER_QUARTER} t/quarter):"
-        f" {yoy_trimmed.shape[0]} quarters × {yoy_trimmed.shape[1]} tickers"
+        f"After trim (≥{cfg['min_obs_per_ticker']} {period_word}/ticker, "
+        f"≥{cfg['min_tickers_per_obs']} t/{period_word}): "
+        f"{yoy_trimmed.shape[0]} {period_word}s × {yoy_trimmed.shape[1]} tickers"
     )
     if yoy_trimmed.shape[0] < 10 or yoy_trimmed.shape[1] < 5:
         sys.exit(f"Panel too small after trim: {yoy_trimmed.shape}")
@@ -242,7 +263,7 @@ def main(args):
     # Correlation heatmap
     corr = standardized.corr()
     write_corr_heatmap(
-        corr, name_map, CHARTS_DIR / "2026-06-10_pmic_corr_heatmap.png"
+        corr, name_map, CHARTS_DIR / f"2026-06-{'11' if args.frequency=='monthly' else '10'}_pmic_corr_heatmap{suffix}.png"
     )
     print(f"Wrote {CHARTS_DIR / '2026-06-10_pmic_corr_heatmap.png'}")
 
@@ -267,7 +288,7 @@ def main(args):
         actual_eig,
         random_95,
         k,
-        CHARTS_DIR / "2026-06-10_pmic_parallel_analysis.png",
+        CHARTS_DIR / f"2026-06-{'11' if args.frequency=='monthly' else '10'}_pmic_parallel_analysis{suffix}.png",
     )
 
     # Fit EFA
@@ -324,19 +345,19 @@ def main(args):
     )
 
     write_loadings_plot(
-        loadings, name_map, CHARTS_DIR / "2026-06-10_pmic_loadings.png"
+        loadings, name_map, CHARTS_DIR / f"2026-06-{'11' if args.frequency=='monthly' else '10'}_pmic_loadings{suffix}.png"
     )
     print(f"Wrote {CHARTS_DIR / '2026-06-10_pmic_loadings.png'}")
 
     # Persist outputs
     loadings_out = loadings.reset_index().rename(columns={"index": "entity_id"})
     loadings_out["entity_name"] = loadings_out["entity_id"].map(name_map)
-    loadings_out.to_parquet(PMIC_DIR / "loadings.parquet", index=False)
-    print(f"Wrote {PMIC_DIR / 'loadings.parquet'}")
+    loadings_out.to_parquet(PMIC_DIR / f"loadings{suffix}.parquet", index=False)
+    print(f"Wrote {PMIC_DIR / f'loadings{suffix}.parquet'}")
 
-    scores_out = scores_df.reset_index().rename(columns={"end": "quarter"})
-    scores_out.to_parquet(PMIC_DIR / "factor_scores.parquet", index=False)
-    print(f"Wrote {PMIC_DIR / 'factor_scores.parquet'}")
+    scores_out = scores_df.reset_index().rename(columns={"end": "period"})
+    scores_out.to_parquet(PMIC_DIR / f"factor_scores{suffix}.parquet", index=False)
+    print(f"Wrote {PMIC_DIR / f'factor_scores{suffix}.parquet'}")
 
     phi = factor_correlation(fa)
     diagnostics = {
@@ -359,7 +380,7 @@ def main(args):
             float(np.abs(phi - np.eye(phi.shape[0])).max()) if phi is not None else None
         ),
     }
-    with open(PMIC_DIR / "efa_diagnostics.json", "w") as f:
+    with open(PMIC_DIR / f"efa_diagnostics{suffix}.json", "w") as f:
         json.dump(diagnostics, f, indent=2)
     print(f"Wrote {PMIC_DIR / 'efa_diagnostics.json'}")
 
@@ -370,6 +391,10 @@ def main(args):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
+    p.add_argument(
+        "--frequency", default="quarterly", choices=["quarterly", "monthly"],
+        help="EFA frequency mode (loads different parquets, different lag)"
+    )
     p.add_argument("--k", type=int, default=None, help="Override factor count")
     p.add_argument(
         "--rotation", default="varimax", choices=["varimax", "promax", "oblimin", "none"]
