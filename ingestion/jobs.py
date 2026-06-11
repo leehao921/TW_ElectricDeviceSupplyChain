@@ -252,6 +252,47 @@ JOBS["event_factor_refresh_weekly"] = ("0 2 * * 0", _job_event_factor_refresh)
 # Auto-quiet on weekends/holidays via is_tw_market_open() inside the script.
 JOBS["market_monitor_intraday"] = ("15,35 9-13 * * 1-5", _job_market_monitor_intraday)
 
+# PMIC EFA v2 quarterly refresh — every quarter's 2nd month, 15th at 09:00 TPE
+# Cron: 0 9 15 2,5,8,11 *  (Feb 15, May 15, Aug 15, Nov 15 — ~2 wks after法說會)
+async def _job_pmic_efa_refresh() -> int:
+    """Re-fetch monthly MOPS revenue, re-fit EFA + DFM, write alert if F>0.5σ."""
+    import subprocess
+    from pathlib import Path
+    import pandas as pd
+    REPO = Path(__file__).resolve().parent.parent
+    PMIC = REPO / "data" / "pmic_efa"
+    ok = 0
+    for cmd in (
+        ["python3", "scripts/fetch_pmic_monthly.py"],
+        ["python3", "scripts/efa_pmic.py", "--frequency", "monthly"],
+        ["python3", "scripts/dfm_pmic.py"],
+    ):
+        try:
+            subprocess.run(cmd, cwd=REPO, check=True, capture_output=True, timeout=600)
+            ok += 1
+        except Exception as exc:
+            LOGGER.warning("pmic_efa step %s failed: %s", cmd, exc)
+            return ok
+    # Alert on factor threshold
+    try:
+        sm = pd.read_parquet(PMIC / "dfm_smoothed_factors.parquet")
+        sm["month"] = pd.to_datetime(sm["month"])
+        last = sm.sort_values("month").iloc[-1]
+        breaches = [c for c in sm.columns if c.startswith("F") and abs(last[c]) > 0.5]
+        if breaches:
+            week = last["month"].strftime("%Y-W%V")
+            inbox = REPO / "vault" / "inbox" / f"{week}.md"
+            inbox.parent.mkdir(parents=True, exist_ok=True)
+            with open(inbox, "a") as f:
+                f.write(f"\n## PMIC EFA factor breach {last['month'].date()}\n")
+                for c in breaches:
+                    f.write(f"- **{c} = {last[c]:+.3f}σ** (threshold |0.5|)\n")
+    except Exception as exc:
+        LOGGER.warning("pmic_efa alert step failed: %s", exc)
+    return ok
+
+JOBS["pmic_efa_refresh"] = ("0 9 15 2,5,8,11 *", _job_pmic_efa_refresh)
+
 # Database maintenance — weekly VACUUM + run-log cleanup, hourly freshness check
 JOBS["db_vacuum_weekly"] = ("0 3 * * 0", _job_db_vacuum_weekly)
 JOBS["db_cleanup_runs"] = ("0 4 * * 0", _job_db_cleanup_runs)
