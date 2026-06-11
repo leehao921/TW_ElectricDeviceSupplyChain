@@ -23,12 +23,16 @@ ALLOWED_TAGS = {
     "revenue", "gross_margin", "operating_margin", "net_margin",
     "r_and_d_ratio", "inventory_days", "accounts_receivable_days",
     "val_usd", "monthly_sales",
+    # Unit 17 — DFM exogenous covariates derived from the WSTS monthly panel
+    "wsts_yoy", "wsts_yoy_3ma", "wsts_level_zscore",
 }
 
 # Tags allowed to be negative (P&L margins + macro deltas can go below 0)
 NEG_OK = {
     "operating_margin", "net_margin", "gross_margin",
     "operating_income", "net_income", "gross_profit",
+    # WSTS-derived features: YoY and z-score legitimately go below zero
+    "wsts_yoy", "wsts_yoy_3ma", "wsts_level_zscore",
 }
 
 EFA_TICKERS_MIN_QUARTERS = 18
@@ -119,3 +123,36 @@ def test_pmic_dir_exists_after_batch_merge():
         pytest.skip("data/pmic_efa/ 尚未落地")
     has_parquet = bool(list(PMIC_DIR.glob("*.parquet")))
     assert has_parquet, "data/pmic_efa/ 存在但無 parquet"
+
+
+def test_wsts_macro_features_schema():
+    """Unit 17 WSTS DFM exogenous covariates must obey canonical schema.
+
+    Checks the 3 derived features produced by `scripts/build_wsts_features.py`:
+    wsts_yoy / wsts_yoy_3ma / wsts_level_zscore. The file is optional (skip
+    if Unit 17 hasn't run) but if present must be well-formed.
+    """
+    path = PMIC_DIR / "wsts_macro_features.parquet"
+    if not path.exists():
+        pytest.skip("wsts_macro_features.parquet missing (Unit 17 not run)")
+
+    df = pd.read_parquet(path)
+    missing = REQUIRED - set(df.columns)
+    assert not missing, f"{path.name} 缺欄位: {missing}"
+    assert pd.api.types.is_numeric_dtype(df["val"]), \
+        f"{path.name} val 非 numeric"
+
+    expected_tags = {"wsts_yoy", "wsts_yoy_3ma", "wsts_level_zscore"}
+    assert set(df["tag"].unique()) == expected_tags, \
+        f"{path.name} tag set 不符: {set(df['tag'].unique())}"
+    bad_tags = set(df["tag"].unique()) - ALLOWED_TAGS
+    assert not bad_tags, f"{path.name} 未知 tag: {bad_tags}"
+
+    # entity_id should be the WSTS macro identifier
+    assert set(df["entity_id"].unique()) == {"WSTS_GLOBAL"}, \
+        f"{path.name} entity_id 非 WSTS_GLOBAL"
+
+    # Sanity check: feature panel should be long enough to be useful as a
+    # DFM covariate (>= 100 month-ends across the 3 tags).
+    assert df["end"].nunique() >= 100, \
+        f"{path.name} 月份太少 ({df['end'].nunique()})"
