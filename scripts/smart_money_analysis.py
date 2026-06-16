@@ -93,6 +93,27 @@ def load_flow(conn, start_date: dtdate, end_date: dtdate) -> pd.DataFrame:
     return df
 
 
+def load_futures_oi(conn, start_date: dtdate, end_date: dtdate) -> pd.DataFrame:
+    """Pull TXF/MXF/TMF 三大法人 OI for the window. Returns one row per
+    (settle_date, underlying, participant_type) with net_oi (snapshot) and
+    trade_net (daily flow). Empty DataFrame if futures_oi_daily has no
+    coverage in the window."""
+    sql = """
+    SELECT settle_date, underlying, participant_type, long_oi, short_oi, net_oi, trade_net
+    FROM futures_oi_daily
+    WHERE settle_date BETWEEN %s AND %s
+    ORDER BY settle_date, underlying, participant_type
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql, (start_date, end_date))
+        rows = cur.fetchall()
+    return pd.DataFrame(
+        rows,
+        columns=["settle_date", "underlying", "participant_type",
+                 "long_oi", "short_oi", "net_oi", "trade_net"],
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Coverage maps (sector + theme)
 # --------------------------------------------------------------------------- #
@@ -295,6 +316,66 @@ def render_div_table(df: pd.DataFrame, group_col: str) -> str:
     return "\n".join(lines)
 
 
+def aggregate_futures_oi(fut: pd.DataFrame, start_date: dtdate, end_date: dtdate) -> pd.DataFrame:
+    """Return one row per (underlying, participant_type) with:
+       - net_oi_start, net_oi_end (snapshot endpoints)
+       - net_oi_change = end - start (positioning shift)
+       - trade_net_sum = sum of daily flows (cumulative directional trades)
+    All values in lots."""
+    if fut.empty:
+        return fut
+    starts = fut.sort_values("settle_date").drop_duplicates(["underlying", "participant_type"], keep="first")
+    ends = fut.sort_values("settle_date").drop_duplicates(["underlying", "participant_type"], keep="last")
+    flow = fut.groupby(["underlying", "participant_type"], as_index=False)["trade_net"].sum()
+    flow = flow.rename(columns={"trade_net": "trade_net_sum"})
+
+    out = ends[["underlying", "participant_type", "net_oi"]].rename(columns={"net_oi": "net_oi_end"})
+    out = out.merge(
+        starts[["underlying", "participant_type", "net_oi"]].rename(columns={"net_oi": "net_oi_start"}),
+        on=["underlying", "participant_type"],
+    )
+    out = out.merge(flow, on=["underlying", "participant_type"])
+    out["net_oi_change"] = out["net_oi_end"] - out["net_oi_start"]
+    underlying_order = {"TXF": 0, "MXF": 1, "TMF": 2}
+    part_order = {"外資": 0, "投信": 1, "自營商": 2}
+    out["_uo"] = out["underlying"].map(underlying_order)
+    out["_po"] = out["participant_type"].map(part_order)
+    return out.sort_values(["_uo", "_po"]).drop(columns=["_uo", "_po"]).reset_index(drop=True)
+
+
+def render_futures_panel(fut_agg: pd.DataFrame, start_date: dtdate, end_date: dtdate) -> str:
+    if fut_agg.empty:
+        return "*futures_oi_daily 在此窗口無資料 — collector 可能 stale,跳過期貨對照。*"
+    lines = [
+        f"窗口 {start_date} → {end_date}, 單位 = 口 (lots)。`net_oi` 為當日收盤淨部位,`Δ` 為窗口起訖差。`trade_net 累計` 為窗口內每日 trade_net 加總。",
+        "",
+        "| Contract | 法人 | net_oi (起) | net_oi (迄) | Δ net_oi | trade_net 累計 |",
+        "|---|---|---:|---:|---:|---:|",
+    ]
+    for _, r in fut_agg.iterrows():
+        lines.append(
+            f"| {r['underlying']} | {r['participant_type']} | "
+            f"{int(r['net_oi_start']):+,} | {int(r['net_oi_end']):+,} | "
+            f"{int(r['net_oi_change']):+,} | {int(r['trade_net_sum']):+,} |"
+        )
+    return "\n".join(lines)
+
+
+def futures_tldr(fut_agg: pd.DataFrame) -> str:
+    """One-liner for TL;DR: TXF 外資 net OI direction over window."""
+    if fut_agg.empty:
+        return "- **期貨 (TXF 外資 net OI):** futures_oi_daily 此窗口無資料"
+    row = fut_agg[(fut_agg["underlying"] == "TXF") & (fut_agg["participant_type"] == "外資")]
+    if row.empty:
+        return "- **期貨 (TXF 外資 net OI):** 資料缺漏"
+    r = row.iloc[0]
+    direction = "空單擴大" if r["net_oi_change"] < 0 else ("多單擴大" if r["net_oi_change"] > 0 else "持平")
+    return (
+        f"- **期貨 (TXF 外資 net OI):** {int(r['net_oi_start']):+,} → {int(r['net_oi_end']):+,} 口 "
+        f"(Δ {int(r['net_oi_change']):+,},{direction}) — 與 spot 賣壓方向一致則互相確認"
+    )
+
+
 def render_top_tickers(df: pd.DataFrame) -> str:
     lines = [
         "| Ticker | 名稱 | 外資 (億) | 投信 (億) | 自營 (億) | 三大合計 (億) |",
@@ -438,6 +519,12 @@ def main() -> int:
 
         veri_log = maybe_verify(sector_df, "sector", df, as_of)
 
+        # Futures OI panel (TXF/MXF/TMF × 三大法人 macro context)
+        fut_df = load_futures_oi(conn, start_date, as_of)
+        fut_agg = aggregate_futures_oi(fut_df, start_date, as_of)
+        fut_days = int(fut_df["settle_date"].nunique()) if not fut_df.empty else 0
+        print(f"[info] futures OI: {len(fut_df)} rows × {fut_days} settle dates", file=sys.stderr)
+
         # ----- Render -----
         out_path = Path(args.output) if args.output else DEFAULT_OUT_DIR / f"smart_money_{as_of}.md"
         out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -453,7 +540,7 @@ def main() -> int:
 **Universe:** {len(per_ticker_cov):,} 檔已覆蓋 (Pilot_Reports 11 sectors / themes/ {len(theme_map)} 主題)
 **單位:** 億 TWD (= shares × close / 10⁸)
 **資料來源:** trading-timescaledb.institutional_stock
-**Warning:** futures_oi_daily stale since 2026-05-15 (collector 缺 beautifulsoup4),本輪不使用期貨資料
+**期貨對照:** futures_oi_daily 覆蓋 {fut_days} 個交易日 ({len(fut_df)} rows)
 
 ---
 
@@ -463,6 +550,7 @@ def main() -> int:
 - **投信 sector top:** {trust_top['sector']} 累計 {fmt(trust_top['投信'])} 億
 - **自營 sector top:** {dealer_top['sector']} 累計 {fmt(dealer_top['自營'])} 億
 - **外資 theme top:** {top_thm_row['theme']} 累計 {fmt(top_thm_row['外資'])} 億 ({top_thm_row['n_tickers']} 檔)
+{futures_tldr(fut_agg)}
 
 > 三大法人視角分開呈現。同一檔可同時出現在多個 theme,所以 theme 列數合計 ≠ sector 列數合計。
 
@@ -509,7 +597,15 @@ def main() -> int:
         report += f"""
 ---
 
-## 6. Verification Log
+## 6. 期貨對照面板 (TXF / MXF / TMF × 三大法人)
+
+期貨部位是 spot 流向的 macro 配套指標。若 spot 外資賣 + 期貨外資 net OI 空單擴大,訊號互相確認 (避險或方向一致);若反向,則 spot 可能只是換股、非整體看空。
+
+{render_futures_panel(fut_agg, start_date, as_of)}
+
+---
+
+## 7. Verification Log
 
 依 CLAUDE.md 規則 "量化主張必先驗證" — 任何「σ / 罕見 / 極端 / outlier / percentile」用詞前須驗證。
 
@@ -517,7 +613,7 @@ def main() -> int:
 
 ---
 
-## 7. Methodology & Caveats
+## 8. Methodology & Caveats
 
 - **資料窗口:** 過去 {len(dates)} 個交易日 (純交易日,自動跳過國定假日)
 - **單位轉換:** `億 TWD = 法人淨股數 × close_price / 10⁸`
@@ -526,7 +622,8 @@ def main() -> int:
 - **Theme 對應:** themes/*.md 內 `**XXXX 公司名**` 形式擷取 ticker
 - **多重歸屬:** 一檔可同時屬多個 theme,因此 theme 表合計不可直接相加
 - **Sanity check:** 自動驗證 sector 表外資合計 = 個股表外資合計 ({s_total:,.1f} 億)
-- **未涵蓋:** 期貨/選擇權未平倉 (futures_oi_daily stale)、ETF 申贖 (未在本表)、現股當沖明細
+- **期貨單位:** 口 (lots) — TXF 一口名義價值 ≈ TAIEX × 200 NTD,MXF ≈ TAIEX × 50,TMF ≈ TAIEX × 10。`net_oi` 是當日收盤淨部位 (snapshot);`trade_net 累計` 是窗口內每日 trade_net 加總 (flow)。窗口內期貨日期數可能與 spot 日期數不完全一致 (TAIFEX 公告時間略後於 TWSE)。
+- **未涵蓋:** 選擇權未平倉、ETF 申贖、現股當沖明細
 
 *Generated: {as_of} · `scripts/smart_money_analysis.py --as-of {as_of} --window {args.window}`*
 """

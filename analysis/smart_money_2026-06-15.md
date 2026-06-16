@@ -4,7 +4,7 @@
 **Universe:** 865 檔已覆蓋 (Pilot_Reports 11 sectors / themes/ 24 主題)
 **單位:** 億 TWD (= shares × close / 10⁸)
 **資料來源:** trading-timescaledb.institutional_stock
-**Warning:** futures_oi_daily stale since 2026-05-15 (collector 缺 beautifulsoup4),本輪不使用期貨資料
+**期貨對照:** futures_oi_daily 覆蓋 20 個交易日 (180 rows)
 
 ---
 
@@ -14,6 +14,7 @@
 - **投信 sector top:** Computer Hardware 累計 +1,262.5 億
 - **自營 sector top:** Semiconductors 累計 +67.5 億
 - **外資 theme top:** ABF_載板 累計 +662.3 億 (11 檔)
+- **期貨 (TXF 外資 net OI):** -45,376 → -66,734 口 (Δ -21,358,空單擴大) — 與 spot 賣壓方向一致則互相確認
 
 > 三大法人視角分開呈現。同一檔可同時出現在多個 theme,所以 theme 列數合計 ≠ sector 列數合計。
 
@@ -172,7 +173,27 @@
 
 ---
 
-## 6. Verification Log
+## 6. 期貨對照面板 (TXF / MXF / TMF × 三大法人)
+
+期貨部位是 spot 流向的 macro 配套指標。若 spot 外資賣 + 期貨外資 net OI 空單擴大,訊號互相確認 (避險或方向一致);若反向,則 spot 可能只是換股、非整體看空。
+
+窗口 2026-05-19 → 2026-06-15, 單位 = 口 (lots)。`net_oi` 為當日收盤淨部位,`Δ` 為窗口起訖差。`trade_net 累計` 為窗口內每日 trade_net 加總。
+
+| Contract | 法人 | net_oi (起) | net_oi (迄) | Δ net_oi | trade_net 累計 |
+|---|---|---:|---:|---:|---:|
+| TXF | 外資 | -45,376 | -66,734 | -21,358 | -26,778 |
+| TXF | 投信 | +38,642 | +57,702 | +19,060 | +17,993 |
+| TXF | 自營商 | +2,612 | +2,618 | +6 | +2,241 |
+| MXF | 外資 | +2,725 | +2,919 | +194 | +9,697 |
+| MXF | 投信 | +2 | +12 | +10 | -43 |
+| MXF | 自營商 | -8,453 | -16,429 | -7,976 | -10,955 |
+| TMF | 外資 | +2,207 | +18,245 | +16,038 | +22,766 |
+| TMF | 投信 | +0 | +0 | +0 | +0 |
+| TMF | 自營商 | -52,062 | -41,732 | +10,330 | -22,181 |
+
+---
+
+## 7. Verification Log
 
 依 CLAUDE.md 規則 "量化主張必先驗證" — 任何「σ / 罕見 / 極端 / outlier / percentile」用詞前須驗證。
 
@@ -212,7 +233,7 @@ Tested value: rolling-20d-sum = **-878.34 億**  (k=20 days)
 
 ---
 
-## 7. Methodology & Caveats
+## 8. Methodology & Caveats
 
 - **資料窗口:** 過去 20 個交易日 (純交易日,自動跳過國定假日)
 - **單位轉換:** `億 TWD = 法人淨股數 × close_price / 10⁸`
@@ -221,6 +242,7 @@ Tested value: rolling-20d-sum = **-878.34 億**  (k=20 days)
 - **Theme 對應:** themes/*.md 內 `**XXXX 公司名**` 形式擷取 ticker
 - **多重歸屬:** 一檔可同時屬多個 theme,因此 theme 表合計不可直接相加
 - **Sanity check:** 自動驗證 sector 表外資合計 = 個股表外資合計 (-1,222.6 億)
-- **未涵蓋:** 期貨/選擇權未平倉 (futures_oi_daily stale)、ETF 申贖 (未在本表)、現股當沖明細
+- **期貨單位:** 口 (lots) — TXF 一口名義價值 ≈ TAIEX × 200 NTD,MXF ≈ TAIEX × 50,TMF ≈ TAIEX × 10。`net_oi` 是當日收盤淨部位 (snapshot);`trade_net 累計` 是窗口內每日 trade_net 加總 (flow)。窗口內期貨日期數可能與 spot 日期數不完全一致 (TAIFEX 公告時間略後於 TWSE)。
+- **未涵蓋:** 選擇權未平倉、ETF 申贖、現股當沖明細
 
 *Generated: 2026-06-15 · `scripts/smart_money_analysis.py --as-of 2026-06-15 --window 20`*
