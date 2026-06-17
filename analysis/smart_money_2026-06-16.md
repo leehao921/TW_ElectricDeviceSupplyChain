@@ -240,7 +240,7 @@ Tested value: rolling-20d-sum = **+286.32 億**  (k=20 days)
 
 技術面與籌碼面交叉確認:找出 BBW 處於低位 (盤整) 一段時間後今日量能放大的個股,再用 5D 三大法人方向決定 Buy / Avoid。
 
-掃描 700 檔 Pilot_Reports 涵蓋的台股電子。條件: 過去 7 個交易日內 BBW ≤ 30% percentile (自身 60D 分布) 達 ≥ 4 天,且今日量能 ≥ 2.0× 20D 平均。與 5D 三大法人 confluence 交叉,分 Buy / Avoid 兩類。資料源: yfinance OHLCV (近 3 個月) + trading-timescaledb.institutional_stock 5D 法人 net。
+掃描 923 檔 Pilot_Reports 涵蓋的台股電子。條件: 過去 7 個交易日內 BBW ≤ 30% percentile (自身 60D 分布) 達 ≥ 4 天,且今日量能 ≥ 2.0× 20D 平均。與 5D 三大法人 confluence 交叉,分 Buy / Avoid 兩類。資料源: yfinance OHLCV (近 3 個月) + trading-timescaledb.institutional_stock 5D 法人 net。
 
 ### 🟢 Buy (squeeze 突破 + 法人加碼確認)
 
@@ -260,7 +260,7 @@ Tested value: rolling-20d-sum = **+286.32 億**  (k=20 days)
 | 3664 | 安瑞-KY | 盤整向下突破 (Bollinger 下緣 + 量增) | 6.14 | -9.97% | ×2.95 | +0.00 |
 | 5248 | 景傳 | 盤整向下突破 (Bollinger 下緣 + 量增) | 32.20 | -8.52% | ×2.61 | +0.00 |
 
-*Watch (squeeze 突破但法人 confluence 不足 / 方向不明): 2340 台亞 / 2380 虹光 / 2460 建通 / 5471 松翰 / 3339 泰谷 / 3360 尚立 / 6259 百徽*
+*Watch (squeeze 突破但法人 confluence 不足 / 方向不明): 2340 台亞 / 2380 虹光 / 2460 建通 / 3339 泰谷 / 3360 尚立 / 3527 聚積 / 5471 松翰 / 6156 松上 / 6173 信昌電 / 6191 精成科 (+ 2 more)*
 
 *Methodology: BBW = (upper-lower)/middle × 100;Bollinger 中軸 = SMA(close, 20),±2σ 帶寬;squeeze 門檻 = 自身 60D 分布的 30 percentile;Buy 需 close > 前日上軌 + 今日漲 > +1.5% + 5D 外資 ≥ +0.3 億;Avoid 包含 (a) 向下突破: close < 前日下軌 + 今日跌 > -1.5%, 或 (b) 向上突破但 5D 外資 ≤ -0.3 億 (distribution into strength)。*
 

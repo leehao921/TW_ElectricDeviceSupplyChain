@@ -401,11 +401,55 @@ BB_CONFLUENCE_OKU = 0.3  # 5D 外資 ≥ +0.3 億 to count as confluence
 BB_AVOID_OKU = -0.3      # 5D 外資 ≤ -0.3 億 → distribution into strength
 
 
-def fetch_ohlcv_universe(tickers: list[str], period: str = "3mo") -> dict[str, pd.DataFrame]:
-    """Batch yfinance download with .TW then .TWO fallback. Returns {ticker: df}.
+def load_ohlcv_from_db(
+    conn,
+    tickers: list[str],
+    start_date: dtdate,
+    end_date: dtdate,
+) -> dict[str, pd.DataFrame]:
+    """Read stock_daily_ohlcv → {ticker: yfinance-shaped df} for the BB scanner.
 
-    `period='3mo'` gives ~60 trading days, enough for BBW 60D percentile + 7D
-    squeeze lookback. Suppresses yfinance's noisy stderr (delisted warnings).
+    Returns DataFrames indexed by trading date (timezone-naive midnight UTC bucket)
+    with columns Open / High / Low / Close / Volume — same shape `fetch_ohlcv_universe`
+    used to return from yfinance, so downstream `compute_squeeze_signal` is unchanged.
+    """
+    sql = """
+    SELECT ts AT TIME ZONE 'Asia/Taipei' AS d, symbol, open, high, low, close, volume
+    FROM stock_daily_ohlcv
+    WHERE symbol = ANY(%s)
+      AND ts >= %s AND ts <= %s
+    ORDER BY symbol, ts
+    """
+    # ts is TWSE 13:30 TPE close in UTC; pad both ends by 1 day to catch boundary bars.
+    ts_start = pd.Timestamp(start_date) - pd.Timedelta(days=1)
+    ts_end = pd.Timestamp(end_date) + pd.Timedelta(days=1)
+    with conn.cursor() as cur:
+        cur.execute(sql, (list(tickers), ts_start, ts_end))
+        rows = cur.fetchall()
+
+    if not rows:
+        return {}
+
+    df = pd.DataFrame(rows, columns=["d", "symbol", "Open", "High", "Low", "Close", "Volume"])
+    # 'd' is timestamptz at TWSE 13:30 TPE; normalise to the calendar date.
+    df["d"] = pd.to_datetime(df["d"]).dt.normalize()
+
+    out: dict[str, pd.DataFrame] = {}
+    for tk, sub in df.groupby("symbol"):
+        sub = sub.set_index("d").sort_index()
+        sub.index.name = None
+        sub = sub[["Open", "High", "Low", "Close", "Volume"]].astype(
+            {"Open": float, "High": float, "Low": float, "Close": float, "Volume": int},
+            errors="ignore",
+        )
+        if len(sub) >= 30:
+            out[tk] = sub
+    return out
+
+
+def fetch_ohlcv_universe_yfinance(tickers: list[str], period: str = "3mo") -> dict[str, pd.DataFrame]:
+    """Legacy fallback: batch yfinance download with .TW then .TWO. Kept for the
+    --ohlcv-source=yfinance escape hatch (offline-from-DB diagnostics, dev iteration).
     """
     try:
         import yfinance as yf
@@ -416,7 +460,6 @@ def fetch_ohlcv_universe(tickers: list[str], period: str = "3mo") -> dict[str, p
     out: dict[str, pd.DataFrame] = {}
 
     def _batch(tk_list: list[str], suffix: str) -> list[str]:
-        """Pull a batch with the given suffix; return the list of tickers still missing."""
         missing: list[str] = []
         chunk_size = 50
         for i in range(0, len(tk_list), chunk_size):
@@ -448,6 +491,37 @@ def fetch_ohlcv_universe(tickers: list[str], period: str = "3mo") -> dict[str, p
         _batch(failed_tw, ".TWO")
 
     return out
+
+
+def fetch_ohlcv_universe(
+    tickers: list[str],
+    conn,
+    as_of: dtdate,
+    source: str = "auto",
+    period_days: int = 90,
+) -> dict[str, pd.DataFrame]:
+    """Resolve OHLCV map for the BB scanner.
+
+    source='db'      → strictly read from stock_daily_ohlcv; empty dict if missing
+    source='yfinance'→ legacy live pull
+    source='auto'    → try DB first; if coverage < 50% of tickers, fall back to yfinance
+    """
+    from datetime import timedelta
+    start_date = as_of - timedelta(days=period_days)
+    if source == "yfinance":
+        return fetch_ohlcv_universe_yfinance(tickers)
+    if source in ("db", "auto"):
+        db_map = load_ohlcv_from_db(conn, tickers, start_date, as_of)
+        if source == "db":
+            return db_map
+        # auto mode: fall back if DB coverage is poor
+        if len(db_map) >= len(tickers) * 0.5:
+            print(f"[info] BB scan source=DB ({len(db_map)}/{len(tickers)} tickers)", file=sys.stderr)
+            return db_map
+        print(f"[warn] DB coverage {len(db_map)}/{len(tickers)} < 50%, "
+              f"falling back to yfinance", file=sys.stderr)
+        return fetch_ohlcv_universe_yfinance(tickers)
+    raise ValueError(f"unknown --ohlcv-source: {source}")
 
 
 def compute_squeeze_signal(
@@ -712,8 +786,11 @@ def main() -> int:
     ap.add_argument("--top-tickers", type=int, default=5)
     ap.add_argument("--output", default=None)
     ap.add_argument("--skip-bb-scan", action="store_true",
-                    help="Skip the Bollinger squeeze + volume breakout panel "
-                         "(~60s yfinance pull over the covered universe)")
+                    help="Skip the Bollinger squeeze + volume breakout panel")
+    ap.add_argument("--ohlcv-source", choices=["auto", "db", "yfinance"], default="auto",
+                    help="Where the BB scanner reads daily OHLCV from. "
+                         "auto (default): try stock_daily_ohlcv table, fall back to yfinance "
+                         "if coverage < 50%%. db: strict DB. yfinance: legacy live pull.")
     args = ap.parse_args()
 
     conn = psycopg2.connect(**DB_CONFIG)
@@ -791,10 +868,12 @@ def main() -> int:
             per_ticker_5d = per_ticker_window_sum(df_5d)
             per_ticker_5d_cov = per_ticker_5d[per_ticker_5d["symbol"].isin(universe)].copy()
 
-            print(f"[info] BB scan: fetching yfinance OHLCV for {len(universe)} tickers...",
-                  file=sys.stderr)
-            ohlcv_map = fetch_ohlcv_universe(sorted(universe))
-            print(f"[info] BB scan: yfinance coverage {len(ohlcv_map)}/{len(universe)}",
+            print(f"[info] BB scan: resolving OHLCV (source={args.ohlcv_source}) for "
+                  f"{len(universe)} tickers...", file=sys.stderr)
+            ohlcv_map = fetch_ohlcv_universe(
+                sorted(universe), conn, as_of, source=args.ohlcv_source,
+            )
+            print(f"[info] BB scan: coverage {len(ohlcv_map)}/{len(universe)}",
                   file=sys.stderr)
 
             buy_df, avoid_df, watch_labels = scan_squeeze(
