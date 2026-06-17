@@ -390,6 +390,260 @@ def render_top_tickers(df: pd.DataFrame) -> str:
 
 
 # --------------------------------------------------------------------------- #
+# Bollinger squeeze + volume breakout scanner
+# --------------------------------------------------------------------------- #
+BB_BBW_PCT = 30          # squeeze threshold: BBW ≤ 30 pct of own 60D history
+BB_MIN_SQUEEZE_DAYS = 4  # ≥ 4 of last 7 trading days squeezed (excl. today)
+BB_VOL_MULT = 2.0        # today's volume ≥ 2× of 20D average
+BB_BUY_MIN_RET = 1.5     # today's return > +1.5% for bullish breakout
+BB_AVOID_MAX_RET = -1.5  # today's return < -1.5% for bearish breakdown
+BB_CONFLUENCE_OKU = 0.3  # 5D 外資 ≥ +0.3 億 to count as confluence
+BB_AVOID_OKU = -0.3      # 5D 外資 ≤ -0.3 億 → distribution into strength
+
+
+def fetch_ohlcv_universe(tickers: list[str], period: str = "3mo") -> dict[str, pd.DataFrame]:
+    """Batch yfinance download with .TW then .TWO fallback. Returns {ticker: df}.
+
+    `period='3mo'` gives ~60 trading days, enough for BBW 60D percentile + 7D
+    squeeze lookback. Suppresses yfinance's noisy stderr (delisted warnings).
+    """
+    try:
+        import yfinance as yf
+    except ImportError:
+        print("[warn] yfinance not installed — skipping BB squeeze scan", file=sys.stderr)
+        return {}
+
+    out: dict[str, pd.DataFrame] = {}
+
+    def _batch(tk_list: list[str], suffix: str) -> list[str]:
+        """Pull a batch with the given suffix; return the list of tickers still missing."""
+        missing: list[str] = []
+        chunk_size = 50
+        for i in range(0, len(tk_list), chunk_size):
+            chunk = tk_list[i:i + chunk_size]
+            syms = [f"{t}{suffix}" for t in chunk]
+            try:
+                df = yf.download(syms, period=period, auto_adjust=False, progress=False,
+                                 threads=True, group_by="ticker")
+            except Exception as exc:  # pylint: disable=broad-except
+                print(f"[warn] yf batch failed ({suffix}): {exc}", file=sys.stderr)
+                missing.extend(chunk)
+                continue
+            for tk in chunk:
+                sym = f"{tk}{suffix}"
+                if isinstance(df.columns, pd.MultiIndex) and sym in df.columns.get_level_values(0):
+                    sub = df[sym].dropna(how="all")
+                elif not isinstance(df.columns, pd.MultiIndex) and len(chunk) == 1:
+                    sub = df.dropna(how="all")
+                else:
+                    sub = pd.DataFrame()
+                if not sub.empty and "Close" in sub.columns and sub["Close"].notna().sum() > 30:
+                    out[tk] = sub
+                else:
+                    missing.append(tk)
+        return missing
+
+    failed_tw = _batch(tickers, ".TW")
+    if failed_tw:
+        _batch(failed_tw, ".TWO")
+
+    return out
+
+
+def compute_squeeze_signal(
+    df: pd.DataFrame,
+    bbw_pct: float = BB_BBW_PCT,
+    min_squeeze_days: int = BB_MIN_SQUEEZE_DAYS,
+    vol_mult: float = BB_VOL_MULT,
+    as_of: dtdate | None = None,
+) -> dict | None:
+    """Compute BB squeeze + breakout metrics for one ticker. None if < 35 rows.
+
+    If `as_of` is given, the df is sliced to bars with date ≤ as_of before computing
+    so historical re-runs don't pick up yfinance's latest bar by accident.
+    """
+    if len(df) < 35:
+        return None
+    df = df.copy().dropna(subset=["Close", "Volume"])
+    if as_of is not None:
+        idx_dates = df.index.tz_localize(None).normalize() if df.index.tz is not None else df.index.normalize()
+        df = df[idx_dates <= pd.Timestamp(as_of)]
+    if len(df) < 35:
+        return None
+    df["sma20"] = df["Close"].rolling(20).mean()
+    df["std20"] = df["Close"].rolling(20).std(ddof=0)
+    df["upper"] = df["sma20"] + 2 * df["std20"]
+    df["lower"] = df["sma20"] - 2 * df["std20"]
+    df["bbw"] = (df["upper"] - df["lower"]) / df["sma20"] * 100
+    df["vol20"] = df["Volume"].rolling(20).mean()
+    df["vol_ratio"] = df["Volume"] / df["vol20"]
+
+    sub = df.dropna(subset=["bbw", "vol_ratio"])
+    if len(sub) < 30:
+        return None
+
+    # Squeeze: BBW low for ≥ min_squeeze_days of the 7 days BEFORE today
+    threshold = sub["bbw"].quantile(bbw_pct / 100.0)
+    last7_bbw = sub["bbw"].iloc[-8:-1]
+    if len(last7_bbw) < 5:
+        return None
+    days_squeezed = int((last7_bbw <= threshold).sum())
+
+    today = sub.iloc[-1]
+    prev = sub.iloc[-2]
+    today_ret = (today["Close"] / prev["Close"] - 1) * 100
+
+    return {
+        "close": float(today["Close"]),
+        "ret_today_pct": float(today_ret),
+        "vol_ratio": float(today["vol_ratio"]),
+        "bbw_today": float(today["bbw"]),
+        "bbw_avg7_prior": float(last7_bbw.mean()),
+        "bbw_threshold": float(threshold),
+        "days_squeezed_of_7": days_squeezed,
+        "above_upper_band": bool(today["Close"] > prev["upper"]),
+        "below_lower_band": bool(today["Close"] < prev["lower"]),
+        "squeezed_enough": days_squeezed >= min_squeeze_days,
+        "vol_spike": today["vol_ratio"] >= vol_mult,
+    }
+
+
+def _ticker_themes(ticker: str, theme_map: dict[str, set[str]], limit: int = 3) -> list[str]:
+    """Return up to `limit` theme names containing this ticker (for narrative annotation)."""
+    themes = [t for t, members in theme_map.items() if ticker in members]
+    return themes[:limit]
+
+
+def scan_squeeze(
+    ohlcv_map: dict[str, pd.DataFrame],
+    sector_map: dict[str, str],
+    name_map: dict[str, str],
+    theme_map: dict[str, set[str]],
+    per_ticker: pd.DataFrame,
+    as_of: dtdate | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+    """Scan ohlcv_map, classify each hit, return (buy_df, avoid_df, watch_labels).
+
+    per_ticker is the per-ticker 5D window sums already in memory from the main
+    flow (foreign / trust / dealer in 億 TWD). Sliced by ticker to attach confluence.
+    """
+    flow_lookup = per_ticker.set_index("symbol")[["foreign", "trust", "dealer"]].to_dict("index")
+
+    buy_rows, avoid_rows, watch_rows = [], [], []
+    for tk, df in ohlcv_map.items():
+        sig = compute_squeeze_signal(df, as_of=as_of)
+        if sig is None:
+            continue
+        if not sig["squeezed_enough"] or not sig["vol_spike"]:
+            continue
+
+        flow = flow_lookup.get(tk, {"foreign": 0.0, "trust": 0.0, "dealer": 0.0})
+        f5d = float(flow["foreign"])
+        themes = _ticker_themes(tk, theme_map)
+        row = {
+            "ticker": tk,
+            "name": name_map.get(tk, ""),
+            "sector": sector_map.get(tk, ""),
+            "close": round(sig["close"], 2),
+            "ret_today_pct": round(sig["ret_today_pct"], 2),
+            "vol_ratio": round(sig["vol_ratio"], 2),
+            "bbw_today": round(sig["bbw_today"], 2),
+            "bbw_avg7_prior": round(sig["bbw_avg7_prior"], 2),
+            "days_squeezed_of_7": sig["days_squeezed_of_7"],
+            "foreign_5d_oku": round(f5d, 2),
+            "trust_5d_oku": round(float(flow["trust"]), 2),
+            "themes": themes,
+        }
+
+        # Bullish breakout
+        if sig["above_upper_band"] and sig["ret_today_pct"] > BB_BUY_MIN_RET:
+            if f5d >= BB_CONFLUENCE_OKU:
+                buy_rows.append(row)
+            elif f5d <= BB_AVOID_OKU:
+                row["avoid_reason"] = "外資逢高出貨 (distribution into strength)"
+                avoid_rows.append(row)
+            else:
+                watch_rows.append(f"{tk} {row['name']}")
+        # Bearish breakdown
+        elif sig["below_lower_band"] and sig["ret_today_pct"] < BB_AVOID_MAX_RET:
+            row["avoid_reason"] = "盤整向下突破 (Bollinger 下緣 + 量增)"
+            avoid_rows.append(row)
+        else:
+            # Squeeze + vol spike but breakout direction unclear
+            watch_rows.append(f"{tk} {row['name']}")
+
+    buy_df = pd.DataFrame(buy_rows).sort_values("vol_ratio", ascending=False).reset_index(drop=True) \
+        if buy_rows else pd.DataFrame()
+    avoid_df = pd.DataFrame(avoid_rows).sort_values("vol_ratio", ascending=False).reset_index(drop=True) \
+        if avoid_rows else pd.DataFrame()
+    return buy_df, avoid_df, watch_rows
+
+
+def render_bb_squeeze_panel(buy_df: pd.DataFrame, avoid_df: pd.DataFrame,
+                            watch_labels: list[str], universe_size: int) -> str:
+    """Render Section 8: BB squeeze panel."""
+    intro = (
+        f"掃描 {universe_size} 檔 Pilot_Reports 涵蓋的台股電子。條件: "
+        f"過去 7 個交易日內 BBW ≤ {BB_BBW_PCT}% percentile (自身 60D 分布) 達 ≥ "
+        f"{BB_MIN_SQUEEZE_DAYS} 天,且今日量能 ≥ {BB_VOL_MULT}× 20D 平均。"
+        f"與 5D 三大法人 confluence 交叉,分 Buy / Avoid 兩類。"
+        f"資料源: yfinance OHLCV (近 3 個月) + trading-timescaledb.institutional_stock 5D 法人 net。"
+    )
+
+    out = [intro, ""]
+
+    # Buy table
+    out.append("### 🟢 Buy (squeeze 突破 + 法人加碼確認)\n")
+    if buy_df.empty:
+        out.append("*無 hits (今日無 squeeze 突破 + 法人加碼 confluence)*")
+    else:
+        out.append("| Ticker | 名稱 | Sector | 收盤 | 今日% | vol× | BBW(今/7均) | 5D 外資 (億) | 主題 |")
+        out.append("|---|---|---|---:|---:|---:|---:|---:|---|")
+        for _, r in buy_df.iterrows():
+            themes = " ".join(f"[[{t}]]" for t in r["themes"]) if r["themes"] else "—"
+            out.append(
+                f"| {r['ticker']} | {r['name']} | {r['sector']} | {r['close']:.2f} | "
+                f"{r['ret_today_pct']:+.2f}% | ×{r['vol_ratio']:.2f} | "
+                f"{r['bbw_today']:.1f}/{r['bbw_avg7_prior']:.1f} | "
+                f"{r['foreign_5d_oku']:+.2f} | {themes} |"
+            )
+
+    out.append("")
+
+    # Avoid table
+    out.append("### 🔴 Avoid (突破方向反轉 OR 法人逢高出貨)\n")
+    if avoid_df.empty:
+        out.append("*無 hits (今日無 squeeze 突破 + 法人逆向 OR 向下突破訊號)*")
+    else:
+        out.append("| Ticker | 名稱 | 訊號 | 收盤 | 今日% | vol× | 5D 外資 (億) |")
+        out.append("|---|---|---|---:|---:|---:|---:|")
+        for _, r in avoid_df.iterrows():
+            out.append(
+                f"| {r['ticker']} | {r['name']} | {r.get('avoid_reason', '?')} | "
+                f"{r['close']:.2f} | {r['ret_today_pct']:+.2f}% | ×{r['vol_ratio']:.2f} | "
+                f"{r['foreign_5d_oku']:+.2f} |"
+            )
+
+    out.append("")
+    if watch_labels:
+        out.append(
+            f"*Watch (squeeze 突破但法人 confluence 不足 / 方向不明): "
+            + " / ".join(watch_labels[:10])
+            + (f" (+ {len(watch_labels) - 10} more)" if len(watch_labels) > 10 else "")
+            + "*"
+        )
+
+    out.append(
+        f"\n*Methodology: BBW = (upper-lower)/middle × 100;Bollinger 中軸 = SMA(close, 20),"
+        f"±2σ 帶寬;squeeze 門檻 = 自身 60D 分布的 {BB_BBW_PCT} percentile;"
+        f"Buy 需 close > 前日上軌 + 今日漲 > +{BB_BUY_MIN_RET}% + 5D 外資 ≥ +{BB_CONFLUENCE_OKU} 億;"
+        f"Avoid 包含 (a) 向下突破: close < 前日下軌 + 今日跌 > {BB_AVOID_MAX_RET}%, 或 "
+        f"(b) 向上突破但 5D 外資 ≤ {BB_AVOID_OKU} 億 (distribution into strength)。*"
+    )
+    return "\n".join(out)
+
+
+# --------------------------------------------------------------------------- #
 # Verification log
 # --------------------------------------------------------------------------- #
 def market_daily_foreign(df: pd.DataFrame) -> list[tuple[str, float]]:
@@ -457,6 +711,9 @@ def main() -> int:
     ap.add_argument("--window", type=int, default=20)
     ap.add_argument("--top-tickers", type=int, default=5)
     ap.add_argument("--output", default=None)
+    ap.add_argument("--skip-bb-scan", action="store_true",
+                    help="Skip the Bollinger squeeze + volume breakout panel "
+                         "(~60s yfinance pull over the covered universe)")
     args = ap.parse_args()
 
     conn = psycopg2.connect(**DB_CONFIG)
@@ -524,6 +781,30 @@ def main() -> int:
         fut_agg = aggregate_futures_oi(fut_df, start_date, as_of)
         fut_days = int(fut_df["settle_date"].nunique()) if not fut_df.empty else 0
         print(f"[info] futures OI: {len(fut_df)} rows × {fut_days} settle dates", file=sys.stderr)
+
+        # Bollinger squeeze + volume breakout scan (optional, ~60s yfinance pull)
+        bb_panel = None
+        if not args.skip_bb_scan:
+            # Build per-ticker 5D window sums for 法人 confluence — slice the last 5 trading days
+            last5_dates = dates[-5:] if len(dates) >= 5 else dates
+            df_5d = df[df["date"].isin(last5_dates)].copy()
+            per_ticker_5d = per_ticker_window_sum(df_5d)
+            per_ticker_5d_cov = per_ticker_5d[per_ticker_5d["symbol"].isin(universe)].copy()
+
+            print(f"[info] BB scan: fetching yfinance OHLCV for {len(universe)} tickers...",
+                  file=sys.stderr)
+            ohlcv_map = fetch_ohlcv_universe(sorted(universe))
+            print(f"[info] BB scan: yfinance coverage {len(ohlcv_map)}/{len(universe)}",
+                  file=sys.stderr)
+
+            buy_df, avoid_df, watch_labels = scan_squeeze(
+                ohlcv_map, sector_map, name_map, theme_map, per_ticker_5d_cov,
+                as_of=as_of,
+            )
+            print(f"[info] BB scan: {len(buy_df)} Buy / {len(avoid_df)} Avoid / "
+                  f"{len(watch_labels)} Watch", file=sys.stderr)
+
+            bb_panel = render_bb_squeeze_panel(buy_df, avoid_df, watch_labels, len(ohlcv_map))
 
         # ----- Render -----
         out_path = Path(args.output) if args.output else DEFAULT_OUT_DIR / f"smart_money_{as_of}.md"
@@ -612,8 +893,22 @@ def main() -> int:
 {veri_log}
 
 ---
+"""
 
-## 8. Methodology & Caveats
+        if bb_panel is not None:
+            report += f"""
+## 8. 盤整突破掃描 (Bollinger Squeeze + Volume Breakout)
+
+技術面與籌碼面交叉確認:找出 BBW 處於低位 (盤整) 一段時間後今日量能放大的個股,再用 5D 三大法人方向決定 Buy / Avoid。
+
+{bb_panel}
+
+---
+"""
+
+        next_section = "9" if bb_panel is not None else "8"
+        report += f"""
+## {next_section}. Methodology & Caveats
 
 - **資料窗口:** 過去 {len(dates)} 個交易日 (純交易日,自動跳過國定假日)
 - **單位轉換:** `億 TWD = 法人淨股數 × close_price / 10⁸`
