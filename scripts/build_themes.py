@@ -95,6 +95,12 @@ THEME_DEFINITIONS = {
         "desc": "低軌道衛星通訊供應鏈，天線、地面站、射頻模組",
         "related": ["5G", "氮化鎵", "RF"],
     },
+    "功率半導體": {
+        "name": "功率半導體 Power Semiconductor / PMIC",
+        "desc": "功率半導體與電源管理供應鏈 — MOSFET/IGBT/Diode/GaN/SiC discrete + PMIC integrated + AI Server VRM",
+        "related": ["AI 伺服器", "電動車", "氮化鎵", "碳化矽", "資料中心"],
+        "analysis_doc": "docs/analysis/2026-06-18-power-semi-pmic-deep-dive.md",
+    },
     # === Process / Equipment ===
     "EUV": {
         "name": "EUV 極紫外光微影",
@@ -221,6 +227,10 @@ def build_theme_page(theme_tag, theme_def, wl_map):
     lines.append("")
     lines.append(f"> {theme_def['desc']}")
     lines.append("")
+    analysis_doc = theme_def.get("analysis_doc")
+    if analysis_doc:
+        lines.append(f"> 📖 **深度分析:** [{theme_def['name']} — 技術 × 台灣供應鏈 deep-dive](../{analysis_doc})")
+        lines.append("")
     lines.append(f"**涵蓋公司數:** {len(entries)}")
     lines.append("")
 
