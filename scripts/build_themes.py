@@ -94,6 +94,7 @@ THEME_DEFINITIONS = {
         "name": "低軌衛星 LEO Satellite",
         "desc": "低軌道衛星通訊供應鏈，天線、地面站、射頻模組",
         "related": ["5G", "氮化鎵", "RF"],
+        "analysis_doc": "docs/analysis/2026-06-18-LEO-satellite-deep-dive.md",
     },
     # === Process / Equipment ===
     "EUV": {
@@ -206,6 +207,10 @@ def build_theme_page(theme_tag, theme_def, wl_map):
     lines.append("")
     lines.append(f"> {theme_def['desc']}")
     lines.append("")
+    analysis_doc = theme_def.get("analysis_doc")
+    if analysis_doc:
+        lines.append(f"> 📖 **深度分析:** [{theme_def['name']} — 技術 × 台灣供應鏈 deep-dive](../{analysis_doc})")
+        lines.append("")
     lines.append(f"**涵蓋公司數:** {len(entries)}")
     lines.append("")
 
