@@ -554,3 +554,29 @@ def test_main_returns_3_when_redis_push_fails(tmp_path, mocker):
     # Markdown is still written before Redis fails
     md_files = list((tmp_path / "reports").glob("memory_cycle_*.md"))
     assert len(md_files) == 1
+
+
+from scripts.memory_cycle_monitor import _suggest_next_trigger
+
+
+def test_suggest_next_trigger_terminal_stage_returns_locked_message():
+    """Stage 3 should NOT suggest a 'next' trigger — there's no further stage."""
+    s1 = SignalResult(RED, "all red")
+    s2a = SignalResult(GREEN, "+10%")   # would otherwise dominate the suggestion
+    s2b = SignalResult(RED, "-5%")
+    s3 = SignalResult(RED, "weak")
+    result = _suggest_next_trigger(s1, s2a, s2b, s3, stage=3)
+    assert "全部三段" in result
+    assert "state file" in result.lower() or "state file" in result  # mention manual revert
+    # Make sure it does NOT suggest a per-signal trigger
+    assert "S2a DDR4" not in result
+    assert "S2b DDR5" not in result
+
+
+def test_suggest_next_trigger_non_terminal_unchanged():
+    """Stages 0/1/2 retain the existing first-GREEN-wins logic."""
+    s1 = SignalResult(GREEN, "")
+    s2a = SignalResult(GREEN, "")
+    s2b = SignalResult(GREEN, "")
+    s3 = SignalResult(GREEN, "")
+    assert "S2a DDR4" in _suggest_next_trigger(s1, s2a, s2b, s3, stage=0)

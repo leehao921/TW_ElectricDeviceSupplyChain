@@ -471,7 +471,9 @@ def _build_redis_payload(*, report_date, overall_light, trim_stage, max_stage_se
     }
 
 
-def _suggest_next_trigger(s1: SignalResult, s2a: SignalResult, s2b: SignalResult, s3: SignalResult) -> str:
+def _suggest_next_trigger(s1: SignalResult, s2a: SignalResult, s2b: SignalResult, s3: SignalResult, *, stage: int) -> str:
+    if stage == 3:
+        return "全部三段已觸發 — 持倉應已歸零;state file `data/memory_cycle_state.json` 為單向,如需手動回退請編輯"
     if s2a.light == GREEN:
         return "S2a DDR4 首次負 MoM"
     if s2b.light == GREEN:
@@ -539,7 +541,7 @@ def main(argv: list[str] | None = None) -> int:
         stage = state["stage"]
         max_seen = state["max_stage_seen"]
 
-    next_trigger = _suggest_next_trigger(s1, s2a, s2b, s3)
+    next_trigger = _suggest_next_trigger(s1, s2a, s2b, s3, stage=stage)
     report_path = Path(args.report_dir) / f"memory_cycle_{today}.md"
 
     md = render_markdown(
