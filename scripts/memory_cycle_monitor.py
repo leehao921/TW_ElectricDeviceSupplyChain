@@ -562,13 +562,15 @@ def main(argv: list[str] | None = None) -> int:
 
     # Publish Redis (unless --no-redis)
     if not args.no_redis:
+        # Build payload OUTSIDE the try so bugs in payload construction surface as real
+        # tracebacks instead of being mis-attributed to a Redis failure.
+        payload = _build_redis_payload(
+            report_date=today, overall_light=agg["overall_light"],
+            trim_stage=stage, max_stage_seen=max_seen, next_trigger=next_trigger,
+            s1=s1, s2a=s2a, s2b=s2b, s3=s3, report_path=str(report_path),
+        )
         try:
             client = make_redis_client()
-            payload = _build_redis_payload(
-                report_date=today, overall_light=agg["overall_light"],
-                trim_stage=stage, max_stage_seen=max_seen, next_trigger=next_trigger,
-                s1=s1, s2a=s2a, s2b=s2b, s3=s3, report_path=str(report_path),
-            )
             publish_redis(client=client, hash_name=REDIS_HASH, data=payload)
         except Exception as e:
             print(f"WARN: Redis push failed: {e}", file=sys.stderr)
