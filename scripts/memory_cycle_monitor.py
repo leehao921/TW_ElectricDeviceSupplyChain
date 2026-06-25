@@ -7,7 +7,7 @@ from __future__ import annotations
 import argparse
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -56,6 +56,15 @@ class SignalResult:
     light: str            # GREEN | YELLOW | RED | "N/A"
     value: str            # short string for report (e.g. "+10.6%")
     detail: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PBData:
+    """P/B with provenance fields for audit trail."""
+    pb: float
+    book_value: float | None = None      # NTD per share
+    current_price: float | None = None   # NTD
+    as_of: str | None = None             # ISO YYYY-MM-DD
 
 
 def load_inputs(path: str | Path) -> Inputs:
@@ -199,11 +208,11 @@ def _worst(*lights: str) -> str:
     return max(known, key=_LIGHT_RANK.__getitem__)
 
 
-def compute_s1_pb(pbs: dict[str, float | None], thresholds: dict[str, dict[str, float]] | None = None) -> SignalResult:
+def compute_s1_pb(pbs: dict[str, PBData | None], thresholds: dict[str, dict[str, float]] | None = None) -> SignalResult:
     """S1: P/B valuation premium for 2408.TW and 2344.TW.
 
-    Takes the worst-known light of the two. If a ticker is None it's recorded
-    as N/A but doesn't drag the overall light down (still uses worst of known).
+    Accepts PBData (with provenance). Stores full PBData in detail[ticker] when present;
+    "N/A" string when None. Takes the worst-known light of the two.
 
     If `thresholds` is provided, uses it; otherwise falls back to module-level PB_THRESHOLDS.
     """
@@ -211,37 +220,54 @@ def compute_s1_pb(pbs: dict[str, float | None], thresholds: dict[str, dict[str, 
     detail: dict[str, Any] = {}
     lights = []
     parts = []
-    for ticker, pb in pbs.items():
-        if pb is None:
+    for ticker, pbd in pbs.items():
+        if pbd is None:
             detail[ticker] = "N/A"
             lights.append("N/A")
             parts.append(f"{ticker}=N/A")
             continue
-        lg = _light_for_pb(pb, effective[ticker])
-        detail[ticker] = {"pb": pb, "light": lg}
+        lg = _light_for_pb(pbd.pb, effective[ticker])
+        detail[ticker] = {
+            "pb": pbd.pb,
+            "book_value": pbd.book_value,
+            "current_price": pbd.current_price,
+            "as_of": pbd.as_of,
+            "light": lg,
+        }
         lights.append(lg)
-        parts.append(f"{ticker}={pb:.2f}")
+        parts.append(f"{ticker}={pbd.pb:.2f}")
 
     return SignalResult(light=_worst(*lights), value=", ".join(parts), detail=detail)
 
 
-def fetch_pb(ticker: str) -> float | None:
-    """Fetch P/B for a ticker via yfinance.
+def fetch_pb(ticker: str) -> PBData | None:
+    """Fetch P/B with provenance for a ticker via yfinance.
 
     Primary: info['priceToBook']. Fallback: marketCap / (bookValue * sharesOutstanding).
     Returns None on any failure (caller treats as N/A).
+    Populates book_value and current_price when available for audit trail.
     """
     import yfinance as yf
     try:
         info = yf.Ticker(ticker).info
+        bv = info.get("bookValue")
+        cp = info.get("currentPrice") or info.get("regularMarketPrice")
+        as_of = date.today().isoformat()
+
         pb = info.get("priceToBook")
         if pb is not None and pb > 0:
-            return float(pb)
+            return PBData(pb=float(pb), book_value=bv, current_price=cp, as_of=as_of)
+
+        # Fallback path
         mc = info.get("marketCap")
-        bv = info.get("bookValue")
         so = info.get("sharesOutstanding")
         if mc and bv and so and bv * so > 0:
-            return float(mc / (bv * so))
+            return PBData(
+                pb=float(mc / (bv * so)),
+                book_value=bv,
+                current_price=cp,
+                as_of=as_of,
+            )
     except Exception:
         pass
     return None
@@ -298,7 +324,6 @@ def fetch_monthly_closes(ticker: str, months: int = 13) -> list[float]:
 
 
 import json
-from datetime import date
 
 
 def aggregate(*, s1: SignalResult, s2a: SignalResult, s2b: SignalResult, s3: SignalResult) -> dict:
@@ -407,6 +432,24 @@ def render_markdown(
         f"{LIGHT_EMOJI[RED if s3d.get('tw_weak') else GREEN]} |",
     ])
 
+    # Build Verification-log provenance lines from s1.detail
+    yf_pulled_at = datetime.now(ZoneInfo("Asia/Taipei")).isoformat(timespec="seconds")
+
+    provenance_lines = []
+    for ticker, label in [("2408.TW", "南亞科 2408"), ("2344.TW", "華邦電 2344")]:
+        info = s1.detail.get(ticker)
+        if isinstance(info, dict):
+            pb_val = info.get("pb")
+            bv = info.get("book_value")
+            cp = info.get("current_price")
+            asof = info.get("as_of")
+            bv_str = f"{bv:.2f}" if bv is not None else "N/A"
+            cp_str = f"{cp:.2f}" if cp is not None else "N/A"
+            provenance_lines.append(
+                f"  - {label}: P/B {pb_val:.2f} (price {cp_str} NTD / book value {bv_str} NTD/sh, as of {asof or 'N/A'})"
+            )
+    provenance_block = "\n".join(provenance_lines) if provenance_lines else "  - (no P/B data)"
+
     return f"""# 記憶體週期燈號 — {report_date}
 
 **總燈號:** {emoji} {overall_light}   **Trim 進度:** {trim_stage} / 3   \
@@ -432,6 +475,9 @@ def render_markdown(
 
 ## Verification log
 - Data source: `data/memory_cycle_inputs.yaml` last_updated {last_updated_yaml}
+- yfinance pulled at: {yf_pulled_at}
+- P/B provenance:
+{provenance_block}
 - Spec: `docs/superpowers/specs/2026-06-25-memory-cycle-monitor-design.md`
 
 ## Action
@@ -473,14 +519,25 @@ TICKERS = ["2408.TW", "2344.TW"]
 def _build_redis_payload(*, report_date, overall_light, trim_stage, max_stage_seen,
                          next_trigger, s1, s2a, s2b, s3, report_path) -> dict:
     tz = ZoneInfo("Asia/Taipei")
+
+    def _pb_field(t, field_name):
+        d = s1.detail.get(t)
+        return d.get(field_name) if isinstance(d, dict) else None
+
     return {
         "updated_at": datetime.now(tz).isoformat(timespec="seconds"),
         "overall_light": overall_light,
         "trim_stage": trim_stage,
         "max_stage_seen": max_stage_seen,
         "next_trigger": next_trigger,
-        "s1_pb_2408": s1.detail.get("2408.TW", {}).get("pb") if isinstance(s1.detail.get("2408.TW"), dict) else None,
-        "s1_pb_2344": s1.detail.get("2344.TW", {}).get("pb") if isinstance(s1.detail.get("2344.TW"), dict) else None,
+        "s1_pb_2408": _pb_field("2408.TW", "pb"),
+        "s1_pb_2408_book_value": _pb_field("2408.TW", "book_value"),
+        "s1_pb_2408_current_price": _pb_field("2408.TW", "current_price"),
+        "s1_pb_2408_as_of": _pb_field("2408.TW", "as_of"),
+        "s1_pb_2344": _pb_field("2344.TW", "pb"),
+        "s1_pb_2344_book_value": _pb_field("2344.TW", "book_value"),
+        "s1_pb_2344_current_price": _pb_field("2344.TW", "current_price"),
+        "s1_pb_2344_as_of": _pb_field("2344.TW", "as_of"),
         "s1_light": s1.light,
         "s2a_ddr4_mom_pct": s2a.detail.get("mom_pct"),
         "s2b_ddr5_qoq_pct": s2b.detail.get("qoq_pct"),

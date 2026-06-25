@@ -2,6 +2,7 @@
 from scripts.memory_cycle_monitor import (
     PB_THRESHOLDS,
     Inputs,
+    PBData,
     PricePoint,
     SignalResult,
     GREEN, YELLOW, RED,
@@ -165,32 +166,32 @@ from scripts.memory_cycle_monitor import compute_s1_pb
 
 
 def test_s1_green_when_both_below_yellow():
-    r = compute_s1_pb({"2408.TW": 1.42, "2344.TW": 1.12})
+    r = compute_s1_pb({"2408.TW": PBData(pb=1.42), "2344.TW": PBData(pb=1.12)})
     assert r.light == GREEN
 
 
 def test_s1_yellow_at_exact_threshold():
     # 2408 at 1.80 → yellow (>= threshold)
-    r = compute_s1_pb({"2408.TW": 1.80, "2344.TW": 1.10})
+    r = compute_s1_pb({"2408.TW": PBData(pb=1.80), "2344.TW": PBData(pb=1.10)})
     assert r.light == YELLOW
     # 2344 at 1.50 → yellow
-    r2 = compute_s1_pb({"2408.TW": 1.10, "2344.TW": 1.50})
+    r2 = compute_s1_pb({"2408.TW": PBData(pb=1.10), "2344.TW": PBData(pb=1.50)})
     assert r2.light == YELLOW
 
 
 def test_s1_red_above_extreme():
-    r = compute_s1_pb({"2408.TW": 2.51, "2344.TW": 1.10})
+    r = compute_s1_pb({"2408.TW": PBData(pb=2.51), "2344.TW": PBData(pb=1.10)})
     assert r.light == RED
 
 
 def test_s1_takes_worst_of_two():
     # one green, one red → RED
-    r = compute_s1_pb({"2408.TW": 1.10, "2344.TW": 2.05})
+    r = compute_s1_pb({"2408.TW": PBData(pb=1.10), "2344.TW": PBData(pb=2.05)})
     assert r.light == RED
 
 
 def test_s1_na_when_value_missing():
-    r = compute_s1_pb({"2408.TW": None, "2344.TW": 1.10})
+    r = compute_s1_pb({"2408.TW": None, "2344.TW": PBData(pb=1.10)})
     assert r.detail["2408.TW"] == "N/A"
     # but 2344 still computes → overall takes worst-known
     assert r.light in (GREEN, "N/A")  # 2344 is green; 2408 unknown → at minimum green-from-known
@@ -201,7 +202,7 @@ def test_fetch_pb_returns_value_from_info(mocker):
     fake_ticker.info = {"priceToBook": 1.42}
     mocker.patch("yfinance.Ticker", return_value=fake_ticker)
     from scripts.memory_cycle_monitor import fetch_pb
-    assert fetch_pb("2408.TW") == 1.42
+    assert fetch_pb("2408.TW").pb == 1.42
 
 
 def test_fetch_pb_returns_none_on_exception(mocker):
@@ -342,8 +343,10 @@ from scripts.memory_cycle_monitor import render_markdown
 
 def test_markdown_contains_required_sections():
     s1 = SignalResult(GREEN, "2408=1.42, 2344=1.12",
-                      {"2408.TW": {"pb": 1.42, "light": GREEN},
-                       "2344.TW": {"pb": 1.12, "light": GREEN}})
+                      {"2408.TW": {"pb": 1.42, "book_value": 30.0, "current_price": 42.6,
+                                   "as_of": "2026-06-25", "light": GREEN},
+                       "2344.TW": {"pb": 1.12, "book_value": 20.0, "current_price": 22.4,
+                                   "as_of": "2026-06-25", "light": GREEN}})
     s2a = SignalResult(GREEN, "+10.6%", {"mom_pct": 10.6})
     s2b = SignalResult(GREEN, "+21.4%", {"qoq_pct": 21.4, "decay_pct": None})
     s3 = SignalResult(GREEN, "MU not weak",
@@ -412,7 +415,10 @@ def test_publish_redis_handles_none_as_empty_string():
 def test_main_dry_run_does_not_write_files(tmp_path, mocker, capsys):
     """--dry-run prints to stdout, writes no files, makes no Redis call."""
     # Mock yfinance — return safe defaults
-    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=1.42)
+    mocker.patch(
+        "scripts.memory_cycle_monitor.fetch_pb",
+        return_value=PBData(pb=1.42, book_value=10.0, current_price=14.2, as_of="2026-06-25"),
+    )
     mocker.patch(
         "scripts.memory_cycle_monitor.fetch_monthly_closes",
         return_value=[100.0, 102.0, 105.0, 108.0, 110.0],  # not weak
@@ -445,8 +451,13 @@ def test_integration_full_pipeline_writes_markdown_and_redis(tmp_path, mocker):
     - Asserts Markdown file written + Redis hash populated
     """
     # Mock yfinance fetches at the source-function level
-    mocker.patch("scripts.memory_cycle_monitor.fetch_pb",
-                 side_effect=lambda t: {"2408.TW": 1.42, "2344.TW": 1.12}[t])
+    mocker.patch(
+        "scripts.memory_cycle_monitor.fetch_pb",
+        side_effect=lambda t: PBData(
+            pb={"2408.TW": 1.42, "2344.TW": 1.12}[t],
+            book_value=10.0, current_price=14.2, as_of="2026-06-25",
+        ),
+    )
     # All upward-trending closes → no weakness anywhere
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
@@ -490,7 +501,10 @@ def test_integration_full_pipeline_writes_markdown_and_redis(tmp_path, mocker):
 
 
 def test_integration_no_redis_flag_skips_redis(tmp_path, mocker):
-    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=1.42)
+    mocker.patch(
+        "scripts.memory_cycle_monitor.fetch_pb",
+        return_value=PBData(pb=1.42, book_value=10.0, current_price=14.2, as_of="2026-06-25"),
+    )
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
     # Make Redis client raise to confirm it's not called
@@ -538,7 +552,10 @@ def test_main_returns_2_when_all_pbs_none(tmp_path, mocker):
 
 def test_main_returns_3_when_redis_push_fails(tmp_path, mocker):
     """rc=3 when Redis client/publish raises (e.g. ConnectionRefusedError)."""
-    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=1.42)
+    mocker.patch(
+        "scripts.memory_cycle_monitor.fetch_pb",
+        return_value=PBData(pb=1.42, book_value=10.0, current_price=14.2, as_of="2026-06-25"),
+    )
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
     # Force Redis client factory to raise — simulates Redis server down
@@ -616,7 +633,7 @@ pb_thresholds:
 
 def test_compute_s1_pb_uses_yaml_thresholds_when_provided():
     # Default: P/B 5.0 for 2408 → RED (above 2.5)
-    r_default = compute_s1_pb({"2408.TW": 5.0, "2344.TW": 1.0})
+    r_default = compute_s1_pb({"2408.TW": PBData(pb=5.0), "2344.TW": PBData(pb=1.0)})
     assert r_default.light == RED
 
     # With override raising thresholds: same P/B 5.0 → GREEN (below 9.0)
@@ -624,5 +641,76 @@ def test_compute_s1_pb_uses_yaml_thresholds_when_provided():
         "2408.TW": {"yellow": 5.0, "red": 9.0},
         "2344.TW": {"yellow": 4.0, "red": 8.0},
     }
-    r_custom = compute_s1_pb({"2408.TW": 4.9, "2344.TW": 1.0}, thresholds=custom)
+    r_custom = compute_s1_pb({"2408.TW": PBData(pb=4.9), "2344.TW": PBData(pb=1.0)}, thresholds=custom)
     assert r_custom.light == GREEN  # 4.9 < 5.0 yellow threshold
+
+
+# ---- Fix 1: P/B provenance surfacing ----
+
+def test_fetch_pb_returns_full_pbdata(mocker):
+    fake_ticker = mocker.MagicMock()
+    fake_ticker.info = {
+        "priceToBook": 7.56,
+        "bookValue": 62.25,
+        "currentPrice": 473.5,
+    }
+    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
+    from scripts.memory_cycle_monitor import fetch_pb
+    result = fetch_pb("2408.TW")
+    assert result.pb == 7.56
+    assert result.book_value == 62.25
+    assert result.current_price == 473.5
+    assert result.as_of  # ISO date populated
+
+
+def test_fetch_pb_fallback_path_via_marketcap(mocker):
+    fake_ticker = mocker.MagicMock()
+    fake_ticker.info = {
+        "priceToBook": None,
+        "marketCap": 100_000_000,
+        "bookValue": 10.0,
+        "sharesOutstanding": 5_000_000,
+    }
+    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
+    from scripts.memory_cycle_monitor import fetch_pb
+    result = fetch_pb("2408.TW")
+    assert result is not None
+    assert result.pb == 2.0  # 100M / (10 * 5M)
+    assert result.book_value == 10.0
+    assert result.current_price is None  # not provided in mock
+
+
+def test_compute_s1_pb_stores_provenance_in_detail():
+    pbs = {
+        "2408.TW": PBData(pb=1.42, book_value=62.25, current_price=88.4, as_of="2026-06-25"),
+        "2344.TW": PBData(pb=1.12, book_value=20.0, current_price=22.4, as_of="2026-06-25"),
+    }
+    r = compute_s1_pb(pbs)
+    assert r.detail["2408.TW"]["pb"] == 1.42
+    assert r.detail["2408.TW"]["book_value"] == 62.25
+    assert r.detail["2408.TW"]["current_price"] == 88.4
+    assert r.detail["2408.TW"]["as_of"] == "2026-06-25"
+    assert r.detail["2408.TW"]["light"] == GREEN
+
+
+def test_markdown_verification_log_includes_pb_provenance():
+    s1 = SignalResult(GREEN, "ok", {
+        "2408.TW": {"pb": 7.56, "book_value": 62.25, "current_price": 473.5,
+                    "as_of": "2026-06-25", "light": GREEN},
+        "2344.TW": {"pb": 8.35, "book_value": 20.0, "current_price": 167.0,
+                    "as_of": "2026-06-25", "light": GREEN},
+    })
+    s2a = SignalResult(GREEN, "+10.6%", {"mom_pct": 10.6})
+    s2b = SignalResult(GREEN, "+21.4%", {"qoq_pct": 21.4})
+    s3 = SignalResult(GREEN, "ok", {"mu_weak": False, "hynix_weak": False, "tw_weak": False})
+    md = render_markdown(
+        report_date="2026-06-25", overall_light=GREEN, trim_stage=0, max_stage_seen=0,
+        next_trigger="-", last_updated_yaml="2026-06-25",
+        s1=s1, s2a=s2a, s2b=s2b, s3=s3,
+    )
+    assert "## Verification log" in md
+    assert "yfinance pulled at" in md
+    assert "P/B 7.56" in md
+    assert "book value 62.25" in md
+    assert "price 473.50" in md  # f"{cp:.2f}" formats 473.5 as "473.50"
+    assert "as of 2026-06-25" in md
