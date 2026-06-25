@@ -159,3 +159,52 @@ def test_s2b_degraded_2_quarter_yellow_between_5_and_10():
 def test_s2b_na_when_fewer_than_2_quarters():
     r = compute_s2b_ddr5([PricePoint("2026Q2", 5.10)])
     assert r.light == "N/A"
+
+
+from scripts.memory_cycle_monitor import compute_s1_pb
+
+
+def test_s1_green_when_both_below_yellow():
+    r = compute_s1_pb({"2408.TW": 1.42, "2344.TW": 1.12})
+    assert r.light == GREEN
+
+
+def test_s1_yellow_at_exact_threshold():
+    # 2408 at 1.80 → yellow (>= threshold)
+    r = compute_s1_pb({"2408.TW": 1.80, "2344.TW": 1.10})
+    assert r.light == YELLOW
+    # 2344 at 1.50 → yellow
+    r2 = compute_s1_pb({"2408.TW": 1.10, "2344.TW": 1.50})
+    assert r2.light == YELLOW
+
+
+def test_s1_red_above_extreme():
+    r = compute_s1_pb({"2408.TW": 2.51, "2344.TW": 1.10})
+    assert r.light == RED
+
+
+def test_s1_takes_worst_of_two():
+    # one green, one red → RED
+    r = compute_s1_pb({"2408.TW": 1.10, "2344.TW": 2.05})
+    assert r.light == RED
+
+
+def test_s1_na_when_value_missing():
+    r = compute_s1_pb({"2408.TW": None, "2344.TW": 1.10})
+    assert r.detail["2408.TW"] == "N/A"
+    # but 2344 still computes → overall takes worst-known
+    assert r.light in (GREEN, "N/A")  # 2344 is green; 2408 unknown → at minimum green-from-known
+
+
+def test_fetch_pb_returns_value_from_info(mocker):
+    fake_ticker = mocker.MagicMock()
+    fake_ticker.info = {"priceToBook": 1.42}
+    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
+    from scripts.memory_cycle_monitor import fetch_pb
+    assert fetch_pb("2408.TW") == 1.42
+
+
+def test_fetch_pb_returns_none_on_exception(mocker):
+    mocker.patch("yfinance.Ticker", side_effect=RuntimeError("network"))
+    from scripts.memory_cycle_monitor import fetch_pb
+    assert fetch_pb("2408.TW") is None

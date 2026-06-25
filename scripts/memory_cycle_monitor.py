@@ -155,3 +155,66 @@ def compute_s2b_ddr5(series: list[PricePoint]) -> SignalResult:
         return SignalResult(light=YELLOW, value=f"{latest_qoq:+.1f}%", detail=detail)
 
     return SignalResult(light=GREEN, value=f"{latest_qoq:+.1f}%", detail=detail)
+
+
+def _light_for_pb(pb: float, thresholds: dict[str, float]) -> str:
+    if pb >= thresholds["red"]:
+        return RED
+    if pb >= thresholds["yellow"]:
+        return YELLOW
+    return GREEN
+
+
+_LIGHT_RANK = {GREEN: 0, YELLOW: 1, RED: 2}
+
+
+def _worst(*lights: str) -> str:
+    known = [lg for lg in lights if lg in _LIGHT_RANK]
+    if not known:
+        return "N/A"
+    return max(known, key=_LIGHT_RANK.__getitem__)
+
+
+def compute_s1_pb(pbs: dict[str, float | None]) -> SignalResult:
+    """S1: P/B valuation premium for 2408.TW and 2344.TW.
+
+    Takes the worst-known light of the two. If a ticker is None it's recorded
+    as N/A but doesn't drag the overall light down (still uses worst of known).
+    """
+    detail: dict[str, Any] = {}
+    lights = []
+    parts = []
+    for ticker, pb in pbs.items():
+        if pb is None:
+            detail[ticker] = "N/A"
+            lights.append("N/A")
+            parts.append(f"{ticker}=N/A")
+            continue
+        lg = _light_for_pb(pb, PB_THRESHOLDS[ticker])
+        detail[ticker] = {"pb": pb, "light": lg}
+        lights.append(lg)
+        parts.append(f"{ticker}={pb:.2f}")
+
+    return SignalResult(light=_worst(*lights), value=", ".join(parts), detail=detail)
+
+
+def fetch_pb(ticker: str) -> float | None:
+    """Fetch P/B for a ticker via yfinance.
+
+    Primary: info['priceToBook']. Fallback: marketCap / (bookValue * sharesOutstanding).
+    Returns None on any failure (caller treats as N/A).
+    """
+    import yfinance as yf
+    try:
+        info = yf.Ticker(ticker).info
+        pb = info.get("priceToBook")
+        if pb is not None and pb > 0:
+            return float(pb)
+        mc = info.get("marketCap")
+        bv = info.get("bookValue")
+        so = info.get("sharesOutstanding")
+        if mc and bv and so and bv * so > 0:
+            return float(mc / (bv * so))
+    except Exception:
+        pass
+    return None
