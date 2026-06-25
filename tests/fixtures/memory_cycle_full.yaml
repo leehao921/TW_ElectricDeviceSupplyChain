@@ -1,0 +1,13 @@
+last_updated: 2026-06-25
+notes: "Test fixture — full 3-quarter DDR5"
+ddr4_8gb_spot_usd:
+  - {month: "2026-03", price: 2.50}
+  - {month: "2026-04", price: 2.85}
+  - {month: "2026-05", price: 3.12}
+  - {month: "2026-06", price: 3.45}
+ddr5_16gb_contract_usd:
+  - {quarter: "2025Q4", price: 3.50}
+  - {quarter: "2026Q1", price: 4.20}
+  - {quarter: "2026Q2", price: 5.10}
+mu_next_quarter_gm_guide: 0.86
+mu_next_quarter_rev_qoq: 0.20

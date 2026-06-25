@@ -5,7 +5,10 @@ See docs/superpowers/specs/2026-06-25-memory-cycle-monitor-design.md.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
+
+import yaml
 
 # Light constants
 GREEN = "GREEN"
@@ -48,3 +51,32 @@ class SignalResult:
     light: str            # GREEN | YELLOW | RED | "N/A"
     value: str            # short string for report (e.g. "+10.6%")
     detail: dict[str, Any] = field(default_factory=dict)
+
+
+def load_inputs(path: str | Path) -> Inputs:
+    """Parse memory_cycle_inputs.yaml into an Inputs dataclass.
+
+    Sorts price series by label (string sort works for both "2026-04" and "2026Q1").
+    Raises ValueError on missing required fields.
+    """
+    with open(path) as f:
+        raw = yaml.safe_load(f) or {}
+
+    if "last_updated" not in raw:
+        raise ValueError("YAML missing required field: last_updated")
+
+    def _parse_series(rows: list[dict], label_key: str) -> list[PricePoint]:
+        if not rows:
+            return []
+        pts = [PricePoint(label=str(r[label_key]), price=float(r["price"])) for r in rows]
+        pts.sort(key=lambda pp: pp.label)
+        return pts
+
+    return Inputs(
+        last_updated=str(raw["last_updated"]),
+        notes=str(raw.get("notes", "")),
+        ddr4_8gb_spot_usd=_parse_series(raw.get("ddr4_8gb_spot_usd") or [], "month"),
+        ddr5_16gb_contract_usd=_parse_series(raw.get("ddr5_16gb_contract_usd") or [], "quarter"),
+        mu_next_quarter_gm_guide=raw.get("mu_next_quarter_gm_guide"),
+        mu_next_quarter_rev_qoq=raw.get("mu_next_quarter_rev_qoq"),
+    )

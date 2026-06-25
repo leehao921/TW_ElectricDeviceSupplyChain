@@ -1,0 +1,8 @@
+last_updated: 2026-06-25
+notes: "Test fixture — only 2 quarters of DDR5 (degraded mode)"
+ddr4_8gb_spot_usd:
+  - {month: "2026-05", price: 3.12}
+  - {month: "2026-06", price: 3.45}
+ddr5_16gb_contract_usd:
+  - {quarter: "2026Q1", price: 4.20}
+  - {quarter: "2026Q2", price: 5.10}
