@@ -580,3 +580,49 @@ def test_suggest_next_trigger_non_terminal_unchanged():
     s2b = SignalResult(GREEN, "")
     s3 = SignalResult(GREEN, "")
     assert "S2a DDR4" in _suggest_next_trigger(s1, s2a, s2b, s3, stage=0)
+
+
+def test_load_inputs_pb_thresholds_when_present(tmp_path):
+    p = tmp_path / "with_thresholds.yaml"
+    p.write_text("""
+last_updated: 2026-06-25
+notes: ""
+pb_thresholds:
+  "2408.TW": {yellow: 5.0, red: 9.0}
+  "2344.TW": {yellow: 4.0, red: 8.0}
+""")
+    inp = load_inputs(p)
+    assert inp.pb_thresholds == {
+        "2408.TW": {"yellow": 5.0, "red": 9.0},
+        "2344.TW": {"yellow": 4.0, "red": 8.0},
+    }
+
+
+def test_load_inputs_pb_thresholds_absent_returns_none():
+    inp = load_inputs(FIXTURES / "memory_cycle_minimal.yaml")
+    assert inp.pb_thresholds is None
+
+
+def test_load_inputs_pb_thresholds_partial_raises(tmp_path):
+    p = tmp_path / "partial.yaml"
+    p.write_text("""
+last_updated: 2026-06-25
+pb_thresholds:
+  "2408.TW": {yellow: 1.8, red: 2.5}
+""")
+    with pytest.raises(ValueError, match="pb_thresholds"):
+        load_inputs(p)
+
+
+def test_compute_s1_pb_uses_yaml_thresholds_when_provided():
+    # Default: P/B 5.0 for 2408 → RED (above 2.5)
+    r_default = compute_s1_pb({"2408.TW": 5.0, "2344.TW": 1.0})
+    assert r_default.light == RED
+
+    # With override raising thresholds: same P/B 5.0 → GREEN (below 9.0)
+    custom = {
+        "2408.TW": {"yellow": 5.0, "red": 9.0},
+        "2344.TW": {"yellow": 4.0, "red": 8.0},
+    }
+    r_custom = compute_s1_pb({"2408.TW": 4.9, "2344.TW": 1.0}, thresholds=custom)
+    assert r_custom.light == GREEN  # 4.9 < 5.0 yellow threshold

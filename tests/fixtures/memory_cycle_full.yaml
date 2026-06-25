@@ -11,3 +11,8 @@ ddr5_16gb_contract_usd:
   - {quarter: "2026Q2", price: 5.10}
 mu_next_quarter_gm_guide: 0.86
 mu_next_quarter_rev_qoq: 0.20
+
+# Optional: override default P/B thresholds (test fixture exercises this path)
+pb_thresholds:
+  "2408.TW": {yellow: 1.8, red: 2.5}
+  "2344.TW": {yellow: 1.5, red: 2.0}

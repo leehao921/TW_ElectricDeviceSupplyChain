@@ -47,6 +47,7 @@ class Inputs:
     ddr5_16gb_contract_usd: list[PricePoint] = field(default_factory=list)
     mu_next_quarter_gm_guide: float | None = None
     mu_next_quarter_rev_qoq: float | None = None
+    pb_thresholds: dict[str, dict[str, float]] | None = None    # NEW
 
 
 @dataclass
@@ -76,6 +77,24 @@ def load_inputs(path: str | Path) -> Inputs:
         pts.sort(key=lambda pp: pp.label)
         return pts
 
+    # Optional pb_thresholds override
+    raw_thresholds = raw.get("pb_thresholds")
+    pb_thresholds = None
+    if raw_thresholds is not None:
+        required_tickers = {"2408.TW", "2344.TW"}
+        if not required_tickers.issubset(raw_thresholds.keys()):
+            missing = required_tickers - set(raw_thresholds.keys())
+            raise ValueError(f"pb_thresholds missing required ticker(s): {missing}")
+        for t in required_tickers:
+            block = raw_thresholds[t]
+            if "yellow" not in block or "red" not in block:
+                raise ValueError(f"pb_thresholds[{t}] must contain both 'yellow' and 'red' keys")
+        pb_thresholds = {
+            t: {"yellow": float(raw_thresholds[t]["yellow"]),
+                "red": float(raw_thresholds[t]["red"])}
+            for t in required_tickers
+        }
+
     return Inputs(
         last_updated=str(raw["last_updated"]),
         notes=str(raw.get("notes", "")),
@@ -83,6 +102,7 @@ def load_inputs(path: str | Path) -> Inputs:
         ddr5_16gb_contract_usd=_parse_series(raw.get("ddr5_16gb_contract_usd") or [], "quarter"),
         mu_next_quarter_gm_guide=raw.get("mu_next_quarter_gm_guide"),
         mu_next_quarter_rev_qoq=raw.get("mu_next_quarter_rev_qoq"),
+        pb_thresholds=pb_thresholds,
     )
 
 
@@ -179,12 +199,15 @@ def _worst(*lights: str) -> str:
     return max(known, key=_LIGHT_RANK.__getitem__)
 
 
-def compute_s1_pb(pbs: dict[str, float | None]) -> SignalResult:
+def compute_s1_pb(pbs: dict[str, float | None], thresholds: dict[str, dict[str, float]] | None = None) -> SignalResult:
     """S1: P/B valuation premium for 2408.TW and 2344.TW.
 
     Takes the worst-known light of the two. If a ticker is None it's recorded
     as N/A but doesn't drag the overall light down (still uses worst of known).
+
+    If `thresholds` is provided, uses it; otherwise falls back to module-level PB_THRESHOLDS.
     """
+    effective = thresholds if thresholds is not None else PB_THRESHOLDS
     detail: dict[str, Any] = {}
     lights = []
     parts = []
@@ -194,7 +217,7 @@ def compute_s1_pb(pbs: dict[str, float | None]) -> SignalResult:
             lights.append("N/A")
             parts.append(f"{ticker}=N/A")
             continue
-        lg = _light_for_pb(pb, PB_THRESHOLDS[ticker])
+        lg = _light_for_pb(pb, effective[ticker])
         detail[ticker] = {"pb": pb, "light": lg}
         lights.append(lg)
         parts.append(f"{ticker}={pb:.2f}")
@@ -511,7 +534,7 @@ def main(argv: list[str] | None = None) -> int:
     if all(v is None for v in pbs.values()):
         print("ERROR: yfinance returned no P/B for any ticker", file=sys.stderr)
         return 2
-    s1 = compute_s1_pb(pbs)
+    s1 = compute_s1_pb(pbs, thresholds=inp.pb_thresholds)
 
     mu_closes = fetch_monthly_closes("MU")
     hynix_closes = fetch_monthly_closes("000660.KS")
