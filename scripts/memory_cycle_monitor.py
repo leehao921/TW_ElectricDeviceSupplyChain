@@ -410,3 +410,25 @@ def render_markdown(
 ## Action
 **{action}**
 """
+
+
+def publish_redis(*, client, hash_name: str, data: dict) -> None:
+    """HSET all fields of `data` to `hash_name`. None values → empty string."""
+    flat = {k: ("" if v is None else str(v)) for k, v in data.items()}
+    client.hset(hash_name, mapping=flat)
+
+
+def make_redis_client():
+    """Standard Redis client per project convention.
+
+    Honors env vars: REDIS_HOST (default 'localhost'), REDIS_PORT (default 6379),
+    REDIS_DB (default 0). Reuses connection params from `redis-trading` MCP config.
+    """
+    import os
+    import redis
+    return redis.Redis(
+        host=os.environ.get("REDIS_HOST", "localhost"),
+        port=int(os.environ.get("REDIS_PORT", "6379")),
+        db=int(os.environ.get("REDIS_DB", "0")),
+        decode_responses=True,
+    )

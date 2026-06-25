@@ -378,3 +378,32 @@ def test_markdown_red_when_any_signal_red():
     )
     assert "🔴" in md
     assert "trim 30%" in md or "止損" in md
+
+
+import fakeredis
+from scripts.memory_cycle_monitor import publish_redis
+
+
+def test_publish_redis_sets_expected_fields():
+    r = fakeredis.FakeStrictRedis(decode_responses=True)
+    publish_redis(
+        client=r,
+        hash_name="h:agent:memory_cycle",
+        data={
+            "updated_at": "2026-06-25T08:15:00+08:00",
+            "overall_light": GREEN,
+            "trim_stage": 0,
+            "s1_pb_2408": 1.42,
+            "report_path": "docs/analysis/memory_cycle_2026-06-25.md",
+        },
+    )
+    out = r.hgetall("h:agent:memory_cycle")
+    assert out["overall_light"] == "GREEN"
+    assert out["trim_stage"] == "0"
+    assert out["s1_pb_2408"] == "1.42"
+
+
+def test_publish_redis_handles_none_as_empty_string():
+    r = fakeredis.FakeStrictRedis(decode_responses=True)
+    publish_redis(client=r, hash_name="h:test", data={"x": None})
+    assert r.hget("h:test", "x") == ""
