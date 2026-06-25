@@ -407,3 +407,28 @@ def test_publish_redis_handles_none_as_empty_string():
     r = fakeredis.FakeStrictRedis(decode_responses=True)
     publish_redis(client=r, hash_name="h:test", data={"x": None})
     assert r.hget("h:test", "x") == ""
+
+
+def test_main_dry_run_does_not_write_files(tmp_path, mocker, capsys):
+    """--dry-run prints to stdout, writes no files, makes no Redis call."""
+    # Mock yfinance — return safe defaults
+    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=1.42)
+    mocker.patch(
+        "scripts.memory_cycle_monitor.fetch_monthly_closes",
+        return_value=[100.0, 102.0, 105.0, 108.0, 110.0],  # not weak
+    )
+    inputs_path = FIXTURES / "memory_cycle_full.yaml"
+    state_path = tmp_path / "state.json"
+
+    from scripts.memory_cycle_monitor import main
+    rc = main([
+        "--dry-run",
+        "--inputs", str(inputs_path),
+        "--state", str(state_path),
+        "--report-dir", str(tmp_path / "reports"),
+    ])
+    assert rc == 0
+    captured = capsys.readouterr()
+    assert "記憶體週期燈號" in captured.out
+    assert not (tmp_path / "reports").exists()
+    assert not state_path.exists()

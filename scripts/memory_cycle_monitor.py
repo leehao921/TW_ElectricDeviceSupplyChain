@@ -4,9 +4,13 @@ See docs/superpowers/specs/2026-06-25-memory-cycle-monitor-design.md.
 """
 from __future__ import annotations
 
+import argparse
+import sys
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import yaml
 
@@ -432,3 +436,147 @@ def make_redis_client():
         db=int(os.environ.get("REDIS_DB", "0")),
         decode_responses=True,
     )
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_INPUTS = PROJECT_ROOT / "data" / "memory_cycle_inputs.yaml"
+DEFAULT_STATE = PROJECT_ROOT / "data" / "memory_cycle_state.json"
+DEFAULT_REPORT_DIR = PROJECT_ROOT / "docs" / "analysis"
+REDIS_HASH = "h:agent:memory_cycle"
+
+TICKERS = ["2408.TW", "2344.TW"]
+
+
+def _build_redis_payload(*, report_date, overall_light, trim_stage, max_stage_seen,
+                         next_trigger, s1, s2a, s2b, s3, report_path) -> dict:
+    tz = ZoneInfo("Asia/Taipei")
+    return {
+        "updated_at": datetime.now(tz).isoformat(timespec="seconds"),
+        "overall_light": overall_light,
+        "trim_stage": trim_stage,
+        "max_stage_seen": max_stage_seen,
+        "next_trigger": next_trigger,
+        "s1_pb_2408": s1.detail.get("2408.TW", {}).get("pb") if isinstance(s1.detail.get("2408.TW"), dict) else None,
+        "s1_pb_2344": s1.detail.get("2344.TW", {}).get("pb") if isinstance(s1.detail.get("2344.TW"), dict) else None,
+        "s1_light": s1.light,
+        "s2a_ddr4_mom_pct": s2a.detail.get("mom_pct"),
+        "s2b_ddr5_qoq_pct": s2b.detail.get("qoq_pct"),
+        "s2b_ddr5_decay_pct": s2b.detail.get("decay_pct"),
+        "s2_light": _worst(s2a.light, s2b.light),
+        "s3_mu_monthly": YELLOW if s3.detail.get("mu_weak") else GREEN,
+        "s3_hynix_monthly": YELLOW if s3.detail.get("hynix_weak") else GREEN,
+        "s3_tw_monthly": YELLOW if s3.detail.get("tw_weak") else GREEN,
+        "s3_light": s3.light,
+        "report_path": report_path,
+    }
+
+
+def _suggest_next_trigger(s1: SignalResult, s2a: SignalResult, s2b: SignalResult, s3: SignalResult) -> str:
+    if s2a.light == GREEN:
+        return "S2a DDR4 首次負 MoM"
+    if s2b.light == GREEN:
+        return "S2b DDR5 QoQ 衰減 >50% 或 <+10%"
+    if s1.light == GREEN:
+        return "S1 任一檔 P/B 進入警戒區"
+    if s3.light == GREEN:
+        return "S3 MU 月線轉弱"
+    return "升級至下一個 trim stage"
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Memory cycle sell-signal monitor")
+    parser.add_argument("--inputs", default=str(DEFAULT_INPUTS))
+    parser.add_argument("--state", default=str(DEFAULT_STATE))
+    parser.add_argument("--report-dir", default=str(DEFAULT_REPORT_DIR))
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print Markdown to stdout, do not write files or push Redis")
+    parser.add_argument("--no-redis", action="store_true",
+                        help="Write Markdown but skip Redis push")
+    args = parser.parse_args(argv)
+
+    # Load inputs
+    try:
+        inp = load_inputs(args.inputs)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"ERROR: inputs YAML invalid: {e}", file=sys.stderr)
+        return 1
+
+    # Compute signals
+    s2a = compute_s2a_ddr4(inp.ddr4_8gb_spot_usd)
+    s2b = compute_s2b_ddr5(inp.ddr5_16gb_contract_usd)
+
+    pbs = {t: fetch_pb(t) for t in TICKERS}
+    if all(v is None for v in pbs.values()):
+        print("ERROR: yfinance returned no P/B for any ticker", file=sys.stderr)
+        return 2
+    s1 = compute_s1_pb(pbs)
+
+    mu_closes = fetch_monthly_closes("MU")
+    hynix_closes = fetch_monthly_closes("000660.KS")
+    tw_weakness_flags = []
+    for t in TICKERS:
+        cl = fetch_monthly_closes(t)
+        if cl:
+            tw_weakness_flags.append(detect_monthly_weakness(cl))
+    tw_weak = any(tw_weakness_flags)
+    s3 = compute_s3_lights(
+        mu_weak=detect_monthly_weakness(mu_closes),
+        hynix_weak=detect_monthly_weakness(hynix_closes),
+        tw_weak=tw_weak,
+    )
+
+    # Aggregate
+    agg = aggregate(s1=s1, s2a=s2a, s2b=s2b, s3=s3)
+
+    # State (skipped on dry-run so test runs don't mutate disk)
+    today = date.today().isoformat()
+    if args.dry_run:
+        stage = agg["trim_stage_candidate"]
+        max_seen = stage
+    else:
+        state = advance_state(candidate=agg["trim_stage_candidate"],
+                              state_path=Path(args.state), today=today)
+        stage = state["stage"]
+        max_seen = state["max_stage_seen"]
+
+    next_trigger = _suggest_next_trigger(s1, s2a, s2b, s3)
+    report_path = Path(args.report_dir) / f"memory_cycle_{today}.md"
+
+    md = render_markdown(
+        report_date=today,
+        overall_light=agg["overall_light"],
+        trim_stage=stage,
+        max_stage_seen=max_seen,
+        next_trigger=next_trigger,
+        last_updated_yaml=inp.last_updated,
+        s1=s1, s2a=s2a, s2b=s2b, s3=s3,
+    )
+
+    if args.dry_run:
+        print(md)
+        return 0
+
+    # Write Markdown
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(md)
+
+    # Publish Redis (unless --no-redis)
+    if not args.no_redis:
+        try:
+            client = make_redis_client()
+            payload = _build_redis_payload(
+                report_date=today, overall_light=agg["overall_light"],
+                trim_stage=stage, max_stage_seen=max_seen, next_trigger=next_trigger,
+                s1=s1, s2a=s2a, s2b=s2b, s3=s3, report_path=str(report_path),
+            )
+            publish_redis(client=client, hash_name=REDIS_HASH, data=payload)
+        except Exception as e:
+            print(f"WARN: Redis push failed: {e}", file=sys.stderr)
+            return 3
+
+    print(f"Wrote {report_path} (overall: {agg['overall_light']}, stage {stage})")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
