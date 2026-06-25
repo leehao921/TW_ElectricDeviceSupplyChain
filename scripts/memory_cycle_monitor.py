@@ -229,3 +229,41 @@ def detect_monthly_weakness(closes: list[float]) -> bool:
         return False
     prior_3_min = min(closes[-4:-1])
     return closes[-1] < prior_3_min
+
+
+def compute_s3_lights(*, mu_weak: bool, hynix_weak: bool, tw_weak: bool) -> SignalResult:
+    """S3 truth table from spec §4.
+
+    | MU  | Hynix | TW  | Light  | Note                          |
+    | --- | ----- | --- | ------ | ----------------------------- |
+    | not | -     | -   | GREEN  | primary signal not triggered  |
+    | wk  | not   | -   | YELLOW | single-head warning           |
+    | wk  | wk    | not | RED    | dual-head lead confirmed      |
+    | wk  | wk    | wk  | YELLOW | lead window closed            |
+    """
+    detail = {"mu_weak": mu_weak, "hynix_weak": hynix_weak, "tw_weak": tw_weak}
+    if not mu_weak:
+        return SignalResult(light=GREEN, value="MU not weak", detail=detail)
+    if not hynix_weak:
+        return SignalResult(light=YELLOW, value="MU weak only", detail=detail)
+    # MU + Hynix both weak
+    if tw_weak:
+        return SignalResult(light=YELLOW, value="lead window closed", detail=detail)
+    return SignalResult(light=RED, value="MU+Hynix lead TW", detail=detail)
+
+
+def fetch_monthly_closes(ticker: str, months: int = 13) -> list[float]:
+    """Return last `months` of monthly close prices for `ticker`.
+
+    Drops the most recent month if it's incomplete (last day of month not yet reached).
+    Returns [] on failure.
+    """
+    import yfinance as yf
+    try:
+        hist = yf.Ticker(ticker).history(period=f"{months}mo", interval="1mo")
+        if hist is None or hist.empty:
+            return []
+        closes = hist["Close"].dropna().tolist()
+        return [float(c) for c in closes]
+    except Exception:
+        return []

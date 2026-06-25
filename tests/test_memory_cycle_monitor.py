@@ -233,3 +233,44 @@ def test_monthly_weakness_false_when_latest_above():
 def test_monthly_weakness_false_with_insufficient_data():
     # need at least 4 months (3 prior + 1 current)
     assert detect_monthly_weakness([100, 95, 90]) is False
+
+
+from scripts.memory_cycle_monitor import compute_s3_lights
+
+
+def test_s3_green_when_mu_not_weak():
+    # MU strong → green regardless of others
+    r = compute_s3_lights(mu_weak=False, hynix_weak=True, tw_weak=True)
+    assert r.light == GREEN
+
+
+def test_s3_yellow_when_only_mu_weak():
+    r = compute_s3_lights(mu_weak=True, hynix_weak=False, tw_weak=False)
+    assert r.light == YELLOW
+
+
+def test_s3_red_when_mu_and_hynix_weak_tw_strong():
+    r = compute_s3_lights(mu_weak=True, hynix_weak=True, tw_weak=False)
+    assert r.light == RED
+
+
+def test_s3_yellow_when_all_three_weak_window_closed():
+    # MU + Hynix + TW all weak → lead window closed → YELLOW per spec
+    r = compute_s3_lights(mu_weak=True, hynix_weak=True, tw_weak=True)
+    assert r.light == YELLOW
+
+
+def test_fetch_monthly_closes_returns_list(mocker):
+    import pandas as pd
+    fake_hist = pd.DataFrame({"Close": [100.0, 102.0, 95.0]})
+    fake_ticker = mocker.MagicMock()
+    fake_ticker.history.return_value = fake_hist
+    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
+    from scripts.memory_cycle_monitor import fetch_monthly_closes
+    assert fetch_monthly_closes("MU") == [100.0, 102.0, 95.0]
+
+
+def test_fetch_monthly_closes_returns_empty_on_failure(mocker):
+    mocker.patch("yfinance.Ticker", side_effect=RuntimeError("boom"))
+    from scripts.memory_cycle_monitor import fetch_monthly_closes
+    assert fetch_monthly_closes("MU") == []
