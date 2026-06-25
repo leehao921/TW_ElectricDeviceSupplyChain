@@ -274,3 +274,64 @@ def test_fetch_monthly_closes_returns_empty_on_failure(mocker):
     mocker.patch("yfinance.Ticker", side_effect=RuntimeError("boom"))
     from scripts.memory_cycle_monitor import fetch_monthly_closes
     assert fetch_monthly_closes("MU") == []
+
+
+from scripts.memory_cycle_monitor import aggregate, advance_state
+
+
+def _sig(light: str) -> SignalResult:
+    return SignalResult(light=light, value="")
+
+
+def test_aggregate_all_green():
+    out = aggregate(s1=_sig(GREEN), s2a=_sig(GREEN), s2b=_sig(GREEN), s3=_sig(GREEN))
+    assert out["overall_light"] == GREEN
+    assert out["trim_stage_candidate"] == 0
+
+
+def test_aggregate_s1_yellow_gives_stage_1():
+    out = aggregate(s1=_sig(YELLOW), s2a=_sig(GREEN), s2b=_sig(GREEN), s3=_sig(GREEN))
+    assert out["overall_light"] == YELLOW
+    assert out["trim_stage_candidate"] == 1
+
+
+def test_aggregate_s3_yellow_gives_stage_2():
+    out = aggregate(s1=_sig(GREEN), s2a=_sig(GREEN), s2b=_sig(GREEN), s3=_sig(YELLOW))
+    assert out["overall_light"] == YELLOW
+    assert out["trim_stage_candidate"] == 2
+
+
+def test_aggregate_any_red_gives_stage_3():
+    out = aggregate(s1=_sig(GREEN), s2a=_sig(RED), s2b=_sig(GREEN), s3=_sig(GREEN))
+    assert out["overall_light"] == RED
+    assert out["trim_stage_candidate"] == 3
+
+
+def test_aggregate_takes_max_when_multiple():
+    # S1 yellow (cand 1) + S3 yellow (cand 2) → cand 2
+    out = aggregate(s1=_sig(YELLOW), s2a=_sig(GREEN), s2b=_sig(GREEN), s3=_sig(YELLOW))
+    assert out["trim_stage_candidate"] == 2
+
+
+def test_advance_state_creates_state_file_when_missing(tmp_path):
+    state_file = tmp_path / "state.json"
+    out = advance_state(candidate=1, state_path=state_file)
+    assert out["stage"] == 1
+    assert out["max_stage_seen"] == 1
+    assert state_file.exists()
+
+
+def test_advance_state_monotonic_does_not_regress(tmp_path):
+    state_file = tmp_path / "state.json"
+    advance_state(candidate=2, state_path=state_file)
+    out = advance_state(candidate=1, state_path=state_file)
+    assert out["stage"] == 2  # never goes back down
+
+
+def test_advance_state_records_first_seen_at(tmp_path):
+    state_file = tmp_path / "state.json"
+    out = advance_state(candidate=2, state_path=state_file, today="2026-07-15")
+    assert out["max_stage_first_seen_at"] == "2026-07-15"
+    # second call with same candidate → first_seen_at unchanged
+    out2 = advance_state(candidate=2, state_path=state_file, today="2026-08-01")
+    assert out2["max_stage_first_seen_at"] == "2026-07-15"

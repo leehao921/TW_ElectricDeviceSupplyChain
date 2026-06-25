@@ -255,8 +255,9 @@ def compute_s3_lights(*, mu_weak: bool, hynix_weak: bool, tw_weak: bool) -> Sign
 def fetch_monthly_closes(ticker: str, months: int = 13) -> list[float]:
     """Return last `months` of monthly close prices for `ticker`.
 
-    Drops the most recent month if it's incomplete (last day of month not yet reached).
-    Returns [] on failure.
+    Drops rows with NaN closes via .dropna(); returns [] on failure.
+    Note: the current (partial) month is NOT dropped — caller's monthly-weakness
+    check must tolerate the last value being mid-month if run before month-end.
     """
     import yfinance as yf
     try:
@@ -267,3 +268,58 @@ def fetch_monthly_closes(ticker: str, months: int = 13) -> list[float]:
         return [float(c) for c in closes]
     except Exception:
         return []
+
+
+import json
+from datetime import date
+
+
+def aggregate(*, s1: SignalResult, s2a: SignalResult, s2b: SignalResult, s3: SignalResult) -> dict:
+    """Combine the 4 signals into overall light + candidate stage.
+
+    Candidate stage (spec §4 S4):
+      3 if any RED
+      2 if S3 YELLOW
+      1 if S1 or S2 (any) YELLOW
+      0 otherwise
+    Final stage = max(candidate, historical max from state file) — caller handles that.
+    """
+    s2_worst = _worst(s2a.light, s2b.light)
+    overall = _worst(s1.light, s2_worst, s3.light)
+
+    candidate = 0
+    if RED in (s1.light, s2a.light, s2b.light, s3.light):
+        candidate = 3
+    elif s3.light == YELLOW:
+        candidate = 2
+    elif s1.light == YELLOW or s2_worst == YELLOW:
+        candidate = 1
+
+    return {
+        "overall_light": overall,
+        "trim_stage_candidate": candidate,
+        "s2_combined_light": s2_worst,
+    }
+
+
+def advance_state(*, candidate: int, state_path: Path, today: str | None = None) -> dict:
+    """Monotonic stage progression backed by JSON state file.
+
+    Returns dict with: stage, max_stage_seen, max_stage_first_seen_at.
+    """
+    today = today or date.today().isoformat()
+    state_path = Path(state_path)
+
+    if state_path.exists():
+        state = json.loads(state_path.read_text())
+    else:
+        state = {"max_stage_seen": 0, "max_stage_first_seen_at": None}
+
+    if candidate > state["max_stage_seen"]:
+        state["max_stage_seen"] = candidate
+        state["max_stage_first_seen_at"] = today
+
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    state_path.write_text(json.dumps(state, indent=2))
+
+    return {"stage": state["max_stage_seen"], **state}
