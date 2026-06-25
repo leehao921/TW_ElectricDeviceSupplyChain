@@ -99,3 +99,63 @@ def test_s2a_consecutive_resets_on_positive_in_between():
 def test_s2a_na_when_fewer_than_2_points():
     r = compute_s2a_ddr4(_ddr4([3.0]))
     assert r.light == "N/A"
+
+
+from scripts.memory_cycle_monitor import compute_s2b_ddr5
+
+
+def _ddr5(prices: list[float]) -> list[PricePoint]:
+    quarters = ["2025Q4", "2026Q1", "2026Q2", "2026Q3"]
+    return [PricePoint(label=quarters[i], price=p) for i, p in enumerate(prices)]
+
+
+def test_s2b_green_strong_qoq_low_decay():
+    # QoQ +21% from +20% → decay ~5% → green
+    r = compute_s2b_ddr5(_ddr5([3.5, 4.2, 5.082]))  # 20% then 21%
+    assert r.light == GREEN
+
+
+def test_s2b_yellow_when_qoq_decays_more_than_50pct():
+    # +20% → +9% → decay 55% → YELLOW
+    r = compute_s2b_ddr5(_ddr5([3.5, 4.2, 4.578]))
+    assert r.light == YELLOW
+
+
+def test_s2b_yellow_when_qoq_below_10pct_3_quarter():
+    # +21% → +8% → decay big → YELLOW
+    r = compute_s2b_ddr5(_ddr5([3.5, 4.235, 4.574]))  # second QoQ ~8%
+    assert r.light == YELLOW
+
+
+def test_s2b_red_when_qoq_below_5pct():
+    # +21% → +3% → RED (absolute threshold)
+    r = compute_s2b_ddr5(_ddr5([3.5, 4.235, 4.362]))  # second QoQ ~3%
+    assert r.light == RED
+
+
+def test_s2b_red_on_negative_qoq():
+    r = compute_s2b_ddr5(_ddr5([3.5, 4.2, 4.0]))
+    assert r.light == RED
+
+
+def test_s2b_degraded_2_quarter_green_at_plus_10():
+    # Only 2 quarters → absolute-only mode. +21% → GREEN
+    r = compute_s2b_ddr5([
+        PricePoint("2026Q1", 4.20),
+        PricePoint("2026Q2", 5.10),
+    ])
+    assert r.light == GREEN
+    assert r.detail.get("decay_pct") is None  # decay unavailable
+
+
+def test_s2b_degraded_2_quarter_yellow_between_5_and_10():
+    r = compute_s2b_ddr5([
+        PricePoint("2026Q1", 4.20),
+        PricePoint("2026Q2", 4.50),  # ~7.1%
+    ])
+    assert r.light == YELLOW
+
+
+def test_s2b_na_when_fewer_than_2_quarters():
+    r = compute_s2b_ddr5([PricePoint("2026Q2", 5.10)])
+    assert r.light == "N/A"

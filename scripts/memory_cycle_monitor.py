@@ -112,3 +112,46 @@ def compute_s2a_ddr4(series: list[PricePoint]) -> SignalResult:
             )
 
     return SignalResult(light=YELLOW, value=value, detail={"mom_pct": latest_mom})
+
+
+def compute_s2b_ddr5(series: list[PricePoint]) -> SignalResult:
+    """S2b: DDR5 16Gb 合約價 QoQ — dual threshold.
+
+    With 3+ quarters (full mode):
+      Green:  QoQ ≥ +10% AND decay < 50%
+      Yellow: QoQ < +10% OR decay > 50%
+      Red:    QoQ < +5% or negative
+
+    With exactly 2 quarters (degraded — no decay computable):
+      Green:  QoQ ≥ +10%
+      Yellow: +5% ≤ QoQ < +10%
+      Red:    QoQ < +5% or negative
+    """
+    if len(series) < 2:
+        return SignalResult(light="N/A", value="insufficient data")
+
+    def _qoq(a: PricePoint, b: PricePoint) -> float:
+        return (b.price - a.price) / a.price * 100
+
+    latest_qoq = _qoq(series[-2], series[-1])
+    detail: dict[str, Any] = {"qoq_pct": latest_qoq, "decay_pct": None}
+
+    # Compute decay if 3+ quarters available
+    if len(series) >= 3:
+        prev_qoq = _qoq(series[-3], series[-2])
+        if prev_qoq > 0:
+            decay = (prev_qoq - latest_qoq) / prev_qoq
+            detail["decay_pct"] = decay * 100
+            detail["prev_qoq_pct"] = prev_qoq
+
+    # Red (absolute) — applies in both modes
+    if latest_qoq < DDR5_QOQ_RED_PCT:
+        return SignalResult(light=RED, value=f"{latest_qoq:+.1f}%", detail=detail)
+
+    # Yellow checks
+    if latest_qoq < DDR5_QOQ_YELLOW_PCT:
+        return SignalResult(light=YELLOW, value=f"{latest_qoq:+.1f}%", detail=detail)
+    if detail["decay_pct"] is not None and detail["decay_pct"] / 100 > DDR5_DECAY_YELLOW:
+        return SignalResult(light=YELLOW, value=f"{latest_qoq:+.1f}%", detail=detail)
+
+    return SignalResult(light=GREEN, value=f"{latest_qoq:+.1f}%", detail=detail)
