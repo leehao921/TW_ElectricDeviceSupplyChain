@@ -432,3 +432,125 @@ def test_main_dry_run_does_not_write_files(tmp_path, mocker, capsys):
     assert "記憶體週期燈號" in captured.out
     assert not (tmp_path / "reports").exists()
     assert not state_path.exists()
+
+
+import json
+
+
+def test_integration_full_pipeline_writes_markdown_and_redis(tmp_path, mocker):
+    """Full pipeline:
+    - YAML fixture (full 3-quarter)
+    - Mocked yfinance (P/B + monthly closes for MU/Hynix/2408/2344)
+    - fakeredis as Redis client
+    - Asserts Markdown file written + Redis hash populated
+    """
+    # Mock yfinance fetches at the source-function level
+    mocker.patch("scripts.memory_cycle_monitor.fetch_pb",
+                 side_effect=lambda t: {"2408.TW": 1.42, "2344.TW": 1.12}[t])
+    # All upward-trending closes → no weakness anywhere
+    mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
+                 return_value=[100, 102, 105, 108, 110])
+
+    # Patch Redis client factory to return a fakeredis instance
+    fake = fakeredis.FakeStrictRedis(decode_responses=True)
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client", return_value=fake)
+
+    from scripts.memory_cycle_monitor import main, REDIS_HASH
+
+    state_path = tmp_path / "state.json"
+    report_dir = tmp_path / "reports"
+    inputs_path = FIXTURES / "memory_cycle_full.yaml"
+
+    rc = main([
+        "--inputs", str(inputs_path),
+        "--state", str(state_path),
+        "--report-dir", str(report_dir),
+    ])
+    assert rc == 0
+
+    # Markdown written
+    md_files = list(report_dir.glob("memory_cycle_*.md"))
+    assert len(md_files) == 1
+    md = md_files[0].read_text()
+    assert "S1 — 兩檔估值溢價" in md
+    assert "1.42" in md
+    assert "🟢" in md  # all-green path
+
+    # Redis hash populated
+    redis_data = fake.hgetall(REDIS_HASH)
+    assert redis_data["overall_light"] == "GREEN"
+    assert redis_data["trim_stage"] == "0"
+    assert redis_data["s1_pb_2408"] == "1.42"
+    assert "memory_cycle_" in redis_data["report_path"]
+
+    # State file created
+    assert state_path.exists()
+    state = json.loads(state_path.read_text())
+    assert state["max_stage_seen"] == 0
+
+
+def test_integration_no_redis_flag_skips_redis(tmp_path, mocker):
+    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=1.42)
+    mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
+                 return_value=[100, 102, 105, 108, 110])
+    # Make Redis client raise to confirm it's not called
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client",
+                 side_effect=RuntimeError("should not be called"))
+
+    from scripts.memory_cycle_monitor import main
+    rc = main([
+        "--no-redis",
+        "--inputs", str(FIXTURES / "memory_cycle_full.yaml"),
+        "--state", str(tmp_path / "state.json"),
+        "--report-dir", str(tmp_path / "reports"),
+    ])
+    assert rc == 0  # no Redis attempted, no error
+
+
+def test_main_returns_1_on_invalid_yaml(tmp_path, mocker):
+    """rc=1 when YAML is malformed/missing required field."""
+    bad_yaml = tmp_path / "bad.yaml"
+    bad_yaml.write_text("notes: 'missing last_updated'\n")
+    from scripts.memory_cycle_monitor import main
+    rc = main([
+        "--inputs", str(bad_yaml),
+        "--state", str(tmp_path / "state.json"),
+        "--report-dir", str(tmp_path / "reports"),
+        "--no-redis",
+    ])
+    assert rc == 1
+
+
+def test_main_returns_2_when_all_pbs_none(tmp_path, mocker):
+    """rc=2 when yfinance returns None for both P/B fetches."""
+    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=None)
+    mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
+                 return_value=[100, 102, 105, 108, 110])
+    from scripts.memory_cycle_monitor import main
+    rc = main([
+        "--inputs", str(FIXTURES / "memory_cycle_full.yaml"),
+        "--state", str(tmp_path / "state.json"),
+        "--report-dir", str(tmp_path / "reports"),
+        "--no-redis",
+    ])
+    assert rc == 2
+
+
+def test_main_returns_3_when_redis_push_fails(tmp_path, mocker):
+    """rc=3 when Redis client/publish raises (e.g. ConnectionRefusedError)."""
+    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=1.42)
+    mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
+                 return_value=[100, 102, 105, 108, 110])
+    # Force Redis client factory to raise — simulates Redis server down
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client",
+                 side_effect=ConnectionRefusedError("simulated Redis down"))
+    from scripts.memory_cycle_monitor import main
+    rc = main([
+        "--inputs", str(FIXTURES / "memory_cycle_full.yaml"),
+        "--state", str(tmp_path / "state.json"),
+        "--report-dir", str(tmp_path / "reports"),
+    ])
+    assert rc == 3
+    # Markdown is still written before Redis fails
+    md_files = list((tmp_path / "reports").glob("memory_cycle_*.md"))
+    assert len(md_files) == 1
