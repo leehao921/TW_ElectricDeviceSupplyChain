@@ -335,3 +335,46 @@ def test_advance_state_records_first_seen_at(tmp_path):
     # second call with same candidate → first_seen_at unchanged
     out2 = advance_state(candidate=2, state_path=state_file, today="2026-08-01")
     assert out2["max_stage_first_seen_at"] == "2026-07-15"
+
+
+from scripts.memory_cycle_monitor import render_markdown
+
+
+def test_markdown_contains_required_sections():
+    s1 = SignalResult(GREEN, "2408=1.42, 2344=1.12",
+                      {"2408.TW": {"pb": 1.42, "light": GREEN},
+                       "2344.TW": {"pb": 1.12, "light": GREEN}})
+    s2a = SignalResult(GREEN, "+10.6%", {"mom_pct": 10.6})
+    s2b = SignalResult(GREEN, "+21.4%", {"qoq_pct": 21.4, "decay_pct": None})
+    s3 = SignalResult(GREEN, "MU not weak",
+                      {"mu_weak": False, "hynix_weak": False, "tw_weak": False})
+    md = render_markdown(
+        report_date="2026-06-25",
+        overall_light=GREEN,
+        trim_stage=0,
+        max_stage_seen=0,
+        next_trigger="S2a DDR4 首次負 MoM",
+        last_updated_yaml="2026-06-25",
+        s1=s1, s2a=s2a, s2b=s2b, s3=s3,
+    )
+    assert "記憶體週期燈號 — 2026-06-25" in md
+    assert "S1 — 兩檔估值溢價" in md
+    assert "S2 — DRAM 報價動能" in md
+    assert "S3 — 跨市場領先訊號" in md
+    assert "1.42" in md
+    assert "+10.6%" in md
+    assert "🟢" in md
+
+
+def test_markdown_red_when_any_signal_red():
+    s1 = SignalResult(RED, "2408=2.60", {"2408.TW": {"pb": 2.6, "light": RED}})
+    s2a = SignalResult(GREEN, "+5%")
+    s2b = SignalResult(GREEN, "+15%")
+    s3 = SignalResult(GREEN, "ok")
+    md = render_markdown(
+        report_date="2026-06-25", overall_light=RED, trim_stage=3,
+        max_stage_seen=3, next_trigger="-", last_updated_yaml="2026-06-25",
+        s1=s1, s2a=s2a, s2b=s2b, s3=s3,
+    )
+    assert "🔴" in md
+    assert "trim 30%" in md or "止損" in md

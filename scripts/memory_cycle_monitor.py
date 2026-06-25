@@ -323,3 +323,90 @@ def advance_state(*, candidate: int, state_path: Path, today: str | None = None)
     state_path.write_text(json.dumps(state, indent=2))
 
     return {"stage": state["max_stage_seen"], **state}
+
+
+LIGHT_EMOJI = {GREEN: "🟢", YELLOW: "🟡", RED: "🔴", "N/A": "⚪"}
+
+STAGE_ACTION = {
+    0: "HOLD;等下次更新",
+    1: "第一段 trim 30%",
+    2: "第二段 trim 40%(累計 70%)",
+    3: "第三段 trim 30%(累計 100%,止損 / 全砍)",
+}
+
+
+def render_markdown(
+    *,
+    report_date: str,
+    overall_light: str,
+    trim_stage: int,
+    max_stage_seen: int,
+    next_trigger: str,
+    last_updated_yaml: str,
+    s1: SignalResult,
+    s2a: SignalResult,
+    s2b: SignalResult,
+    s3: SignalResult,
+) -> str:
+    """Render the daily Markdown report. Pure function — no I/O."""
+    emoji = LIGHT_EMOJI.get(overall_light, "⚪")
+    action = STAGE_ACTION[trim_stage]
+
+    # S1 table
+    s1_rows = []
+    for ticker, label in [("2408.TW", "南亞科 2408"), ("2344.TW", "華邦電 2344")]:
+        info = s1.detail.get(ticker)
+        if isinstance(info, dict):
+            pb = f"{info['pb']:.2f}"
+            lg = LIGHT_EMOJI[info["light"]]
+        else:
+            pb, lg = "N/A", "⚪"
+        th = PB_THRESHOLDS[ticker]
+        s1_rows.append(f"| {label} | {pb} | >{th['yellow']} | >{th['red']} | {lg} |")
+    s1_table = "\n".join(s1_rows)
+
+    # S2 detail strings
+    decay = s2b.detail.get("decay_pct")
+    decay_str = "N/A" if decay is None else f"{decay:.1f}%"
+
+    # S3 detail
+    s3d = s3.detail
+    s3_table = "\n".join([
+        f"| MU | {'轉弱' if s3d.get('mu_weak') else '站穩'} | "
+        f"{LIGHT_EMOJI[RED if s3d.get('mu_weak') else GREEN]} |",
+        f"| Hynix 000660.KS | {'轉弱' if s3d.get('hynix_weak') else '站穩'} | "
+        f"{LIGHT_EMOJI[RED if s3d.get('hynix_weak') else GREEN]} |",
+        f"| 2408 / 2344 | {'轉弱' if s3d.get('tw_weak') else '站穩'} | "
+        f"{LIGHT_EMOJI[RED if s3d.get('tw_weak') else GREEN]} |",
+    ])
+
+    return f"""# 記憶體週期燈號 — {report_date}
+
+**總燈號:** {emoji} {overall_light}   **Trim 進度:** {trim_stage} / 3   \
+**Action:** {action}
+**下一段觸發:** {next_trigger}
+**Inputs YAML last_updated:** {last_updated_yaml}   **Max stage seen:** {max_stage_seen}
+
+---
+
+## S1 — 兩檔估值溢價
+| 標的 | P/B | 警戒 | 極端 | 燈號 |
+|---|---|---|---|---|
+{s1_table}
+
+## S2 — DRAM 報價動能
+- **S2a DDR4 8Gb 現貨 MoM:** {s2a.value} {LIGHT_EMOJI[s2a.light]}
+- **S2b DDR5 16Gb 合約 QoQ:** {s2b.value};相對前季衰減 {decay_str} {LIGHT_EMOJI[s2b.light]}
+
+## S3 — 跨市場領先訊號
+| Source | 月線狀態 | 燈號 |
+|---|---|---|
+{s3_table}
+
+## Verification log
+- Data source: `data/memory_cycle_inputs.yaml` last_updated {last_updated_yaml}
+- Spec: `docs/superpowers/specs/2026-06-25-memory-cycle-monitor-design.md`
+
+## Action
+**{action}**
+"""
