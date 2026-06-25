@@ -40,3 +40,10 @@ analysis/reports/snapshot_*.csv
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Memory cycle monitor auto-generated outputs
+data/memory_cycle_state.json
+docs/analysis/memory_cycle_*.md
+
+# Memory cycle monitor live inputs (use .example.yaml as reference)
+data/memory_cycle_inputs.yaml

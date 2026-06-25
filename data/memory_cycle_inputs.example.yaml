@@ -1,3 +1,8 @@
+# REFERENCE FILE — do NOT edit.
+# Copy to data/memory_cycle_inputs.yaml and update monthly with latest TrendForce / MU figures.
+#
+# File is committed; live data file is gitignored to prevent monthly diff noise.
+#
 # Memory Cycle Monitor — manual inputs
 # Edit monthly after TrendForce / DRAMeXchange report; once per quarter for DDR5.
 # Source attribution required for audit.
