@@ -208,3 +208,28 @@ def test_fetch_pb_returns_none_on_exception(mocker):
     mocker.patch("yfinance.Ticker", side_effect=RuntimeError("network"))
     from scripts.memory_cycle_monitor import fetch_pb
     assert fetch_pb("2408.TW") is None
+
+
+from scripts.memory_cycle_monitor import detect_monthly_weakness
+
+
+def test_monthly_weakness_true_when_latest_below_prior_3_min():
+    # latest = 90 < min(prior 3 = [95, 100, 98]) = 95 → weak
+    closes = [105, 102, 100, 95, 100, 98, 90]
+    assert detect_monthly_weakness(closes) is True
+
+
+def test_monthly_weakness_false_when_latest_equals_prior_3_min():
+    # strict less-than → equal = not weak
+    closes = [100, 102, 95, 100, 98, 95]
+    assert detect_monthly_weakness(closes) is False
+
+
+def test_monthly_weakness_false_when_latest_above():
+    closes = [100, 95, 98, 99, 105]
+    assert detect_monthly_weakness(closes) is False
+
+
+def test_monthly_weakness_false_with_insufficient_data():
+    # need at least 4 months (3 prior + 1 current)
+    assert detect_monthly_weakness([100, 95, 90]) is False

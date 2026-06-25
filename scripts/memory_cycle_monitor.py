@@ -218,3 +218,14 @@ def fetch_pb(ticker: str) -> float | None:
     except Exception:
         pass
     return None
+
+
+def detect_monthly_weakness(closes: list[float]) -> bool:
+    """Spec §4 S3: latest month close < min of prior 3 months close.
+
+    `closes` is chronological; index -1 is latest. Need ≥4 points.
+    """
+    if len(closes) < 4:
+        return False
+    prior_3_min = min(closes[-4:-1])
+    return closes[-1] < prior_3_min
