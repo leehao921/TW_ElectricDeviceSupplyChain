@@ -80,3 +80,35 @@ def load_inputs(path: str | Path) -> Inputs:
         mu_next_quarter_gm_guide=raw.get("mu_next_quarter_gm_guide"),
         mu_next_quarter_rev_qoq=raw.get("mu_next_quarter_rev_qoq"),
     )
+
+
+def compute_s2a_ddr4(series: list[PricePoint]) -> SignalResult:
+    """S2a: DDR4 8Gb 現貨價 MoM.
+
+    Green: latest MoM ≥ 0%
+    Yellow: latest MoM < 0% (single negative month)
+    Red: latest 2 consecutive months MoM < 0%
+    N/A: <2 data points
+    """
+    if len(series) < 2:
+        return SignalResult(light="N/A", value="insufficient data")
+
+    def _mom(a: PricePoint, b: PricePoint) -> float:
+        return (b.price - a.price) / a.price * 100
+
+    latest_mom = _mom(series[-2], series[-1])
+    value = f"{latest_mom:+.1f}%"
+
+    if latest_mom >= 0:
+        return SignalResult(light=GREEN, value=value, detail={"mom_pct": latest_mom})
+
+    # latest is negative; check previous month
+    if len(series) >= 3:
+        prev_mom = _mom(series[-3], series[-2])
+        if prev_mom < 0:
+            return SignalResult(
+                light=RED, value=value,
+                detail={"mom_pct": latest_mom, "prev_mom_pct": prev_mom},
+            )
+
+    return SignalResult(light=YELLOW, value=value, detail={"mom_pct": latest_mom})
