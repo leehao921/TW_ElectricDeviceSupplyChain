@@ -40,3 +40,6 @@ analysis/reports/snapshot_*.csv
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# BB squeeze daily alert — live consolidation state file (regenerates each run)
+data/bb_consolidation_state.json
