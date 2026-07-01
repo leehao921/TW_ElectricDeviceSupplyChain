@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.etf-smart-money</string>
+
+    <!-- Daily 主動ETF smart money × 產業輪動 report (Mon-Fri 19:30 Asia/Taipei,
+         ~1hr after the tmf-etf-holdings-collector 18:30 run so the day's
+         holdings are stored). Regenerates analysis/etf_smart_money_<date>.md
+         and XADDs a compact summary to the claude:inbox Redis stream.
+         Single-shot per fire — no KeepAlive. -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/etf_smart_money.py</string>
+        <string>--notify</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- Mon-Fri 19:30 local time (Asia/Taipei). -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>19</integer><key>Minute</key><integer>30</integer></dict>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key><string>Asia/Taipei</string>
+        <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>REDIS_HOST</key><string>localhost</string>
+        <key>REDIS_PORT</key><string>6379</string>
+        <key>DB_HOST</key><string>localhost</string>
+        <key>DB_PORT</key><string>5432</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/etf-smart-money.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/etf-smart-money.log</string>
+</dict>
+</plist>

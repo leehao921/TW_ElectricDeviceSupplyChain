@@ -220,7 +220,45 @@ def render(conn, flow_window, min_breadth):
              f"flow = 近 {flow_window} 日 Σ(法人淨買股數 × 當日收盤)/1e8 億元。")
     L.append("- 未使用 σ/罕見/極端/percentile 等分布形容詞（golden rule 0 未觸發）。")
     L.append(f"- 涵蓋 {n_etfs_total} 檔主動 ETF；未覆蓋者之共識為下限。可回補歷史僅 date-capable issuer。")
-    return "\n".join(L) + "\n"
+
+    # compact one-liner summary for the inbox
+    top3 = "、".join(f"{d['name'][:4]}{code}({d['n_etfs']}檔)" for code, d in ranked[:3])
+    sec_in = max(roll.items(), key=lambda kv: kv[1]["t"], default=("—", {"t": 0}))
+    sec_out = min(roll.items(), key=lambda kv: kv[1]["t"], default=("—", {"t": 0}))
+    rot_line = ""
+    if lo and hi and lo != hi:
+        rot = rotation_delta(rows_on_date(conn, lo, etfs), rows_on_date(conn, hi, etfs))
+        # exits sorted by biggest weight dropped (deterministic)
+        exits = [f"{d['name'][:4]}{c}" for c, d in sorted(rot.items(), key=lambda kv: kv[1]["delta"])
+                 if d["n_start"] > 0 and d["n_end"] == 0]
+        adds = sorted(rot.items(), key=lambda kv: -kv[1]["delta"])[:2]
+        rot_line = (f"｜ETF換手({lo}→{hi}): 出清 {('/'.join(exits[:3]) or '無')}；"
+                    f"加碼 {'/'.join(d['name'][:4] for _, d in adds)}")
+    summary = (
+        f"主動ETF smart money（{n_etfs_total}檔, {now}）｜"
+        f"共識核心: {top3}｜"
+        f"投信近{flow_window}d: 買{sec_in[0][:14]}({sec_in[1]['t']:+.0f}億)/"
+        f"賣{sec_out[0][:14]}({sec_out[1]['t']:+.0f}億)"
+        f"{rot_line}"
+    )
+    return "\n".join(L) + "\n", summary
+
+
+def push_to_inbox(summary, as_of, host="localhost", port=6379):
+    """XADD a compact summary to the claude:inbox Redis stream (mirrors bb_inbox_alert)."""
+    import subprocess
+    fields = [
+        "ts", datetime.now(TZ_TPE).isoformat(),
+        "from", "etf_smart_money", "topic", "etf-smart-money",
+        "tags", "etf-smart-money,daily", "as_of", as_of, "msg", summary,
+    ]
+    cmd = ["redis-cli", "-h", host, "-p", str(port), "XADD", "claude:inbox", "*", *fields]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+    if r.returncode != 0:
+        print(f"[error] XADD failed: {r.stderr.strip()}", file=sys.stderr)
+        return False
+    print(f"[info] inbox XADD ok id={r.stdout.strip()}", file=sys.stderr)
+    return True
 
 
 def main(argv=None):
@@ -228,12 +266,13 @@ def main(argv=None):
     ap.add_argument("--flow-window", type=int, default=20, help="投信/外資 flow 交易日數 (預設 20)")
     ap.add_argument("--min-breadth", type=int, default=8, help="共識表最低持有檔數 (預設 8)")
     ap.add_argument("--output", help="輸出路徑 (預設 analysis/etf_smart_money_<date>.md)")
+    ap.add_argument("--notify", action="store_true", help="XADD 摘要至 claude:inbox")
     args = ap.parse_args(argv)
 
     import psycopg2
     conn = psycopg2.connect(**DB_CONFIG)
     try:
-        md = render(conn, args.flow_window, args.min_breadth)
+        md, summary = render(conn, args.flow_window, args.min_breadth)
     finally:
         conn.close()
 
@@ -242,6 +281,11 @@ def main(argv=None):
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md, encoding="utf-8")
     print(f"wrote {out}")
+    print(summary)
+    if args.notify:
+        push_to_inbox(summary, now,
+                      host=os.environ.get("REDIS_HOST", "localhost"),
+                      port=int(os.environ.get("REDIS_PORT", "6379")))
     return 0
 
 
