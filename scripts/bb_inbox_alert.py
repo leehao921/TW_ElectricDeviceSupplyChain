@@ -123,6 +123,12 @@ def update_consolidation_state(
     prior_days = prior.get("squeeze_days", {})
 
     as_of_str = as_of.isoformat()
+
+    # Idempotency: if state was already advanced for this as_of (e.g. a watchdog
+    # re-run after a partial/crashed first run), return it unchanged rather than
+    # re-incrementing consecutive_days.
+    if prior.get("as_of") == as_of_str:
+        return prior
     new_days = {}
     for ticker, status in today_tickers.items():
         prev = prior_days.get(ticker)

@@ -1,0 +1,19 @@
+# TW market (TWSE/TPEx) closed dates — one ISO date (YYYY-MM-DD) per line.
+# Used by scripts/routine_watchdog.py to avoid re-running daily routines on
+# weekday holidays. Weekends are already excluded automatically, so only list
+# WEEKDAY closures here. Lines after '#' are comments.
+#
+# NOTE: this file is HAND-MAINTAINED. Only the fixed-Gregorian weekday closures
+# below are pre-seeded (high confidence). Lunar-calendar holidays (農曆春節、
+# 端午、中秋) and government "bridge" (補假/彈性放假) days shift every year and
+# MUST be pasted from the official TWSE trading calendar:
+#   https://www.twse.com.tw/en/holidaySchedule/holidaySchedule
+# An incomplete list is safe — worst case the watchdog re-runs a routine on an
+# unlisted holiday, which just produces an empty/no-op message.
+
+# --- 2026 fixed-date weekday closures (verified Gregorian) ---
+2026-01-01   # 元旦 (Thu)
+2026-05-01   # 勞動節 (Fri)
+
+# --- 2026 lunar / bridge days: FILL FROM OFFICIAL TWSE CALENDAR ---
+# (春節、清明、端午、中秋、國慶連假補班補假 etc.)

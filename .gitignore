@@ -43,3 +43,6 @@ analysis/reports/snapshot_*.csv
 
 # BB squeeze daily alert — live consolidation state file (regenerates each run)
 data/bb_consolidation_state.json
+
+# Routine watchdog — live per-job cooldown/alert state (regenerates each run)
+data/routine_watchdog_state.json

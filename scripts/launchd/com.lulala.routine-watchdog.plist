@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.routine-watchdog</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/routine_watchdog.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+
+    <!-- Poll every 30 min; RunAtLoad catches misses immediately on login/boot
+         (the exact case that skipped bb-squeeze/bb-followthrough on the 18:27 reboot). -->
+    <key>StartInterval</key>
+    <integer>1800</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key>
+        <string>Asia/Taipei</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>REDIS_HOST</key>
+        <string>localhost</string>
+        <key>REDIS_PORT</key>
+        <string>6379</string>
+        <key>TMF_PG_PASSWORD</key>
+        <string>tmf_dev_2026</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/routine-watchdog.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/routine-watchdog.log</string>
+</dict>
+</plist>
