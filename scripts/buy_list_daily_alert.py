@@ -326,7 +326,7 @@ def build_digest(state: dict, snapshots: dict, bb_status: dict, disposition: dic
             f"- **{sym} {pick['name']}** (T{pick['tier']}, 權重 {pick['weight_pct']}%) — "
             f"收 ${close:.1f}" if close else f"- **{sym} {pick['name']}** — 資料 N/A"
         )
-        if close:
+        if close is not None:
             line += f" · Entry {entry_str} · Stop ${pick['stop_loss']} · TP1 ${pick['tp1']}"
             line += f" · 5D外資 {f5:+.1f}億 · 20D外資 {f20:+.1f}億"
             if bb_marker: line += f" · {bb_marker}"
@@ -376,11 +376,10 @@ def build_digest(state: dict, snapshots: dict, bb_status: dict, disposition: dic
             f5 = snap.get("f5")
             c_str = f"${c:.1f}" if isinstance(c, (int, float)) else "N/A"
             f5_str = f" (5D外資 {f5:+.1f}億)" if isinstance(f5, (int, float)) else ""
-            vstr = format_valuation(
-                pb_lights.get(w["ticker"], {}),
-                report_cache.setdefault(w["ticker"], parse_report_valuation(w["ticker"])),
-                c,
-            )
+            sym = w["ticker"]
+            if sym not in report_cache:
+                report_cache[sym] = parse_report_valuation(sym)
+            vstr = format_valuation(pb_lights.get(sym, {}), report_cache[sym], c)
             lines.append(f"- **{w['ticker']} {w['name']}**: {c_str}{f5_str} · {vstr} — {w['reason']}")
         lines.append("")
 

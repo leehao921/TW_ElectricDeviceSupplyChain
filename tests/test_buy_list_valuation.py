@@ -156,3 +156,24 @@ def test_build_digest_no_trim_when_green(monkeypatch):
     monkeypatch.setattr(bl, "parse_report_valuation", lambda t, files=None: None)
     md = bl.build_digest(state, snapshots, {}, {}, pb_lights={"2454": {"light": "GREEN", "pb_current": 3.0}})
     assert "優先減碼" not in md
+
+
+def test_build_digest_parses_report_once_for_shared_ticker(monkeypatch):
+    """A ticker in both picks and watch_list must be report-parsed exactly once
+    (report_cache hit must NOT trigger a re-read on the watch path)."""
+    state = {"version": "t", "picks": [
+        {"ticker": "2454", "name": "聯發科", "tier": 1, "weight_pct": 20,
+         "entry_range": [4250, 4350], "stop_loss": 4250, "tp1": 4700}],
+        "watch_list": [{"ticker": "2454", "name": "聯發科", "reason": "shared"}],
+        "avoid_list": []}
+    snapshots = {"2454": {"latest_close": 4030.0, "f5": 0, "f20": 0, "t20": 0}}
+
+    calls: list[str] = []
+
+    def _counting_parse(t, files=None):
+        calls.append(t)
+        return {"pe": 64.22, "yield_pct": 1.33, "base_price": 4030.0}
+
+    monkeypatch.setattr(bl, "parse_report_valuation", _counting_parse)
+    bl.build_digest(state, snapshots, {}, {}, pb_lights={"2454": {"light": "GREEN", "pb_current": 3.0}})
+    assert calls.count("2454") == 1
