@@ -10,6 +10,9 @@ Sub-project C (buy-list) reads the hash for its display + 減碼 rule.
 Pure functions (load_universe ... build_inbox_summary) take already-fetched
 data and are unit-tested offline. fetch_latest_closes / publish / push_inbox
 are the only I/O and are injected/skipped in tests.
+
+Note: `percentile` is best-effort — null on engine-A cache fast-path (only a
+slow recompute fills it); consumers must key off `light`, not `percentile`.
 """
 from __future__ import annotations
 
@@ -73,7 +76,11 @@ def build_light_records(universe, closes, pb_light_fn, today) -> list[dict]:
 
 
 def records_to_hash_mapping(records, now_iso) -> dict:
-    """Flatten records to a Redis-hash mapping (all string values)."""
+    """Flatten records to a Redis-hash mapping (all string values).
+
+    Note: `percentile` is best-effort — null on engine-A cache fast-path;
+    consumers must key off `light`, not `percentile`.
+    """
     mapping = {}
     for rec in records:
         mapping[rec["ticker"]] = json.dumps({
@@ -100,6 +107,10 @@ def build_inbox_summary(records, today) -> str:
         f"RED: {', '.join(reds) if reds else '(none)'}",
         f"YELLOW: {', '.join(yellows) if yellows else '(none)'}",
     ]
+    # Elevated N/A count often signals a coverage regression (e.g. yfinance
+    # rate-limited a batch) — list the tickers so it's diagnosable.
+    if len(nas) > 3:
+        lines.append(f"N/A: {', '.join(nas)}")
     return "\n".join(lines)
 
 
@@ -124,12 +135,16 @@ def fetch_latest_closes(universe) -> dict:
             data = yf.download(symbols, period="5d", progress=False,
                                group_by="ticker", threads=True)
             out = {}
+            multi = isinstance(data.columns, pd.MultiIndex)
             for sym, bare in suffix_map.items():
                 try:
-                    if len(symbols) == 1:
-                        close = data["Close"]
-                    else:
+                    # yfinance column layout varies by version and by
+                    # single-vs-multi symbol download; branch on the actual
+                    # column shape, not the symbol count.
+                    if multi:
                         close = data[sym]["Close"]
+                    else:
+                        close = data["Close"]
                     close = close.dropna()
                     if len(close):
                         out[bare] = float(close.iloc[-1])
@@ -195,11 +210,16 @@ def main(argv=None) -> int:
     print(f"[info] universe: {len(universe)} tickers", file=sys.stderr)
 
     if args.refresh_cutoffs:
-        n = 0
+        ok = 0
+        total = len(universe)
         for ticker in universe:
-            pb_percentile.pb_light(ticker, today=today)  # no latest_close
-            n += 1
-        print(f"[ok] refreshed cutoffs for {n} tickers", file=sys.stderr)
+            try:
+                pb_percentile.pb_light(ticker, today=today)  # no latest_close
+                ok += 1
+            except Exception as e:  # noqa: BLE001 — never let one ticker kill the run
+                print(f"[warn] refresh failed for {ticker}: {e}",
+                      file=sys.stderr)
+        print(f"[ok] refreshed {ok}/{total} cutoffs", file=sys.stderr)
         return 0
 
     closes = fetch_latest_closes(universe)
@@ -212,18 +232,26 @@ def main(argv=None) -> int:
         print("\n[dry-run] not published, not notified", file=sys.stderr)
         return 0
 
-    client = None
-    if not args.no_redis or not args.no_notify:
-        client = make_redis_client()
+    # Digest is already printed above; a Redis outage here must degrade to a
+    # logged error (not a raw traceback) so the computed digest is preserved.
+    try:
+        client = None
+        if not args.no_redis or not args.no_notify:
+            client = make_redis_client()
 
-    if not args.no_redis:
-        now_iso = datetime.now().isoformat(timespec="seconds")
-        publish(records_to_hash_mapping(records, now_iso), client)
-        print(f"[ok] published {len(records)} to {HASH_KEY}", file=sys.stderr)
+        if not args.no_redis:
+            now_iso = datetime.now().isoformat(timespec="seconds")
+            publish(records_to_hash_mapping(records, now_iso), client)
+            print(f"[ok] published {len(records)} to {HASH_KEY}",
+                  file=sys.stderr)
 
-    if not args.no_notify:
-        push_inbox(summary, today, client)
-        print(f"[ok] pushed to {INBOX_STREAM} topic=pb-lights", file=sys.stderr)
+        if not args.no_notify:
+            push_inbox(summary, today, client)
+            print(f"[ok] pushed to {INBOX_STREAM} topic=pb-lights",
+                  file=sys.stderr)
+    except Exception as e:  # noqa: BLE001 — Redis unreachable → degrade, don't crash
+        print(f"[error] redis unavailable: {e}", file=sys.stderr)
+        return 1
 
     return 0
 

@@ -100,6 +100,19 @@ def test_build_inbox_summary_counts_and_lists():
     assert "1 N/A" in s
     assert "1111" in s and "2222" in s  # RED tickers listed
     assert "3333" in s  # YELLOW ticker listed
+    # <=3 N/A: count only, no N/A: line
+    assert "N/A:" not in s
+
+
+def test_build_inbox_summary_lists_na_when_elevated():
+    # >3 N/A tickers -> list them so coverage drops are diagnosable
+    recs = [{"ticker": f"90{i:02d}", "light": "N/A"} for i in range(5)]
+    recs.append({"ticker": "1111", "light": "RED"})
+    s = plp.build_inbox_summary(recs, "2026-07-09")
+    assert "5 N/A" in s
+    assert "N/A: " in s
+    for i in range(5):
+        assert f"90{i:02d}" in s  # every N/A ticker listed
 
 
 # --------------------------------------------------------------------- #
@@ -127,3 +140,31 @@ def test_main_dry_run_no_redis(monkeypatch):
     monkeypatch.setattr(plp, "make_redis_client", lambda: _Boom())
     rc = plp.main(["--dry-run", "--today", "2026-07-09"])
     assert rc == 0
+
+
+# --------------------------------------------------------------------- #
+# main degrades (does not crash) when Redis is down
+# --------------------------------------------------------------------- #
+class _RedisDown:
+    def delete(self, *a, **k):
+        raise ConnectionError("redis down")
+
+    def hset(self, *a, **k):
+        raise ConnectionError("redis down")
+
+    def xadd(self, *a, **k):
+        raise ConnectionError("redis down")
+
+
+def test_main_redis_down_degrades(monkeypatch):
+    monkeypatch.setattr(plp, "fetch_latest_closes",
+                        lambda universe: {t: 10.0 for t in universe})
+    monkeypatch.setattr(plp.pb_percentile, "pb_light",
+                        lambda ticker, latest_close=None, today=None: {
+                            "ticker": ticker, "light": "GREEN",
+                            "pb_current": 1.0, "percentile": 10.0,
+                            "asof": "2026-07-09", "source": "fake"})
+    monkeypatch.setattr(plp, "make_redis_client", lambda: _RedisDown())
+    # must NOT raise; digest already printed; returns nonzero
+    rc = plp.main(["--today", "2026-07-09"])
+    assert rc == 1
