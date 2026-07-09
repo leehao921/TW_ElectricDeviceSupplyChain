@@ -113,6 +113,19 @@ def recompute_valuation(report_val: dict | None, latest_close: float | None) -> 
     }
 
 
+def format_valuation(pb_rec: dict | None, report_val: dict | None, latest_close: float | None) -> str:
+    """Compose 'P/B 7.20 🔴 · PE 64.2 · 殖 1.3%'. P/B+light from hash; PE/殖 rescaled from report."""
+    rec = pb_rec or {}
+    light = rec.get("light", "N/A")
+    emoji = PB_LIGHT_EMOJI.get(light, "⚪")
+    pb = rec.get("pb_current")
+    pb_str = f"{pb:.2f}" if isinstance(pb, (int, float)) else "N/A"
+    rv = recompute_valuation(report_val, latest_close)
+    pe_str = f"{rv['pe']:.1f}" if rv["pe"] is not None else "N/A"
+    y_str = f"{rv['yield_pct']:.1f}%" if rv["yield_pct"] is not None else "N/A"
+    return f"P/B {pb_str} {emoji} · PE {pe_str} · 殖 {y_str}"
+
+
 def fetch_latest_snapshot(conn, tickers: list[str]) -> dict[str, dict]:
     """For each ticker: latest close, 5D & 20D 外資/投信/自營 flow (億 TWD)."""
     result = {}

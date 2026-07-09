@@ -83,3 +83,24 @@ def test_recompute_valuation_none_inputs():
     assert bl.recompute_valuation(None, 100.0) == {"pe": None, "yield_pct": None}
     assert bl.recompute_valuation({"pe": 10, "yield_pct": 2, "base_price": None}, 100.0) == {"pe": None, "yield_pct": None}
     assert bl.recompute_valuation({"pe": 10, "yield_pct": 2, "base_price": 50.0}, None) == {"pe": None, "yield_pct": None}
+
+
+# ---------------------------------------------------------------------------
+# Task 4: format_valuation
+# ---------------------------------------------------------------------------
+def test_format_valuation_full():
+    s = bl.format_valuation(
+        {"light": "RED", "pb_current": 7.2},
+        {"pe": 64.22, "yield_pct": 1.33, "base_price": 4030.0},
+        4030.0,
+    )
+    assert "P/B 7.20 🔴" in s
+    assert "PE 64.2" in s
+    assert "殖 1.3%" in s
+
+
+def test_format_valuation_na_when_missing():
+    s = bl.format_valuation({}, None, None)
+    assert "P/B N/A ⚪" in s
+    assert "PE N/A" in s
+    assert "殖 N/A" in s
