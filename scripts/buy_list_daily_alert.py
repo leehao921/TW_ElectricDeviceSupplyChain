@@ -276,8 +276,19 @@ def _urgency(pick: dict, snap: dict) -> tuple[str, int]:
     return "⚪ 高於進場區 (等回測)", 2
 
 
-def build_digest(state: dict, snapshots: dict, bb_status: dict, disposition: dict | None = None) -> str:
+def build_digest(state: dict, snapshots: dict, bb_status: dict, disposition: dict | None = None,
+                 pb_lights: dict | None = None) -> str:
     disposition = disposition or {}
+    pb_lights = pb_lights or {}
+    report_cache: dict = {}
+
+    def _val_suffix(sym, snap, pick_or_watch, pb_lights, report_cache):
+        close = snap.get("latest_close")
+        if sym not in report_cache:
+            report_cache[sym] = parse_report_valuation(sym)
+        pb_rec = pb_lights.get(sym, {})
+        return pb_rec, format_valuation(pb_rec, report_cache[sym], close)
+
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     lines = [f"# 🌅 每日買入清單 巡檢 {now}", ""]
     lines.append(f"**Portfolio version:** {state.get('version','?')} · **Picks:** {len(state['picks'])} · **Watch:** {len(state.get('watch_list',[]))} · **Avoid:** {len(state.get('avoid_list',[]))}")
@@ -321,6 +332,10 @@ def build_digest(state: dict, snapshots: dict, bb_status: dict, disposition: dic
             if bb_marker: line += f" · {bb_marker}"
             if disp_marker: line += f" · {disp_marker}"
             line += f" · **{urgency_label}**"
+            pb_rec, vstr = _val_suffix(sym, snap, pick, pb_lights, report_cache)
+            line += f" · {vstr}"
+            if is_priority_trim(pick, snap, pb_rec):
+                line += " · 🔴 優先減碼 (P/B RED)"
 
         if urgency_rank == 0:
             urgent.append(line)
@@ -361,7 +376,12 @@ def build_digest(state: dict, snapshots: dict, bb_status: dict, disposition: dic
             f5 = snap.get("f5")
             c_str = f"${c:.1f}" if isinstance(c, (int, float)) else "N/A"
             f5_str = f" (5D外資 {f5:+.1f}億)" if isinstance(f5, (int, float)) else ""
-            lines.append(f"- **{w['ticker']} {w['name']}**: {c_str}{f5_str} — {w['reason']}")
+            vstr = format_valuation(
+                pb_lights.get(w["ticker"], {}),
+                report_cache.setdefault(w["ticker"], parse_report_valuation(w["ticker"])),
+                c,
+            )
+            lines.append(f"- **{w['ticker']} {w['name']}**: {c_str}{f5_str} · {vstr} — {w['reason']}")
         lines.append("")
 
     # Avoid list (short summary)
@@ -411,9 +431,18 @@ def main() -> int:
 
     bb_status = parse_bb_log()
     disposition = load_disposition()
-    print(f"[info] tickers snapshotted: {len(snapshots)}, BB status: {len(bb_status)}, disposition: {len(disposition)}", file=sys.stderr)
 
-    msg = build_digest(state, snapshots, bb_status, disposition)
+    try:
+        import redis
+        client = redis.Redis(host="localhost", port=6379, decode_responses=True)
+        pb_lights = load_pb_lights(client)
+    except Exception as e:
+        print(f"[warn] pb_lights load failed: {e}", file=sys.stderr)
+        pb_lights = {}
+
+    print(f"[info] tickers snapshotted: {len(snapshots)}, BB status: {len(bb_status)}, disposition: {len(disposition)}, pb_lights: {len(pb_lights)}", file=sys.stderr)
+
+    msg = build_digest(state, snapshots, bb_status, disposition, pb_lights=pb_lights)
     print(msg)
 
     if not args.dry_run:

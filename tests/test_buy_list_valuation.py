@@ -123,3 +123,36 @@ def test_is_priority_trim_quadrants():
     assert bl.is_priority_trim(_pick(100), {"latest_close": 101.0}, {"light": "N/A"}) is False
     # no close → False
     assert bl.is_priority_trim(_pick(100), {}, {"light": "RED"}) is False
+
+
+# ---------------------------------------------------------------------------
+# Task 6: build_digest wiring
+# ---------------------------------------------------------------------------
+def test_build_digest_shows_valuation_and_priority_trim(monkeypatch):
+    # a pick that is breaking stop and RED → 優先減碼; report parse stubbed
+    state = {
+        "version": "t", "picks": [
+            {"ticker": "2454", "name": "聯發科", "tier": 1, "weight_pct": 20,
+             "entry_range": [4250, 4350], "stop_loss": 4250, "tp1": 4700},
+        ],
+        "watch_list": [], "avoid_list": [],
+    }
+    snapshots = {"2454": {"latest_close": 4030.0, "f5": -100.0, "f20": 10.0, "t20": 0}}
+    monkeypatch.setattr(bl, "parse_report_valuation",
+                        lambda t, files=None: {"pe": 64.22, "yield_pct": 1.33, "base_price": 4030.0})
+    pb_lights = {"2454": {"light": "RED", "pb_current": 7.2}}
+    md = bl.build_digest(state, snapshots, {}, {}, pb_lights=pb_lights)
+    assert "P/B 7.20 🔴" in md
+    assert "PE 64.2" in md
+    assert "🔴 優先減碼 (P/B RED)" in md
+
+
+def test_build_digest_no_trim_when_green(monkeypatch):
+    state = {"version": "t", "picks": [
+        {"ticker": "2454", "name": "聯發科", "tier": 1, "weight_pct": 20,
+         "entry_range": [4250, 4350], "stop_loss": 4250, "tp1": 4700}],
+        "watch_list": [], "avoid_list": []}
+    snapshots = {"2454": {"latest_close": 4030.0, "f5": 0, "f20": 0, "t20": 0}}
+    monkeypatch.setattr(bl, "parse_report_valuation", lambda t, files=None: None)
+    md = bl.build_digest(state, snapshots, {}, {}, pb_lights={"2454": {"light": "GREEN", "pb_current": 3.0}})
+    assert "優先減碼" not in md
