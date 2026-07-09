@@ -366,6 +366,38 @@ def record_post(entry: dict, snap: dict, days_since_release: int) -> None:
         entry["post"][key] = round((close - base) / base * 100, 2)
 
 
+from statistics import median as _median
+
+
+def _grp(e):
+    cg = "1st" if e.get("count_n", 1) == 1 else "2nd+"
+    f20 = e.get("foreign_20d_at_enter")
+    fg = "法人接" if (f20 is not None and f20 >= 0) else "法人撤"
+    return f"{cg}/{fg}"
+
+
+def compute_conditional_stats(history: list[dict], min_samples: int = MIN_STATS_SAMPLES) -> dict:
+    """Group graduated history by (count 1st/2nd+) × (entry 20D 法人接/撤); win-rate + median T+5/T+20."""
+    graded = [e for e in history if e.get("post", {}).get("t20") is not None]
+    if len(graded) < min_samples:
+        return {"enough": False, "n": len(graded), "groups": {}}
+    groups: dict[str, dict] = {}
+    buckets: dict[str, list] = {}
+    for e in graded:
+        buckets.setdefault(_grp(e), []).append(e)
+    for key, es in buckets.items():
+        t5 = [e["post"]["t5"] for e in es if e["post"].get("t5") is not None]
+        t20 = [e["post"]["t20"] for e in es if e["post"].get("t20") is not None]
+        groups[key] = {
+            "n": len(es),
+            "t5_winrate": round(sum(1 for x in t5 if x > 0) / len(t5) * 100, 1) if t5 else None,
+            "t20_winrate": round(sum(1 for x in t20 if x > 0) / len(t20) * 100, 1) if t20 else None,
+            "t5_median": round(_median(t5), 1) if t5 else None,
+            "t20_median": round(_median(t20), 1) if t20 else None,
+        }
+    return {"enough": True, "n": len(graded), "groups": groups}
+
+
 # ------------------------------------------------------------------ #
 # Main
 # ------------------------------------------------------------------ #

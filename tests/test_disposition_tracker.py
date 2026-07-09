@@ -60,3 +60,23 @@ def test_record_post_fills_checkpoints():
     assert e["post"]["t5"] == -10.0
     dt.record_post(e, {"close": 100.0}, days_since_release=3)   # not a checkpoint → unchanged
     assert e["post"]["t20"] is None
+
+
+def _hist_entry(count_n, f20, t5, t20):
+    return {"count_n": count_n, "foreign_20d_at_enter": f20, "post": {"t1": None, "t5": t5, "t20": t20}}
+
+
+def test_conditional_stats_below_threshold():
+    stats = dt.compute_conditional_stats([_hist_entry(1, 5, 3, 4)], min_samples=10)
+    assert stats["enough"] is False and stats["n"] == 1
+
+
+def test_conditional_stats_groups_and_winrate():
+    hist = [_hist_entry(2, -1, -5, -8) for _ in range(6)] + [_hist_entry(1, 5, 4, 9) for _ in range(6)]
+    stats = dt.compute_conditional_stats(hist, min_samples=10)
+    assert stats["enough"] is True and stats["n"] == 12
+    g = stats["groups"]
+    # 2nd+ & 法人撤 → all negative T+20 → win-rate 0
+    assert g["2nd+/法人撤"]["t20_winrate"] == 0.0
+    # 1st & 法人接 → all positive T+20 → win-rate 100
+    assert g["1st/法人接"]["t20_winrate"] == 100.0
