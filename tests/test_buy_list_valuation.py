@@ -104,3 +104,22 @@ def test_format_valuation_na_when_missing():
     assert "P/B N/A ⚪" in s
     assert "PE N/A" in s
     assert "殖 N/A" in s
+
+
+# ---------------------------------------------------------------------------
+# Task 5: is_priority_trim
+# ---------------------------------------------------------------------------
+def _pick(stop=100.0):
+    return {"ticker": "T", "stop_loss": stop, "entry_range": [110, 120], "tp1": 150}
+
+def test_is_priority_trim_quadrants():
+    # stop-break (close ≤ stop×1.02) AND RED → True
+    assert bl.is_priority_trim(_pick(100), {"latest_close": 101.0}, {"light": "RED"}) is True
+    # stop-break but GREEN → False
+    assert bl.is_priority_trim(_pick(100), {"latest_close": 101.0}, {"light": "GREEN"}) is False
+    # above stop but RED → False
+    assert bl.is_priority_trim(_pick(100), {"latest_close": 130.0}, {"light": "RED"}) is False
+    # N/A light → False
+    assert bl.is_priority_trim(_pick(100), {"latest_close": 101.0}, {"light": "N/A"}) is False
+    # no close → False
+    assert bl.is_priority_trim(_pick(100), {}, {"light": "RED"}) is False

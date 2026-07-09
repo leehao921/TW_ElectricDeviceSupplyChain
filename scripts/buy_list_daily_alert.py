@@ -126,6 +126,16 @@ def format_valuation(pb_rec: dict | None, report_val: dict | None, latest_close:
     return f"P/B {pb_str} {emoji} · PE {pe_str} · 殖 {y_str}"
 
 
+def is_priority_trim(pick: dict, snap: dict, pb_rec: dict | None) -> bool:
+    """True iff close ≤ stop_loss×1.02 AND the hash light is RED. Data gap → False (fail-safe)."""
+    close = snap.get("latest_close")
+    if close is None:
+        return False
+    if close > pick["stop_loss"] * 1.02:
+        return False
+    return (pb_rec or {}).get("light") == "RED"
+
+
 def fetch_latest_snapshot(conn, tickers: list[str]) -> dict[str, dict]:
     """For each ticker: latest close, 5D & 20D 外資/投信/自營 flow (億 TWD)."""
     result = {}
