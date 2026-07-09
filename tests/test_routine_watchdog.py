@@ -40,16 +40,24 @@ def test_is_trading_day_normal_weekday_true():
 def test_build_checks_expands_ma_touch_slots():
     checks = rw.build_checks()
     keys = {c.key for c in checks}
-    # 7 registry topics, but ma-touch → 3 slot checks ⇒ 10 total
-    assert len(checks) == 10
+    # 8 registry topics, but ma-touch → 3 slot checks ⇒ 11 total
+    assert len(checks) == 11
     assert {"ma-touch:preopen", "ma-touch:noon", "ma-touch:close"} <= keys
     assert {"bb-squeeze", "bb-followthrough", "etf-smart-money",
-            "disposition-alert", "buy-list", "pb-lights", "memory-cycle"} <= keys
+            "disposition-alert", "disposition-track", "buy-list", "pb-lights",
+            "memory-cycle"} <= keys
     labels = {c.key: c.label for c in checks}
     assert labels["ma-touch:preopen"] == "com.lulala.ma-touch-preopen"
     assert labels["pb-lights"] == "com.lulala.pb-lights"
     assert labels["memory-cycle"] == "com.lulala.memory-cycle"
     assert labels["bb-squeeze"] == "com.lulala.bb-squeeze"
+
+
+def test_disposition_track_registered_same_label():
+    checks = {c.key: c for c in rw.build_checks()}
+    assert "disposition-track" in checks
+    assert checks["disposition-track"].label == "com.lulala.disposition-daily"
+    assert checks["disposition-track"].sched == time(8, 35)
 
 
 # ------------------------------------------------------------------ #
