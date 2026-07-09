@@ -319,6 +319,23 @@ def count_to_n(action_label: str | None) -> int:
     return _CN_NUM.get(m.group(1), 1)
 
 
+def record_entry(ticker: str, disp: dict, market: dict, as_of: str) -> dict:
+    """Assemble a new tracking-state entry at disposition entry."""
+    close = market.get("enter_close")
+    return {
+        "ticker": ticker, "name": disp.get("name", ""),
+        "enter_date": as_of, "disp_start": disp.get("start"), "disp_end": disp.get("end"),
+        "condition": disp.get("condition"), "count_label": disp.get("action"),
+        "count_n": count_to_n(disp.get("action")), "source": disp.get("source"),
+        "runup_5d_pct": market.get("runup_5d_pct"), "runup_20d_pct": market.get("runup_20d_pct"),
+        "foreign_5d_at_enter": market.get("foreign_5d"), "foreign_20d_at_enter": market.get("foreign_20d"),
+        "enter_close": close,
+        "during": [{"d": as_of, "close": close, "cumret_pct": 0.0, "foreign_1d": market.get("foreign_1d")}],
+        "release_date": None, "release_close": None,
+        "post": {"t1": None, "t5": None, "t20": None},
+    }
+
+
 # ------------------------------------------------------------------ #
 # Main
 # ------------------------------------------------------------------ #
