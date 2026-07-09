@@ -90,3 +90,23 @@ def test_compute_pb_light_na_when_thin_history():
     res = pbp.compute_pb_light(prices, equity={2023: 1000.0}, shares=100.0, ticker="TEST")
     assert res["light"] == "N/A"
     assert "thin" in res["source"]
+
+
+def test_light_from_cutoffs_matches_bands():
+    assert pbp.light_from_cutoffs(30.0, p70=20.0, p85=25.0) == "RED"
+    assert pbp.light_from_cutoffs(25.0, p70=20.0, p85=25.0) == "RED"    # boundary
+    assert pbp.light_from_cutoffs(22.0, p70=20.0, p85=25.0) == "YELLOW"
+    assert pbp.light_from_cutoffs(20.0, p70=20.0, p85=25.0) == "YELLOW"  # boundary
+    assert pbp.light_from_cutoffs(10.0, p70=20.0, p85=25.0) == "GREEN"
+
+
+def test_cache_roundtrip(tmp_path):
+    p = tmp_path / "cache.json"
+    cache = {"2408": {"bvps": 54.99, "p70": 5.0, "p85": 6.5, "asof": "2026-07-09", "n_days": 1214}}
+    pbp.save_cache(cache, p)
+    loaded = pbp.load_cache(p)
+    assert loaded["2408"]["p85"] == 6.5
+
+
+def test_load_cache_missing_file_returns_empty(tmp_path):
+    assert pbp.load_cache(tmp_path / "nope.json") == {}

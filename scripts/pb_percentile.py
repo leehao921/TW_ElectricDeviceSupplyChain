@@ -113,3 +113,31 @@ def compute_pb_light(prices, equity, shares, ticker="", asof="",
         "source": "yfinance annual BVPS 5y",
         "asof": asof,
     }
+
+
+def light_from_cutoffs(current_pb: float, p70: float, p85: float) -> str:
+    """Fast-path light: compare current P/B to cached absolute cutoffs.
+
+    Equivalent to classify(percentile) because p70/p85 ARE the percentile
+    cutoffs of the same historical distribution.
+    """
+    if current_pb >= p85:
+        return "RED"
+    if current_pb >= p70:
+        return "YELLOW"
+    return "GREEN"
+
+
+def load_cache(path=CACHE_PATH) -> dict:
+    path = Path(path)
+    if not path.exists():
+        return {}
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_cache(cache: dict, path=CACHE_PATH) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
