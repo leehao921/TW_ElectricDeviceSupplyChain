@@ -94,3 +94,21 @@ def test_build_track_digest_sections():
     assert "處置股追蹤" in md
     assert "3055" in md and "第二次處置" in md
     assert "樣本累積中" in md          # empty history → stats not enough
+
+
+def test_update_tracking_enter_snapshot_release_graduate():
+    # market_fn returns deterministic data
+    def market_fn(ticker, as_of):
+        return {"enter_close": 100.0, "close": 100.0, "runup_5d_pct": 5.0, "runup_20d_pct": 20.0,
+                "foreign_5d": 1.0, "foreign_20d": 2.0, "foreign_1d": 0.1,
+                "days_since_release": 0}
+    state = {"tracked": {}}
+    history = []
+    active = {"3055": {"name": "蔚華科", "start": "2026-07-09", "end": "2026-07-09",
+                       "condition": "x", "action": "第一次處置", "source": "TWSE"}}
+    # Day 1: enters tracking
+    dt.update_tracking(state, active, history, market_fn, "2026-07-09")
+    assert "3055" in state["tracked"]
+    # Day 2: no longer in active (end passed) → release marked
+    dt.update_tracking(state, {}, history, market_fn, "2026-07-10")
+    assert state["tracked"]["3055"]["release_date"] == "2026-07-10"

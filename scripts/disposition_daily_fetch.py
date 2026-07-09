@@ -445,6 +445,75 @@ def build_track_digest(state: dict, history: list[dict], as_of: str) -> str:
     return "\n".join(lines)
 
 
+def _trading_days_between(a: str, b: str) -> int:
+    """Approx trading-day gap (calendar days; good enough for T+N checkpoints)."""
+    from datetime import date as _date
+    ya, ma, da = (int(x) for x in a.split("-")); yb, mb, db = (int(x) for x in b.split("-"))
+    return (_date(yb, mb, db) - _date(ya, ma, da)).days
+
+
+def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: str) -> None:
+    """Advance the disposition lifecycle for as_of. market_fn(ticker, as_of)->dict abstracts the DB."""
+    tracked = state.setdefault("tracked", {})
+    # (a) enter new dispositions
+    for ticker, disp in active.items():
+        if ticker not in tracked:
+            m = market_fn(ticker, as_of)
+            if m:
+                tracked[ticker] = record_entry(ticker, disp, m, as_of)
+    # (b)-(e) advance existing
+    graduated = []
+    for ticker, entry in list(tracked.items()):
+        m = market_fn(ticker, as_of) or {}
+        still_disposed = ticker in active
+        if not entry.get("release_date"):
+            if still_disposed:
+                append_during(entry, m, as_of)
+            else:
+                mark_release(entry, m, as_of)     # first day out of active
+        else:
+            dsr = _trading_days_between(entry["release_date"], as_of)
+            record_post(entry, m, dsr)
+            if dsr >= POST_TRACK_DAYS:
+                history.append(entry)
+                graduated.append(ticker)
+    for t in graduated:
+        del tracked[t]
+
+
+def _return_pct(conn, ticker: str, as_of: str, lookback: int) -> float | None:
+    """Cumulative % return over `lookback` trading rows into as_of, from stock_daily_ohlcv."""
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT close FROM stock_daily_ohlcv WHERE symbol=%s AND ts::date<=%s
+                 ORDER BY ts DESC LIMIT %s
+            """, (ticker, as_of, lookback + 1))
+            rows = [r[0] for r in cur.fetchall()]
+        if len(rows) < 2 or not rows[-1]:
+            return None
+        return round((rows[0] - rows[-1]) / rows[-1] * 100, 2)
+    except Exception:
+        return None
+
+
+def _save_json(path, obj) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def push_inbox_track(msg: str, as_of: str) -> bool:
+    try:
+        import redis
+        r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+        r.xadd("claude:inbox", {"topic": "disposition-track", "from": "disposition_daily_fetch",
+                                "tags": "disposition,track,daily", "as_of": as_of, "msg": msg})
+        return True
+    except Exception as e:
+        print(f"[warn] disposition-track inbox push failed: {e}", file=sys.stderr)
+        return False
+
+
 # ------------------------------------------------------------------ #
 # Main
 # ------------------------------------------------------------------ #
@@ -463,6 +532,34 @@ def main() -> int:
 
     digest = build_digest(active, picks_hits, watches_hits, bb_hits, twse_n, tpex_n)
     print(digest)
+
+    # --- lifecycle tracking pass (reuses bb_followthrough DB helpers) ---
+    try:
+        import psycopg2
+        from bb_followthrough_track import DB_CONFIG, fetch_daily_snapshot, fetch_20d_foreign
+        conn = psycopg2.connect(**DB_CONFIG)
+        def market_fn(ticker, as_of_):
+            snap = fetch_daily_snapshot(conn, ticker, as_of_) or {}
+            return {
+                "enter_close": snap.get("close"), "close": snap.get("close"),
+                "foreign_1d": snap.get("foreign_net"),
+                "foreign_5d": snap.get("foreign_net"),  # best-effort; refine later
+                "foreign_20d": fetch_20d_foreign(conn, ticker, as_of_),
+                "runup_5d_pct": _return_pct(conn, ticker, as_of_, 5),
+                "runup_20d_pct": _return_pct(conn, ticker, as_of_, 20),
+            }
+        track_state = load_json(TRACK_STATE_PATH) or {"tracked": {}}
+        track_history = load_json(TRACK_HISTORY_PATH) or []
+        update_tracking(track_state, active, track_history, market_fn, today_iso)
+        _save_json(TRACK_STATE_PATH, track_state)
+        _save_json(TRACK_HISTORY_PATH, track_history)
+        conn.close()
+        track_digest = build_track_digest(track_state, track_history, today_iso)
+        print(track_digest)
+        if not args.dry_run:
+            push_inbox_track(track_digest, today_iso)
+    except Exception as e:
+        print(f"[warn] disposition tracking pass failed: {e}", file=sys.stderr)
 
     if args.dry_run:
         print("\n[dry-run] state NOT saved, inbox NOT pushed", file=sys.stderr)
