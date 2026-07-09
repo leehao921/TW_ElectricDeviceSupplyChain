@@ -185,7 +185,9 @@ def read_pb_lights(client, tickers: list[str]) -> dict[str, dict | None]:
     """
     try:
         raw = client.hgetall(PB_LIGHTS_HASH) or {}
-    except Exception:  # noqa: BLE001 — Redis unreachable → all None, fallback handles it
+    except Exception as e:  # noqa: BLE001 — Redis unreachable → all None, fallback handles it
+        print(f"[warn] read_pb_lights: h:agent:pb_lights unreachable: {e}",
+              file=sys.stderr)
         raw = {}
     out: dict[str, dict | None] = {}
     for ticker in tickers:
@@ -224,6 +226,8 @@ def s1_lights_with_fallback(client, tickers: list[str]) -> dict[str, dict | None
     for ticker, rec in records.items():
         if rec is not None:
             continue
+        print(f"[warn] pb_lights hash missing {ticker}; falling back to direct "
+              f"engine-A pb_light", file=sys.stderr)
         try:
             pb_percentile = _import_pb_percentile()
             fb = pb_percentile.pb_light(_bare_ticker(ticker))
@@ -256,12 +260,13 @@ def compute_s1_pb(pb_lights: dict[str, dict | None]) -> SignalResult:
     lights = []
     parts = []
     for ticker, rec in pb_lights.items():
-        if not isinstance(rec, dict):
+        lg = rec.get("light", "N/A") if isinstance(rec, dict) else "N/A"
+        if lg not in (GREEN, YELLOW, RED):
+            # None record or valid JSON with missing/unknown light → N/A path
             detail[ticker] = "N/A"
             lights.append("N/A")
             parts.append(f"{ticker}=N/A")
             continue
-        lg = rec["light"]
         pb = rec.get("pb_current")
         pct = rec.get("percentile")
         detail[ticker] = {

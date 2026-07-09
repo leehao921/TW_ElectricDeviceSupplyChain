@@ -67,6 +67,11 @@ data/memory_cycle_inputs.yaml     ◀── 使用者每月編輯(~5 個數字)
 
 ### S1 — Valuation Premium (兩檔 P/B)
 
+> **Superseded (2026-07-09, sub-project B Component 2):** S1 no longer uses yfinance `priceToBook`
+> with absolute 1.8/2.5 thresholds. It now reads engine-A percentile lights (85/70 bands) from
+> Redis hash `h:agent:pb_lights`. See docs/superpowers/plans/2026-07-09-pb-percentile-engine.md
+> and /Users/lulala/.claude/plans/memoized-drifting-sky.md.
+
 | Ticker | Yellow (begin trim) | Red (extreme, must sell) |
 |---|---|---|
 | 南亞科 2408.TW | P/B > 1.8x | P/B > 2.5x |

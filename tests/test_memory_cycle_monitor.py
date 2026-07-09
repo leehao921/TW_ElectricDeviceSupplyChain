@@ -225,6 +225,16 @@ def test_s1_value_guards_none_percentile():
     assert "(p" not in r.value  # no percentile suffix when None
 
 
+def test_s1_record_missing_light_is_na():
+    # valid-JSON record without a "light" key must not crash → treated as N/A
+    r = compute_s1_pb({"2408.TW": {"pb_current": 5.0}, "2344.TW": None})
+    assert r.detail["2408.TW"] == "N/A"
+    assert r.detail["2344.TW"] == "N/A"
+    assert "2408.TW=N/A" in r.value
+    # both N/A → overall N/A (no known light)
+    assert r.light == "N/A"
+
+
 # --------------------------------------------------------------------- #
 # read_pb_lights — Redis hash parsing
 # --------------------------------------------------------------------- #

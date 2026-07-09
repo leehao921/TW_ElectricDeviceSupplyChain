@@ -21,12 +21,6 @@ ddr5_16gb_contract_usd:
 mu_next_quarter_gm_guide: 0.86
 mu_next_quarter_rev_qoq: 0.20
 
-# Optional: override default P/B thresholds.
-# Defaults are calibrated to 2018-era cycle peak (1.8 / 2.5 for 2408.TW;
-# 1.5 / 2.0 for 2344.TW). Post-HBM-crowding-out, the structural P/B floor
-# may be permanently higher — override here without code edits.
-# Uncomment + adjust:
-#
-# pb_thresholds:
-#   "2408.TW": {yellow: 1.8, red: 2.5}
-#   "2344.TW": {yellow: 1.5, red: 2.0}
+# NOTE: S1 P/B thresholds are no longer configured here. S1 now reads engine-A
+# percentile lights (85/70 bands, non-configurable) from Redis hash h:agent:pb_lights,
+# populated by scripts/pb_lights_publish.py. See docs/superpowers/specs/2026-07-08-pb-percentile-engine-design.md.
