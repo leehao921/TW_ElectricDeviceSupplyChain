@@ -22,7 +22,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
-from datetime import date as dtdate, datetime
+from datetime import date as dtdate, datetime, timedelta
 from pathlib import Path
 
 import psycopg2
@@ -236,6 +236,18 @@ def load_disposition(path: Path | None = None) -> set[str]:
         return set()
 
 
+def load_history(path: Path = HISTORY_PATH) -> list[dict]:
+    """Load lifetime graduation history log. Missing/corrupt file → []."""
+    if not path.exists():
+        return []
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
 def append_history(entry: dict, path: Path) -> None:
     """Append a graduated/failed entry to lifetime history log."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -416,9 +428,93 @@ def graduate_stale(state: dict, as_of: str, dry_run: bool = False) -> list[str]:
 
 
 # ------------------------------------------------------------------ #
+# Rolling follow-through hit-rate (from history log)
+# ------------------------------------------------------------------ #
+SUCCESS_STATUSES = ("波段", "confirmed")
+
+
+def _median(values: list[float]) -> float:
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+    if n % 2:
+        return s[mid]
+    return (s[mid - 1] + s[mid]) / 2
+
+
+def compute_hitrate(history: list[dict], as_of: str, window_days: int = 30) -> dict:
+    """Rolling follow-through success rate from graduated history.
+
+    Windows entries by graduated_on within [as_of - window_days, as_of] inclusive.
+    Success = final_status in ("波段", "confirmed"). Pure function, no I/O.
+    """
+    as_of_d = dtdate.fromisoformat(as_of)
+    lo = as_of_d - timedelta(days=window_days)
+
+    in_window = []
+    for h in history:
+        g = h.get("graduated_on")
+        if not g:
+            continue
+        try:
+            gd = dtdate.fromisoformat(str(g)[:10])
+        except ValueError:
+            continue
+        if lo <= gd <= as_of_d:
+            in_window.append(h)
+
+    n = len(in_window)
+    n_success = sum(1 for h in in_window if h.get("final_status") in SUCCESS_STATUSES)
+    all_time_success = sum(1 for h in history if h.get("final_status") in SUCCESS_STATUSES)
+
+    if n:
+        max_rets = [float(h.get("max_cumret_pct") or 0) for h in in_window]
+        exit_rets = [float(h.get("cumret_pct") or 0) for h in in_window]
+        hit_rate_pct = n_success / n * 100
+        avg_max = sum(max_rets) / n
+        median_exit = _median(exit_rets)
+    else:
+        hit_rate_pct = None
+        avg_max = None
+        median_exit = None
+
+    return {
+        "window_days": window_days,
+        "n": n,
+        "n_success": n_success,
+        "hit_rate_pct": hit_rate_pct,
+        "avg_max_cumret": avg_max,
+        "median_exit_cumret": median_exit,
+        "all_time_n": len(history),
+        "all_time_success": all_time_success,
+    }
+
+
+def format_hitrate_line(stats: dict) -> str:
+    """Render a concise markdown hit-rate block for the digest."""
+    wd = stats.get("window_days", 30)
+    at_n = stats.get("all_time_n", 0)
+    at_s = stats.get("all_time_success", 0)
+    header = f"## 📈 近{wd}日 follow-through 命中率"
+    if not stats.get("n"):
+        return f"{header}\n(近{wd}日無畢業樣本) · 全期 {at_s}/{at_n}"
+    n = stats["n"]
+    ns = stats["n_success"]
+    hr = stats["hit_rate_pct"]
+    avg_max = stats["avg_max_cumret"]
+    med_exit = stats["median_exit_cumret"]
+    return (
+        f"{header}\n"
+        f"{ns}/{n} 波段成功 ({hr:.0f}%) · 平均峰值 {avg_max:+.1f}% · "
+        f"中位出場 {med_exit:+.1f}% · 全期 {at_s}/{at_n}"
+    )
+
+
+# ------------------------------------------------------------------ #
 # Digest
 # ------------------------------------------------------------------ #
-def build_digest(state: dict, as_of: str, added: list[str], graduated: list[str]) -> str:
+def build_digest(state: dict, as_of: str, added: list[str], graduated: list[str],
+                 history: list[dict] | None = None) -> str:
     now = datetime.now().strftime("%H:%M")
     lines = [f"# 📊 BB Follow-through 追蹤 {as_of} {now} (追蹤中 {len(state['tracked'])} 檔)"]
 
@@ -472,6 +568,10 @@ def build_digest(state: dict, as_of: str, added: list[str], graduated: list[str]
         lines.append(f"\n## 🎓 Graduated ({len(graduated)} 檔今日移出 state)")
         for t in graduated:
             lines.append(f"  • {t}")
+
+    if history is None:
+        history = load_history()
+    lines.append("\n" + format_hitrate_line(compute_hitrate(history, as_of)))
 
     lines.append(f"\n源: scripts/bb_followthrough_track.py · state {STATE_PATH.name}")
     return "\n".join(lines)
