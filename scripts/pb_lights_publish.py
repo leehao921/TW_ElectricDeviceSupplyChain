@@ -2,7 +2,8 @@
 
 Computes an engine-A P/B percentile light for every ticker in the portfolio
 universe (data/buy_list_state.json) and publishes:
-  - Redis hash `h:agent:pb_lights` (field=ticker -> JSON of the light record)
+  - Redis hash `h:agent:pb_lights` (field=ticker -> JSON of the light record:
+    {light, pb_current, percentile, p70, p85, asof, source})
   - an inbox summary (claude:inbox, topic=pb-lights)
 
 Sub-project C (buy-list) reads the hash for its display + 減碼 rule.
@@ -60,7 +61,8 @@ def build_light_records(universe, closes, pb_light_fn, today) -> list[dict]:
         if close is None:
             records.append({
                 "ticker": ticker, "light": "N/A", "pb_current": None,
-                "percentile": None, "asof": today, "source": "no latest close",
+                "percentile": None, "p70": None, "p85": None,
+                "asof": today, "source": "no latest close",
             })
             continue
         rec = pb_light_fn(ticker, latest_close=close, today=today)
@@ -69,6 +71,8 @@ def build_light_records(universe, closes, pb_light_fn, today) -> list[dict]:
             "light": rec["light"],
             "pb_current": rec["pb_current"],
             "percentile": rec["percentile"],
+            "p70": rec.get("p70"),
+            "p85": rec.get("p85"),
             "asof": rec["asof"],
             "source": rec["source"],
         })
@@ -87,6 +91,8 @@ def records_to_hash_mapping(records, now_iso) -> dict:
             "light": rec["light"],
             "pb_current": rec["pb_current"],
             "percentile": rec["percentile"],
+            "p70": rec.get("p70"),
+            "p85": rec.get("p85"),
             "asof": rec["asof"],
             "source": rec["source"],
         }, ensure_ascii=False)

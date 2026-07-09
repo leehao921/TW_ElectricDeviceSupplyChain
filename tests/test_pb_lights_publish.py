@@ -71,9 +71,11 @@ def test_build_light_records_never_drops_and_marks_na():
 def test_records_to_hash_mapping_valid_json_and_meta():
     recs = [
         {"ticker": "1111", "light": "RED", "pb_current": 5.0,
-         "percentile": 90.0, "asof": "2026-07-09", "source": "x"},
+         "percentile": 90.0, "p70": 3.0, "p85": 4.2,
+         "asof": "2026-07-09", "source": "x"},
         {"ticker": "2222", "light": "N/A", "pb_current": None,
-         "percentile": None, "asof": "2026-07-09", "source": "y"},
+         "percentile": None, "p70": None, "p85": None,
+         "asof": "2026-07-09", "source": "y"},
     ]
     m = plp.records_to_hash_mapping(recs, "2026-07-09T08:35:00")
     assert m["_count"] == "2"
@@ -81,7 +83,8 @@ def test_records_to_hash_mapping_valid_json_and_meta():
     assert all(isinstance(v, str) for v in m.values())
     for tk in ("1111", "2222"):
         parsed = json.loads(m[tk])  # valid JSON round-trip
-        assert set(parsed) == {"light", "pb_current", "percentile", "asof", "source"}
+        assert set(parsed) == {"light", "pb_current", "percentile",
+                               "p70", "p85", "asof", "source"}
 
 
 # --------------------------------------------------------------------- #
