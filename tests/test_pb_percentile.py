@@ -92,6 +92,15 @@ def test_compute_pb_light_na_when_thin_history():
     assert "thin" in res["source"]
 
 
+def test_na_result_has_bvps_key_none():
+    # shape-stable: consumers B/C can read res["bvps"] on ANY result, incl. N/A
+    res = pbp.compute_pb_light(_prices([("2023-06-30", 100.0)]),
+                               equity={2023: float("nan")}, shares=100.0, ticker="TEST")
+    assert res["light"] == "N/A"
+    assert "bvps" in res
+    assert res["bvps"] is None
+
+
 def test_light_from_cutoffs_matches_bands():
     assert pbp.light_from_cutoffs(30.0, p70=20.0, p85=25.0) == "RED"
     assert pbp.light_from_cutoffs(25.0, p70=20.0, p85=25.0) == "RED"    # boundary

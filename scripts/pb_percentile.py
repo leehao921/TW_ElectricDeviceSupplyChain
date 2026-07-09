@@ -13,8 +13,10 @@ See docs/superpowers/specs/2026-07-08-pb-percentile-engine-design.md.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import math
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -82,7 +84,7 @@ def classify(percentile: float, red: float = RED_PCT, yellow: float = YELLOW_PCT
 def _na(ticker: str, asof: str, source: str) -> dict:
     return {
         "ticker": ticker, "pb_current": None, "percentile": None,
-        "light": "N/A", "p70": None, "p85": None, "n_days": 0,
+        "light": "N/A", "p70": None, "p85": None, "bvps": None, "n_days": 0,
         "source": source, "asof": asof,
     }
 
@@ -143,9 +145,6 @@ def save_cache(cache: dict, path=CACHE_PATH) -> None:
         json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
 
 
-from datetime import date, timedelta
-
-
 def _days_between(a: str, b: str) -> int:
     return abs((date.fromisoformat(a) - date.fromisoformat(b)).days)
 
@@ -157,6 +156,9 @@ def fetch_yf(ticker: str):
     """
     import yfinance as yf
 
+    # Fallback assumes symbol consistency: a ticker's balance sheet AND price come
+    # from the same suffix. A transient empty history() under .TW could fall
+    # through to .TWO — acceptable given TW/TWO tickers don't collide.
     for suffix in (".TW", ".TWO"):
         t = yf.Ticker(f"{ticker}{suffix}")
         bs = getattr(t, "balance_sheet", None)
@@ -184,7 +186,7 @@ def pb_light(ticker: str, latest_close: float | None = None,
 
     fresh = (entry and entry.get("asof")
              and _days_between(entry["asof"], today) <= STALE_DAYS
-             and entry.get("p85") and entry.get("bvps"))
+             and entry.get("p85") is not None and entry.get("bvps") is not None)
     if fresh and latest_close is not None:
         current_pb = float(latest_close) / entry["bvps"]
         return {
@@ -206,9 +208,6 @@ def pb_light(ticker: str, latest_close: float | None = None,
         }
         save_cache(cache, cache_path)
     return res
-
-
-import argparse
 
 
 def main(argv=None) -> int:

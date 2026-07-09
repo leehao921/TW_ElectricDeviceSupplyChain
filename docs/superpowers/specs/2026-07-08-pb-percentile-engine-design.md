@@ -94,6 +94,7 @@ def pb_light(ticker: str) -> dict:
         "light": "RED",           # GREEN | YELLOW | RED | "N/A"
         "p70": <abs P/B at 70th>,
         "p85": <abs P/B at 85th>,
+        "bvps": 54.99,            # latest annual book value per share; None on N/A
         "n_days": 1214,
         "source": "yfinance annual BVPS 5y",
         "asof": "2026-07-08",
