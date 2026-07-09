@@ -35,3 +35,36 @@ def test_load_pb_lights_parses_and_skips_meta():
 def test_load_pb_lights_bad_json_skipped_and_redis_down_empty():
     assert bl.load_pb_lights(_FakeRedis({"2408": "{not json"})) == {}
     assert bl.load_pb_lights(_FakeRedis({}, boom=True)) == {}
+
+
+# ---------------------------------------------------------------------------
+# Task 2: parse_report_valuation
+# ---------------------------------------------------------------------------
+_REPORT_FIXTURE = """# 2454 - [[聯發科]]
+## 估值概況
+### 估值指標 (殖利率 1.33%) (股價 $4,030.00 as of 2026-07-08)
+| P/E (TTM) | Forward P/E | P/S (TTM) |   P/B | EV/EBITDA |
+|-----------|-------------|-----------|-------|-----------|
+|     64.22 |         N/A |       N/A | 16.48 |       N/A |
+"""
+
+def test_parse_report_valuation_extracts_fields(tmp_path):
+    fp = tmp_path / "2454_聯發科.md"
+    fp.write_text(_REPORT_FIXTURE, encoding="utf-8")
+    v = bl.parse_report_valuation("2454", files={"2454": str(fp)})
+    assert v["pe"] == 64.22
+    assert v["yield_pct"] == 1.33
+    assert v["base_price"] == 4030.0
+
+
+def test_parse_report_valuation_missing_file_returns_none():
+    assert bl.parse_report_valuation("9999", files={}) is None
+
+
+def test_parse_report_valuation_na_pe(tmp_path):
+    txt = _REPORT_FIXTURE.replace("     64.22 ", "       N/A ")
+    fp = tmp_path / "2454_聯發科.md"
+    fp.write_text(txt, encoding="utf-8")
+    v = bl.parse_report_valuation("2454", files={"2454": str(fp)})
+    assert v["pe"] is None
+    assert v["yield_pct"] == 1.33

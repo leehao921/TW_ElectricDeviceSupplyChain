@@ -69,6 +69,34 @@ def load_pb_lights(redis_client) -> dict:
     return out
 
 
+def parse_report_valuation(ticker: str, files: dict | None = None) -> dict | None:
+    """From the report's 估值指標 block: {pe, yield_pct, base_price}. Missing file → None; unparseable field → None."""
+    files = files if files is not None else find_ticker_files([ticker])
+    fp = files.get(ticker)
+    if not fp:
+        return None
+    text = Path(fp).read_text(encoding="utf-8", errors="replace")
+    idx = text.find("估值指標")
+    if idx == -1:
+        return None
+    header = text[idx:text.find("\n", idx)]
+    mp = re.search(r"股價\s*\$([\d,]+\.?\d*)", header)
+    base_price = float(mp.group(1).replace(",", "")) if mp else None
+    my = re.search(r"殖利率\s*([\d.]+)%", header)
+    yield_pct = float(my.group(1)) if my else None
+    pe = None
+    rows = [ln for ln in text[idx:].splitlines() if ln.strip().startswith("|")]
+    # rows[0] header, rows[1] separator, rows[2] data
+    if len(rows) >= 3:
+        cells = [c.strip() for c in rows[2].strip().strip("|").split("|")]
+        if cells and cells[0] not in ("N/A", ""):
+            try:
+                pe = float(cells[0])
+            except ValueError:
+                pe = None
+    return {"pe": pe, "yield_pct": yield_pct, "base_price": base_price}
+
+
 def fetch_latest_snapshot(conn, tickers: list[str]) -> dict[str, dict]:
     """For each ticker: latest close, 5D & 20D 外資/投信/自營 flow (億 TWD)."""
     result = {}
