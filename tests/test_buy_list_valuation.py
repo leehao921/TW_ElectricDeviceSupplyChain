@@ -68,3 +68,18 @@ def test_parse_report_valuation_na_pe(tmp_path):
     v = bl.parse_report_valuation("2454", files={"2454": str(fp)})
     assert v["pe"] is None
     assert v["yield_pct"] == 1.33
+
+
+# ---------------------------------------------------------------------------
+# Task 3: recompute_valuation
+# ---------------------------------------------------------------------------
+def test_recompute_valuation_scales_by_price_ratio():
+    rv = bl.recompute_valuation({"pe": 64.22, "yield_pct": 1.33, "base_price": 4030.0}, 4433.0)
+    assert rv["pe"] == pytest.approx(64.22 * 4433.0 / 4030.0, rel=1e-4)   # ≈ 70.6, PE up with price
+    assert rv["yield_pct"] == pytest.approx(1.33 * 4030.0 / 4433.0, rel=1e-4)  # ≈ 1.21, yield down
+
+
+def test_recompute_valuation_none_inputs():
+    assert bl.recompute_valuation(None, 100.0) == {"pe": None, "yield_pct": None}
+    assert bl.recompute_valuation({"pe": 10, "yield_pct": 2, "base_price": None}, 100.0) == {"pe": None, "yield_pct": None}
+    assert bl.recompute_valuation({"pe": 10, "yield_pct": 2, "base_price": 50.0}, None) == {"pe": None, "yield_pct": None}

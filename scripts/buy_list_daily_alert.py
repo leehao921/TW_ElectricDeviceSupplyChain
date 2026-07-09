@@ -97,6 +97,22 @@ def parse_report_valuation(ticker: str, files: dict | None = None) -> dict | Non
     return {"pe": pe, "yield_pct": yield_pct, "base_price": base_price}
 
 
+def recompute_valuation(report_val: dict | None, latest_close: float | None) -> dict:
+    """Rescale PE (∝ price) and 殖利率 (∝ 1/price) from report base price to latest close."""
+    if not report_val:
+        return {"pe": None, "yield_pct": None}
+    base = report_val.get("base_price")
+    if not base or not latest_close:
+        return {"pe": None, "yield_pct": None}
+    ratio = latest_close / base
+    pe = report_val.get("pe")
+    y = report_val.get("yield_pct")
+    return {
+        "pe": pe * ratio if pe is not None else None,
+        "yield_pct": y / ratio if y is not None else None,
+    }
+
+
 def fetch_latest_snapshot(conn, tickers: list[str]) -> dict[str, dict]:
     """For each ticker: latest close, 5D & 20D 外資/投信/自營 flow (億 TWD)."""
     result = {}
