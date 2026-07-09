@@ -41,3 +41,22 @@ def test_append_during_computes_cumret_and_is_idempotent():
     dt.append_during(e, {"close": 999.0, "foreign_1d": 9.9}, "2026-07-03")
     assert len([s for s in e["during"] if s["d"] == "2026-07-03"]) == 1
     assert e["during"][-1]["close"] == 110.0     # first write wins on re-run
+
+
+def test_mark_release_sets_date_and_close_once():
+    e = {"ticker": "3055", "release_date": None, "release_close": None}
+    dt.mark_release(e, {"close": 120.0}, "2026-07-16")
+    assert e["release_date"] == "2026-07-16" and e["release_close"] == 120.0
+    dt.mark_release(e, {"close": 130.0}, "2026-07-17")   # already released → no change
+    assert e["release_date"] == "2026-07-16" and e["release_close"] == 120.0
+
+
+def test_record_post_fills_checkpoints():
+    e = {"release_date": "2026-07-16", "release_close": 100.0,
+         "post": {"t1": None, "t5": None, "t20": None}}
+    dt.record_post(e, {"close": 105.0}, days_since_release=1)
+    assert e["post"]["t1"] == 5.0
+    dt.record_post(e, {"close": 90.0}, days_since_release=5)
+    assert e["post"]["t5"] == -10.0
+    dt.record_post(e, {"close": 100.0}, days_since_release=3)   # not a checkpoint → unchanged
+    assert e["post"]["t20"] is None

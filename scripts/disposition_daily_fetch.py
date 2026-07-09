@@ -347,6 +347,25 @@ def append_during(entry: dict, snap: dict, as_of: str) -> None:
                             "foreign_1d": snap.get("foreign_1d")})
 
 
+def mark_release(entry: dict, snap: dict, as_of: str) -> None:
+    """Set release_date/close on first release detection (idempotent)."""
+    if entry.get("release_date"):
+        return
+    entry["release_date"] = as_of
+    entry["release_close"] = snap.get("close")
+
+
+def record_post(entry: dict, snap: dict, days_since_release: int) -> None:
+    """Record T+1/T+5/T+20 return vs release close at the matching checkpoint."""
+    base = entry.get("release_close")
+    close = snap.get("close")
+    if not base or not close:
+        return
+    key = {1: "t1", 5: "t5", 20: "t20"}.get(days_since_release)
+    if key and entry["post"].get(key) is None:
+        entry["post"][key] = round((close - base) / base * 100, 2)
+
+
 # ------------------------------------------------------------------ #
 # Main
 # ------------------------------------------------------------------ #
