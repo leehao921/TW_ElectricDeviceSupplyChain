@@ -151,3 +151,16 @@ def test_pb_light_stale_cache_recomputes(tmp_path):
     res = pbp.pb_light("TEST", cache_path=p, today="2026-07-09",
                        fetcher=_fake_fetcher(prices, equity, 100.0))
     assert res["source"].startswith("yfinance")         # recomputed, not fast path
+
+
+@pytest.mark.live
+def test_live_2408_is_red(tmp_path):
+    try:
+        res = pbp.pb_light("2408", cache_path=tmp_path / "c.json", today="2026-07-09")
+    except Exception as e:
+        pytest.skip(f"network/yfinance unavailable: {e}")
+    if res["light"] == "N/A":
+        pytest.skip(f"yfinance returned no data: {res['source']}")
+    assert res["pb_current"] > 5.0             # elevated regime
+    assert res["percentile"] >= 85.0           # top of 5y history
+    assert res["light"] == "RED"
