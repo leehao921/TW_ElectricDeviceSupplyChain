@@ -141,3 +141,68 @@ def save_cache(cache: dict, path=CACHE_PATH) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
+
+
+from datetime import date, timedelta
+
+
+def _days_between(a: str, b: str) -> int:
+    return abs((date.fromisoformat(a) - date.fromisoformat(b)).days)
+
+
+def fetch_yf(ticker: str):
+    """Networked: return (prices: pd.Series, equity: dict[int,float], shares).
+
+    Tries `<ticker>.TW` then `<ticker>.TWO`. Not unit-tested (injected in tests).
+    """
+    import yfinance as yf
+
+    for suffix in (".TW", ".TWO"):
+        t = yf.Ticker(f"{ticker}{suffix}")
+        bs = getattr(t, "balance_sheet", None)
+        if bs is None or bs.empty or "Stockholders Equity" not in bs.index:
+            continue
+        eq_row = bs.loc["Stockholders Equity"]
+        equity = {ts.year: (None if pd.isna(v) else float(v))
+                  for ts, v in eq_row.items()}
+        shares = t.info.get("sharesOutstanding")
+        px = t.history(period="5y")["Close"]
+        if px is None or px.empty:
+            continue
+        px.index = px.index.tz_localize(None)
+        return px, equity, shares
+    return pd.Series(dtype=float), {}, None
+
+
+def pb_light(ticker: str, latest_close: float | None = None,
+             cache_path=CACHE_PATH, today: str | None = None,
+             fetcher=fetch_yf) -> dict:
+    """Public entry. Fresh cache -> fast path; miss/stale -> recompute + persist."""
+    today = today or date.today().isoformat()
+    cache = load_cache(cache_path)
+    entry = cache.get(ticker)
+
+    fresh = (entry and entry.get("asof")
+             and _days_between(entry["asof"], today) <= STALE_DAYS
+             and entry.get("p85") and entry.get("bvps"))
+    if fresh and latest_close is not None:
+        current_pb = float(latest_close) / entry["bvps"]
+        return {
+            "ticker": ticker,
+            "pb_current": round(current_pb, 4),
+            "percentile": None,   # fast path does not recompute percentile
+            "light": light_from_cutoffs(current_pb, entry["p70"], entry["p85"]),
+            "p70": entry["p70"], "p85": entry["p85"], "bvps": entry["bvps"],
+            "n_days": entry.get("n_days", 0),
+            "source": "cache fast-path", "asof": entry["asof"],
+        }
+
+    prices, equity, shares = fetcher(ticker)
+    res = compute_pb_light(prices, equity, shares, ticker=ticker, asof=today)
+    if res["light"] != "N/A":
+        cache[ticker] = {
+            "bvps": res["bvps"], "p70": res["p70"], "p85": res["p85"],
+            "asof": today, "n_days": res["n_days"],
+        }
+        save_cache(cache, cache_path)
+    return res

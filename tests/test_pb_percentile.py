@@ -110,3 +110,44 @@ def test_cache_roundtrip(tmp_path):
 
 def test_load_cache_missing_file_returns_empty(tmp_path):
     assert pbp.load_cache(tmp_path / "nope.json") == {}
+
+
+def _fake_fetcher(prices, equity, shares):
+    def _f(ticker):
+        return prices, equity, shares
+    return _f
+
+
+def test_pb_light_cache_miss_computes_and_writes(tmp_path):
+    prices = _linear_prices("2023-01-02", "2024-12-31", 300, 100.0, 300.0)
+    equity = {2022: 1000.0, 2023: 1000.0}
+    p = tmp_path / "cache.json"
+    res = pbp.pb_light("TEST", cache_path=p, today="2026-07-09",
+                       fetcher=_fake_fetcher(prices, equity, 100.0))
+    assert res["light"] == "RED"
+    assert pbp.load_cache(p)["TEST"]["p85"] > 0        # cutoffs persisted
+
+
+def test_pb_light_fresh_cache_uses_fast_path(tmp_path):
+    p = tmp_path / "cache.json"
+    pbp.save_cache({"TEST": {"bvps": 10.0, "p70": 15.0, "p85": 25.0,
+                             "asof": "2026-07-08", "n_days": 300}}, p)
+
+    def _boom(ticker):
+        raise AssertionError("fetcher must not be called on fresh cache hit")
+
+    res = pbp.pb_light("TEST", latest_close=300.0, cache_path=p,
+                       today="2026-07-09", fetcher=_boom)
+    assert res["pb_current"] == pytest.approx(30.0)    # 300 / 10
+    assert res["light"] == "RED"                        # 30 >= p85 25
+
+
+def test_pb_light_stale_cache_recomputes(tmp_path):
+    prices = _linear_prices("2023-01-02", "2024-12-31", 300, 100.0, 300.0)
+    equity = {2022: 1000.0, 2023: 1000.0}
+    p = tmp_path / "cache.json"
+    pbp.save_cache({"TEST": {"bvps": 10.0, "p70": 15.0, "p85": 25.0,
+                             "asof": "2026-06-01", "n_days": 300}}, p)   # >7d old
+    res = pbp.pb_light("TEST", cache_path=p, today="2026-07-09",
+                       fetcher=_fake_fetcher(prices, equity, 100.0))
+    assert res["source"].startswith("yfinance")         # recomputed, not fast path
