@@ -46,3 +46,13 @@ data/bb_consolidation_state.json
 
 # Routine watchdog — live per-job cooldown/alert state (regenerates each run)
 data/routine_watchdog_state.json
+
+# Memory cycle monitor auto-generated outputs
+data/memory_cycle_state.json
+docs/analysis/memory_cycle_*.md
+
+# Memory cycle monitor live inputs (use .example.yaml as reference)
+data/memory_cycle_inputs.yaml
+
+# P/B percentile engine — cutoff cache (regenerates on refresh)
+data/pb_percentile_cache.json
