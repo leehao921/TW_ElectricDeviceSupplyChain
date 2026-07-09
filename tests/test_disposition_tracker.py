@@ -52,13 +52,28 @@ def test_mark_release_sets_date_and_close_once():
 
 
 def test_record_post_fills_checkpoints():
+    # M1: checkpoints fill at the FIRST run at/after their T+N offset (not exact match),
+    # so a checkpoint whose calendar offset lands on a weekend/holiday is still captured.
     e = {"release_date": "2026-07-16", "release_close": 100.0,
          "post": {"t1": None, "t5": None, "t20": None}}
     dt.record_post(e, {"close": 105.0}, days_since_release=1)
     assert e["post"]["t1"] == 5.0
     dt.record_post(e, {"close": 90.0}, days_since_release=5)
     assert e["post"]["t5"] == -10.0
-    dt.record_post(e, {"close": 100.0}, days_since_release=3)   # not a checkpoint → unchanged
+    # dsr=3 with t1 already set: must NOT overwrite t1 and must NOT set t5 (already set here)
+    dt.record_post(e, {"close": 100.0}, days_since_release=3)
+    assert e["post"]["t1"] == 5.0          # unchanged (already filled)
+    assert e["post"]["t20"] is None        # 3 < 20 → not yet
+
+
+def test_record_post_fills_at_first_run_after_offset():
+    # T+5 offset landing on a weekend: no run at dsr==5, first run is dsr==7 → t5 must fill.
+    e = {"release_date": "2026-07-16", "release_close": 100.0,
+         "post": {"t1": None, "t5": None, "t20": None}}
+    dt.record_post(e, {"close": 105.0}, days_since_release=1)   # t1 fills
+    dt.record_post(e, {"close": 108.0}, days_since_release=7)   # first run at/after T+5 → t5 fills
+    assert e["post"]["t1"] == 5.0
+    assert e["post"]["t5"] == 8.0
     assert e["post"]["t20"] is None
 
 
@@ -112,3 +127,32 @@ def test_update_tracking_enter_snapshot_release_graduate():
     # Day 2: no longer in active (end passed) → release marked
     dt.update_tracking(state, {}, history, market_fn, "2026-07-10")
     assert state["tracked"]["3055"]["release_date"] == "2026-07-10"
+
+
+def test_update_tracking_reentry_during_post_window():
+    # I1 (thesis C): a ticker released, then disposed AGAIN during its T+1..T+20 post
+    # window must close out the old entry to history and start a fresh entry.
+    def market_fn(ticker, as_of):
+        return {"enter_close": 100.0, "close": 100.0, "runup_5d_pct": 5.0, "runup_20d_pct": 20.0,
+                "foreign_5d": 1.0, "foreign_20d": 2.0, "foreign_1d": 0.1}
+    state = {"tracked": {}}
+    history = []
+    active = {"3055": {"name": "蔚華科", "start": "2026-07-09", "end": "2026-07-09",
+                       "condition": "x", "action": "第一次處置", "source": "TWSE"}}
+    # Day 1: enter
+    dt.update_tracking(state, active, history, market_fn, "2026-07-09")
+    assert state["tracked"]["3055"]["enter_date"] == "2026-07-09"
+    # Day 2: empty active → released (now in post window, still tracked)
+    dt.update_tracking(state, {}, history, market_fn, "2026-07-10")
+    assert state["tracked"]["3055"]["release_date"] == "2026-07-10"
+    assert history == []
+    # Day 3 (within post window): re-disposed → old entry graduates to history,
+    # fresh entry created with the new enter_date.
+    reentry = {"3055": {"name": "蔚華科", "start": "2026-07-14", "end": "2026-07-25",
+                        "condition": "x", "action": "第二次處置", "source": "TWSE"}}
+    dt.update_tracking(state, reentry, history, market_fn, "2026-07-14")
+    assert len(history) == 1
+    assert history[0]["enter_date"] == "2026-07-09" and history[0]["release_date"] == "2026-07-10"
+    assert state["tracked"]["3055"]["enter_date"] == "2026-07-14"
+    assert state["tracked"]["3055"]["release_date"] is None
+    assert state["tracked"]["3055"]["count_n"] == 2

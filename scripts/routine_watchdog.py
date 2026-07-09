@@ -275,7 +275,7 @@ def main(argv: list[str] | None = None) -> int:
                 alerted[chk.key] = today
                 changed = True
 
-    print(f"[poll] {now:%Y-%m-%d %H:%M} trading_day=True checks=8 "
+    print(f"[poll] {now:%Y-%m-%d %H:%M} trading_day=True checks={len(build_checks())} "
           f"kickstart={n_kick} alert={n_alert}"
           + ("  [dry-run]" if args.dry_run else ""))
     if changed and not args.dry_run:

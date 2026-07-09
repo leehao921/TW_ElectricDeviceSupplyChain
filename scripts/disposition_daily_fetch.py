@@ -28,6 +28,7 @@ import urllib.error
 import urllib.request
 from datetime import date, datetime
 from pathlib import Path
+from statistics import median as _median
 
 REPO = Path(__file__).resolve().parent.parent
 STATE_PATH = REPO / "data" / "disposition_current.json"
@@ -356,17 +357,19 @@ def mark_release(entry: dict, snap: dict, as_of: str) -> None:
 
 
 def record_post(entry: dict, snap: dict, days_since_release: int) -> None:
-    """Record T+1/T+5/T+20 return vs release close at the matching checkpoint."""
+    """Record T+1/T+5/T+20 return vs release close.
+
+    Each checkpoint fills at the FIRST trading run at/after its T+N offset that is
+    still None. Calendar offsets landing on a weekend/holiday (no run that day) are
+    therefore still captured on the next run, instead of being silently skipped.
+    """
     base = entry.get("release_close")
     close = snap.get("close")
     if not base or not close:
         return
-    key = {1: "t1", 5: "t5", 20: "t20"}.get(days_since_release)
-    if key and entry["post"].get(key) is None:
-        entry["post"][key] = round((close - base) / base * 100, 2)
-
-
-from statistics import median as _median
+    for c, key in ((1, "t1"), (5, "t5"), (20, "t20")):
+        if days_since_release >= c and entry["post"].get(key) is None:
+            entry["post"][key] = round((close - base) / base * 100, 2)
 
 
 def _grp(e):
@@ -457,7 +460,15 @@ def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: 
     tracked = state.setdefault("tracked", {})
     # (a) enter new dispositions
     for ticker, disp in active.items():
-        if ticker not in tracked:
+        existing = tracked.get(ticker)
+        # Re-entry (thesis C): a ticker released but still in its post window that is
+        # disposed AGAIN. Close out the stale post-window entry to history and start
+        # fresh, so the repeat disposition is recorded as a new entry.
+        if existing is not None and existing.get("release_date"):
+            history.append(existing)
+            del tracked[ticker]
+            existing = None
+        if existing is None:
             m = market_fn(ticker, as_of)
             if m:
                 tracked[ticker] = record_entry(ticker, disp, m, as_of)
@@ -493,6 +504,26 @@ def _return_pct(conn, ticker: str, as_of: str, lookback: int) -> float | None:
         if len(rows) < 2 or not rows[-1]:
             return None
         return round((rows[0] - rows[-1]) / rows[-1] * 100, 2)
+    except Exception:
+        return None
+
+
+def _ndays_foreign(conn, ticker: str, as_of: str, n: int) -> float | None:
+    """Sum of foreign net (億/oku) over the last n trading rows up to as_of.
+
+    Mirrors bb_followthrough_track.fetch_20d_foreign but for an arbitrary window;
+    columns are institutional_stock(symbol, date, foreign_net, close_price).
+    """
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT foreign_net, close_price FROM institutional_stock
+                 WHERE symbol=%s AND date<=%s ORDER BY date DESC LIMIT %s
+            """, (ticker, as_of, n))
+            rows = cur.fetchall()
+        if not rows:
+            return None
+        return round(sum(float(fn or 0) * float(cp or 0) / 1e8 for fn, cp in rows), 4)
     except Exception:
         return None
 
@@ -542,8 +573,8 @@ def main() -> int:
             snap = fetch_daily_snapshot(conn, ticker, as_of_) or {}
             return {
                 "enter_close": snap.get("close"), "close": snap.get("close"),
-                "foreign_1d": snap.get("foreign_net"),
-                "foreign_5d": snap.get("foreign_net"),  # best-effort; refine later
+                "foreign_1d": snap.get("foreign_1d_oku"),
+                "foreign_5d": _ndays_foreign(conn, ticker, as_of_, 5),
                 "foreign_20d": fetch_20d_foreign(conn, ticker, as_of_),
                 "runup_5d_pct": _return_pct(conn, ticker, as_of_, 5),
                 "runup_20d_pct": _return_pct(conn, ticker, as_of_, 20),
@@ -551,8 +582,9 @@ def main() -> int:
         track_state = load_json(TRACK_STATE_PATH) or {"tracked": {}}
         track_history = load_json(TRACK_HISTORY_PATH) or []
         update_tracking(track_state, active, track_history, market_fn, today_iso)
-        _save_json(TRACK_STATE_PATH, track_state)
-        _save_json(TRACK_HISTORY_PATH, track_history)
+        if not args.dry_run:
+            _save_json(TRACK_STATE_PATH, track_state)
+            _save_json(TRACK_HISTORY_PATH, track_history)
         conn.close()
         track_digest = build_track_digest(track_state, track_history, today_iso)
         print(track_digest)
