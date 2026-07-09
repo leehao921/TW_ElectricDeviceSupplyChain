@@ -77,3 +77,39 @@ def classify(percentile: float, red: float = RED_PCT, yellow: float = YELLOW_PCT
     if percentile >= yellow:
         return "YELLOW"
     return "GREEN"
+
+
+def _na(ticker: str, asof: str, source: str) -> dict:
+    return {
+        "ticker": ticker, "pb_current": None, "percentile": None,
+        "light": "N/A", "p70": None, "p85": None, "n_days": 0,
+        "source": source, "asof": asof,
+    }
+
+
+def compute_pb_light(prices, equity, shares, ticker="", asof="",
+                     red=RED_PCT, yellow=YELLOW_PCT) -> dict:
+    """Pure: given fetched inputs, return the light dict. Fails safe to N/A."""
+    bvps = compute_bvps(equity, shares)
+    if not bvps:
+        return _na(ticker, asof, "no valid annual book value")
+    latest_bvps = bvps[max(bvps)]
+    if latest_bvps <= 0:
+        return _na(ticker, asof, "non-positive latest book value")
+    series = build_pb_series(prices, bvps)
+    if len(series) < MIN_DAYS:
+        return _na(ticker, asof, f"thin history ({len(series)} days)")
+    current_pb = float(prices.iloc[-1]) / latest_bvps
+    percentile = pct_rank(series, current_pb)
+    return {
+        "ticker": ticker,
+        "pb_current": round(current_pb, 4),
+        "percentile": round(percentile, 1),
+        "light": classify(percentile, red, yellow),
+        "p70": round(float(series.quantile(yellow / 100.0)), 4),
+        "p85": round(float(series.quantile(red / 100.0)), 4),
+        "bvps": round(latest_bvps, 4),
+        "n_days": int(len(series)),
+        "source": "yfinance annual BVPS 5y",
+        "asof": asof,
+    }

@@ -58,3 +58,35 @@ def test_classify_bands():
     assert pbp.classify(70.0) == "YELLOW"   # boundary inclusive
     assert pbp.classify(69.9) == "GREEN"
     assert pbp.classify(10.0) == "GREEN"
+
+
+def _linear_prices(start, end, n, price_lo, price_hi):
+    idx = pd.date_range(start, end, periods=n)
+    vals = [price_lo + (price_hi - price_lo) * i / (n - 1) for i in range(n)]
+    return pd.Series(vals, index=idx)
+
+
+def test_compute_pb_light_happy_red():
+    # 300 trading days across 2 fiscal years; price rises so latest P/B is top of range
+    prices = _linear_prices("2023-01-02", "2024-12-31", 300, 100.0, 300.0)
+    equity = {2022: 1000.0, 2023: 1000.0}   # BVPS 10 both years (shares 100)
+    res = pbp.compute_pb_light(prices, equity, shares=100.0, ticker="TEST")
+    assert res["light"] == "RED"
+    assert res["percentile"] >= 85.0
+    assert res["pb_current"] == pytest.approx(30.0, rel=1e-3)   # 300 / 10
+    assert res["n_days"] >= 250
+    assert res["p85"] > 0 and res["p70"] > 0
+
+
+def test_compute_pb_light_na_when_no_bvps():
+    prices = _linear_prices("2023-01-02", "2024-12-31", 300, 100.0, 300.0)
+    res = pbp.compute_pb_light(prices, equity={2023: float("nan")}, shares=100.0, ticker="TEST")
+    assert res["light"] == "N/A"
+    assert res["percentile"] is None
+
+
+def test_compute_pb_light_na_when_thin_history():
+    prices = _linear_prices("2024-06-03", "2024-12-31", 100, 100.0, 120.0)  # <250 days
+    res = pbp.compute_pb_light(prices, equity={2023: 1000.0}, shares=100.0, ticker="TEST")
+    assert res["light"] == "N/A"
+    assert "thin" in res["source"]
