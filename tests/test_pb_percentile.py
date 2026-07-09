@@ -42,3 +42,19 @@ def test_build_pb_series_asof_annual_join():
 def test_build_pb_series_empty_bvps_returns_empty():
     pb = pbp.build_pb_series(_prices([("2023-06-30", 100.0)]), {})
     assert len(pb) == 0
+
+
+def test_pct_rank_strict_less_than():
+    s = pd.Series([1.0, 2.0, 3.0, 4.0, 5.0])
+    assert pbp.pct_rank(s, 4.0) == 60.0     # 3 of 5 strictly < 4
+    assert pbp.pct_rank(s, 1.0) == 0.0
+    assert pbp.pct_rank(s, 6.0) == 100.0
+
+
+def test_classify_bands():
+    assert pbp.classify(90.0) == "RED"
+    assert pbp.classify(85.0) == "RED"      # boundary inclusive
+    assert pbp.classify(84.9) == "YELLOW"
+    assert pbp.classify(70.0) == "YELLOW"   # boundary inclusive
+    assert pbp.classify(69.9) == "GREEN"
+    assert pbp.classify(10.0) == "GREEN"

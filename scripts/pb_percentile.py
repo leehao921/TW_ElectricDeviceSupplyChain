@@ -64,3 +64,16 @@ def build_pb_series(prices: "pd.Series", bvps: dict) -> "pd.Series":
     denom = pd.Series([asof(d) for d in idx], index=prices.index)
     pb = (prices / denom).dropna()
     return pb
+
+
+def pct_rank(values: "pd.Series", current: float) -> float:
+    """Percentile of `current`: fraction of values strictly less, x100."""
+    return float((values < current).mean() * 100.0)
+
+
+def classify(percentile: float, red: float = RED_PCT, yellow: float = YELLOW_PCT) -> str:
+    if percentile >= red:
+        return "RED"
+    if percentile >= yellow:
+        return "YELLOW"
+    return "GREEN"
