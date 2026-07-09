@@ -398,6 +398,53 @@ def compute_conditional_stats(history: list[dict], min_samples: int = MIN_STATS_
     return {"enough": True, "n": len(graded), "groups": groups}
 
 
+def _next_trading_day(iso: str) -> str:
+    """Next calendar day (approx next trading day; weekend skew acceptable for a ±1d release window)."""
+    from datetime import date as _date, timedelta as _td
+    y, m, d = (int(x) for x in iso.split("-"))
+    return (_date(y, m, d) + _td(days=1)).isoformat()
+
+
+def build_track_digest(state: dict, history: list[dict], as_of: str) -> str:
+    tracked = state.get("tracked", {})
+    lines = [f"# 📈 處置股追蹤 {as_of} (追蹤中 {len(tracked)} 檔)"]
+
+    new_today = [e for e in tracked.values() if e.get("enter_date") == as_of]
+    if new_today:
+        lines.append(f"\n## 🆕 今日新進處置 ({len(new_today)})")
+        for e in new_today:
+            lines.append(f"- **{e['ticker']} {e['name']}** {e.get('count_label','')} · "
+                         f"進場前 5D {e.get('runup_5d_pct')}% / 20D {e.get('runup_20d_pct')}% · "
+                         f"20D 外資 {e.get('foreign_20d_at_enter')}億")
+
+    releasing = [e for e in tracked.values()
+                 if not e.get("release_date") and e.get("disp_end") in (as_of, _next_trading_day(as_of))]
+    if releasing:
+        lines.append(f"\n## 🔓 今日/明日解除 ({len(releasing)})")
+        for e in releasing:
+            lines.append(f"- **{e['ticker']} {e['name']}** 解除 {e.get('disp_end')} · "
+                         f"處置期累計 {e['during'][-1].get('cumret_pct')}%")
+
+    post = [e for e in tracked.values() if e.get("release_date")]
+    if post:
+        lines.append(f"\n## 📊 解除後表現 ({len(post)})")
+        for e in post:
+            p = e["post"]
+            lines.append(f"- **{e['ticker']} {e['name']}** T+1 {p.get('t1')}% · T+5 {p.get('t5')}% · T+20 {p.get('t20')}%")
+
+    stats = compute_conditional_stats(history)
+    lines.append("\n## 📈 累積條件統計")
+    if not stats["enough"]:
+        lines.append(f"樣本累積中 ({stats['n']}/{MIN_STATS_SAMPLES})")
+    else:
+        for key, g in sorted(stats["groups"].items()):
+            lines.append(f"- **{key}** (n={g['n']}): T+5 勝率 {g['t5_winrate']}% (中位 {g['t5_median']}%) · "
+                         f"T+20 勝率 {g['t20_winrate']}% (中位 {g['t20_median']}%)")
+
+    lines.append(f"\n*源: scripts/disposition_daily_fetch.py · state {TRACK_STATE_PATH.name}*")
+    return "\n".join(lines)
+
+
 # ------------------------------------------------------------------ #
 # Main
 # ------------------------------------------------------------------ #

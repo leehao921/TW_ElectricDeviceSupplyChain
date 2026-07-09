@@ -80,3 +80,17 @@ def test_conditional_stats_groups_and_winrate():
     assert g["2nd+/法人撤"]["t20_winrate"] == 0.0
     # 1st & 法人接 → all positive T+20 → win-rate 100
     assert g["1st/法人接"]["t20_winrate"] == 100.0
+
+
+def test_build_track_digest_sections():
+    state = {"tracked": {
+        "3055": {"ticker": "3055", "name": "蔚華科", "enter_date": "2026-07-09",
+                 "runup_5d_pct": 12.3, "runup_20d_pct": 41.0, "count_label": "第二次處置",
+                 "foreign_20d_at_enter": 7.3, "disp_end": "2026-07-22", "release_date": None,
+                 "during": [{"d": "2026-07-09", "close": 158.0, "cumret_pct": 0.0, "foreign_1d": 0.0}],
+                 "post": {"t1": None, "t5": None, "t20": None}},
+    }}
+    md = dt.build_track_digest(state, history=[], as_of="2026-07-09")
+    assert "處置股追蹤" in md
+    assert "3055" in md and "第二次處置" in md
+    assert "樣本累積中" in md          # empty history → stats not enough
