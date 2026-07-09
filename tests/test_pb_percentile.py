@@ -20,3 +20,25 @@ def test_compute_bvps_drops_nan_and_nonpositive():
 def test_compute_bvps_empty_when_shares_missing():
     assert pbp.compute_bvps({2023: 1100.0}, 0.0) == {}
     assert pbp.compute_bvps({2023: 1100.0}, None) == {}
+
+
+def _prices(pairs):
+    idx = pd.to_datetime([d for d, _ in pairs])
+    return pd.Series([p for _, p in pairs], index=idx)
+
+
+def test_build_pb_series_asof_annual_join():
+    bvps = {2022: 10.0, 2023: 11.0}
+    prices = _prices([
+        ("2022-06-30", 50.0),   # before 2022 year-end -> no prior FY -> dropped
+        ("2023-06-30", 100.0),  # most recent FY-end <= date is 2022-12-31 -> bvps 10 -> pb 10
+        ("2024-01-02", 110.0),  # FY 2023-12-31 -> bvps 11 -> pb 10
+    ])
+    pb = pbp.build_pb_series(prices, bvps)
+    assert list(pb.round(4)) == [10.0, 10.0]        # first row dropped
+    assert len(pb) == 2
+
+
+def test_build_pb_series_empty_bvps_returns_empty():
+    pb = pbp.build_pb_series(_prices([("2023-06-30", 100.0)]), {})
+    assert len(pb) == 0

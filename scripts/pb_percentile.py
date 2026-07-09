@@ -17,6 +17,8 @@ import json
 import math
 from pathlib import Path
 
+import pandas as pd
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CACHE_PATH = REPO_ROOT / "data" / "pb_percentile_cache.json"
 RED_PCT = 85.0
@@ -39,3 +41,26 @@ def compute_bvps(equity: dict, shares) -> dict:
             continue
         out[int(year)] = eq / shares
     return out
+
+
+def build_pb_series(prices: "pd.Series", bvps: dict) -> "pd.Series":
+    """Daily P/B = close / (BVPS of most recent fiscal year-end <= date).
+
+    Dates earlier than the first available fiscal year-end are dropped.
+    """
+    if not bvps or prices is None or len(prices) == 0:
+        return pd.Series(dtype=float)
+    years = sorted(bvps)
+    year_ends = [(pd.Timestamp(y, 12, 31), bvps[y]) for y in years]
+
+    def asof(d):
+        chosen = None
+        for ye, val in year_ends:
+            if ye <= d:
+                chosen = val
+        return chosen  # None if date precedes first FY-end
+
+    idx = pd.to_datetime(prices.index)
+    denom = pd.Series([asof(d) for d in idx], index=prices.index)
+    pb = (prices / denom).dropna()
+    return pb
