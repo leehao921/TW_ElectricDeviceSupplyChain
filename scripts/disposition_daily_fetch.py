@@ -336,6 +336,17 @@ def record_entry(ticker: str, disp: dict, market: dict, as_of: str) -> dict:
     }
 
 
+def append_during(entry: dict, snap: dict, as_of: str) -> None:
+    """Append a during-disposition daily snapshot. No-op if as_of already recorded (idempotent)."""
+    if any(s["d"] == as_of for s in entry["during"]):
+        return
+    base = entry["enter_close"]
+    close = snap.get("close")
+    cumret = round((close - base) / base * 100, 2) if base and close else None
+    entry["during"].append({"d": as_of, "close": close, "cumret_pct": cumret,
+                            "foreign_1d": snap.get("foreign_1d")})
+
+
 # ------------------------------------------------------------------ #
 # Main
 # ------------------------------------------------------------------ #

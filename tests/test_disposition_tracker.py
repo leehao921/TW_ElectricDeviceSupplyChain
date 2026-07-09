@@ -26,3 +26,18 @@ def test_record_entry_builds_full_record():
     assert e["runup_20d_pct"] == 41.0 and e["enter_close"] == 155.0
     assert e["release_date"] is None
     assert e["during"] == [{"d": "2026-07-02", "close": 155.0, "cumret_pct": 0.0, "foreign_1d": 0.3}]
+
+
+def _entry():
+    return {"ticker": "3055", "enter_close": 100.0,
+            "during": [{"d": "2026-07-02", "close": 100.0, "cumret_pct": 0.0, "foreign_1d": 0.0}]}
+
+
+def test_append_during_computes_cumret_and_is_idempotent():
+    e = _entry()
+    dt.append_during(e, {"close": 110.0, "foreign_1d": 1.2}, "2026-07-03")
+    assert e["during"][-1] == {"d": "2026-07-03", "close": 110.0, "cumret_pct": 10.0, "foreign_1d": 1.2}
+    # same-day re-run must NOT duplicate
+    dt.append_during(e, {"close": 999.0, "foreign_1d": 9.9}, "2026-07-03")
+    assert len([s for s in e["during"] if s["d"] == "2026-07-03"]) == 1
+    assert e["during"][-1]["close"] == 110.0     # first write wins on re-run
