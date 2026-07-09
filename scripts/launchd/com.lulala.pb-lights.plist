@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.pb-lights</string>
+
+    <!-- Daily P/B-lights publish — 08:35 Mon-Fri Asia/Taipei (before buy-list @ 08:50).
+         Computes engine-A P/B percentile lights for the 50-ticker portfolio universe
+         (picks+watch+avoid from data/buy_list_state.json), publishes Redis hash
+         h:agent:pb_lights, and pushes topic=pb-lights summary to claude:inbox.
+         The single P/B-light source of truth read by buy-list and memory_cycle_monitor.
+         Install:
+           cp scripts/launchd/com.lulala.pb-lights.plist ~/Library/LaunchAgents/
+           launchctl load ~/Library/LaunchAgents/com.lulala.pb-lights.plist -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/pb_lights_publish.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>35</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>35</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>35</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>35</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>35</integer></dict>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key><string>Asia/Taipei</string>
+        <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>PYTHONUNBUFFERED</key><string>1</string>
+        <key>REDIS_HOST</key><string>localhost</string>
+        <key>REDIS_PORT</key><string>6379</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/pb-lights.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/pb-lights.log</string>
+</dict>
+</plist>

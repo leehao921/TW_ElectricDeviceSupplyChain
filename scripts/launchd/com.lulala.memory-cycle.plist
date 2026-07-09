@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.memory-cycle</string>
+
+    <!-- Memory-cycle sell-signal monitor — 08:40 Mon-Fri Asia/Taipei
+         (5 min after pb-lights @ 08:35, before buy-list @ 08:50).
+         S1 reads 2408/2344 P/B percentile lights from Redis hash h:agent:pb_lights
+         (self-heals via direct engine-A call if the hash is missing); S2/S3 use the
+         DDR price series in data/memory_cycle_inputs.yaml (manually updated monthly).
+         Writes h:agent:memory_cycle + docs/analysis/memory_cycle_<date>.md and pushes
+         topic=memory-cycle summary to claude:inbox.
+         Install:
+           cp scripts/launchd/com.lulala.memory-cycle.plist ~/Library/LaunchAgents/
+           launchctl load ~/Library/LaunchAgents/com.lulala.memory-cycle.plist -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/memory_cycle_monitor.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>40</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>40</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>40</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>40</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>8</integer><key>Minute</key><integer>40</integer></dict>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key><string>Asia/Taipei</string>
+        <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>PYTHONUNBUFFERED</key><string>1</string>
+        <key>REDIS_HOST</key><string>localhost</string>
+        <key>REDIS_PORT</key><string>6379</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/memory-cycle.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/memory-cycle.log</string>
+</dict>
+</plist>

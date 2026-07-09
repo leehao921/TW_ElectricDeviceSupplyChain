@@ -62,7 +62,9 @@ class Check:
 # One row per launchd job. ma-touch is one topic across 3 slots → expanded below.
 _REGISTRY = [
     # topic, label-suffix, sched, window_end
+    ("pb-lights", "pb-lights", time(8, 35), time(13, 30)),
     ("disposition-alert", "disposition-daily", time(8, 35), time(13, 30)),
+    ("memory-cycle", "memory-cycle", time(8, 40), time(13, 30)),
     ("buy-list", "buy-list-daily", time(8, 50), time(13, 30)),
     ("bb-squeeze", "bb-squeeze", time(14, 30), time(23, 59)),
     ("bb-followthrough", "bb-followthrough", time(15, 30), time(23, 59)),

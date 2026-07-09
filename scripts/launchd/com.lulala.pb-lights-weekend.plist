@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.pb-lights-weekend</string>
+
+    <!-- Weekend cutoff warm — Sat 10:00 Asia/Taipei (no SLA).
+         Runs pb_lights_publish.py --refresh-cutoffs: recomputes each ticker's engine-A
+         P/B history and refreshes data/pb_percentile_cache.json cutoffs, so the weekday
+         08:35 run only walks the network-free fast path. No Redis publish, no inbox.
+         Install:
+           cp scripts/launchd/com.lulala.pb-lights-weekend.plist ~/Library/LaunchAgents/
+           launchctl load ~/Library/LaunchAgents/com.lulala.pb-lights-weekend.plist -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/pb_lights_publish.py</string>
+        <string>--refresh-cutoffs</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Weekday</key><integer>6</integer><key>Hour</key><integer>10</integer><key>Minute</key><integer>0</integer></dict>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key><string>Asia/Taipei</string>
+        <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>PYTHONUNBUFFERED</key><string>1</string>
+        <key>REDIS_HOST</key><string>localhost</string>
+        <key>REDIS_PORT</key><string>6379</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/pb-lights-weekend.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/pb-lights-weekend.log</string>
+</dict>
+</plist>
