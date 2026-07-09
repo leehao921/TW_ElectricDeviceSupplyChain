@@ -511,6 +511,56 @@ def render_markdown(
 """
 
 
+INBOX_STREAM = "claude:inbox"
+
+
+def build_inbox_summary(
+    *,
+    report_date: str,
+    overall_light: str,
+    trim_stage: int,
+    s1: SignalResult,
+    s2a: SignalResult,
+    s2b: SignalResult,
+    s3: SignalResult,
+) -> str:
+    """Build a SHORT inbox digest (NOT the full report). Pure function.
+
+    Header line with overall light emoji + trim stage, one line per signal
+    (S1/S2/S3) with its light + short value, and a pointer to the full report.
+    ~6-10 lines.
+    """
+    overall_emoji = LIGHT_EMOJI.get(overall_light, "⚪")
+    s2_worst = _worst(s2a.light, s2b.light)
+    s2_emoji = LIGHT_EMOJI.get(s2_worst, "⚪")
+    action = STAGE_ACTION[trim_stage]
+    lines = [
+        f"記憶體週期燈號 {report_date}",
+        f"總燈號 {overall_emoji} {overall_light} · Trim {trim_stage}/3 · {action}",
+        f"S1 估值溢價 {LIGHT_EMOJI.get(s1.light, '⚪')} {s1.light} — {s1.value}",
+        f"S2 DRAM 報價 {s2_emoji} {s2_worst} — DDR4 {s2a.value} / DDR5 {s2b.value}",
+        f"S3 跨市場領先 {LIGHT_EMOJI.get(s3.light, '⚪')} {s3.light} — {s3.value}",
+        f"→ 全文 docs/analysis/memory_cycle_{report_date}.md",
+    ]
+    return "\n".join(lines)
+
+
+def push_inbox(client, summary: str, report_date: str) -> bool:
+    """Push the digest to the claude:inbox stream (topic=memory-cycle). Thin I/O."""
+    try:
+        client.xadd(INBOX_STREAM, {
+            "topic": "memory-cycle",
+            "from": "memory_cycle_monitor",
+            "tags": "memory-cycle,daily",
+            "as_of": report_date,
+            "msg": summary,
+        })
+        return True
+    except Exception as e:  # noqa: BLE001 — inbox push is best-effort
+        print(f"[warn] inbox push failed: {e}", file=sys.stderr)
+        return False
+
+
 def publish_redis(*, client, hash_name: str, data: dict) -> None:
     """HSET all fields of `data` to `hash_name`. None values → empty string."""
     flat = {k: ("" if v is None else str(v)) for k, v in data.items()}
@@ -602,6 +652,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="Print Markdown to stdout, do not write files or push Redis")
     parser.add_argument("--no-redis", action="store_true",
                         help="Write Markdown but skip Redis push")
+    parser.add_argument("--no-notify", action="store_true",
+                        help="skip claude:inbox push")
     args = parser.parse_args(argv)
 
     # Load inputs
@@ -687,6 +739,16 @@ def main(argv: list[str] | None = None) -> int:
         except Exception as e:
             print(f"WARN: Redis push failed: {e}", file=sys.stderr)
             return 3
+
+    # Push a concise digest to claude:inbox (unless --no-notify).
+    # Not reached on --dry-run (which returns above).
+    if not args.no_notify:
+        summary = build_inbox_summary(
+            report_date=today, overall_light=agg["overall_light"],
+            trim_stage=stage, s1=s1, s2a=s2a, s2b=s2b, s3=s3,
+        )
+        if push_inbox(make_redis_client(), summary, today):
+            print("[ok] pushed to claude:inbox topic=memory-cycle")
 
     print(f"Wrote {report_path} (overall: {agg['overall_light']}, stage {stage})")
     return 0

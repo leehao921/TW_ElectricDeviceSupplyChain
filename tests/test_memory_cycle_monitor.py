@@ -777,3 +777,28 @@ def test_markdown_verification_log_includes_pb_provenance():
     assert "p85=6.50" in md
     assert "source engine-A recompute" in md
     assert "as of 2026-06-25" in md
+
+
+# ── build_inbox_summary (inbox digest) ──────────────────────────────
+from scripts.memory_cycle_monitor import build_inbox_summary
+
+
+def test_build_inbox_summary_has_lights_and_pointer():
+    s1 = SignalResult(RED, "2408.TW=7.56(p98), 2344.TW=8.35(p99)", {})
+    s2a = SignalResult(YELLOW, "-1.2%", {})
+    s2b = SignalResult(RED, "+3.0%", {})
+    s3 = SignalResult(YELLOW, "MU weak only", {})
+    summary = build_inbox_summary(
+        report_date="2026-07-09", overall_light=RED, trim_stage=3,
+        s1=s1, s2a=s2a, s2b=s2b, s3=s3,
+    )
+    # overall light present (emoji or word)
+    assert "RED" in summary or "🔴" in summary
+    # trim stage present
+    assert "3" in summary
+    # per-signal markers
+    assert "S1" in summary
+    assert "S2" in summary
+    assert "S3" in summary
+    # pointer to full report
+    assert "memory_cycle_2026-07-09.md" in summary
