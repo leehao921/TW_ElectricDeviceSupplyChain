@@ -164,3 +164,13 @@ def test_live_2408_is_red(tmp_path):
     assert res["pb_current"] > 5.0             # elevated regime
     assert res["percentile"] >= 85.0           # top of 5y history
     assert res["light"] == "RED"
+
+
+def test_main_prints_light(capsys, tmp_path, monkeypatch):
+    prices = _linear_prices("2023-01-02", "2024-12-31", 300, 100.0, 300.0)
+    equity = {2022: 1000.0, 2023: 1000.0}
+    monkeypatch.setattr(pbp, "fetch_yf", _fake_fetcher(prices, equity, 100.0))
+    rc = pbp.main(["TEST", "--cache", str(tmp_path / "c.json"), "--today", "2026-07-09"])
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "TEST" in out and "RED" in out

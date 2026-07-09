@@ -206,3 +206,23 @@ def pb_light(ticker: str, latest_close: float | None = None,
         }
         save_cache(cache, cache_path)
     return res
+
+
+import argparse
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="P/B historical-percentile light per ticker")
+    ap.add_argument("tickers", nargs="+", help="bare tickers, e.g. 2408 2344")
+    ap.add_argument("--cache", default=str(CACHE_PATH))
+    ap.add_argument("--today", default=None)
+    args = ap.parse_args(argv)
+    for tk in args.tickers:
+        r = pb_light(tk, cache_path=args.cache, today=args.today, fetcher=fetch_yf)
+        pct = "N/A" if r["percentile"] is None else f"{r['percentile']}"
+        print(f"{r['ticker']}: P/B={r['pb_current']} pct={pct} -> {r['light']}  ({r['source']})")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
