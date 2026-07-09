@@ -1,17 +1,17 @@
 """Tests for scripts/memory_cycle_monitor.py — DRAM sell-signal monitor."""
 from scripts.memory_cycle_monitor import (
-    PB_THRESHOLDS,
     Inputs,
-    PBData,
     PricePoint,
     SignalResult,
     GREEN, YELLOW, RED,
 )
 
 
-def test_pb_thresholds_match_spec():
-    assert PB_THRESHOLDS["2408.TW"] == {"yellow": 1.8, "red": 2.5}
-    assert PB_THRESHOLDS["2344.TW"] == {"yellow": 1.5, "red": 2.0}
+# Reusable P/B light records (mirror the h:agent:pb_lights hash record shape)
+def _pb_rec(light, pb, percentile=None, p70=None, p85=None,
+            asof="2026-06-25", source="cache fast-path"):
+    return {"light": light, "pb_current": pb, "percentile": percentile,
+            "p70": p70, "p85": p85, "asof": asof, "source": source}
 
 
 def test_signal_result_has_required_fields():
@@ -162,53 +162,148 @@ def test_s2b_na_when_fewer_than_2_quarters():
     assert r.light == "N/A"
 
 
-from scripts.memory_cycle_monitor import compute_s1_pb
+from scripts.memory_cycle_monitor import compute_s1_pb, read_pb_lights
 
 
-def test_s1_green_when_both_below_yellow():
-    r = compute_s1_pb({"2408.TW": PBData(pb=1.42), "2344.TW": PBData(pb=1.12)})
+def test_s1_green_when_both_green_records():
+    r = compute_s1_pb({
+        "2408.TW": _pb_rec(GREEN, 1.42, percentile=40, p70=5.0, p85=6.5),
+        "2344.TW": _pb_rec(GREEN, 1.12, percentile=30, p70=4.0, p85=5.5),
+    })
     assert r.light == GREEN
+    assert r.detail["2408.TW"]["pb"] == 1.42
+    assert r.detail["2408.TW"]["percentile"] == 40
+    assert r.detail["2408.TW"]["p70"] == 5.0
+    assert r.detail["2408.TW"]["p85"] == 6.5
+    assert r.detail["2408.TW"]["source"] == "cache fast-path"
+    assert r.detail["2408.TW"]["light"] == GREEN
+    # value string carries P/B + percentile
+    assert "2408.TW=1.42(p40)" in r.value
 
 
-def test_s1_yellow_at_exact_threshold():
-    # 2408 at 1.80 → yellow (>= threshold)
-    r = compute_s1_pb({"2408.TW": PBData(pb=1.80), "2344.TW": PBData(pb=1.10)})
+def test_s1_yellow_record():
+    r = compute_s1_pb({
+        "2408.TW": _pb_rec(YELLOW, 5.2, percentile=75),
+        "2344.TW": _pb_rec(GREEN, 1.10, percentile=20),
+    })
     assert r.light == YELLOW
-    # 2344 at 1.50 → yellow
-    r2 = compute_s1_pb({"2408.TW": PBData(pb=1.10), "2344.TW": PBData(pb=1.50)})
-    assert r2.light == YELLOW
 
 
-def test_s1_red_above_extreme():
-    r = compute_s1_pb({"2408.TW": PBData(pb=2.51), "2344.TW": PBData(pb=1.10)})
+def test_s1_red_record():
+    r = compute_s1_pb({
+        "2408.TW": _pb_rec(RED, 7.2, percentile=98, p70=5.0, p85=6.5),
+        "2344.TW": _pb_rec(GREEN, 1.10, percentile=20),
+    })
     assert r.light == RED
 
 
 def test_s1_takes_worst_of_two():
     # one green, one red → RED
-    r = compute_s1_pb({"2408.TW": PBData(pb=1.10), "2344.TW": PBData(pb=2.05)})
+    r = compute_s1_pb({
+        "2408.TW": _pb_rec(GREEN, 1.10, percentile=15),
+        "2344.TW": _pb_rec(RED, 8.35, percentile=99),
+    })
     assert r.light == RED
 
 
-def test_s1_na_when_value_missing():
-    r = compute_s1_pb({"2408.TW": None, "2344.TW": PBData(pb=1.10)})
+def test_s1_na_when_record_missing():
+    r = compute_s1_pb({"2408.TW": None, "2344.TW": _pb_rec(GREEN, 1.10, percentile=20)})
     assert r.detail["2408.TW"] == "N/A"
-    # but 2344 still computes → overall takes worst-known
-    assert r.light in (GREEN, "N/A")  # 2344 is green; 2408 unknown → at minimum green-from-known
+    assert "2408.TW=N/A" in r.value
+    # 2344 still computes → overall takes worst-known (green)
+    assert r.light == GREEN
 
 
-def test_fetch_pb_returns_value_from_info(mocker):
-    fake_ticker = mocker.MagicMock()
-    fake_ticker.info = {"priceToBook": 1.42}
-    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
-    from scripts.memory_cycle_monitor import fetch_pb
-    assert fetch_pb("2408.TW").pb == 1.42
+def test_s1_value_guards_none_percentile():
+    # cache fast-path leaves percentile None but pb/light populated
+    r = compute_s1_pb({
+        "2408.TW": _pb_rec(RED, 7.2, percentile=None, p70=5.0, p85=6.5),
+        "2344.TW": None,
+    })
+    assert r.light == RED
+    assert "2408.TW=7.20" in r.value
+    assert "(p" not in r.value  # no percentile suffix when None
 
 
-def test_fetch_pb_returns_none_on_exception(mocker):
-    mocker.patch("yfinance.Ticker", side_effect=RuntimeError("network"))
-    from scripts.memory_cycle_monitor import fetch_pb
-    assert fetch_pb("2408.TW") is None
+# --------------------------------------------------------------------- #
+# read_pb_lights — Redis hash parsing
+# --------------------------------------------------------------------- #
+import json as _json
+
+
+class _FakeHashClient:
+    def __init__(self, mapping):
+        self._mapping = mapping
+
+    def hgetall(self, key):
+        return dict(self._mapping)
+
+
+def test_read_pb_lights_valid_json_maps_bare_key():
+    rec = {"light": "RED", "pb_current": 7.2, "percentile": 98,
+           "p70": 5.0, "p85": 6.5, "asof": "2026-06-25", "source": "x"}
+    client = _FakeHashClient({"2408": _json.dumps(rec), "_count": "1"})
+    out = read_pb_lights(client, ["2408.TW", "2344.TW"])
+    # .TW suffix mapped to bare "2408" hash field
+    assert out["2408.TW"] == rec
+    # missing field → None
+    assert out["2344.TW"] is None
+
+
+def test_read_pb_lights_bad_json_returns_none():
+    client = _FakeHashClient({"2408": "{not valid json"})
+    out = read_pb_lights(client, ["2408.TW"])
+    assert out["2408.TW"] is None
+
+
+def test_read_pb_lights_two_suffix_maps_bare_key():
+    rec = {"light": "GREEN", "pb_current": 1.0, "percentile": 10,
+           "p70": 3.0, "p85": 4.0, "asof": "2026-06-25", "source": "x"}
+    client = _FakeHashClient({"8358": _json.dumps(rec)})
+    out = read_pb_lights(client, ["8358.TWO"])
+    assert out["8358.TWO"] == rec
+
+
+def test_read_pb_lights_redis_error_all_none():
+    class _Boom:
+        def hgetall(self, key):
+            raise ConnectionError("redis down")
+    out = read_pb_lights(_Boom(), ["2408.TW", "2344.TW"])
+    assert out == {"2408.TW": None, "2344.TW": None}
+
+
+# --------------------------------------------------------------------- #
+# s1_lights_with_fallback — engine-A self-heal when hash missing a ticker
+# --------------------------------------------------------------------- #
+def test_s1_fallback_calls_engine_a_when_record_missing(mocker):
+    from scripts.memory_cycle_monitor import s1_lights_with_fallback, _import_pb_percentile
+    pb_percentile = _import_pb_percentile()
+    # hash has 2344 but NOT 2408
+    rec2344 = {"light": "GREEN", "pb_current": 1.1, "percentile": 20,
+               "p70": 3.0, "p85": 4.0, "asof": "2026-06-25", "source": "hash"}
+    client = _FakeHashClient({"2344": _json.dumps(rec2344)})
+
+    def fake_light(ticker, latest_close=None, today=None):
+        assert ticker == "2408"  # bare ticker passed to engine A
+        return {"ticker": "2408", "light": "RED", "pb_current": 7.2,
+                "percentile": 98, "p70": 5.0, "p85": 6.5,
+                "asof": "2026-06-25", "source": "engine-A recompute"}
+
+    mocker.patch.object(pb_percentile, "pb_light", side_effect=fake_light)
+    out = s1_lights_with_fallback(client, ["2408.TW", "2344.TW"])
+    assert out["2344.TW"] == rec2344              # kept from hash
+    assert out["2408.TW"]["light"] == "RED"        # self-healed via engine A
+    assert out["2408.TW"]["source"] == "engine-A recompute"
+
+
+def test_s1_fallback_keeps_none_on_engine_failure(mocker):
+    from scripts.memory_cycle_monitor import s1_lights_with_fallback, _import_pb_percentile
+    pb_percentile = _import_pb_percentile()
+    client = _FakeHashClient({})  # empty hash → both missing
+    mocker.patch.object(pb_percentile, "pb_light",
+                        side_effect=RuntimeError("engine boom"))
+    out = s1_lights_with_fallback(client, ["2408.TW", "2344.TW"])
+    assert out == {"2408.TW": None, "2344.TW": None}
 
 
 from scripts.memory_cycle_monitor import detect_monthly_weakness
@@ -342,11 +437,11 @@ from scripts.memory_cycle_monitor import render_markdown
 
 
 def test_markdown_contains_required_sections():
-    s1 = SignalResult(GREEN, "2408=1.42, 2344=1.12",
-                      {"2408.TW": {"pb": 1.42, "book_value": 30.0, "current_price": 42.6,
-                                   "as_of": "2026-06-25", "light": GREEN},
-                       "2344.TW": {"pb": 1.12, "book_value": 20.0, "current_price": 22.4,
-                                   "as_of": "2026-06-25", "light": GREEN}})
+    s1 = SignalResult(GREEN, "2408.TW=1.42(p40), 2344.TW=1.12(p30)",
+                      {"2408.TW": {"pb": 1.42, "percentile": 40, "p70": 5.0, "p85": 6.5,
+                                   "as_of": "2026-06-25", "source": "cache", "light": GREEN},
+                       "2344.TW": {"pb": 1.12, "percentile": 30, "p70": 4.0, "p85": 5.5,
+                                   "as_of": "2026-06-25", "source": "cache", "light": GREEN}})
     s2a = SignalResult(GREEN, "+10.6%", {"mom_pct": 10.6})
     s2b = SignalResult(GREEN, "+21.4%", {"qoq_pct": 21.4, "decay_pct": None})
     s3 = SignalResult(GREEN, "MU not weak",
@@ -370,7 +465,9 @@ def test_markdown_contains_required_sections():
 
 
 def test_markdown_red_when_any_signal_red():
-    s1 = SignalResult(RED, "2408=2.60", {"2408.TW": {"pb": 2.6, "light": RED}})
+    s1 = SignalResult(RED, "2408.TW=7.20(p98)",
+                      {"2408.TW": {"pb": 7.2, "percentile": 98, "p70": 5.0, "p85": 6.5,
+                                   "as_of": "2026-06-25", "source": "cache", "light": RED}})
     s2a = SignalResult(GREEN, "+5%")
     s2b = SignalResult(GREEN, "+15%")
     s3 = SignalResult(GREEN, "ok")
@@ -412,13 +509,21 @@ def test_publish_redis_handles_none_as_empty_string():
     assert r.hget("h:test", "x") == ""
 
 
+def _fake_pb_lights(**overrides):
+    base = {
+        "2408.TW": _pb_rec(GREEN, 1.42, percentile=40, p70=5.0, p85=6.5),
+        "2344.TW": _pb_rec(GREEN, 1.12, percentile=30, p70=4.0, p85=5.5),
+    }
+    base.update(overrides)
+    return base
+
+
 def test_main_dry_run_does_not_write_files(tmp_path, mocker, capsys):
     """--dry-run prints to stdout, writes no files, makes no Redis call."""
-    # Mock yfinance — return safe defaults
-    mocker.patch(
-        "scripts.memory_cycle_monitor.fetch_pb",
-        return_value=PBData(pb=1.42, book_value=10.0, current_price=14.2, as_of="2026-06-25"),
-    )
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client",
+                 return_value=object())
+    mocker.patch("scripts.memory_cycle_monitor.s1_lights_with_fallback",
+                 return_value=_fake_pb_lights())
     mocker.patch(
         "scripts.memory_cycle_monitor.fetch_monthly_closes",
         return_value=[100.0, 102.0, 105.0, 108.0, 110.0],  # not weak
@@ -450,20 +555,18 @@ def test_integration_full_pipeline_writes_markdown_and_redis(tmp_path, mocker):
     - fakeredis as Redis client
     - Asserts Markdown file written + Redis hash populated
     """
-    # Mock yfinance fetches at the source-function level
-    mocker.patch(
-        "scripts.memory_cycle_monitor.fetch_pb",
-        side_effect=lambda t: PBData(
-            pb={"2408.TW": 1.42, "2344.TW": 1.12}[t],
-            book_value=10.0, current_price=14.2, as_of="2026-06-25",
-        ),
-    )
+    # Publish the pb_lights hash into a fakeredis instance, then let the monitor
+    # read it back through its real read path (make_redis_client → read_pb_lights).
+    fake = fakeredis.FakeStrictRedis(decode_responses=True)
+    fake.hset("h:agent:pb_lights", mapping={
+        "2408": _json.dumps(_pb_rec(GREEN, 1.42, percentile=40, p70=5.0, p85=6.5)),
+        "2344": _json.dumps(_pb_rec(GREEN, 1.12, percentile=30, p70=4.0, p85=5.5)),
+    })
     # All upward-trending closes → no weakness anywhere
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
 
-    # Patch Redis client factory to return a fakeredis instance
-    fake = fakeredis.FakeStrictRedis(decode_responses=True)
+    # Patch Redis client factory to return the same fakeredis instance
     mocker.patch("scripts.memory_cycle_monitor.make_redis_client", return_value=fake)
 
     from scripts.memory_cycle_monitor import main, REDIS_HASH
@@ -492,6 +595,9 @@ def test_integration_full_pipeline_writes_markdown_and_redis(tmp_path, mocker):
     assert redis_data["overall_light"] == "GREEN"
     assert redis_data["trim_stage"] == "0"
     assert redis_data["s1_pb_2408"] == "1.42"
+    assert redis_data["s1_pb_2408_percentile"] == "40"
+    assert redis_data["s1_pb_2408_p70"] == "5.0"
+    assert redis_data["s1_pb_2408_p85"] == "6.5"
     assert "memory_cycle_" in redis_data["report_path"]
 
     # State file created
@@ -501,15 +607,18 @@ def test_integration_full_pipeline_writes_markdown_and_redis(tmp_path, mocker):
 
 
 def test_integration_no_redis_flag_skips_redis(tmp_path, mocker):
-    mocker.patch(
-        "scripts.memory_cycle_monitor.fetch_pb",
-        return_value=PBData(pb=1.42, book_value=10.0, current_price=14.2, as_of="2026-06-25"),
-    )
+    # Reads still go through make_redis_client → provide a fake hash client, but
+    # the WRITE path (publish_redis) must not be invoked under --no-redis.
+    fake = fakeredis.FakeStrictRedis(decode_responses=True)
+    fake.hset("h:agent:pb_lights", mapping={
+        "2408": _json.dumps(_pb_rec(GREEN, 1.42, percentile=40, p70=5.0, p85=6.5)),
+        "2344": _json.dumps(_pb_rec(GREEN, 1.12, percentile=30, p70=4.0, p85=5.5)),
+    })
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client", return_value=fake)
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
-    # Make Redis client raise to confirm it's not called
-    mocker.patch("scripts.memory_cycle_monitor.make_redis_client",
-                 side_effect=RuntimeError("should not be called"))
+    boom = mocker.patch("scripts.memory_cycle_monitor.publish_redis",
+                        side_effect=AssertionError("publish must not run under --no-redis"))
 
     from scripts.memory_cycle_monitor import main
     rc = main([
@@ -535,9 +644,12 @@ def test_main_returns_1_on_invalid_yaml(tmp_path, mocker):
     assert rc == 1
 
 
-def test_main_returns_2_when_all_pbs_none(tmp_path, mocker):
-    """rc=2 when yfinance returns None for both P/B fetches."""
-    mocker.patch("scripts.memory_cycle_monitor.fetch_pb", return_value=None)
+def test_main_returns_2_when_all_pb_lights_none(tmp_path, mocker):
+    """rc=2 when neither the hash nor engine-A fallback yields a light."""
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client",
+                 return_value=object())
+    mocker.patch("scripts.memory_cycle_monitor.s1_lights_with_fallback",
+                 return_value={"2408.TW": None, "2344.TW": None})
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
     from scripts.memory_cycle_monitor import main
@@ -551,15 +663,19 @@ def test_main_returns_2_when_all_pbs_none(tmp_path, mocker):
 
 
 def test_main_returns_3_when_redis_push_fails(tmp_path, mocker):
-    """rc=3 when Redis client/publish raises (e.g. ConnectionRefusedError)."""
-    mocker.patch(
-        "scripts.memory_cycle_monitor.fetch_pb",
-        return_value=PBData(pb=1.42, book_value=10.0, current_price=14.2, as_of="2026-06-25"),
-    )
+    """rc=3 when the Redis WRITE (publish_redis) raises after markdown is written.
+
+    Reads succeed (fake hash client with lights); only the publish path fails.
+    """
+    fake = fakeredis.FakeStrictRedis(decode_responses=True)
+    fake.hset("h:agent:pb_lights", mapping={
+        "2408": _json.dumps(_pb_rec(GREEN, 1.42, percentile=40, p70=5.0, p85=6.5)),
+        "2344": _json.dumps(_pb_rec(GREEN, 1.12, percentile=30, p70=4.0, p85=5.5)),
+    })
+    mocker.patch("scripts.memory_cycle_monitor.make_redis_client", return_value=fake)
     mocker.patch("scripts.memory_cycle_monitor.fetch_monthly_closes",
                  return_value=[100, 102, 105, 108, 110])
-    # Force Redis client factory to raise — simulates Redis server down
-    mocker.patch("scripts.memory_cycle_monitor.make_redis_client",
+    mocker.patch("scripts.memory_cycle_monitor.publish_redis",
                  side_effect=ConnectionRefusedError("simulated Redis down"))
     from scripts.memory_cycle_monitor import main
     rc = main([
@@ -599,106 +715,40 @@ def test_suggest_next_trigger_non_terminal_unchanged():
     assert "S2a DDR4" in _suggest_next_trigger(s1, s2a, s2b, s3, stage=0)
 
 
-def test_load_inputs_pb_thresholds_when_present(tmp_path):
-    p = tmp_path / "with_thresholds.yaml"
+def test_load_inputs_ignores_stray_pb_thresholds(tmp_path):
+    # pb_thresholds is no longer a recognized field; presence must not error.
+    p = tmp_path / "with_stray.yaml"
     p.write_text("""
 last_updated: 2026-06-25
 notes: ""
 pb_thresholds:
   "2408.TW": {yellow: 5.0, red: 9.0}
-  "2344.TW": {yellow: 4.0, red: 8.0}
 """)
-    inp = load_inputs(p)
-    assert inp.pb_thresholds == {
-        "2408.TW": {"yellow": 5.0, "red": 9.0},
-        "2344.TW": {"yellow": 4.0, "red": 8.0},
-    }
-
-
-def test_load_inputs_pb_thresholds_absent_returns_none():
-    inp = load_inputs(FIXTURES / "memory_cycle_minimal.yaml")
-    assert inp.pb_thresholds is None
-
-
-def test_load_inputs_pb_thresholds_partial_raises(tmp_path):
-    p = tmp_path / "partial.yaml"
-    p.write_text("""
-last_updated: 2026-06-25
-pb_thresholds:
-  "2408.TW": {yellow: 1.8, red: 2.5}
-""")
-    with pytest.raises(ValueError, match="pb_thresholds"):
-        load_inputs(p)
-
-
-def test_compute_s1_pb_uses_yaml_thresholds_when_provided():
-    # Default: P/B 5.0 for 2408 → RED (above 2.5)
-    r_default = compute_s1_pb({"2408.TW": PBData(pb=5.0), "2344.TW": PBData(pb=1.0)})
-    assert r_default.light == RED
-
-    # With override raising thresholds: same P/B 5.0 → GREEN (below 9.0)
-    custom = {
-        "2408.TW": {"yellow": 5.0, "red": 9.0},
-        "2344.TW": {"yellow": 4.0, "red": 8.0},
-    }
-    r_custom = compute_s1_pb({"2408.TW": PBData(pb=4.9), "2344.TW": PBData(pb=1.0)}, thresholds=custom)
-    assert r_custom.light == GREEN  # 4.9 < 5.0 yellow threshold
-
-
-# ---- Fix 1: P/B provenance surfacing ----
-
-def test_fetch_pb_returns_full_pbdata(mocker):
-    fake_ticker = mocker.MagicMock()
-    fake_ticker.info = {
-        "priceToBook": 7.56,
-        "bookValue": 62.25,
-        "currentPrice": 473.5,
-    }
-    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
-    from scripts.memory_cycle_monitor import fetch_pb
-    result = fetch_pb("2408.TW")
-    assert result.pb == 7.56
-    assert result.book_value == 62.25
-    assert result.current_price == 473.5
-    assert result.as_of  # ISO date populated
-
-
-def test_fetch_pb_fallback_path_via_marketcap(mocker):
-    fake_ticker = mocker.MagicMock()
-    fake_ticker.info = {
-        "priceToBook": None,
-        "marketCap": 100_000_000,
-        "bookValue": 10.0,
-        "sharesOutstanding": 5_000_000,
-    }
-    mocker.patch("yfinance.Ticker", return_value=fake_ticker)
-    from scripts.memory_cycle_monitor import fetch_pb
-    result = fetch_pb("2408.TW")
-    assert result is not None
-    assert result.pb == 2.0  # 100M / (10 * 5M)
-    assert result.book_value == 10.0
-    assert result.current_price is None  # not provided in mock
+    inp = load_inputs(p)  # must not raise
+    assert not hasattr(inp, "pb_thresholds")
 
 
 def test_compute_s1_pb_stores_provenance_in_detail():
-    pbs = {
-        "2408.TW": PBData(pb=1.42, book_value=62.25, current_price=88.4, as_of="2026-06-25"),
-        "2344.TW": PBData(pb=1.12, book_value=20.0, current_price=22.4, as_of="2026-06-25"),
+    pb_lights = {
+        "2408.TW": _pb_rec(GREEN, 1.42, percentile=40, p70=5.0, p85=6.5,
+                           source="cache fast-path"),
+        "2344.TW": _pb_rec(GREEN, 1.12, percentile=30, p70=4.0, p85=5.5),
     }
-    r = compute_s1_pb(pbs)
+    r = compute_s1_pb(pb_lights)
     assert r.detail["2408.TW"]["pb"] == 1.42
-    assert r.detail["2408.TW"]["book_value"] == 62.25
-    assert r.detail["2408.TW"]["current_price"] == 88.4
-    assert r.detail["2408.TW"]["as_of"] == "2026-06-25"
+    assert r.detail["2408.TW"]["percentile"] == 40
+    assert r.detail["2408.TW"]["p70"] == 5.0
+    assert r.detail["2408.TW"]["p85"] == 6.5
+    assert r.detail["2408.TW"]["source"] == "cache fast-path"
     assert r.detail["2408.TW"]["light"] == GREEN
 
 
 def test_markdown_verification_log_includes_pb_provenance():
     s1 = SignalResult(GREEN, "ok", {
-        "2408.TW": {"pb": 7.56, "book_value": 62.25, "current_price": 473.5,
-                    "as_of": "2026-06-25", "light": GREEN},
-        "2344.TW": {"pb": 8.35, "book_value": 20.0, "current_price": 167.0,
-                    "as_of": "2026-06-25", "light": GREEN},
+        "2408.TW": {"pb": 7.56, "percentile": 98, "p70": 5.0, "p85": 6.5,
+                    "as_of": "2026-06-25", "source": "engine-A recompute", "light": GREEN},
+        "2344.TW": {"pb": 8.35, "percentile": 99, "p70": 4.0, "p85": 5.5,
+                    "as_of": "2026-06-25", "source": "cache fast-path", "light": GREEN},
     })
     s2a = SignalResult(GREEN, "+10.6%", {"mom_pct": 10.6})
     s2b = SignalResult(GREEN, "+21.4%", {"qoq_pct": 21.4})
@@ -709,8 +759,11 @@ def test_markdown_verification_log_includes_pb_provenance():
         s1=s1, s2a=s2a, s2b=s2b, s3=s3,
     )
     assert "## Verification log" in md
-    assert "yfinance pulled at" in md
+    assert "Data pulled at" in md
+    assert "h:agent:pb_lights" in md
     assert "P/B 7.56" in md
-    assert "book value 62.25" in md
-    assert "price 473.50" in md  # f"{cp:.2f}" formats 473.5 as "473.50"
+    assert "percentile p98" in md
+    assert "p70=5.00" in md
+    assert "p85=6.50" in md
+    assert "source engine-A recompute" in md
     assert "as of 2026-06-25" in md

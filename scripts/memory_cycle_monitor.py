@@ -5,6 +5,7 @@ See docs/superpowers/specs/2026-06-25-memory-cycle-monitor-design.md.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -19,11 +20,7 @@ GREEN = "GREEN"
 YELLOW = "YELLOW"
 RED = "RED"
 
-# Thresholds per spec §4 S1
-PB_THRESHOLDS: dict[str, dict[str, float]] = {
-    "2408.TW": {"yellow": 1.8, "red": 2.5},
-    "2344.TW": {"yellow": 1.5, "red": 2.0},
-}
+PB_LIGHTS_HASH = "h:agent:pb_lights"
 
 # Spec §4 S2 thresholds
 DDR5_QOQ_YELLOW_PCT = 10.0  # below this in absolute QoQ → yellow
@@ -47,7 +44,6 @@ class Inputs:
     ddr5_16gb_contract_usd: list[PricePoint] = field(default_factory=list)
     mu_next_quarter_gm_guide: float | None = None
     mu_next_quarter_rev_qoq: float | None = None
-    pb_thresholds: dict[str, dict[str, float]] | None = None    # NEW
 
 
 @dataclass
@@ -56,15 +52,6 @@ class SignalResult:
     light: str            # GREEN | YELLOW | RED | "N/A"
     value: str            # short string for report (e.g. "+10.6%")
     detail: dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class PBData:
-    """P/B with provenance fields for audit trail."""
-    pb: float
-    book_value: float | None = None      # NTD per share
-    current_price: float | None = None   # NTD
-    as_of: str | None = None             # ISO YYYY-MM-DD
 
 
 def load_inputs(path: str | Path) -> Inputs:
@@ -86,24 +73,6 @@ def load_inputs(path: str | Path) -> Inputs:
         pts.sort(key=lambda pp: pp.label)
         return pts
 
-    # Optional pb_thresholds override
-    raw_thresholds = raw.get("pb_thresholds")
-    pb_thresholds = None
-    if raw_thresholds is not None:
-        required_tickers = {"2408.TW", "2344.TW"}
-        if not required_tickers.issubset(raw_thresholds.keys()):
-            missing = required_tickers - set(raw_thresholds.keys())
-            raise ValueError(f"pb_thresholds missing required ticker(s): {missing}")
-        for t in required_tickers:
-            block = raw_thresholds[t]
-            if "yellow" not in block or "red" not in block:
-                raise ValueError(f"pb_thresholds[{t}] must contain both 'yellow' and 'red' keys")
-        pb_thresholds = {
-            t: {"yellow": float(raw_thresholds[t]["yellow"]),
-                "red": float(raw_thresholds[t]["red"])}
-            for t in required_tickers
-        }
-
     return Inputs(
         last_updated=str(raw["last_updated"]),
         notes=str(raw.get("notes", "")),
@@ -111,7 +80,6 @@ def load_inputs(path: str | Path) -> Inputs:
         ddr5_16gb_contract_usd=_parse_series(raw.get("ddr5_16gb_contract_usd") or [], "quarter"),
         mu_next_quarter_gm_guide=raw.get("mu_next_quarter_gm_guide"),
         mu_next_quarter_rev_qoq=raw.get("mu_next_quarter_rev_qoq"),
-        pb_thresholds=pb_thresholds,
     )
 
 
@@ -190,14 +158,6 @@ def compute_s2b_ddr5(series: list[PricePoint]) -> SignalResult:
     return SignalResult(light=GREEN, value=f"{latest_qoq:+.1f}%", detail=detail)
 
 
-def _light_for_pb(pb: float, thresholds: dict[str, float]) -> str:
-    if pb >= thresholds["red"]:
-        return RED
-    if pb >= thresholds["yellow"]:
-        return YELLOW
-    return GREEN
-
-
 _LIGHT_RANK = {GREEN: 0, YELLOW: 1, RED: 2}
 
 
@@ -208,69 +168,120 @@ def _worst(*lights: str) -> str:
     return max(known, key=_LIGHT_RANK.__getitem__)
 
 
-def compute_s1_pb(pbs: dict[str, PBData | None], thresholds: dict[str, dict[str, float]] | None = None) -> SignalResult:
-    """S1: P/B valuation premium for 2408.TW and 2344.TW.
+def _bare_ticker(ticker: str) -> str:
+    """Strip the yfinance market suffix to get the bare hash key ("2408.TW"→"2408")."""
+    for suffix in (".TW", ".TWO"):
+        if ticker.endswith(suffix):
+            return ticker[: -len(suffix)]
+    return ticker
 
-    Accepts PBData (with provenance). Stores full PBData in detail[ticker] when present;
-    "N/A" string when None. Takes the worst-known light of the two.
 
-    If `thresholds` is provided, uses it; otherwise falls back to module-level PB_THRESHOLDS.
+def read_pb_lights(client, tickers: list[str]) -> dict[str, dict | None]:
+    """Read pre-computed P/B light records from the `h:agent:pb_lights` hash.
+
+    Maps each suffixed monitor ticker ("2408.TW") to the hash's bare field key
+    ("2408"). Missing field or JSON parse error → None for that ticker.
+    Returns {suffixed_ticker: record_dict | None}.
     """
-    effective = thresholds if thresholds is not None else PB_THRESHOLDS
+    try:
+        raw = client.hgetall(PB_LIGHTS_HASH) or {}
+    except Exception:  # noqa: BLE001 — Redis unreachable → all None, fallback handles it
+        raw = {}
+    out: dict[str, dict | None] = {}
+    for ticker in tickers:
+        field_val = raw.get(_bare_ticker(ticker))
+        if field_val is None:
+            out[ticker] = None
+            continue
+        try:
+            out[ticker] = json.loads(field_val)
+        except (json.JSONDecodeError, TypeError):
+            out[ticker] = None
+    return out
+
+
+def _import_pb_percentile():
+    """Import the sibling engine-A module regardless of how this file was loaded.
+
+    Works whether the monitor is run as a script (scripts/ on sys.path) or
+    imported as `scripts.memory_cycle_monitor` (scripts/ not on sys.path).
+    """
+    scripts_dir = str(Path(__file__).resolve().parent)
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import pb_percentile
+    return pb_percentile
+
+
+def s1_lights_with_fallback(client, tickers: list[str]) -> dict[str, dict | None]:
+    """read_pb_lights + engine-A self-heal for tickers the hash is missing.
+
+    If Component 1 (pb_lights_publish) hasn't run, the hash may lack a ticker.
+    For any None record, call `pb_percentile.pb_light(<bare ticker>)` directly and
+    use it when it yields a usable (non-N/A) light. Any failure → keep None.
+    """
+    records = read_pb_lights(client, tickers)
+    for ticker, rec in records.items():
+        if rec is not None:
+            continue
+        try:
+            pb_percentile = _import_pb_percentile()
+            fb = pb_percentile.pb_light(_bare_ticker(ticker))
+            if fb and fb.get("light") != "N/A":
+                # normalize field names to the hash record shape
+                records[ticker] = {
+                    "light": fb["light"],
+                    "pb_current": fb.get("pb_current"),
+                    "percentile": fb.get("percentile"),
+                    "p70": fb.get("p70"),
+                    "p85": fb.get("p85"),
+                    "asof": fb.get("asof"),
+                    "source": fb.get("source"),
+                }
+        except Exception:  # noqa: BLE001 — self-heal is best-effort
+            records[ticker] = None
+    return records
+
+
+def compute_s1_pb(pb_lights: dict[str, dict | None]) -> SignalResult:
+    """S1: engine-A P/B percentile lights for 2408.TW and 2344.TW.
+
+    Consumes pre-computed light records (from the `h:agent:pb_lights` hash):
+    each record is {light, pb_current, percentile, p70, p85, asof, source} or None.
+    Takes the light directly (already GREEN/YELLOW/RED/N/A); stores per-ticker
+    detail {pb, percentile, p70, p85, as_of, source, light}, or "N/A" when the
+    record is None. Overall light is the worst-known of the two.
+    """
     detail: dict[str, Any] = {}
     lights = []
     parts = []
-    for ticker, pbd in pbs.items():
-        if pbd is None:
+    for ticker, rec in pb_lights.items():
+        if not isinstance(rec, dict):
             detail[ticker] = "N/A"
             lights.append("N/A")
             parts.append(f"{ticker}=N/A")
             continue
-        lg = _light_for_pb(pbd.pb, effective[ticker])
+        lg = rec["light"]
+        pb = rec.get("pb_current")
+        pct = rec.get("percentile")
         detail[ticker] = {
-            "pb": pbd.pb,
-            "book_value": pbd.book_value,
-            "current_price": pbd.current_price,
-            "as_of": pbd.as_of,
+            "pb": pb,
+            "percentile": pct,
+            "p70": rec.get("p70"),
+            "p85": rec.get("p85"),
+            "as_of": rec.get("asof"),
+            "source": rec.get("source"),
             "light": lg,
         }
         lights.append(lg)
-        parts.append(f"{ticker}={pbd.pb:.2f}")
+        if pb is None:
+            parts.append(f"{ticker}=N/A")
+        elif pct is None:
+            parts.append(f"{ticker}={pb:.2f}")
+        else:
+            parts.append(f"{ticker}={pb:.2f}(p{pct:.0f})")
 
     return SignalResult(light=_worst(*lights), value=", ".join(parts), detail=detail)
-
-
-def fetch_pb(ticker: str) -> PBData | None:
-    """Fetch P/B with provenance for a ticker via yfinance.
-
-    Primary: info['priceToBook']. Fallback: marketCap / (bookValue * sharesOutstanding).
-    Returns None on any failure (caller treats as N/A).
-    Populates book_value and current_price when available for audit trail.
-    """
-    import yfinance as yf
-    try:
-        info = yf.Ticker(ticker).info
-        bv = info.get("bookValue")
-        cp = info.get("currentPrice") or info.get("regularMarketPrice")
-        as_of = date.today().isoformat()
-
-        pb = info.get("priceToBook")
-        if pb is not None and pb > 0:
-            return PBData(pb=float(pb), book_value=bv, current_price=cp, as_of=as_of)
-
-        # Fallback path
-        mc = info.get("marketCap")
-        so = info.get("sharesOutstanding")
-        if mc and bv and so and bv * so > 0:
-            return PBData(
-                pb=float(mc / (bv * so)),
-                book_value=bv,
-                current_price=cp,
-                as_of=as_of,
-            )
-    except Exception:
-        pass
-    return None
 
 
 def detect_monthly_weakness(closes: list[float]) -> bool:
@@ -321,9 +332,6 @@ def fetch_monthly_closes(ticker: str, months: int = 13) -> list[float]:
         return [float(c) for c in closes]
     except Exception:
         return []
-
-
-import json
 
 
 def aggregate(*, s1: SignalResult, s2a: SignalResult, s2b: SignalResult, s3: SignalResult) -> dict:
@@ -405,16 +413,22 @@ def render_markdown(
     action = STAGE_ACTION[trim_stage]
 
     # S1 table
+    def _fmt(x, prec=2):
+        return "N/A" if x is None else f"{x:.{prec}f}"
+
     s1_rows = []
     for ticker, label in [("2408.TW", "南亞科 2408"), ("2344.TW", "華邦電 2344")]:
         info = s1.detail.get(ticker)
         if isinstance(info, dict):
-            pb = f"{info['pb']:.2f}"
+            pb = _fmt(info.get("pb"))
+            pct = info.get("percentile")
+            pct_str = "N/A" if pct is None else f"p{pct:.0f}"
+            p70 = _fmt(info.get("p70"))
+            p85 = _fmt(info.get("p85"))
             lg = LIGHT_EMOJI[info["light"]]
         else:
-            pb, lg = "N/A", "⚪"
-        th = PB_THRESHOLDS[ticker]
-        s1_rows.append(f"| {label} | {pb} | >{th['yellow']} | >{th['red']} | {lg} |")
+            pb, pct_str, p70, p85, lg = "N/A", "N/A", "N/A", "N/A", "⚪"
+        s1_rows.append(f"| {label} | {pb} | {pct_str} | {p70} | {p85} | {lg} |")
     s1_table = "\n".join(s1_rows)
 
     # S2 detail strings
@@ -433,20 +447,26 @@ def render_markdown(
     ])
 
     # Build Verification-log provenance lines from s1.detail
-    yf_pulled_at = datetime.now(ZoneInfo("Asia/Taipei")).isoformat(timespec="seconds")
+    pulled_at = datetime.now(ZoneInfo("Asia/Taipei")).isoformat(timespec="seconds")
 
     provenance_lines = []
     for ticker, label in [("2408.TW", "南亞科 2408"), ("2344.TW", "華邦電 2344")]:
         info = s1.detail.get(ticker)
         if isinstance(info, dict):
             pb_val = info.get("pb")
-            bv = info.get("book_value")
-            cp = info.get("current_price")
+            pct = info.get("percentile")
+            p70 = info.get("p70")
+            p85 = info.get("p85")
             asof = info.get("as_of")
-            bv_str = f"{bv:.2f}" if bv is not None else "N/A"
-            cp_str = f"{cp:.2f}" if cp is not None else "N/A"
+            source = info.get("source") or "N/A"
+            pb_str = f"{pb_val:.2f}" if pb_val is not None else "N/A"
+            pct_str = f"p{pct:.0f}" if pct is not None else "N/A"
+            p70_str = f"{p70:.2f}" if p70 is not None else "N/A"
+            p85_str = f"{p85:.2f}" if p85 is not None else "N/A"
             provenance_lines.append(
-                f"  - {label}: P/B {pb_val:.2f} (price {cp_str} NTD / book value {bv_str} NTD/sh, as of {asof or 'N/A'})"
+                f"  - {label}: P/B {pb_str} (percentile {pct_str}, "
+                f"cutoffs p70={p70_str} / p85={p85_str}, source {source}, "
+                f"as of {asof or 'N/A'})"
             )
     provenance_block = "\n".join(provenance_lines) if provenance_lines else "  - (no P/B data)"
 
@@ -460,8 +480,8 @@ def render_markdown(
 ---
 
 ## S1 — 兩檔估值溢價
-| 標的 | P/B | 警戒 | 極端 | 燈號 |
-|---|---|---|---|---|
+| 標的 | P/B | 歷史分位 | p70 | p85 | 燈號 |
+|---|---|---|---|---|---|
 {s1_table}
 
 ## S2 — DRAM 報價動能
@@ -475,7 +495,8 @@ def render_markdown(
 
 ## Verification log
 - Data source: `data/memory_cycle_inputs.yaml` last_updated {last_updated_yaml}
-- yfinance pulled at: {yf_pulled_at}
+- Data pulled at: {pulled_at}
+- P/B source: `h:agent:pb_lights` (engine-A percentile; see scripts/pb_percentile.py)
 - P/B provenance:
 {provenance_block}
 - Spec: `docs/superpowers/specs/2026-06-25-memory-cycle-monitor-design.md`
@@ -531,12 +552,14 @@ def _build_redis_payload(*, report_date, overall_light, trim_stage, max_stage_se
         "max_stage_seen": max_stage_seen,
         "next_trigger": next_trigger,
         "s1_pb_2408": _pb_field("2408.TW", "pb"),
-        "s1_pb_2408_book_value": _pb_field("2408.TW", "book_value"),
-        "s1_pb_2408_current_price": _pb_field("2408.TW", "current_price"),
+        "s1_pb_2408_percentile": _pb_field("2408.TW", "percentile"),
+        "s1_pb_2408_p70": _pb_field("2408.TW", "p70"),
+        "s1_pb_2408_p85": _pb_field("2408.TW", "p85"),
         "s1_pb_2408_as_of": _pb_field("2408.TW", "as_of"),
         "s1_pb_2344": _pb_field("2344.TW", "pb"),
-        "s1_pb_2344_book_value": _pb_field("2344.TW", "book_value"),
-        "s1_pb_2344_current_price": _pb_field("2344.TW", "current_price"),
+        "s1_pb_2344_percentile": _pb_field("2344.TW", "percentile"),
+        "s1_pb_2344_p70": _pb_field("2344.TW", "p70"),
+        "s1_pb_2344_p85": _pb_field("2344.TW", "p85"),
         "s1_pb_2344_as_of": _pb_field("2344.TW", "as_of"),
         "s1_light": s1.light,
         "s2a_ddr4_mom_pct": s2a.detail.get("mom_pct"),
@@ -587,11 +610,13 @@ def main(argv: list[str] | None = None) -> int:
     s2a = compute_s2a_ddr4(inp.ddr4_8gb_spot_usd)
     s2b = compute_s2b_ddr5(inp.ddr5_16gb_contract_usd)
 
-    pbs = {t: fetch_pb(t) for t in TICKERS}
-    if all(v is None for v in pbs.values()):
-        print("ERROR: yfinance returned no P/B for any ticker", file=sys.stderr)
+    pb_client = make_redis_client()
+    pb_lights = s1_lights_with_fallback(pb_client, TICKERS)
+    if all(v is None for v in pb_lights.values()):
+        print("ERROR: no P/B lights available (hash empty + fallback failed)",
+              file=sys.stderr)
         return 2
-    s1 = compute_s1_pb(pbs, thresholds=inp.pb_thresholds)
+    s1 = compute_s1_pb(pb_lights)
 
     mu_closes = fetch_monthly_closes("MU")
     hynix_closes = fetch_monthly_closes("000660.KS")
