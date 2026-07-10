@@ -259,3 +259,65 @@ def analyze_iv_rv(atm_iv_series, txf_bars, history_df):
                    f" 60 日同窗 percentile {pct:.0f} → {rich}")
     return {"metrics": {"rv": rv, "iv": iv_mean, "vrp": vrp, "percentile": pct},
             "verdict": verdict, "verification": vlog}
+
+
+def _window_gaps(times, gap_minutes=GAP_MINUTES):
+    """Return list of (start, end) gaps > gap_minutes in a time series."""
+    t = pd.Series(pd.to_datetime(times)).sort_values()
+    dt = t.diff()
+    gaps = []
+    for i, d in enumerate(dt):
+        if pd.notna(d) and d > pd.Timedelta(minutes=gap_minutes):
+            gaps.append((t.iloc[i - 1], t.iloc[i]))
+    return gaps
+
+
+def analyze_term_skew(metrics_df, history_df):
+    """Window deltas + path extremes for ATM IV / skew_25d / term slope. Spec §3.3."""
+    if metrics_df.empty:
+        return {"metrics": {}, "verdict": "TERM/SKEW: DATA GAP — no iv_metrics rows",
+                "verification": []}
+    df = metrics_df.dropna(subset=["atm_iv"]).sort_values("time")
+    gaps = _window_gaps(df["time"])
+    skew = df["skew_25d"].dropna()
+    skew_delta = float(skew.iloc[-1] - skew.iloc[0]) if len(skew) >= 2 else None
+    atm_delta = float(df["atm_iv"].iloc[-1] - df["atm_iv"].iloc[0])
+    slope_last = float(df["iv_term_slope"].dropna().iloc[-1]) if df["iv_term_slope"].notna().any() else None
+    pct, vlog = (None, [])
+    if skew_delta is not None:
+        pct, vlog = percentile_verified(skew_delta,
+                                        history_df.get("skew_delta", pd.Series(dtype=float)),
+                                        metric_name="skew_25d window delta")
+    verdict = (f"ATM IV Δ {atm_delta*100:+.1f} pts; skew_25d Δ "
+               f"{(skew_delta or 0)*100:+.2f} (pct {pct if pct is not None else 'n/a'}); "
+               f"term slope {slope_last}")
+    if gaps:
+        gap_txt = ", ".join(f"{a:%H:%M}–{b:%H:%M}" for a, b in gaps)
+        verdict = f"DATA GAP {gap_txt} | " + verdict
+    return {"metrics": {"atm_iv_delta": atm_delta, "skew_delta": skew_delta,
+                        "skew_delta_pct": pct, "term_slope": slope_last,
+                        "atm_iv_path_max": float(df["atm_iv"].max()),
+                        "atm_iv_path_min": float(df["atm_iv"].min())},
+            "verdict": verdict, "verification": vlog}
+
+
+def analyze_flow(metrics_df, oi_now, oi_prev):
+    """PCR path + per-strike OI build/unwind. Spec §3.4."""
+    pcr = metrics_df["pcr_volume"].dropna() if not metrics_df.empty else pd.Series(dtype=float)
+    pcr_mean = float(pcr.mean()) if not pcr.empty else None
+    builds = []
+    note = ""
+    if oi_prev.empty or oi_now.empty:
+        note = "無前日 OI 可比 (no prior OI)"
+    else:
+        merged = oi_now.merge(oi_prev, on=["strike", "cp"], how="outer",
+                              suffixes=("_now", "_prev")).fillna({"open_interest_now": 0,
+                                                                  "open_interest_prev": 0})
+        merged["d_oi"] = merged["open_interest_now"] - merged["open_interest_prev"]
+        top = merged.reindex(merged["d_oi"].abs().sort_values(ascending=False).index).head(5)
+        builds = [(float(r.strike), int(r.d_oi), str(r.cp)) for r in top.itertuples()]
+    verdict = f"PCR(vol) mean {pcr_mean}; top ΔOI: {builds[:3]}"
+    if note:
+        verdict += f" | {note}"
+    return {"metrics": {"pcr_mean": pcr_mean, "top_oi_builds": builds},
+            "verdict": verdict, "verification": []}

@@ -147,3 +147,51 @@ class TestAnalyzeIvRv:
     def test_empty_bars_data_gap(self):
         sec = oq.analyze_iv_rv(pd.Series([0.3]), _mk_bars([]), pd.DataFrame({"vrp": []}))
         assert "DATA GAP" in sec["verdict"]
+
+
+def _mk_metrics(n=180, skew_start=0.05, skew_end=0.05, date="2026-07-09"):
+    idx = pd.date_range(f"{date} 09:00", periods=n, freq="1min", tz="Asia/Taipei")
+    return pd.DataFrame({
+        "time": idx,
+        "atm_iv": np.linspace(0.32, 0.30, n),
+        "skew_25d": np.linspace(skew_start, skew_end, n),
+        "rr_25d": -np.linspace(skew_start, skew_end, n),
+        "pcr_volume": np.linspace(0.8, 1.1, n),
+        "iv_term_slope": np.full(n, -0.03),
+        "underlying_price": np.linspace(45800, 45500, n),
+    })
+
+
+class TestAnalyzeTermSkew:
+    def test_deltas_and_percentile(self):
+        df = _mk_metrics(skew_start=0.04, skew_end=0.12)
+        hist = pd.DataFrame({"skew_delta": np.linspace(-0.02, 0.03, 60)})
+        sec = oq.analyze_term_skew(df, hist)
+        m = sec["metrics"]
+        assert m["skew_delta"] == pytest.approx(0.08, abs=1e-6)
+        assert m["skew_delta_pct"] == 100.0  # 0.08 above entire history
+        assert m["atm_iv_delta"] == pytest.approx(-0.02, abs=1e-6)
+
+    def test_data_gap_flag(self):
+        df = _mk_metrics(n=30)
+        df = pd.concat([df.iloc[:10], df.iloc[25:]])  # 15-min hole
+        sec = oq.analyze_term_skew(df, pd.DataFrame({"skew_delta": []}))
+        assert "DATA GAP" in sec["verdict"]
+
+
+class TestAnalyzeFlow:
+    def test_oi_delta_top_strikes(self):
+        oi_now = _mk_oi([(45000, "P", 25000, "2026-07-09"), (45500, "C", 8000, "2026-07-09"),
+                         (46000, "C", 12000, "2026-07-09")])
+        oi_prev = _mk_oi([(45000, "P", 10000, "2026-07-08"), (45500, "C", 9000, "2026-07-08"),
+                          (46000, "C", 5000, "2026-07-08")])
+        df = _mk_metrics()
+        sec = oq.analyze_flow(df, oi_now, oi_prev)
+        m = sec["metrics"]
+        builds = dict((k, v) for k, v, cp in m["top_oi_builds"])
+        assert builds.get(45000.0) == 15000
+        assert m["pcr_mean"] == pytest.approx(0.95, abs=0.01)
+
+    def test_missing_prev_oi_noted(self):
+        sec = oq.analyze_flow(_mk_metrics(), _mk_oi([(45000, "P", 100, "2026-07-09")]), _mk_oi([]))
+        assert "無前日 OI" in sec["verdict"] or "no prior OI" in sec["verdict"]
