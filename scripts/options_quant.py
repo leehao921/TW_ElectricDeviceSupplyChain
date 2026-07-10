@@ -13,6 +13,7 @@ import warnings
 from datetime import datetime
 from typing import List, Optional, Tuple
 
+import numpy as np
 import pandas as pd
 
 warnings.filterwarnings("ignore", message=".*pandas only supports SQLAlchemy.*")
@@ -223,3 +224,38 @@ def analyze_gex(strikes_df, oi_df, spot):
     return {"metrics": {"total_gex": total, "flip": flip, "zone": zone,
                         "top_strikes": top},
             "verdict": verdict, "verification": verification}
+
+
+def realized_vol_annualized(closes, bars_per_day):
+    """Close-to-close annualized RV from a 1m close series (window subset).
+
+    sigma = std of 1m log returns (population) * sqrt(252 * bars_per_day).
+    """
+    r = np.diff(np.log(closes.astype(float)))
+    if r.size == 0:
+        return None
+    return float(np.sqrt(np.mean(r * r)) * np.sqrt(252.0 * bars_per_day))
+
+
+def analyze_iv_rv(atm_iv_series, txf_bars, history_df):
+    """VRP = mean window ATM IV - window annualized RV. Percentile vs
+    same-window history (history_df['vrp']). Spec §3.2 + Golden Rule 0."""
+    if txf_bars.empty or atm_iv_series.dropna().empty:
+        return {"metrics": {"rv": None, "iv": None, "vrp": None, "percentile": None},
+                "verdict": "IV-RV: DATA GAP — missing bars or ATM IV in window",
+                "verification": []}
+    closes = txf_bars["close"]
+    rv = realized_vol_annualized(closes, bars_per_day=270)  # 09:00-13:30 ≈ 270 1m bars
+    iv_mean = float(atm_iv_series.dropna().mean())
+    vrp = iv_mean - rv
+    pct, vlog = percentile_verified(vrp, history_df.get("vrp", pd.Series(dtype=float)),
+                                    metric_name="VRP")
+    if pct is None:
+        verdict = f"VRP {vrp*100:+.1f} vol pts (IV {iv_mean*100:.1f} vs RV {rv*100:.1f})"
+    else:
+        rich = "選擇權相對已實現波動偏貴" if pct >= 70 else (
+               "選擇權相對已實現波動偏便宜" if pct <= 30 else "VRP 居中")
+        verdict = (f"VRP {vrp*100:+.1f} vol pts (IV {iv_mean*100:.1f} vs RV {rv*100:.1f}),"
+                   f" 60 日同窗 percentile {pct:.0f} → {rich}")
+    return {"metrics": {"rv": rv, "iv": iv_mean, "vrp": vrp, "percentile": pct},
+            "verdict": verdict, "verification": vlog}

@@ -2,6 +2,7 @@
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -111,4 +112,38 @@ class TestAnalyzeGex:
     def test_empty_inputs_yield_data_gap(self):
         sec = oq.analyze_gex(_mk_strikes([]), _mk_oi([]), spot=45000.0)
         assert sec["metrics"]["total_gex"] is None
+        assert "DATA GAP" in sec["verdict"]
+
+
+def _mk_bars(closes, date="2026-07-09"):
+    idx = pd.date_range(f"{date} 09:00", periods=len(closes), freq="1min", tz="Asia/Taipei")
+    c = pd.Series(closes, index=idx)
+    return pd.DataFrame({"bucket": idx, "open": c.values, "high": c.values * 1.0005,
+                         "low": c.values * 0.9995, "close": c.values})
+
+
+class TestAnalyzeIvRv:
+    def test_flat_prices_give_zero_rv_positive_vrp(self):
+        bars = _mk_bars([45000.0] * 180)
+        atm = pd.Series([0.30] * 180)
+        hist = pd.DataFrame({"vrp": np.linspace(-0.05, 0.25, 60)})
+        sec = oq.analyze_iv_rv(atm, bars, hist)
+        m = sec["metrics"]
+        assert m["rv"] == pytest.approx(0.0, abs=1e-9)
+        assert m["vrp"] == pytest.approx(0.30, abs=1e-6)
+        assert m["percentile"] is not None
+        assert any("percentile" in v for v in sec["verification"])
+
+    def test_no_adjective_without_history(self):
+        bars = _mk_bars([45000, 45100, 44950, 45200] * 45)
+        atm = pd.Series([0.30] * 180)
+        hist = pd.DataFrame({"vrp": [0.1] * 5})  # n=5 < 20
+        sec = oq.analyze_iv_rv(atm, bars, hist)
+        assert sec["metrics"]["percentile"] is None
+        assert "insufficient-history" in " ".join(sec["verification"])
+        for word in ("貴", "便宜", "極端", "罕見"):
+            assert word not in sec["verdict"]
+
+    def test_empty_bars_data_gap(self):
+        sec = oq.analyze_iv_rv(pd.Series([0.3]), _mk_bars([]), pd.DataFrame({"vrp": []}))
         assert "DATA GAP" in sec["verdict"]
