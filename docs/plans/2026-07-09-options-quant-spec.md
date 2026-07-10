@@ -42,7 +42,7 @@ python scripts/options_quant.py --date 2026-07-09 --window 09:00-12:00
 
 ### 3.2 IV vs RV(Variance Risk Premium)
 - RV:窗口內 TXF 1m log-return 的年化實現波動(√(Σr²/n) × √(252×窗口 bar 數/日) 標準化);同時給 Parkinson(high-low)版
-- IV:窗口內 front expiry ATM IV 的均值與首尾值
+- IV:窗口內 **TXO 月選 front** ATM IV 的均值與首尾值(與 60 日歷史同 product,like-for-like;避免非結算週 TX2 週選 vs 月選歷史的偏置。GEX 不涉 percentile,照用 nearest live expiry)
 - **VRP = IV_mean − RV**(vol points)
 - Percentile:對近 60 個交易日**同窗口**的 VRP 分布排名。**量化形容詞(貴/便宜/極端)只有在 percentile 驗證後才可出現在 verdict,verification list 記錄樣本 n 與計算式** — 落實 Golden Rule 0
 - 產出:RV、IV、VRP、percentile、verdict(如 "VRP +4.2 vol pts,60 日同窗 percentile 78 → 選擇權相對已實現波動偏貴")

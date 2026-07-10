@@ -13,7 +13,7 @@
 **Verified schema facts (2026-07-09/10, live DB `tmf_market_data` via `docker exec trading-timescaledb psql -U tmf`):**
 - `iv_metrics` (raw, ~10s): `time, underlying, expiry, atm_iv, iv_skew_25d, near_month_iv, far_month_iv, iv_term_slope, avg_delta, avg_gamma, avg_theta, avg_vega, points_count, underlying_price, product_code, skew_25d, rr_25d, pcr_volume`. `expiry` is text `YYYYMMDD`.
 - `iv_strikes` (~10s): `time, product_code, expiry, strike, call_put, price, iv, delta, gamma, theta, vega, volume, source`. `call_put` is 'C'/'P'.
-- `option_oi_daily`: `settle_date (date), underlying, expiry (date), strike, cp ('C'/'P'), open_interest, volume, settle_price`.
+- `option_oi_daily`: `settle_date (date), underlying, expiry (date), strike, cp ('C'/'P'), open_interest, volume, settle_price`. **`underlying` 值是 `'TX'`**（live 驗證 556,792 rows；`'TXO'` 為 0 rows — Task 1 審查抓到）。
 - `ohlcv_1m`: `bucket, symbol, open, high, low, close, volume`. TXF rows present and fresh.
 - DB conn convention (copy from `scripts/etf_smart_money.py:36-40`): env-driven dict `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`, defaults `localhost/5432/tmf/tmf_dev_2026/tmf_market_data`, `psycopg2.connect(**DB_CONFIG)`.
 
@@ -210,10 +210,10 @@ def fetch_oi(conn, expiry_yyyymmdd, before_date=None):
     sql = """
         SELECT strike, cp, open_interest, settle_date
         FROM option_oi_daily
-        WHERE underlying='TXO' AND expiry = %(expiry)s::date
+        WHERE underlying='TX' AND expiry = %(expiry)s::date
           AND settle_date = (
             SELECT max(settle_date) FROM option_oi_daily
-            WHERE underlying='TXO' AND expiry = %(expiry)s::date
+            WHERE underlying='TX' AND expiry = %(expiry)s::date
               AND (%(before)s::date IS NULL OR settle_date < %(before)s::date)
           )
     """
@@ -394,6 +394,10 @@ def analyze_gex(strikes_df, oi_df, spot):
 ## Task 3: analyze_iv_rv (VRP)
 
 **Files:** Modify both files.
+
+> **Like-for-like 決策（Task 1 審查 issue 2）:** VRP 的當日 ATM IV 序列必須限定 `product_code='TXO'`（月選 front），與 `fetch_vrp_history` 的 TXO-only 歷史同 product 比較 — 否則非結算週的 nearest 是 TX2 週選，跟月選歷史分布比是 apples-to-oranges，會偏置 §4 標籤。main() 組裝時（Task 5）對 VRP 用 TXO-filtered series；GEX（§3.1，無 percentile）照用 nearest live expiry。
+
+> **Like-for-like 決策（Task 1 審查 issue 2）:** VRP 的當日 ATM IV 序列必須限定 `product_code='TXO'`（月選 front），與 `fetch_vrp_history` 的 TXO-only 歷史同 product 比較 — 否則結算週外的近月是 TX2 週選，跟月選歷史分布比是 apples-to-oranges，會偏置 §4 標籤。main() 組裝時（Task 5）對 VRP 用 TXO-filtered series；GEX（§3.1，無 percentile）照用 nearest live expiry。
 
 - [ ] **Step 1: Failing tests** — append:
 
@@ -711,6 +715,35 @@ def render_report(date_str, window, sections, labels):
         lines.append(f"- `{name}`: {rule}")
     lines += ["", "> 本報告為環境判定,不出買賣指令。資料 read-only 取自 trading-timescaledb。"]
     return "\n".join(lines)
+```
+
+**skew_delta 歷史（Task 4 的 analyze_term_skew 需要，data 層補一個 fetch）:**
+
+```python
+def fetch_skew_delta_history(conn, date_str, start, end, days=HISTORY_DAYS):
+    """Per-day same-window skew_25d (last - first), TXO only, past `days`
+    trading days before date_str. Returns DataFrame[d, skew_delta]."""
+    sql = """
+        WITH w AS (
+          SELECT (time at time zone 'Asia/Taipei')::date AS d, time, skew_25d
+          FROM iv_metrics
+          WHERE underlying='TX' AND product_code='TXO' AND skew_25d IS NOT NULL
+            AND (time at time zone 'Asia/Taipei')::date < %(d)s::date
+            AND (time at time zone 'Asia/Taipei')::date >= %(d)s::date - %(days)s * interval '1 day' * 2
+            AND (time at time zone 'Asia/Taipei')::time >= %(s)s::time
+            AND (time at time zone 'Asia/Taipei')::time <  %(e)s::time
+        )
+        SELECT d, (max(skew_25d) FILTER (WHERE time = last_t)
+                 - max(skew_25d) FILTER (WHERE time = first_t)) AS skew_delta
+        FROM (SELECT d, time, skew_25d,
+                     min(time) OVER (PARTITION BY d) AS first_t,
+                     max(time) OVER (PARTITION BY d) AS last_t
+              FROM w) x
+        WHERE time IN (first_t, last_t)
+        GROUP BY d ORDER BY d DESC LIMIT %(days)s
+    """
+    p = {"d": date_str, "s": f"{start}:00", "e": f"{end}:00", "days": days}
+    return pd.read_sql(sql, conn, params=p)
 ```
 
 `main()`: argparse (`--date` default today TW via `datetime.now()`, `--window` default `09:00-13:30`, `--out-dir` default `analysis`); connect (exit 1 with clear message on failure); fetch window `iv_metrics` → per-expiry counts → `select_front_expiry` → filter metrics to front expiry; fetch strikes snapshot / OI(latest & prev via `before_date`) / bars / VRP history (join iv & bars per day in pandas: RV per day via `realized_vol_annualized`, vrp = iv_mean − rv → history_df); run 4 analyzers; labels; render; write `analysis/options_quant_<date>.md`; print verdicts + labels to stdout.
