@@ -13,7 +13,7 @@ python scripts/options_quant.py --date 2026-07-09 --window 09:00-12:00
 - `--date` 預設今天(TW);`--window` 預設 `09:00-13:30`;`HH:MM-HH:MM` 格式
 - 資料來源(全 read-only,psycopg 連 `trading-timescaledb:5432/tmf_market_data`,user tmf):
   - `iv_strikes` — 逐檔 strike IV + greeks(delta/gamma/theta/vega),~10s cadence
-  - `iv_metrics_1m` — ATM IV / skew_25d / rr_25d / pcr_volume 分鐘級連續序列
+  - `iv_metrics`(原始 10s 表)— ATM IV / skew_25d / rr_25d / pcr_volume / iv_term_slope / underlying_price。註:1m 聚合表缺 skew/pcr 欄,統一讀原始表(窗口資料量 ~1,260 筆/到期,無負擔),pandas 內 resample 到 1m
   - `option_oi_daily` — TAIFEX 盤後結算 OI(settle_date 鍵,T+1)
   - `ohlcv_1m`(bucket, symbol='TXF', OHLCV)— TXF 1 分鐘 bar,RV 計算用(已驗證存在且新鮮)
 - 產出:`analysis/options_quant_<date>.md` + stdout 摘要
