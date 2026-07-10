@@ -483,7 +483,7 @@ def analyze_iv_rv(atm_iv_series, txf_bars, history_df):
             "verdict": verdict, "verification": vlog}
 ```
 
-> Note: `bars_per_day=270` annualization is fixed to the full-session bar count regardless of window length — RV over a 3h window annualizes with the same per-bar variance scale. Parkinson variant: optional; if trivial add `rv_parkinson` to metrics, else note as skipped (YAGNI).
+> Note (superseded during review: constant corrected to **300** — TXF day session 08:45-13:45; the 270 below referenced the TWSE cash session by mistake): `bars_per_day=270` annualization is fixed to the full-session bar count regardless of window length — RV over a 3h window annualizes with the same per-bar variance scale. Parkinson variant: optional; if trivial add `rv_parkinson` to metrics, else note as skipped (YAGNI).
 
 - [ ] **Step 4: Verify PASS.** **Step 5: Commit** (`feat(quant): IV-vs-RV analyzer — VRP with verified percentile`).
 

@@ -84,5 +84,8 @@ python scripts/options_quant.py --date 2026-07-09 --window 09:00-12:00
 ## 7. 未來擴充(本期不做,YAGNI)
 
 - launchd 每日排程 + inbox notify(跑順之後)
+- §3.3 轉折偵測(單調性破壞點)、rr_25d 路徑分析 — 首版僅出 Δ 與極值(2026-07-10 實作時降範圍)
+- §3.4 價平 ±3 檔量能集中度 — 同上,首版未實作
+- Parkinson RV 變體(首版僅 close-to-close,已於報告 verification 揭露 intraday-only)
 - 盤中即時模式(讀 Redis h:iv:latest)
 - 跨日事件研究(GEX 標籤 vs 次日已實現波動的回測)

@@ -312,7 +312,7 @@ def analyze_iv_rv(atm_iv_series, txf_bars, history_df):
         rich = "選擇權相對已實現波動偏貴" if pct >= 70 else (
                "選擇權相對已實現波動偏便宜" if pct <= 30 else "VRP 居中")
         verdict = (f"VRP {vrp*100:+.1f} vol pts (IV {iv_mean*100:.1f} vs RV {rv*100:.1f}),"
-                   f" 60 日同窗 percentile {pct:.0f} → {rich}")
+                   f" 同窗歷史 percentile {pct:.0f}（n 見 verification）→ {rich}")
     return {"metrics": {"rv": rv, "iv": iv_mean, "vrp": vrp, "percentile": pct},
             "verdict": verdict, "verification": vlog}
 
@@ -349,8 +349,8 @@ def analyze_term_skew(metrics_df, history_df):
                                         metric_name="skew_25d window delta")
     skew_txt = f"{skew_delta*100:+.2f}" if skew_delta is not None else "n/a"
     verdict = (f"ATM IV Δ {atm_delta*100:+.1f} pts; skew_25d Δ "
-               f"{skew_txt} (pct {pct if pct is not None else 'n/a'}); "
-               f"term slope {slope_last}")
+               f"{skew_txt} (pct {f'{pct:.0f}' if pct is not None else 'n/a'}); "
+               f"term slope {f'{slope_last:.4f}' if slope_last is not None else 'n/a'}")
     if gaps:
         gap_txt = ", ".join(f"{a:%H:%M}–{b:%H:%M}" for a, b in gaps)
         verdict = f"DATA GAP {gap_txt} | " + verdict
@@ -382,8 +382,15 @@ def analyze_flow(metrics_df, oi_now, oi_prev):
         verdict += f" | {note}"
     if metrics_df.empty:
         verdict = "DATA GAP — no metrics rows | " + verdict
+    verification = []
+    if not oi_now.empty:
+        d_now = str(oi_now["settle_date"].max())
+        d_prev = str(oi_prev["settle_date"].max()) if not oi_prev.empty else "n/a"
+        verification.append(
+            f"Flow ΔOI compares settle {d_prev} -> {d_now}; run intraday the "
+            f"analysis day's own EOD OI is not yet available (T+1)")
     return {"metrics": {"pcr_mean": pcr_mean, "top_oi_builds": builds},
-            "verdict": verdict, "verification": []}
+            "verdict": verdict, "verification": verification}
 
 
 # ---------------------------------------------------------------------------
@@ -521,7 +528,9 @@ def main(argv=None):
 
         # Term / skew (front-expiry window path vs same-window skew_delta history).
         skew_hist = fetch_skew_delta_history(conn, date_str, start, end)
-        term_sec = analyze_term_skew(front_metrics, skew_hist)
+        # Like-for-like: skew_delta percentile history is TXO-only, so the
+        # window series must be TXO front too (mirrors the VRP decision).
+        term_sec = analyze_term_skew(txo_metrics, skew_hist)
 
         # Flow (PCR path + day-over-day OI delta on the front expiry).
         # "now" side is bounded to settle <= analysis date (before next day) so

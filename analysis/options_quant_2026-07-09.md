@@ -13,7 +13,7 @@
 
 ## 2. IV vs RV (VRP)
 
-**Verdict:** VRP +10.9 vol pts (IV 35.9 vs RV 25.0), 60 日同窗 percentile 43 → VRP 居中
+**Verdict:** VRP +10.9 vol pts (IV 35.9 vs RV 25.0), 同窗歷史 percentile 43（n 見 verification）→ VRP 居中
 
 - rv: 0.24967766572109182
 - iv: 0.35883071300149777
@@ -22,7 +22,7 @@
 
 ## 3. Term / Skew 盤中動態
 
-**Verdict:** ATM IV Δ -16.2 pts; skew_25d Δ -0.65 (pct 48.38709677419355); term slope 0.00036679812596923655
+**Verdict:** ATM IV Δ -16.2 pts; skew_25d Δ -0.65 (pct 48); term slope 0.0004
 
 - atm_iv_delta: -0.16231342337492055
 - skew_delta: -0.006485685413280373
@@ -44,6 +44,7 @@
 - VRP: value=0.1092 percentile=43 vs same-window history n=35 (rank = share of history strictly below value)
 - RV: intraday-only (day-session 1m bars), overnight variance excluded; annualized sqrt(252*300)
 - skew_25d window delta: value=-0.0065 percentile=48 vs same-window history n=31 (rank = share of history strictly below value)
+- Flow ΔOI compares settle 2026-07-08 -> 2026-07-09; run intraday the analysis day's own EOD OI is not yet available (T+1)
 
 ## 標籤定義
 
