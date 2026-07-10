@@ -170,3 +170,56 @@ def fetch_vrp_history(conn, date_str, start, end, days=HISTORY_DAYS):
     """
     p = {"d": date_str, "s": f"{start}:00", "e": f"{end}:00", "days": days}
     return pd.read_sql(iv_sql, conn, params=p), pd.read_sql(bars_sql, conn, params=p)
+
+
+# ---------------------------------------------------------------------------
+# Analysis layer (pure functions — Section = {metrics, verdict, verification})
+# ---------------------------------------------------------------------------
+
+def analyze_gex(strikes_df, oi_df, spot):
+    """GEX per spec §3.1. Naive dealer convention: call OI +gamma, put OI -gamma.
+
+    GEX(K) = gamma * OI * MULTIPLIER * spot^2 * 0.01  (NTD per 1% move)
+    Flip = zero-crossing of cumulative GEX over strikes (ascending).
+    zone: 'pinning' if spot in positive-cumulative region (>= flip), else 'expansion'.
+    """
+    empty = {"metrics": {"total_gex": None, "flip": None, "zone": None, "top_strikes": []},
+             "verdict": "GEX: DATA GAP — no strikes/OI rows in window",
+             "verification": []}
+    if strikes_df.empty or oi_df.empty:
+        return empty
+    df = strikes_df.merge(oi_df, left_on=["strike", "call_put"],
+                          right_on=["strike", "cp"], how="inner")
+    if df.empty:
+        return empty
+    sign = df["call_put"].map({"C": 1.0, "P": -1.0})
+    df = df.assign(gex=df["gamma"] * df["open_interest"] * CONTRACT_MULTIPLIER
+                        * spot * spot * 0.01 * sign)
+    by_k = df.groupby("strike")["gex"].sum().sort_index()
+    cum = by_k.cumsum()
+    flip = None
+    prev_k, prev_v = None, None
+    for k, v in cum.items():
+        if prev_v is not None and prev_v < 0 <= v:
+            flip = float(k)
+            break
+        prev_k, prev_v = k, v
+    total = float(by_k.sum())
+    zone = None
+    if flip is not None:
+        zone = "pinning" if spot >= flip else "expansion"
+    elif total > 0:
+        zone = "pinning"
+    elif total < 0:
+        zone = "expansion"
+    top = (by_k.abs().sort_values(ascending=False).head(5).index.astype(float).tolist())
+    settle = str(oi_df["settle_date"].iloc[0])
+    verdict = (f"總 GEX {total/1e8:.2f} 億/1%; flip={flip}; spot={spot:.0f} → "
+               f"{'磁吸區 (pinning)' if zone == 'pinning' else '放大區 (expansion)'}")
+    verification = [
+        f"GEX assumptions: naive dealer sign (call +, put -); OI from settle {settle} (T+1 approximation); "
+        f"gamma from window-end iv_strikes snapshot; multiplier {CONTRACT_MULTIPLIER}",
+    ]
+    return {"metrics": {"total_gex": total, "flip": flip, "zone": zone,
+                        "top_strikes": top},
+            "verdict": verdict, "verification": verification}

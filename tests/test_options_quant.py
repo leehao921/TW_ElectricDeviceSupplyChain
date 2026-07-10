@@ -69,3 +69,46 @@ class TestPercentileWithVerification:
         hist = pd.Series(list(range(20)))  # n == MIN_HISTORY boundary
         pct, _ = oq.percentile_verified(10, hist, metric_name="VRP")
         assert pct is not None
+
+
+def _mk_strikes(rows):
+    return pd.DataFrame(rows, columns=["strike", "call_put", "iv", "gamma", "delta", "volume"])
+
+
+def _mk_oi(rows):
+    return pd.DataFrame(rows, columns=["strike", "cp", "open_interest", "settle_date"])
+
+
+class TestAnalyzeGex:
+    def test_flip_between_put_and_call_mass(self):
+        strikes = _mk_strikes([
+            (45000, "P", 0.30, 0.0002, -0.4, 100),
+            (45000, "C", 0.30, 0.0002, 0.6, 100),
+            (46000, "P", 0.28, 0.0001, -0.2, 50),
+            (46000, "C", 0.28, 0.0003, 0.4, 50),
+        ])
+        oi = _mk_oi([
+            (45000, "P", 20000, "2026-07-08"),  # big put OI low  -> negative GEX below
+            (45000, "C", 1000, "2026-07-08"),
+            (46000, "P", 500, "2026-07-08"),
+            (46000, "C", 15000, "2026-07-08"),  # big call OI high -> positive GEX above
+        ])
+        sec = oq.analyze_gex(strikes, oi, spot=45500.0)
+        m = sec["metrics"]
+        assert m["flip"] is not None and 45000 < m["flip"] <= 46000
+        assert m["total_gex"] != 0
+        assert len(m["top_strikes"]) <= 5
+        assert "T+1" in " ".join(sec["verification"])  # OI staleness disclosed
+
+    def test_spot_below_flip_is_expansion_zone(self):
+        strikes = _mk_strikes([(45000, "P", 0.3, 0.0002, -0.4, 10),
+                               (46000, "C", 0.3, 0.0002, 0.4, 10)])
+        oi = _mk_oi([(45000, "P", 30000, "2026-07-08"),
+                     (46000, "C", 30000, "2026-07-08")])
+        sec = oq.analyze_gex(strikes, oi, spot=44000.0)
+        assert sec["metrics"]["zone"] == "expansion"
+
+    def test_empty_inputs_yield_data_gap(self):
+        sec = oq.analyze_gex(_mk_strikes([]), _mk_oi([]), spot=45000.0)
+        assert sec["metrics"]["total_gex"] is None
+        assert "DATA GAP" in sec["verdict"]
