@@ -195,3 +195,113 @@ class TestAnalyzeFlow:
     def test_missing_prev_oi_noted(self):
         sec = oq.analyze_flow(_mk_metrics(), _mk_oi([(45000, "P", 100, "2026-07-09")]), _mk_oi([]))
         assert "無前日 OI" in sec["verdict"] or "no prior OI" in sec["verdict"]
+
+
+# ---------------------------------------------------------------------------
+# Robustness regressions — review of a19c295..4757d62
+# ---------------------------------------------------------------------------
+
+class TestIvRvDegenerate:
+    def test_single_bar_window_data_gap_not_typeerror(self):
+        # Important-1: 1 close -> no returns -> rv None must not crash the report.
+        bars = _mk_bars([45000.0])
+        atm = pd.Series([0.30])
+        hist = pd.DataFrame({"vrp": np.linspace(-0.05, 0.25, 60)})
+        sec = oq.analyze_iv_rv(atm, bars, hist)
+        assert sec["metrics"]["rv"] is None
+        assert sec["metrics"]["vrp"] is None
+        assert sec["metrics"]["percentile"] is None
+        assert "DATA GAP" in sec["verdict"]
+
+    def test_rv_intraday_only_disclosure(self):
+        # RV annualization: TXF day session 300 bars, intraday-only must be disclosed.
+        bars = _mk_bars([45000, 45100, 44950, 45200] * 45)
+        atm = pd.Series([0.30] * 180)
+        hist = pd.DataFrame({"vrp": np.linspace(-0.05, 0.25, 60)})
+        sec = oq.analyze_iv_rv(atm, bars, hist)
+        joined = " ".join(sec["verification"])
+        assert "intraday-only" in joined
+        assert "sqrt(252*300)" in joined
+
+
+class TestTermSkewDegenerate:
+    def test_all_nan_atm_iv_data_gap_not_indexerror(self):
+        # Important-2: rows exist but atm_iv all NaN -> post-dropna empty frame.
+        df = _mk_metrics(n=10)
+        df["atm_iv"] = np.nan
+        sec = oq.analyze_term_skew(df, pd.DataFrame({"skew_delta": []}))
+        assert "DATA GAP" in sec["verdict"]
+
+    def test_missing_skew_renders_na_not_zero(self):
+        # Minor-5: skew_delta None must print n/a, not +0.00.
+        df = _mk_metrics(n=30)
+        df["skew_25d"] = np.nan
+        sec = oq.analyze_term_skew(df, pd.DataFrame({"skew_delta": []}))
+        assert sec["metrics"]["skew_delta"] is None
+        assert "skew_25d Δ n/a" in sec["verdict"]
+        assert "+0.00" not in sec["verdict"]
+
+
+class TestGexDegenerate:
+    def test_nan_gamma_rows_excluded_and_disclosed(self):
+        # Important-3: NaN put gamma must be dropped + disclosed, not zeroed
+        # (zeroing silently flips the verdict sign toward the call side).
+        strikes = _mk_strikes([
+            (45000, "P", 0.30, np.nan, -0.4, 100),
+            (45000, "C", 0.30, 0.0002, 0.6, 100),
+        ])
+        oi = _mk_oi([(45000, "P", 20000, "2026-07-08"),
+                     (45000, "C", 1000, "2026-07-08")])
+        sec = oq.analyze_gex(strikes, oi, spot=45000.0)
+        joined = " ".join(sec["verification"])
+        assert "excluded 1" in joined
+        assert sec["metrics"]["total_gex"] > 0  # call-only remainder, disclosed
+
+    def test_all_nan_gamma_yields_data_gap(self):
+        strikes = _mk_strikes([(45000, "P", 0.30, np.nan, -0.4, 100),
+                               (45000, "C", 0.30, np.nan, 0.6, 100)])
+        oi = _mk_oi([(45000, "P", 20000, "2026-07-08"),
+                     (45000, "C", 1000, "2026-07-08")])
+        sec = oq.analyze_gex(strikes, oi, spot=45000.0)
+        assert sec["metrics"]["total_gex"] is None
+        assert "DATA GAP" in sec["verdict"]
+
+    def test_zone_none_renders_na(self):
+        # Minor-6: zero-gamma single row -> total 0, flip None, zone None.
+        strikes = _mk_strikes([(45000, "C", 0.30, 0.0, 0.6, 100)])
+        oi = _mk_oi([(45000, "C", 1000, "2026-07-08")])
+        sec = oq.analyze_gex(strikes, oi, spot=45000.0)
+        assert sec["metrics"]["zone"] is None
+        assert "zone n/a" in sec["verdict"]
+        assert "flip=n/a" in sec["verdict"]
+
+
+class TestFlowFormatting:
+    def test_pcr_mean_formatted_two_decimals(self):
+        # Minor-4: verdict shows 0.95, not the raw float repr.
+        oi_now = _mk_oi([(45000, "P", 25000, "2026-07-09")])
+        oi_prev = _mk_oi([(45000, "P", 10000, "2026-07-08")])
+        sec = oq.analyze_flow(_mk_metrics(), oi_now, oi_prev)
+        assert "PCR(vol) mean 0.95" in sec["verdict"]
+
+    def test_empty_metrics_pcr_na_and_data_gap(self):
+        sec = oq.analyze_flow(pd.DataFrame(), _mk_oi([]), _mk_oi([]))
+        assert sec["metrics"]["pcr_mean"] is None
+        assert "PCR(vol) mean n/a" in sec["verdict"]
+        assert sec["verdict"].startswith("DATA GAP — no metrics rows | ")
+
+
+class TestNumericPins:
+    def test_gex_unit_pin_single_call_strike(self):
+        # Hand-computed: 0.0002 * 20000 * 50 * 45000^2 * 0.01 = 4.05e9 NTD/1%.
+        strikes = _mk_strikes([(45000, "C", 0.30, 0.0002, 0.6, 100)])
+        oi = _mk_oi([(45000, "C", 20000, "2026-07-08")])
+        sec = oq.analyze_gex(strikes, oi, spot=45000.0)
+        assert sec["metrics"]["total_gex"] == pytest.approx(4.05e9, rel=1e-9)
+
+    def test_rv_annualization_scale_pin(self):
+        closes = np.array([45000.0, 45045.0] * 100)  # |log return| ~1e-3 per bar
+        r = np.diff(np.log(closes))
+        expected = np.sqrt(np.mean(r * r)) * np.sqrt(252.0 * 300.0)
+        rv = oq.realized_vol_annualized(pd.Series(closes), bars_per_day=300)
+        assert rv == pytest.approx(expected, rel=1e-12)

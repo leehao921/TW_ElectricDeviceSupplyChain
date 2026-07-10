@@ -193,18 +193,23 @@ def analyze_gex(strikes_df, oi_df, spot):
                           right_on=["strike", "cp"], how="inner")
     if df.empty:
         return empty
+    n_before = len(df)
+    df = df.dropna(subset=["gamma", "open_interest"])
+    n_excluded = n_before - len(df)
+    if df.empty:
+        return empty
     sign = df["call_put"].map({"C": 1.0, "P": -1.0})
     df = df.assign(gex=df["gamma"] * df["open_interest"] * CONTRACT_MULTIPLIER
                         * spot * spot * 0.01 * sign)
     by_k = df.groupby("strike")["gex"].sum().sort_index()
     cum = by_k.cumsum()
     flip = None
-    prev_k, prev_v = None, None
+    prev_v = None
     for k, v in cum.items():
         if prev_v is not None and prev_v < 0 <= v:
             flip = float(k)
             break
-        prev_k, prev_v = k, v
+        prev_v = v
     total = float(by_k.sum())
     zone = None
     if flip is not None:
@@ -215,12 +220,21 @@ def analyze_gex(strikes_df, oi_df, spot):
         zone = "expansion"
     top = (by_k.abs().sort_values(ascending=False).head(5).index.astype(float).tolist())
     settle = str(oi_df["settle_date"].iloc[0])
-    verdict = (f"總 GEX {total/1e8:.2f} 億/1%; flip={flip}; spot={spot:.0f} → "
-               f"{'磁吸區 (pinning)' if zone == 'pinning' else '放大區 (expansion)'}")
+    if zone == "pinning":
+        zone_txt = "磁吸區 (pinning)"
+    elif zone == "expansion":
+        zone_txt = "放大區 (expansion)"
+    else:
+        zone_txt = "zone n/a"
+    verdict = (f"總 GEX {total/1e8:.2f} 億/1%; "
+               f"flip={flip if flip is not None else 'n/a'}; "
+               f"spot={spot:.0f} → {zone_txt}")
     verification = [
         f"GEX assumptions: naive dealer sign (call +, put -); OI from settle {settle} (T+1 approximation); "
         f"gamma from window-end iv_strikes snapshot; multiplier {CONTRACT_MULTIPLIER}",
     ]
+    if n_excluded > 0:
+        verification.append(f"excluded {n_excluded} rows with NaN gamma/OI from GEX")
     return {"metrics": {"total_gex": total, "flip": flip, "zone": zone,
                         "top_strikes": top},
             "verdict": verdict, "verification": verification}
@@ -245,11 +259,17 @@ def analyze_iv_rv(atm_iv_series, txf_bars, history_df):
                 "verdict": "IV-RV: DATA GAP — missing bars or ATM IV in window",
                 "verification": []}
     closes = txf_bars["close"]
-    rv = realized_vol_annualized(closes, bars_per_day=270)  # 09:00-13:30 ≈ 270 1m bars
+    rv = realized_vol_annualized(closes, bars_per_day=300)  # TXF day session 08:45-13:45 ≈ 300 1m bars
+    if rv is None:
+        return {"metrics": {"rv": None, "iv": None, "vrp": None, "percentile": None},
+                "verdict": "IV-RV: DATA GAP — insufficient bars for RV",
+                "verification": []}
     iv_mean = float(atm_iv_series.dropna().mean())
     vrp = iv_mean - rv
     pct, vlog = percentile_verified(vrp, history_df.get("vrp", pd.Series(dtype=float)),
                                     metric_name="VRP")
+    vlog.append("RV: intraday-only (day-session 1m bars), overnight variance excluded; "
+                "annualized sqrt(252*300)")
     if pct is None:
         verdict = f"VRP {vrp*100:+.1f} vol pts (IV {iv_mean*100:.1f} vs RV {rv*100:.1f})"
     else:
@@ -278,6 +298,9 @@ def analyze_term_skew(metrics_df, history_df):
         return {"metrics": {}, "verdict": "TERM/SKEW: DATA GAP — no iv_metrics rows",
                 "verification": []}
     df = metrics_df.dropna(subset=["atm_iv"]).sort_values("time")
+    if df.empty:
+        return {"metrics": {}, "verdict": "TERM/SKEW: DATA GAP — no iv_metrics rows",
+                "verification": []}
     gaps = _window_gaps(df["time"])
     skew = df["skew_25d"].dropna()
     skew_delta = float(skew.iloc[-1] - skew.iloc[0]) if len(skew) >= 2 else None
@@ -288,8 +311,9 @@ def analyze_term_skew(metrics_df, history_df):
         pct, vlog = percentile_verified(skew_delta,
                                         history_df.get("skew_delta", pd.Series(dtype=float)),
                                         metric_name="skew_25d window delta")
+    skew_txt = f"{skew_delta*100:+.2f}" if skew_delta is not None else "n/a"
     verdict = (f"ATM IV Δ {atm_delta*100:+.1f} pts; skew_25d Δ "
-               f"{(skew_delta or 0)*100:+.2f} (pct {pct if pct is not None else 'n/a'}); "
+               f"{skew_txt} (pct {pct if pct is not None else 'n/a'}); "
                f"term slope {slope_last}")
     if gaps:
         gap_txt = ", ".join(f"{a:%H:%M}–{b:%H:%M}" for a, b in gaps)
@@ -316,8 +340,11 @@ def analyze_flow(metrics_df, oi_now, oi_prev):
         merged["d_oi"] = merged["open_interest_now"] - merged["open_interest_prev"]
         top = merged.reindex(merged["d_oi"].abs().sort_values(ascending=False).index).head(5)
         builds = [(float(r.strike), int(r.d_oi), str(r.cp)) for r in top.itertuples()]
-    verdict = f"PCR(vol) mean {pcr_mean}; top ΔOI: {builds[:3]}"
+    pcr_txt = f"{pcr_mean:.2f}" if pcr_mean is not None else "n/a"
+    verdict = f"PCR(vol) mean {pcr_txt}; top ΔOI: {builds[:3]}"
     if note:
         verdict += f" | {note}"
+    if metrics_df.empty:
+        verdict = "DATA GAP — no metrics rows | " + verdict
     return {"metrics": {"pcr_mean": pcr_mean, "top_oi_builds": builds},
             "verdict": verdict, "verification": []}
