@@ -143,20 +143,22 @@ def fetch_txf_bars(conn, date_str, start, end):
 
 def fetch_vrp_history(conn, date_str, start, end, days=HISTORY_DAYS):
     """Per-day same-window (ATM IV mean, RV) for the past `days` trading days
-    BEFORE date_str. One SQL per source, joined in pandas by day."""
+    BEFORE date_str. One SQL per source, joined in pandas by day.
+
+    Note: the plan's correlated min-expiry subquery ran >4 min live, so per the
+    plan's documented fallback we fetch per-(day, expiry) aggregates and pick
+    each day's front (min) expiry in pandas.
+    """
     iv_sql = """
-        SELECT (time at time zone 'Asia/Taipei')::date AS d, avg(atm_iv) AS iv_mean
+        SELECT (time at time zone 'Asia/Taipei')::date AS d, expiry,
+               avg(atm_iv) AS iv_mean
         FROM iv_metrics
         WHERE underlying='TX' AND product_code='TXO'
           AND (time at time zone 'Asia/Taipei')::date < %(d)s::date
           AND (time at time zone 'Asia/Taipei')::date >= %(d)s::date - %(days)s * interval '1 day' * 2
           AND (time at time zone 'Asia/Taipei')::time >= %(s)s::time
           AND (time at time zone 'Asia/Taipei')::time <  %(e)s::time
-          AND expiry = (SELECT min(expiry) FROM iv_metrics m2
-                        WHERE m2.underlying='TX' AND m2.product_code='TXO'
-                          AND (m2.time at time zone 'Asia/Taipei')::date
-                            = (iv_metrics.time at time zone 'Asia/Taipei')::date)
-        GROUP BY 1 ORDER BY 1 DESC LIMIT %(days)s
+        GROUP BY 1, 2 ORDER BY 1 DESC, 2
     """
     bars_sql = """
         SELECT (bucket at time zone 'Asia/Taipei')::date AS d,
@@ -170,7 +172,41 @@ def fetch_vrp_history(conn, date_str, start, end, days=HISTORY_DAYS):
         ORDER BY d, t
     """
     p = {"d": date_str, "s": f"{start}:00", "e": f"{end}:00", "days": days}
-    return pd.read_sql(iv_sql, conn, params=p), pd.read_sql(bars_sql, conn, params=p)
+    iv_all = pd.read_sql(iv_sql, conn, params=p)
+    if not iv_all.empty:
+        # Per-day front expiry (lexical min == date min for YYYYMMDD strings),
+        # keep the most recent `days` days.
+        iv_all = iv_all.sort_values(["d", "expiry"]).groupby("d", as_index=False).first()
+        iv_all = iv_all.sort_values("d", ascending=False).head(days)[["d", "iv_mean"]]
+    else:
+        iv_all = pd.DataFrame({"d": [], "iv_mean": []})
+    return iv_all, pd.read_sql(bars_sql, conn, params=p)
+
+
+def fetch_skew_delta_history(conn, date_str, start, end, days=HISTORY_DAYS):
+    """Per-day same-window skew_25d (last - first), TXO only, past `days`
+    trading days before date_str. Returns DataFrame[d, skew_delta]."""
+    sql = """
+        WITH w AS (
+          SELECT (time at time zone 'Asia/Taipei')::date AS d, time, skew_25d
+          FROM iv_metrics
+          WHERE underlying='TX' AND product_code='TXO' AND skew_25d IS NOT NULL
+            AND (time at time zone 'Asia/Taipei')::date < %(d)s::date
+            AND (time at time zone 'Asia/Taipei')::date >= %(d)s::date - %(days)s * interval '1 day' * 2
+            AND (time at time zone 'Asia/Taipei')::time >= %(s)s::time
+            AND (time at time zone 'Asia/Taipei')::time <  %(e)s::time
+        )
+        SELECT d, (max(skew_25d) FILTER (WHERE time = last_t)
+                 - max(skew_25d) FILTER (WHERE time = first_t)) AS skew_delta
+        FROM (SELECT d, time, skew_25d,
+                     min(time) OVER (PARTITION BY d) AS first_t,
+                     max(time) OVER (PARTITION BY d) AS last_t
+              FROM w) x
+        WHERE time IN (first_t, last_t)
+        GROUP BY d ORDER BY d DESC LIMIT %(days)s
+    """
+    p = {"d": date_str, "s": f"{start}:00", "e": f"{end}:00", "days": days}
+    return pd.read_sql(sql, conn, params=p)
 
 
 # ---------------------------------------------------------------------------
@@ -348,3 +384,182 @@ def analyze_flow(metrics_df, oi_now, oi_prev):
         verdict = "DATA GAP — no metrics rows | " + verdict
     return {"metrics": {"pcr_mean": pcr_mean, "top_oi_builds": builds},
             "verdict": verdict, "verification": []}
+
+
+# ---------------------------------------------------------------------------
+# Report layer — labels + markdown
+# ---------------------------------------------------------------------------
+
+LABEL_RULES = (
+    ("expansion-risk", "總 GEX < 0 且 VRP percentile < 30"),
+    ("premium-rich-pinning", "總 GEX > 0 且 VRP percentile > 70"),
+    ("hedging-bid", "skew Δ percentile > 80"),
+    ("neutral-carry", "其餘 (fallback)"),
+)
+
+
+def vol_labels(sections):
+    """Rule-based env labels per spec §4. Multi-label; neutral-carry fallback."""
+    g = sections["gex"]["metrics"].get("total_gex")
+    vp = sections["iv_rv"]["metrics"].get("percentile")
+    sp = sections["term_skew"]["metrics"].get("skew_delta_pct")
+    labels = []
+    if g is not None and vp is not None and g < 0 and vp < 30:
+        labels.append("expansion-risk")
+    if g is not None and vp is not None and g > 0 and vp > 70:
+        labels.append("premium-rich-pinning")
+    if sp is not None and sp > 80:
+        labels.append("hedging-bid")
+    return labels or ["neutral-carry"]
+
+
+def render_report(date_str, window, sections, labels):
+    lines = [f"# TXO 選擇權盤中量化分析 — {date_str} {window}", ""]
+    lines += [f"**Vol 環境標籤:** {', '.join('`%s`' % l for l in labels)}", ""]
+    titles = (("gex", "## 1. GEX / Dealer Gamma"), ("iv_rv", "## 2. IV vs RV (VRP)"),
+              ("term_skew", "## 3. Term / Skew 盤中動態"), ("flow", "## 4. PCR / OI 資金流"))
+    for key, title in titles:
+        s = sections[key]
+        lines += [title, "", f"**Verdict:** {s['verdict']}", ""]
+        for k, v in s["metrics"].items():
+            lines.append(f"- {k}: {v}")
+        lines.append("")
+    lines += ["## Verification log", ""]
+    for key, _ in titles:
+        for v in sections[key]["verification"]:
+            lines.append(f"- {v}")
+    lines += ["", "## 標籤定義", ""]
+    for name, rule in LABEL_RULES:
+        lines.append(f"- `{name}`: {rule}")
+    lines += ["", "> 本報告為環境判定,不出買賣指令。資料 read-only 取自 trading-timescaledb。"]
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# CLI orchestration
+# ---------------------------------------------------------------------------
+
+def _build_vrp_history(iv_hist, bars_hist):
+    """Join per-day IV means with per-day RV (from 1m closes) -> DataFrame['vrp']."""
+    if iv_hist.empty or bars_hist.empty:
+        return pd.DataFrame({"vrp": []})
+    rows = []
+    rv_by_day = {}
+    for d, grp in bars_hist.groupby("d"):
+        rv = realized_vol_annualized(grp["close"], bars_per_day=300)
+        if rv is not None:
+            rv_by_day[d] = rv
+    for r in iv_hist.itertuples():
+        rv = rv_by_day.get(r.d)
+        if rv is not None and pd.notna(r.iv_mean):
+            rows.append({"d": r.d, "vrp": float(r.iv_mean) - rv})
+    if not rows:
+        return pd.DataFrame({"vrp": []})
+    return pd.DataFrame(rows)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="TXO intraday options quant — env labels, no trade directives")
+    ap.add_argument("--date", default=datetime.now().strftime("%Y-%m-%d"),
+                    help="Trading date YYYY-MM-DD (default: today, Asia/Taipei local)")
+    ap.add_argument("--window", default="09:00-13:30", help="Intraday window HH:MM-HH:MM")
+    ap.add_argument("--out-dir", default="analysis", help="Output directory for the md report")
+    args = ap.parse_args(argv)
+
+    start, end = parse_window(args.window)
+    date_str = args.date
+
+    try:
+        conn = _connect()
+    except Exception as e:
+        print(f"ERROR: cannot connect to trading-timescaledb ({DB_CONFIG['host']}:"
+              f"{DB_CONFIG['port']}/{DB_CONFIG['dbname']}): {e}", file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        metrics = fetch_iv_metrics(conn, date_str, start, end)
+
+        # Front expiry (overall nearest live — weekly if listed) for GEX/flow.
+        counts = (metrics.groupby("expiry").size().rename("n").reset_index()
+                  if not metrics.empty else pd.DataFrame({"expiry": [], "n": []}))
+        front = select_front_expiry(counts)
+
+        # TXO-only front expiry for VRP (like-for-like vs TXO-only history).
+        txo = metrics[metrics["product_code"] == "TXO"] if not metrics.empty else metrics
+        txo_counts = (txo.groupby("expiry").size().rename("n").reset_index()
+                      if not txo.empty else pd.DataFrame({"expiry": [], "n": []}))
+        txo_front = select_front_expiry(txo_counts)
+        txo_metrics = txo[txo["expiry"] == txo_front] if txo_front else txo.iloc[0:0]
+
+        front_metrics = metrics[metrics["expiry"] == front] if front else metrics.iloc[0:0]
+        spot_series = front_metrics["underlying_price"].dropna() if not front_metrics.empty \
+            else pd.Series(dtype=float)
+        spot = float(spot_series.iloc[-1]) if not spot_series.empty else None
+
+        # GEX inputs (front expiry, window-end snapshot + OI knowable AT the
+        # window: settle strictly BEFORE the analysis date — spec §3.1 前一
+        # 結算日. Unbounded latest would look ahead to the analysis day's own
+        # EOD on retrospective runs.
+        if front and spot is not None:
+            strikes = fetch_strikes_snapshot(conn, date_str, end, front)
+            oi_gex = fetch_oi(conn, front, before_date=date_str)
+            gex_sec = analyze_gex(strikes, oi_gex, spot=spot)
+        else:
+            _empty_oi = pd.DataFrame({"strike": [], "cp": [], "open_interest": [],
+                                      "settle_date": []})
+            gex_sec = analyze_gex(_empty_oi.assign(call_put=[], iv=[], gamma=[],
+                                                   delta=[], volume=[])[
+                ["strike", "call_put", "iv", "gamma", "delta", "volume"]],
+                _empty_oi, spot=spot or 0.0)
+
+        # IV-RV / VRP (TXO front-expiry ATM IV vs TXF RV, TXO-only history).
+        bars = fetch_txf_bars(conn, date_str, start, end)
+        iv_hist, bars_hist = fetch_vrp_history(conn, date_str, start, end)
+        vrp_history = _build_vrp_history(iv_hist, bars_hist)
+        iv_rv_sec = analyze_iv_rv(txo_metrics["atm_iv"] if not txo_metrics.empty
+                                  else pd.Series(dtype=float), bars, vrp_history)
+
+        # Term / skew (front-expiry window path vs same-window skew_delta history).
+        skew_hist = fetch_skew_delta_history(conn, date_str, start, end)
+        term_sec = analyze_term_skew(front_metrics, skew_hist)
+
+        # Flow (PCR path + day-over-day OI delta on the front expiry).
+        # "now" side is bounded to settle <= analysis date (before next day) so
+        # retrospective runs weeks later don't pick up future settles; "prev"
+        # is the settle before that — spec §3.4 前一結算日 → 最新結算日.
+        next_day = (datetime.strptime(date_str, "%Y-%m-%d")
+                    + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+        oi_now = fetch_oi(conn, front, before_date=next_day) if front else \
+            pd.DataFrame({"strike": [], "cp": [], "open_interest": [],
+                          "settle_date": []})
+        if front and not oi_now.empty:
+            latest_settle = str(oi_now["settle_date"].max())
+            oi_prev = fetch_oi(conn, front, before_date=latest_settle)
+        else:
+            oi_prev = pd.DataFrame({"strike": [], "cp": [], "open_interest": [],
+                                    "settle_date": []})
+        flow_sec = analyze_flow(front_metrics, oi_now, oi_prev)
+    finally:
+        conn.close()
+
+    sections = {"gex": gex_sec, "iv_rv": iv_rv_sec, "term_skew": term_sec,
+                "flow": flow_sec}
+    labels = vol_labels(sections)
+    md = render_report(date_str, args.window, sections, labels)
+
+    os.makedirs(args.out_dir, exist_ok=True)
+    out_path = os.path.join(args.out_dir, f"options_quant_{date_str}.md")
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(md + "\n")
+
+    print(f"report: {out_path}")
+    print(f"front expiry (GEX/flow): {front}; TXO front (VRP): {txo_front}; "
+          f"spot: {spot}")
+    for key, name in (("gex", "GEX"), ("iv_rv", "IV-RV"),
+                      ("term_skew", "TERM/SKEW"), ("flow", "FLOW")):
+        print(f"[{name}] {sections[key]['verdict']}")
+    print(f"labels: {', '.join(labels)}")
+
+
+if __name__ == "__main__":
+    main()

@@ -305,3 +305,48 @@ class TestNumericPins:
         expected = np.sqrt(np.mean(r * r)) * np.sqrt(252.0 * 300.0)
         rv = oq.realized_vol_annualized(pd.Series(closes), bars_per_day=300)
         assert rv == pytest.approx(expected, rel=1e-12)
+
+
+class TestVolLabels:
+    def _sections(self, gex_total, vrp_pct, skew_pct):
+        return {
+            "gex": {"metrics": {"total_gex": gex_total, "flip": 45500, "zone": None,
+                                "top_strikes": []}},
+            "iv_rv": {"metrics": {"percentile": vrp_pct}},
+            "term_skew": {"metrics": {"skew_delta_pct": skew_pct}},
+        }
+
+    def test_expansion_risk(self):
+        assert "expansion-risk" in oq.vol_labels(self._sections(-1e9, 20, 50))
+
+    def test_premium_rich_pinning(self):
+        assert "premium-rich-pinning" in oq.vol_labels(self._sections(+1e9, 80, 50))
+
+    def test_hedging_bid(self):
+        assert "hedging-bid" in oq.vol_labels(self._sections(+1e9, 50, 85))
+
+    def test_neutral_fallback(self):
+        assert oq.vol_labels(self._sections(+1e9, 50, 50)) == ["neutral-carry"]
+
+    def test_none_inputs_neutral(self):
+        assert oq.vol_labels(self._sections(None, None, None)) == ["neutral-carry"]
+
+
+class TestRender:
+    def test_report_contains_required_sections(self):
+        secs = {
+            "gex": {"metrics": {"total_gex": 1e9, "flip": 45500.0, "zone": "pinning",
+                                "top_strikes": [45500.0]},
+                    "verdict": "v1", "verification": ["a1"]},
+            "iv_rv": {"metrics": {"rv": 0.2, "iv": 0.3, "vrp": 0.1, "percentile": 75.0},
+                      "verdict": "v2", "verification": ["a2"]},
+            "term_skew": {"metrics": {"skew_delta_pct": 50.0}, "verdict": "v3",
+                          "verification": ["a3"]},
+            "flow": {"metrics": {"pcr_mean": 0.9, "top_oi_builds": []},
+                     "verdict": "v4", "verification": []},
+        }
+        md = oq.render_report("2026-07-09", "09:00-12:00", secs, ["premium-rich-pinning"])
+        for needle in ("# TXO", "GEX", "IV vs RV", "Term / Skew", "資金流",
+                       "premium-rich-pinning", "Verification log", "a1", "a2",
+                       "不出買賣指令"):
+            assert needle in md
