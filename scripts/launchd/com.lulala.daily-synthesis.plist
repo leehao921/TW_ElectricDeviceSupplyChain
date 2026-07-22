@@ -10,10 +10,12 @@
          analysis/routine_synthesis_<date>.md, XADD claude:inbox topic=routine-synthesis,
          發 macOS 通知。單次執行, 無 KeepAlive。 -->
 
+    <!-- 必須用 .venv/bin/python 直接執行 (有 TCC ~/Documents 授權);
+         /bin/bash 會 Operation not permitted (2026-07-16 實測 exit 126)。 -->
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/daily_synthesis.sh</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/daily_synthesis.py</string>
     </array>
 
     <key>WorkingDirectory</key>

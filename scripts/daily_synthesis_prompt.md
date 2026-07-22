@@ -42,7 +42,7 @@ ls -t analysis/routine_synthesis_*.md | head -1       # 昨日綜合報告（讀
    ```
    redis-cli XADD claude:inbox '*' ts <ISO時間> from daily_synthesis topic routine-synthesis tags "synthesis,daily" as_of <日期> msg <摘要>
    ```
-3. **macOS 通知**（一行結論）：
+3. **macOS 通知**——用會停留的 dialog（不是 banner，banner 使用者看不到），且必須背景執行（`&`）避免卡住 session：
    ```
-   osascript -e 'display notification "<一句話總結>" with title "每日 Routine 綜合分析 <日期>"'
+   osascript -e 'display dialog "<一句話總結>\n\n完整報告: analysis/routine_synthesis_<日期>.md" with title "每日 Routine 綜合分析 <日期>" buttons {"OK"} default button 1 giving up after 21600' > /dev/null 2>&1 &
    ```
