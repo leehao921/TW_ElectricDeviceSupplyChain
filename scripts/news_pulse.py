@@ -43,6 +43,26 @@ NAME_BLOCKLIST = {"全新", "大同", "東元", "中興", "力山", "光明", "�
 THEME_BLOCKLIST = {"台北", "新北", "台中", "台南", "高雄", "桃園", "新竹", "內湖",
                    "南港", "大金", "大眾", "大同", "全新", "中興"}
 
+# Phase 3b: 國際事件 → 本地 theme 標籤 (事件→theme 映射屬分析層, 故在此不在 collector)
+EVENT_THEME_MAP = {
+    "tsmc": "台積電", "semi_export": "出口管制", "tariff": "關稅",
+    "taiwan_strait": "台海風險", "ai_capex": "AI 伺服器", "memory": "記憶體",
+    "KXFEDDECISION": "Fed 利率", "KXTAIWANLVL4": "台海風險", "KXCHINAEUV": "出口管制",
+    "will-china-launch-a-fullscale-invas": "台海風險",
+    "if-china-invades-taiwan-will-be-inv": "台海風險",
+    "will-the-us-be-able-to-prop-up-its": "出口管制",
+    "federal-reserve-fomc-decision-in-ju": "Fed 利率",
+}
+
+
+def _map_event_theme(key):
+    if key in EVENT_THEME_MAP:
+        return EVENT_THEME_MAP[key]
+    for prefix, theme in EVENT_THEME_MAP.items():
+        if key.startswith(prefix):
+            return theme
+    return key
+
 _WIKILINK_RE = re.compile(r"\[\[([^\]|]+)\]\]")
 _FILENAME_RE = re.compile(r"^(\d{4,5})_(.+)\.md$")
 
@@ -176,6 +196,56 @@ def theme_pulse(tagged, history, min_history=MIN_HISTORY):
     return out
 
 
+def intl_momentum(gdelt_rows, pm_rows, min_history=MIN_HISTORY):
+    """國際事件動能 (Phase 3b, 純函數)。
+    gdelt_rows: [(query_key, date, article_count, avg_tone)]
+    pm_rows:    [(platform, market_id, date, prob, question, liquidity)]
+    → {"gdelt": [{key, theme, today, z, tone, note}], "pm": [{...prob, delta_7d}]}
+    z gated by min_history; PM delta 需 ≥7 日前有快照。"""
+    by_key = {}
+    for key, d, cnt, tone in gdelt_rows:
+        by_key.setdefault(key, {})[d] = (cnt or 0, tone)
+    out_g = []
+    for key, series in by_key.items():
+        days = sorted(series)
+        latest = days[-1]
+        today_cnt, today_tone = series[latest]
+        hist = [series[d][0] for d in days[:-1]]
+        n = len(hist)
+        z, note = None, ""
+        if n < min_history:
+            note = "insufficient-history(n=%d)" % n
+        else:
+            mean = sum(hist) / n
+            std = math.sqrt(sum((v - mean) ** 2 for v in hist) / n)
+            if std < STD_FLOOR or not math.isfinite(std):
+                note = "degenerate-baseline(n=%d)" % n
+            else:
+                z = (today_cnt - mean) / std
+                note = "z vs %d-day baseline" % n
+        out_g.append({"key": key, "theme": _map_event_theme(key), "today": today_cnt,
+                      "tone": today_tone, "z": z, "note": note, "date": latest})
+    out_g.sort(key=lambda x: -(x["z"] if x["z"] is not None else -999))
+
+    by_mkt = {}
+    for plat, mid, d, prob, q, liq in pm_rows:
+        by_mkt.setdefault((plat, mid), {"q": q, "liq": liq, "series": {}})
+        by_mkt[(plat, mid)]["series"][d] = prob
+    out_pm = []
+    for (plat, mid), rec in by_mkt.items():
+        days = sorted(rec["series"])
+        latest = days[-1]
+        prob = rec["series"][latest]
+        prior = [d for d in days if (latest - d).days >= 7]
+        delta = (prob - rec["series"][prior[-1]]) if prior else None
+        out_pm.append({"platform": plat, "market_id": mid,
+                       "theme": _map_event_theme(mid), "prob": prob,
+                       "delta_7d": delta, "question": rec["q"],
+                       "liquidity": rec["liq"], "date": latest})
+    out_pm.sort(key=lambda x: -abs(x["delta_7d"] if x["delta_7d"] is not None else 0))
+    return {"gdelt": out_g, "pm": out_pm}
+
+
 def cluster_confirm(members, price_5d, flow_5d):
     """breadth: 價格漲家數/有價格成員數, 外資買超家數/有 flow 成員數。
     無價格資料成員(OTC gap)列 no_price_data 揭露。"""
@@ -273,6 +343,47 @@ def fetch_flow_price_5d(conn, tickers):
     return flow, price
 
 
+def fetch_intl(conn):
+    """讀 gdelt_daily(60d) + prediction_markets_daily(30d), read-only。表不存在回空。"""
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT query_key, date, article_count, avg_tone FROM gdelt_daily "
+                    "WHERE date >= CURRENT_DATE - INTERVAL '65 days' ORDER BY date")
+        g = cur.fetchall()
+        cur.execute("SELECT platform, market_id, date, prob, question, liquidity "
+                    "FROM prediction_markets_daily "
+                    "WHERE date >= CURRENT_DATE - INTERVAL '30 days' ORDER BY date")
+        pm = cur.fetchall()
+    except Exception:                                # noqa: BLE001 — 表未建時優雅降級
+        conn.rollback()
+        g, pm = [], []
+    cur.close()
+    return g, pm
+
+
+def render_intl_section(intl):
+    if not intl or (not intl["gdelt"] and not intl["pm"]):
+        return "\n## 國際事件動能\n\n(無資料 — intl_events collector 未產出)\n"
+    L = ["\n## 國際事件動能\n"]
+    if intl["gdelt"]:
+        L.append("**GDELT 新聞量（日級，60d baseline）:**\n")
+        L.append("| 監測 | 對應題材 | 今日則數 | z | tone |")
+        L.append("|---|---|--:|---|---|")
+        for g in intl["gdelt"]:
+            zs = ("%.1f" % g["z"]) if g["z"] is not None else "— (%s)" % g["note"]
+            tn = ("%.1f" % g["tone"]) if g["tone"] is not None else "n/a"
+            L.append("| %s | %s | %d | %s | %s |" % (g["key"], g["theme"], g["today"], zs, tn))
+    if intl["pm"]:
+        L.append("\n**預測市場機率（Kalshi/Manifold）:**\n")
+        L.append("| 市場 | 對應題材 | 機率 | Δ7d |")
+        L.append("|---|---|--:|---|")
+        for p in intl["pm"][:10]:
+            ds = ("%+.0f pp" % (p["delta_7d"] * 100)) if p["delta_7d"] is not None else "— (首日快照)"
+            L.append("| %s | %s | %.0f%% | %s |" % (
+                (p["question"] or p["market_id"])[:48], p["theme"], p["prob"] * 100, ds))
+    return "\n".join(L) + "\n"
+
+
 def load_history():
     if HISTORY_PATH.exists():
         return json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
@@ -323,11 +434,15 @@ def main():
             flow, price = fetch_flow_price_5d(conn, members)
             p["cluster"] = cluster_confirm(members, price, flow)
             p["headlines"] = [t["title"] for t in tagged if p["theme"] in t["themes"]][:3]
+
+        g_rows, pm_rows = fetch_intl(conn)
+        intl = intl_momentum(g_rows, pm_rows)
     finally:
         conn.close()
 
     tagged_n = sum(1 for t in tagged if t["themes"])
     md = render_report(date, pulses, len(items), tagged_n)
+    md += render_intl_section(intl)
     ANALYSIS_DIR.mkdir(exist_ok=True)
     out = ANALYSIS_DIR / ("news_pulse_%s.md" % date.isoformat())
     out.write_text(md, encoding="utf-8")

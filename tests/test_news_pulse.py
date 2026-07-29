@@ -172,3 +172,44 @@ class TestRender:
         assert "insufficient-history(n=5)" in md
         assert "Verification log" in md
         assert "液冷" in md
+
+
+# ------------------------------------------------------------------ #
+# intl momentum (Phase 3b)
+# ------------------------------------------------------------------ #
+class TestIntlMomentum:
+    def test_gdelt_z_with_sufficient_history(self):
+        import datetime as dt
+        rows = [("tsmc", dt.date(2026, 6, 1) + dt.timedelta(days=i), (i * 7) % 11, -2.0)
+                for i in range(45)]
+        rows.append(("tsmc", dt.date(2026, 7, 29), 40, -6.5))
+        out = np_.intl_momentum(gdelt_rows=rows, pm_rows=[], min_history=20)
+        g = {x["key"]: x for x in out["gdelt"]}["tsmc"]
+        assert g["today"] == 40
+        assert g["z"] is not None and g["z"] > 2
+        assert g["theme"]  # mapped label exists
+
+    def test_gdelt_insufficient_history_gated(self):
+        import datetime as dt
+        rows = [("tariff", dt.date(2026, 7, 27), 5, -1.0),
+                ("tariff", dt.date(2026, 7, 28), 6, -1.2),
+                ("tariff", dt.date(2026, 7, 29), 30, -3.0)]
+        out = np_.intl_momentum(gdelt_rows=rows, pm_rows=[], min_history=20)
+        g = out["gdelt"][0]
+        assert g["z"] is None
+        assert "insufficient-history(n=2)" in g["note"]
+
+    def test_pm_delta_needs_prior_day(self):
+        import datetime as dt
+        pm = [("kalshi", "KXTAIWANLVL4-27JAN01", dt.date(2026, 7, 22), 0.05, "q", 100.0),
+              ("kalshi", "KXTAIWANLVL4-27JAN01", dt.date(2026, 7, 29), 0.12, "q", 100.0)]
+        out = np_.intl_momentum(gdelt_rows=[], pm_rows=pm, min_history=20)
+        p = out["pm"][0]
+        assert abs(p["prob"] - 0.12) < 1e-9
+        assert abs(p["delta_7d"] - 0.07) < 1e-9
+
+    def test_pm_single_day_no_delta(self):
+        import datetime as dt
+        pm = [("manifold", "some-slug", dt.date(2026, 7, 29), 0.33, "q", 1019.0)]
+        out = np_.intl_momentum(gdelt_rows=[], pm_rows=pm, min_history=20)
+        assert out["pm"][0]["delta_7d"] is None
