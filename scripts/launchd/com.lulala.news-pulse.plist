@@ -5,7 +5,7 @@
     <key>Label</key>
     <string>com.lulala.news-pulse</string>
 
-    <!-- Daily 主動ETF smart money × 產業輪動 report (Mon-Fri 19:30 Asia/Taipei,
+    <!-- Daily 題材脈衝 news_pulse (Mon-Fri 20:35 Asia/Taipei,
          ~1hr after the tmf-etf-holdings-collector 18:30 run so the day's
          題材脈衝 (Phase 2 事件動能層): 讀 news_items (read-only) → 字典標註
          → analysis/news_pulse_<date>.md + inbox topic=news-pulse。
