@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.discord-forward</string>
+
+    <!-- claude:inbox → Discord webhook forwarder (每 300s,全週)。
+         Cursor 存 Redis discord:forward:last_id,無新訊息時 no-op 秒退。
+         Webhook URL fallback 讀 ../database/.env (DISCORD_WEBHOOK_URL,
+         與 Grafana alerting 同一頻道)。venv python 直跑 (TCC:不可經 bash)。
+         Plan: docs/plans/2026-07-30-discord-push.md -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/discord_forward.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key><string>Asia/Taipei</string>
+        <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>REDIS_HOST</key><string>localhost</string>
+        <key>REDIS_PORT</key><string>6379</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/discord-forward.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/discord-forward.log</string>
+</dict>
+</plist>
