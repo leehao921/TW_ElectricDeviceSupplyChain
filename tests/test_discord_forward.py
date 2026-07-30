@@ -166,44 +166,35 @@ class TestBuildReportMessages:
 
     def test_no_report_same_as_plain(self):
         msgs = build_report_messages(self.FIELDS, None)
-        assert msgs == [(c, False) for c in chunk_message(format_entry(self.FIELDS))]
+        assert msgs == chunk_message(format_entry(self.FIELDS))
 
-    def test_short_report_summary_then_body_with_attach(self):
+    def test_short_report_summary_then_body(self):
         msgs = build_report_messages(self.FIELDS, "# 報告\n完整內容")
-        assert len(msgs) == 2
-        assert msgs[0] == (format_entry(self.FIELDS), False)
-        assert msgs[1] == ("# 報告\n完整內容", True)
+        assert msgs == [format_entry(self.FIELDS), "# 報告\n完整內容"]
 
-    def test_long_report_chunked_attach_only_last(self):
+    def test_long_report_chunked(self):
         report = "\n".join("row %04d" % i for i in range(1200))  # ~10KB
         msgs = build_report_messages(self.FIELDS, report)
         assert len(msgs) >= 4
-        assert all(len(c) <= 2000 for c, _ in msgs)
-        assert [a for _, a in msgs] == [False] * (len(msgs) - 1) + [True]
+        assert all(len(c) <= 2000 for c in msgs)
 
     def test_containment_dedup_skips_body(self):
-        # bb-followthrough 情境: msg 即報告全文 → 不重複切段,附件掛摘要尾
+        # bb-followthrough 情境: msg 即報告全文 → 不重複切段
         digest = "**BB 追蹤**\n多行報告內容\n第三行"
         fields = {"topic": "bb-followthrough", "msg": digest}
         msgs = build_report_messages(fields, digest + "\n")
-        assert msgs == [(format_entry(fields), True)]
+        assert msgs == [format_entry(fields)]
 
-    def test_over_cap_replaced_by_notice(self):
+    def test_over_cap_truncated_with_notice(self):
         report = "\n".join("row %05d" % i for i in range(6000))  # 遠超 15 段
         msgs = build_report_messages(self.FIELDS, report, max_report_chunks=15)
-        assert len(msgs) == 2
-        assert "見附件" in msgs[1][0]
-        assert msgs[1][1] is True
-
-    def test_long_summary_chunked_attach_still_last(self):
-        fields = {"topic": "t", "msg": "\n".join("s %04d" % i for i in range(400))}
-        msgs = build_report_messages(fields, "short body")
-        assert sum(1 for _, a in msgs if a) == 1
-        assert msgs[-1][1] is True
+        summary_n = len(chunk_message(format_entry(self.FIELDS)))
+        assert len(msgs) == summary_n + 15 + 1
+        assert "截斷" in msgs[-1]
 
     def test_empty_report_text_treated_as_none(self):
         msgs = build_report_messages(self.FIELDS, "")
-        assert all(a is False for _, a in msgs)
+        assert msgs == chunk_message(format_entry(self.FIELDS))
 
 
 # ------------------------------------------------------------------ #
@@ -230,17 +221,6 @@ class TestPostDiscord:
         discord_forward.post_discord("http://x", "hello")
         assert calls[0]["json"] == {"content": "hello"}
         assert "files" not in calls[0]
-
-    def test_attachment_uses_multipart(self, monkeypatch):
-        calls = []
-        import requests
-        monkeypatch.setattr(requests, "post", lambda url, **kw: calls.append(kw) or _Resp())
-        discord_forward.post_discord("http://x", "hi", attachment=("r.md", b"data"))
-        kw = calls[0]
-        assert "json" not in kw
-        assert kw["files"]["files[0]"] == ("r.md", b"data")
-        import json as _json
-        assert _json.loads(kw["data"]["payload_json"])["content"] == "hi"
 
     def test_429_backoff_then_retry(self, monkeypatch):
         seq = [_Resp(429, retry_after=0), _Resp(204)]
@@ -275,40 +255,38 @@ class FakeRedis:
 
 
 class TestRunOnce:
-    def _patch(self, monkeypatch, load_ret=(None, None)):
+    def _patch(self, monkeypatch, load_ret=None):
         sent = []
         monkeypatch.setattr(discord_forward, "post_discord",
-                            lambda url, content, attachment=None: sent.append((content, attachment)))
+                            lambda url, content: sent.append(content))
         monkeypatch.setattr(discord_forward, "load_report", lambda raw: load_ret)
         monkeypatch.setattr(discord_forward.time, "sleep", lambda s: None)
         return sent
 
-    def test_report_entry_sends_summary_body_attachment(self, monkeypatch):
-        sent = self._patch(monkeypatch, load_ret=("# 報告\n內容", ("r.md", b"x")))
+    def test_report_entry_sends_summary_then_body(self, monkeypatch):
+        sent = self._patch(monkeypatch, load_ret="# 報告\n內容")
         r = FakeRedis([("1-0", {"topic": "t", "msg": "摘要", "report_path": "analysis/r.md"})])
         n = discord_forward.run_once(r, "http://x")
         assert n == 1
-        assert len(sent) == 2
-        assert sent[0] == ("**[t]** 摘要", None)
-        assert sent[1] == ("# 報告\n內容", ("r.md", b"x"))
+        assert sent == ["**[t]** 摘要", "# 報告\n內容"]
         assert r.kv["discord:forward:last_id"] == "1-0"
 
     def test_bogus_report_path_falls_back_to_summary(self, monkeypatch):
-        sent = self._patch(monkeypatch, load_ret=(None, None))
+        sent = self._patch(monkeypatch, load_ret=None)
         r = FakeRedis([("1-0", {"topic": "t", "msg": "摘要", "report_path": "analysis/nope.md"})])
         assert discord_forward.run_once(r, "http://x") == 1
-        assert sent == [("**[t]** 摘要", None)]
+        assert sent == ["**[t]** 摘要"]
         assert r.kv["discord:forward:last_id"] == "1-0"
 
     def test_old_format_entry_unchanged(self, monkeypatch):
         sent = self._patch(monkeypatch)
         r = FakeRedis([("1-0", {"topic": "t", "msg": "普通訊息"})])
         assert discord_forward.run_once(r, "http://x") == 1
-        assert sent == [("**[t]** 普通訊息", None)]
+        assert sent == ["**[t]** 普通訊息"]
 
     def test_budget_defers_entry_to_next_run(self, monkeypatch):
         big = "\n".join("row %04d" % i for i in range(1200))  # ~10KB → 摘要+多段
-        sent = self._patch(monkeypatch, load_ret=(big, ("r.md", b"x")))
+        sent = self._patch(monkeypatch, load_ret=big)
         entries = [("%d-0" % i, {"topic": "t", "msg": "摘要", "report_path": "analysis/r.md"})
                    for i in range(1, 6)]
         r = FakeRedis(entries)
@@ -320,27 +298,10 @@ class TestRunOnce:
         assert len(sent) <= discord_forward.MAX_MSGS_PER_RUN
 
     def test_first_entry_over_budget_still_sent(self, monkeypatch):
-        huge = "x" * 60000  # 硬切 >25 段 → cap 後仍是 摘要+提示,但驗證單 entry 超算照送
+        huge = "x" * 60000
         monkeypatch.setattr(discord_forward, "MAX_MSGS_PER_RUN", 1)
-        sent = self._patch(monkeypatch, load_ret=(huge, ("r.md", b"x")))
+        sent = self._patch(monkeypatch, load_ret=huge)
         r = FakeRedis([("1-0", {"topic": "t", "msg": "摘要", "report_path": "analysis/r.md"})])
         assert discord_forward.run_once(r, "http://x") == 1
         assert len(sent) >= 2
-        assert r.kv["discord:forward:last_id"] == "1-0"
-
-    def test_multipart_failure_degrades_to_plain(self, monkeypatch):
-        sent = []
-
-        def flaky_post(url, content, attachment=None):
-            if attachment is not None:
-                raise RuntimeError("multipart boom")
-            sent.append((content, attachment))
-
-        monkeypatch.setattr(discord_forward, "post_discord", flaky_post)
-        monkeypatch.setattr(discord_forward, "load_report",
-                            lambda raw: ("body", ("r.md", b"x")))
-        monkeypatch.setattr(discord_forward.time, "sleep", lambda s: None)
-        r = FakeRedis([("1-0", {"topic": "t", "msg": "摘要", "report_path": "analysis/r.md"})])
-        assert discord_forward.run_once(r, "http://x") == 1
-        assert ("body", None) in sent                    # 降級純文字
         assert r.kv["discord:forward:last_id"] == "1-0"

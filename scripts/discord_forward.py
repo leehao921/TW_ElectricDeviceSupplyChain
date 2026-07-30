@@ -101,25 +101,21 @@ def resolve_report_path(raw, repo_root: Path = REPO_ROOT):
 def build_report_messages(fields: dict, report_text,
                           limit: int = CHUNK_LIMIT,
                           max_report_chunks: int = MAX_REPORT_CHUNKS) -> list:
-    """組出一個 entry 要送的訊息序列 [(content, attach_bool)]。
+    """組出一個 entry 要送的訊息序列(內容字串 list)。
 
-    有報告全文時:摘要切段 → 全文切段 → 最後一則掛附件。
+    有報告全文時:摘要切段 → 全文切段。
     去重:msg 已包含於全文(bb-followthrough msg==全文)→ 跳過全文段。
-    全文段數超過 cap → 以「見附件」提示取代(附件仍完整)。
+    全文段數超過 cap → 截斷並補一則提示(完整檔留在 analysis/)。
     """
-    summary = [(c, False) for c in chunk_message(format_entry(fields), limit)]
+    summary = chunk_message(format_entry(fields), limit)
     if not report_text:
         return summary
     if (fields.get("msg") or "").strip() in report_text:
-        body = []
-    else:
-        chunks = chunk_message(report_text, limit)
-        if len(chunks) > max_report_chunks:
-            body = [("(全文過長，見附件)", False)]
-        else:
-            body = [(c, False) for c in chunks]
-    msgs = summary + body
-    return msgs[:-1] + [(msgs[-1][0], True)]
+        return summary
+    body = chunk_message(report_text, limit)
+    if len(body) > max_report_chunks:
+        body = body[:max_report_chunks] + ["(報告全文過長，其餘截斷 — 完整檔在 analysis/)"]
+    return summary + body
 
 
 # ------------------------------------------------------------------ #
@@ -138,19 +134,11 @@ def resolve_webhook_url() -> str:
     return url
 
 
-def post_discord(url: str, content: str, attachment=None) -> None:
-    """POST 一則;attachment=(filename, bytes) 時走 multipart。
-    429 依 retry_after 退避重試一次。"""
-    import json
-
+def post_discord(url: str, content: str) -> None:
+    """POST 一則;429 依 retry_after 退避重試一次。"""
     import requests
     for attempt in range(2):
-        if attachment is not None:
-            r = requests.post(url,
-                              data={"payload_json": json.dumps({"content": content})},
-                              files={"files[0]": attachment}, timeout=30)
-        else:
-            r = requests.post(url, json={"content": content}, timeout=15)
+        r = requests.post(url, json={"content": content}, timeout=15)
         if r.status_code == 429 and attempt == 0:
             time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
             continue
@@ -159,16 +147,15 @@ def post_discord(url: str, content: str, attachment=None) -> None:
 
 
 def load_report(raw):
-    """report_path → (text, (filename, bytes));任何失敗回 (None, None),
+    """report_path → 報告全文;任何失敗回 None,
     forwarder fallback 只送摘要,cursor 照常前移不卡死。"""
     try:
         p = resolve_report_path(raw)
         if p is None or not p.exists():
-            return None, None
-        data = p.read_bytes()
-        return data.decode("utf-8", errors="replace"), (p.name, data)
+            return None
+        return p.read_text(encoding="utf-8", errors="replace")
     except OSError:
-        return None, None
+        return None
 
 
 def run_once(r, url: str, verbose: bool = False) -> int:
@@ -187,25 +174,18 @@ def run_once(r, url: str, verbose: bool = False) -> int:
     sent, budget = 0, MAX_MSGS_PER_RUN
     for entry_id, fields in entries:
         if should_forward(fields):
-            text, attach_payload = load_report(fields.get("report_path"))
+            text = load_report(fields.get("report_path"))
             msgs = build_report_messages(fields, text)
             if len(msgs) > budget and sent:
                 break                    # 留下輪;cursor 停在上一 entry
-            for content, is_attach in msgs:
-                try:
-                    post_discord(url, content,
-                                 attachment=attach_payload if is_attach else None)
-                except Exception:
-                    if not is_attach:
-                        raise            # 純文字失敗 → 下輪重送 (at-least-once)
-                    post_discord(url, content)   # multipart 失敗降級純文字
+            for content in msgs:
+                post_discord(url, content)
                 time.sleep(POST_SLEEP)
             budget -= len(msgs)
             sent += 1
             if verbose:
-                print("sent %s topic=%s msgs=%d attach=%s"
-                      % (entry_id, fields.get("topic"), len(msgs),
-                         attach_payload is not None))
+                print("sent %s topic=%s msgs=%d"
+                      % (entry_id, fields.get("topic"), len(msgs)))
         r.set(CURSOR_KEY, entry_id)   # 送出(或略過)成功才前移
     return sent
 
