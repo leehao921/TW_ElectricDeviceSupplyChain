@@ -43,6 +43,14 @@ NAME_BLOCKLIST = {"全新", "大同", "東元", "中興", "力山", "光明", "�
 THEME_BLOCKLIST = {"台北", "新北", "台中", "台南", "高雄", "桃園", "新竹", "內湖",
                    "南港", "大金", "大眾", "大同", "全新", "中興"}
 
+# 大盤與總經段: 標題關鍵詞 filter (獨立於 theme 體系,不進 z baseline/history)。
+# 只收 tier2 媒體且未命中個股的新聞 → 與題材脈衝段天然不重複。
+MACRO_KEYWORDS = ("加權指數", "台股", "台指期", "大盤", "外資買超", "外資賣超",
+                  "匯率", "新台幣", "台幣", "央行", "Fed", "聯準會", "FOMC", "利率",
+                  "降息", "升息", "關稅", "CPI", "通膨", "非農", "GDP", "道瓊",
+                  "那斯達克", "納斯達克", "標普", "S&P", "費半", "美股", "日經")
+MACRO_TOP_N = 10
+
 # Phase 3b: 國際事件 → 本地 theme 標籤 (事件→theme 映射屬分析層, 故在此不在 collector)
 EVENT_THEME_MAP = {
     "tsmc": "台積電", "semi_export": "出口管制", "tariff": "關稅",
@@ -155,10 +163,39 @@ def tag_items(items, name_map, entities):
             "news_uid": it["news_uid"],
             "source_tier": it.get("source_tier", 2),
             "title": it.get("title", ""),
+            "date": it.get("date"),
             "tickers": tickers,
             "themes": extract_themes(it.get("title"), it.get("body"), entities),
         })
     return tagged
+
+
+def extract_macro_headlines(tagged, keywords=MACRO_KEYWORDS, top_n=MACRO_TOP_N):
+    """大盤/總經頭條: tier2 + 標題含關鍵詞 + 未命中個股 → 去重 → date desc top N。
+    去重 key 去除數字: cnyes 盤中速報同模板連發只差點數,視為同一則。"""
+    seen, out = set(), []
+    for t in tagged:
+        title = (t.get("title") or "").strip()
+        if (t.get("source_tier") != 2 or t.get("tickers") or not title
+                or not any(k in title for k in keywords)):
+            continue
+        key = re.sub(r"[\d.,+%-]+", "", title)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append({"date": t.get("date"), "title": title})
+    out.sort(key=lambda x: (x["date"] or dt.date.min, x["title"]), reverse=True)
+    return out[:top_n]
+
+
+def render_macro_section(macro):
+    md = "\n## 大盤與總經\n\n"
+    if not macro:
+        return md + "(無大盤/總經頭條)\n"
+    for m in macro:
+        d = m["date"].strftime("%m/%d") if m.get("date") else "--/--"
+        md += "- %s %s\n" % (d, m["title"])
+    return md
 
 
 # ------------------------------------------------------------------ #
@@ -311,13 +348,14 @@ def fetch_news(conn, date):
     # 3 日滾動窗口: TWSE 重訊快照滯後 1 日、TPEx 滯後 2 日 (見 collector plan),
     # 窄窗會漏掉全部 tier1。baseline 同窗口慣例 → z like-for-like。
     cur.execute(
-        "SELECT news_uid, source, source_tier, ticker, title, body "
+        "SELECT news_uid, source, source_tier, ticker, title, body, announce_date "
         "FROM news_items WHERE announce_date >= %s - INTERVAL '2 days' "
         "AND announce_date <= %s", (date, date))
     rows = cur.fetchall()
     cur.close()
     return [{"news_uid": r[0], "source": r[1], "source_tier": r[2],
-             "ticker": r[3], "title": r[4] or "", "body": r[5]} for r in rows]
+             "ticker": r[3], "title": r[4] or "", "body": r[5], "date": r[6]}
+            for r in rows]
 
 
 def fetch_flow_price_5d(conn, tickers):
@@ -398,11 +436,13 @@ def save_history(history, date, pulses):
     HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False), encoding="utf-8")
 
 
-def push_inbox(summary, date):
+def push_inbox(summary, date, report_path=None):
     import subprocess
     fields = ["ts", dt.datetime.now(TZ_TPE).isoformat(), "from", "news_pulse",
               "topic", "news-pulse", "tags", "news-pulse,daily",
               "as_of", date.isoformat(), "msg", summary]
+    if report_path:
+        fields += ["report_path", str(report_path)]
     r = subprocess.run(["redis-cli", "XADD", "claude:inbox", "*", *fields],
                        capture_output=True, text=True, timeout=10)
     return r.returncode == 0
@@ -441,7 +481,9 @@ def main():
         conn.close()
 
     tagged_n = sum(1 for t in tagged if t["themes"])
+    macro = extract_macro_headlines(tagged)
     md = render_report(date, pulses, len(items), tagged_n)
+    md += render_macro_section(macro)
     md += render_intl_section(intl)
     ANALYSIS_DIR.mkdir(exist_ok=True)
     out = ANALYSIS_DIR / ("news_pulse_%s.md" % date.isoformat())
@@ -451,7 +493,8 @@ def main():
     top = pulses[:5]
     summary = "題材脈衝 %s: " % date + "; ".join(
         "%s %d則(t1=%d)" % (p["theme"], p["count"], p["tier1"]) for p in top)
-    push_inbox(summary, date)
+    summary += "; 大盤/總經 %d 則" % len(macro)
+    push_inbox(summary, date, report_path=out)
     print("[%s] items=%d tagged=%d themes=%d → %s" % (
         dt.datetime.now(TZ_TPE).strftime("%F %T"), len(items), tagged_n,
         len(pulses), out))

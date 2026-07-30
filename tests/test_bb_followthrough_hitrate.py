@@ -142,3 +142,23 @@ def test_build_digest_includes_hitrate_section():
     digest = bft.build_digest(state, "2026-07-09", [], [], history=hist)
     assert "命中率" in digest
     assert "1/2" in digest
+
+
+class TestWriteReportAndPush:
+    def test_write_report_content(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(bft, "REPO", tmp_path)
+        out = bft.write_report("**BB 追蹤**\n內容", "2026-07-30")
+        assert out == tmp_path / "analysis" / "bb_followthrough_2026-07-30.md"
+        assert out.read_text(encoding="utf-8") == "**BB 追蹤**\n內容\n"
+
+    def test_push_inbox_report_path_field(self, monkeypatch):
+        import redis as _redis
+        captured = {}
+
+        class _FakeR:
+            def xadd(self, stream, fields):
+                captured.update(fields)
+
+        monkeypatch.setattr(_redis, "Redis", lambda **kw: _FakeR())
+        assert bft.push_inbox("digest", report_path="analysis/bb_followthrough_2026-07-30.md")
+        assert captured["report_path"] == "analysis/bb_followthrough_2026-07-30.md"

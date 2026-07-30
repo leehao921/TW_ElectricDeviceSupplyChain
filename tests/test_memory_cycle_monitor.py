@@ -802,3 +802,24 @@ def test_build_inbox_summary_has_lights_and_pointer():
     assert "S3" in summary
     # pointer to full report
     assert "memory_cycle_2026-07-09.md" in summary
+
+
+class TestPushInboxReportPath:
+    class _FakeClient:
+        def __init__(self):
+            self.fields = None
+
+        def xadd(self, stream, fields):
+            self.fields = fields
+
+    def test_report_path_in_fields(self):
+        from scripts.memory_cycle_monitor import push_inbox
+        c = self._FakeClient()
+        assert push_inbox(c, "摘要", "2026-07-30", report_path="docs/analysis/memory_cycle_2026-07-30.md")
+        assert c.fields["report_path"] == "docs/analysis/memory_cycle_2026-07-30.md"
+
+    def test_no_report_path_omitted(self):
+        from scripts.memory_cycle_monitor import push_inbox
+        c = self._FakeClient()
+        assert push_inbox(c, "摘要", "2026-07-30")
+        assert "report_path" not in c.fields

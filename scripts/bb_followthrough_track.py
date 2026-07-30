@@ -587,16 +587,27 @@ def has_meaningful_events(state: dict, added: list[str], graduated: list[str]) -
     return False
 
 
-def push_inbox(msg: str) -> bool:
+def push_inbox(msg: str, report_path: str | None = None) -> bool:
     try:
         import redis
         r = redis.Redis(host="localhost", port=6379, decode_responses=True)
-        r.xadd(INBOX_STREAM, {"topic": "bb-followthrough", "msg": msg,
-                              "tags": "twse,bb,followthrough,daily,alert"})
+        fields = {"topic": "bb-followthrough", "msg": msg,
+                  "tags": "twse,bb,followthrough,daily,alert"}
+        if report_path:
+            fields["report_path"] = report_path
+        r.xadd(INBOX_STREAM, fields)
         return True
     except Exception as e:
         print(f"[err] inbox push failed: {e}", file=sys.stderr)
         return False
+
+
+def write_report(digest: str, as_of: str) -> Path:
+    """Archive the digest as analysis/bb_followthrough_<date>.md."""
+    out = REPO / "analysis" / f"bb_followthrough_{as_of}.md"
+    out.parent.mkdir(exist_ok=True)
+    out.write_text(digest + "\n", encoding="utf-8")
+    return out
 
 
 # ------------------------------------------------------------------ #
@@ -650,6 +661,7 @@ def main() -> int:
                 digests.append(digest)
             print("\n\n".join(digests))
             digest = digests[-1] if digests else ""
+            as_of = dates[-1] if dates else dtdate.today().isoformat()
         else:
             as_of = dtdate.today().isoformat()
             added, grad, digest = process_one_date(state, as_of, conn, args.dry_run, disposition_set=disposition_set)
@@ -665,8 +677,10 @@ def main() -> int:
     print(f"[ok] state saved to {args.state}", file=sys.stderr)
 
     if has_meaningful_events(state, [], []):
-        push_inbox(digest)
-        print("[ok] pushed to claude:inbox topic=bb-followthrough", file=sys.stderr)
+        report = write_report(digest, as_of)
+        push_inbox(digest, report_path=str(report))
+        print(f"[ok] pushed to claude:inbox topic=bb-followthrough (report {report.name})",
+              file=sys.stderr)
     else:
         print("[skip] no meaningful events, not pushing", file=sys.stderr)
     return 0

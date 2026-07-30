@@ -109,6 +109,80 @@ class TestTagItems:
 
 
 # ------------------------------------------------------------------ #
+# 大盤與總經 headlines
+# ------------------------------------------------------------------ #
+def _macro_item(title, tier=2, tickers=None, date=None):
+    return {"news_uid": "u:" + title, "source_tier": tier, "title": title,
+            "tickers": tickers or set(), "themes": set(),
+            "date": date or dt.date(2026, 7, 30)}
+
+
+class TestMacroHeadlines:
+    def test_keyword_title_tier2_no_ticker_included(self):
+        got = np_.extract_macro_headlines([_macro_item("台股大跌兩千點 外資狂砍")])
+        assert len(got) == 1
+        assert got[0]["title"] == "台股大跌兩千點 外資狂砍"
+        assert got[0]["date"] == dt.date(2026, 7, 30)
+
+    def test_tier1_excluded(self):
+        assert np_.extract_macro_headlines([_macro_item("台股公告", tier=1)]) == []
+
+    def test_ticker_news_excluded(self):
+        # 個股新聞留給題材脈衝段,不重複
+        got = np_.extract_macro_headlines(
+            [_macro_item("外資買超台積電", tickers={"2330"})])
+        assert got == []
+
+    def test_no_keyword_excluded(self):
+        assert np_.extract_macro_headlines([_macro_item("某公司發表新產品")]) == []
+
+    def test_dedup_same_title(self):
+        items = [_macro_item("Fed 決議利率不變"), _macro_item("Fed 決議利率不變")]
+        assert len(np_.extract_macro_headlines(items)) == 1
+
+    def test_dedup_template_titles_differing_only_in_numbers(self):
+        # cnyes 盤中速報同模板連發,只差數字 → 視為同一則
+        items = [
+            _macro_item("盤中速報 - 集中市場加權指數下跌-2049.5點至39553.86點，跌幅4.93%"),
+            _macro_item("盤中速報 - 集中市場加權指數下跌-1025.91點至40577.45點，跌幅2.47%"),
+            _macro_item("台股收盤創低"),
+        ]
+        got = np_.extract_macro_headlines(items)
+        assert len(got) == 2
+        assert sum(1 for g in got if "盤中速報" in g["title"]) == 1
+
+    def test_date_desc_and_top_n(self):
+        # 標題不能只差數字 (會被 template 去重),用中文序號區分
+        items = [_macro_item("台股頭條%s" % ("甲乙丙丁戊己庚辛壬癸子丑寅卯辰"[i]),
+                             date=dt.date(2026, 7, 28 + i % 3))
+                 for i in range(15)]
+        got = np_.extract_macro_headlines(items, top_n=10)
+        assert len(got) == 10
+        dates = [g["date"] for g in got]
+        assert dates == sorted(dates, reverse=True)
+
+    def test_render_lists_headlines(self):
+        md = np_.render_macro_section([
+            {"date": dt.date(2026, 7, 30), "title": "台股收盤大跌"},
+            {"date": dt.date(2026, 7, 29), "title": "Fed 按兵不動"}])
+        assert "## 大盤與總經" in md
+        assert "- 07/30 台股收盤大跌" in md
+        assert "- 07/29 Fed 按兵不動" in md
+
+    def test_render_empty_fallback(self):
+        md = np_.render_macro_section([])
+        assert "## 大盤與總經" in md
+        assert "無大盤/總經頭條" in md
+
+    def test_tag_items_passthrough_date(self):
+        items = [{"news_uid": "cnyes:1", "source": "cnyes", "source_tier": 2,
+                  "ticker": None, "title": "x", "body": None,
+                  "date": dt.date(2026, 7, 30)}]
+        tagged = np_.tag_items(items, {}, set())
+        assert tagged[0]["date"] == dt.date(2026, 7, 30)
+
+
+# ------------------------------------------------------------------ #
 # pulse — counting + insufficient-history gate
 # ------------------------------------------------------------------ #
 def _tagged(theme, n, tier=2):

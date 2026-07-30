@@ -50,3 +50,30 @@ def test_rotation_delta_new_position():
     assert d["6187"]["n_start"] == 0 and d["6187"]["n_end"] == 2
     assert d["6187"]["w_start"] == 0.0
     assert round(d["6187"]["delta"], 1) == 5.6
+
+
+class TestPushInboxReportPath:
+    def _capture(self, monkeypatch):
+        import subprocess
+        calls = []
+
+        class _R:
+            returncode = 0
+            stdout = "1-0"
+            stderr = ""
+
+        monkeypatch.setattr(subprocess, "run", lambda cmd, **kw: calls.append(cmd) or _R())
+        return calls
+
+    def test_report_path_in_fields(self, monkeypatch):
+        from etf_smart_money import push_to_inbox
+        calls = self._capture(monkeypatch)
+        assert push_to_inbox("摘要", "2026-07-30", report_path="analysis/etf_smart_money_2026-07-30.md")
+        assert "report_path" in calls[0]
+        assert "analysis/etf_smart_money_2026-07-30.md" in calls[0]
+
+    def test_no_report_path_omitted(self, monkeypatch):
+        from etf_smart_money import push_to_inbox
+        calls = self._capture(monkeypatch)
+        assert push_to_inbox("摘要", "2026-07-30")
+        assert "report_path" not in calls[0]

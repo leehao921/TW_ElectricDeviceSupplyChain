@@ -264,6 +264,7 @@ def push_to_inbox(
     tags: str = "bb-squeeze,daily",
     redis_host: str = "localhost",
     redis_port: int = 6379,
+    report_path: str | None = None,
 ) -> bool:
     """XADD to claude:inbox via redis-cli. Returns True on success."""
     fields = [
@@ -274,6 +275,8 @@ def push_to_inbox(
         "as_of", as_of.isoformat(),
         "msg", message,
     ]
+    if report_path:
+        fields += ["report_path", report_path]
     cmd = [
         "redis-cli", "-h", redis_host, "-p", str(redis_port),
         "XADD", INBOX_STREAM, "*", *fields,
@@ -368,11 +371,14 @@ def main(argv: list[str] | None = None) -> int:
         print("[info] dry-run: skipping XADD", file=sys.stderr)
         return 0
 
+    # smart_money 報告非每日產出 (由 smart_money_analysis.py 手動產),存在才附
+    report = REPO_ROOT / "analysis" / f"smart_money_{scan.as_of.isoformat()}.md"
     ok = push_to_inbox(
         message=message,
         as_of=scan.as_of,
         redis_host=os.environ.get("REDIS_HOST", "localhost"),
         redis_port=int(os.environ.get("REDIS_PORT", "6379")),
+        report_path=str(report) if report.exists() else None,
     )
     return 0 if ok else 3
 

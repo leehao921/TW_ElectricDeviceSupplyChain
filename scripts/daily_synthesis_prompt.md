@@ -42,8 +42,9 @@ ls -t analysis/news_pulse_*.md | head -1              # 最新題材脈衝（new
 1. **Write** `analysis/routine_synthesis_<YYYY-MM-DD>.md`（今天日期）— 結構：壓力面 / 訊號品質 / smart money / 週期燈號 / 明日觀察 / 一句話總結。
 2. **XADD 到 claude:inbox**（≤600 字摘要，換行用 \n）：
    ```
-   redis-cli XADD claude:inbox '*' ts <ISO時間> from daily_synthesis topic routine-synthesis tags "synthesis,daily" as_of <日期> msg <摘要>
+   redis-cli XADD claude:inbox '*' ts <ISO時間> from daily_synthesis topic routine-synthesis tags "synthesis,daily" as_of <日期> msg <摘要> report_path analysis/routine_synthesis_<日期>.md
    ```
+   `report_path` 必帶（相對路徑即可）：discord forwarder 據此把完整報告全文切段 + md 附件推到 Discord。
 3. **macOS 通知**——用會停留的 dialog（不是 banner，banner 使用者看不到），且必須背景執行（`&`）避免卡住 session：
    ```
    osascript -e 'display dialog "<一句話總結>\n\n完整報告: analysis/routine_synthesis_<日期>.md" with title "每日 Routine 綜合分析 <日期>" buttons {"OK"} default button 1 giving up after 21600' > /dev/null 2>&1 &

@@ -545,16 +545,19 @@ def build_inbox_summary(
     return "\n".join(lines)
 
 
-def push_inbox(client, summary: str, report_date: str) -> bool:
+def push_inbox(client, summary: str, report_date: str, report_path=None) -> bool:
     """Push the digest to the claude:inbox stream (topic=memory-cycle). Thin I/O."""
     try:
-        client.xadd(INBOX_STREAM, {
+        fields = {
             "topic": "memory-cycle",
             "from": "memory_cycle_monitor",
             "tags": "memory-cycle,daily",
             "as_of": report_date,
             "msg": summary,
-        })
+        }
+        if report_path:
+            fields["report_path"] = str(report_path)
+        client.xadd(INBOX_STREAM, fields)
         return True
     except Exception as e:  # noqa: BLE001 — inbox push is best-effort
         print(f"[warn] inbox push failed: {e}", file=sys.stderr)
@@ -747,7 +750,7 @@ def main(argv: list[str] | None = None) -> int:
             report_date=today, overall_light=agg["overall_light"],
             trim_stage=stage, s1=s1, s2a=s2a, s2b=s2b, s3=s3,
         )
-        if push_inbox(make_redis_client(), summary, today):
+        if push_inbox(make_redis_client(), summary, today, report_path=report_path):
             print("[ok] pushed to claude:inbox topic=memory-cycle")
 
     print(f"Wrote {report_path} (overall: {agg['overall_light']}, stage {stage})")

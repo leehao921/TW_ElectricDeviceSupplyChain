@@ -244,7 +244,7 @@ def render(conn, flow_window, min_breadth):
     return "\n".join(L) + "\n", summary
 
 
-def push_to_inbox(summary, as_of, host="localhost", port=6379):
+def push_to_inbox(summary, as_of, host="localhost", port=6379, report_path=None):
     """XADD a compact summary to the claude:inbox Redis stream (mirrors bb_inbox_alert)."""
     import subprocess
     fields = [
@@ -252,6 +252,8 @@ def push_to_inbox(summary, as_of, host="localhost", port=6379):
         "from", "etf_smart_money", "topic", "etf-smart-money",
         "tags", "etf-smart-money,daily", "as_of", as_of, "msg", summary,
     ]
+    if report_path:
+        fields += ["report_path", str(report_path)]
     cmd = ["redis-cli", "-h", host, "-p", str(port), "XADD", "claude:inbox", "*", *fields]
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
     if r.returncode != 0:
@@ -285,7 +287,8 @@ def main(argv=None):
     if args.notify:
         push_to_inbox(summary, now,
                       host=os.environ.get("REDIS_HOST", "localhost"),
-                      port=int(os.environ.get("REDIS_PORT", "6379")))
+                      port=int(os.environ.get("REDIS_PORT", "6379")),
+                      report_path=out)
     return 0
 
 

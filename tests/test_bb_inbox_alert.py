@@ -214,3 +214,27 @@ def test_extract_persistent_squeeze_empty_when_none_qualify():
     }
     persistent = alert.extract_persistent_squeeze(state, name_map={}, min_days=5)
     assert persistent == []
+
+
+class TestPushToInboxReportPath:
+    def _capture(self, monkeypatch):
+        calls = []
+
+        class _R:
+            returncode = 0
+            stdout = "1-0"
+            stderr = ""
+
+        monkeypatch.setattr(alert.subprocess, "run", lambda cmd, **kw: calls.append(cmd) or _R())
+        return calls
+
+    def test_report_path_conditional(self, monkeypatch):
+        calls = self._capture(monkeypatch)
+        assert alert.push_to_inbox(message="m", as_of=date(2026, 7, 30),
+                                   report_path="analysis/smart_money_2026-07-30.md")
+        assert "report_path" in calls[0]
+
+    def test_none_omitted(self, monkeypatch):
+        calls = self._capture(monkeypatch)
+        assert alert.push_to_inbox(message="m", as_of=date(2026, 7, 30), report_path=None)
+        assert "report_path" not in calls[0]
