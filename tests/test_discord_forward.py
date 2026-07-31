@@ -10,8 +10,10 @@ from discord_forward import (  # noqa: E402
     TOPIC_BLOCKLIST,
     build_report_messages,
     chunk_message,
+    convert_tables,
     format_entry,
     parse_env_file,
+    rebalance_fences,
     resolve_report_path,
     should_forward,
 )
@@ -130,6 +132,72 @@ class TestChunkMessage:
         chunks = chunk_message(text, limit=1900)
         assert all(len(c) <= 2000 for c in chunks)
         assert sum(len(c.split(") ", 1)[1]) for c in chunks) == 5000
+
+
+# ------------------------------------------------------------------ #
+# convert_tables — markdown 表格 → code block 等寬 ASCII
+# ------------------------------------------------------------------ #
+class TestConvertTables:
+    TABLE = ("前文\n"
+             "| 題材 | 則數 | z |\n"
+             "|---|---|---|\n"
+             "| 記憶體 | 36 | 2.1 |\n"
+             "| AI | 11 | 0.5 |\n"
+             "後文\n")
+
+    def test_table_wrapped_in_code_fence(self):
+        out = convert_tables(self.TABLE)
+        assert out.count("```") == 2
+        assert "前文" in out and "後文" in out
+
+    def test_separator_row_becomes_dashes(self):
+        out = convert_tables(self.TABLE)
+        assert "|---|" not in out
+        assert "-" in out.split("```")[1]
+
+    def test_columns_aligned_cjk_double_width(self):
+        out = convert_tables(self.TABLE)
+        block = out.split("```")[1].strip("\n").splitlines()
+        rows = [ln for ln in block if not set(ln) <= set("-+| ")]
+        # 「記憶體」顯示寬 6、「AI」寬 2:第二欄起點須一致 (CJK=2 計寬)
+        starts = []
+        for ln in rows:
+            cells = ln.split("|")
+            first = cells[1]
+            w = sum(2 if discord_forward._disp_width_char(ch) == 2 else 1 for ch in first)
+            starts.append(w)
+        assert len(set(starts)) == 1
+
+    def test_text_without_table_unchanged(self):
+        assert convert_tables("plain\ntext\n") == "plain\ntext\n"
+
+    def test_multiple_tables_each_fenced(self):
+        two = self.TABLE + "\n" + self.TABLE
+        assert convert_tables(two).count("```") == 4
+
+
+# ------------------------------------------------------------------ #
+# rebalance_fences — 切段不可把 code block 劈成兩半
+# ------------------------------------------------------------------ #
+class TestRebalanceFences:
+    def test_split_inside_fence_gets_closed_and_reopened(self):
+        chunks = ["(1/2) text\n```\n| a | b |", "(2/2) | c | d |\n```\nrest"]
+        out = rebalance_fences(chunks)
+        assert all(c.count("```") % 2 == 0 for c in out)
+        assert out[0].endswith("```")
+        assert "```" in out[1].split("\n")[0] or out[1].startswith("(2/2) ```")
+
+    def test_balanced_chunks_untouched(self):
+        chunks = ["```\nx\n```", "plain"]
+        assert rebalance_fences(chunks) == chunks
+
+    def test_build_report_messages_all_chunks_balanced(self):
+        rows = "\n".join("| 題材%d | %d | 內容說明文字較長一點 |" % (i, i) for i in range(300))
+        report = "# 報告\n| 題材 | 則數 | 說明 |\n|---|---|---|\n" + rows + "\n尾文"
+        msgs = build_report_messages({"topic": "t", "msg": "摘要"}, report)
+        assert len(msgs) > 2
+        assert all(c.count("```") % 2 == 0 for c in msgs)
+        assert all(len(c) <= 2000 for c in msgs)
 
 
 # ------------------------------------------------------------------ #

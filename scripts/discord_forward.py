@@ -14,6 +14,7 @@ Plan: docs/plans/2026-07-30-discord-push.md
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import time
 from pathlib import Path
@@ -80,6 +81,86 @@ def chunk_message(text: str, limit: int = CHUNK_LIMIT) -> list:
     return ["(%d/%d) %s" % (i + 1, n, p) for i, p in enumerate(parts)]
 
 
+def _disp_width_char(ch: str) -> int:
+    """CJK 全形字在 monospace 下佔 2 格。"""
+    import unicodedata
+    return 2 if unicodedata.east_asian_width(ch) in ("F", "W") else 1
+
+
+def _disp_width(s: str) -> int:
+    return sum(_disp_width_char(ch) for ch in s)
+
+
+def _pad(s: str, width: int) -> str:
+    return s + " " * (width - _disp_width(s))
+
+
+def _is_table_line(ln: str) -> bool:
+    ln = ln.strip()
+    return ln.startswith("|") and ln.endswith("|") and ln.count("|") >= 3
+
+
+def _is_separator_cells(cells) -> bool:
+    return all(c.strip() and set(c.strip()) <= set(":-") for c in cells)
+
+
+def _render_table(lines) -> str:
+    """markdown 表格行 → 等寬 ASCII 對齊 (CJK=2 計寬),包 code fence。"""
+    rows = [[c.strip() for c in ln.strip().strip("|").split("|")] for ln in lines]
+    ncol = max(len(r) for r in rows)
+    for r in rows:
+        r.extend([""] * (ncol - len(r)))
+    sep_idx = {i for i, r in enumerate(rows) if _is_separator_cells(r)}
+    widths = [0] * ncol
+    for i, r in enumerate(rows):
+        if i in sep_idx:
+            continue
+        for j, c in enumerate(r):
+            widths[j] = max(widths[j], _disp_width(c))
+    out = []
+    for i, r in enumerate(rows):
+        if i in sep_idx:
+            out.append("+" + "+".join("-" * (w + 2) for w in widths) + "+")
+        else:
+            out.append("| " + " | ".join(_pad(r[j], widths[j]) for j in range(ncol)) + " |")
+    return "```\n" + "\n".join(out) + "\n```"
+
+
+def convert_tables(text: str) -> str:
+    """Discord 訊息不渲染 markdown 表格 → 轉 code block 等寬排版。非表格行原樣。"""
+    lines = text.split("\n")
+    out, block = [], []
+    for ln in lines + [""]:                  # 哨兵行沖出最後一個 block
+        if _is_table_line(ln):
+            block.append(ln)
+            continue
+        if block:
+            if len(block) >= 2:
+                out.append(_render_table(block))
+            else:
+                out.extend(block)            # 孤行不是表格
+            block = []
+        out.append(ln)
+    return "\n".join(out[:-1])               # 去掉哨兵
+
+
+def rebalance_fences(chunks) -> list:
+    """切段後每段的 ``` 必須成對:段尾未閉合→補閉合,下一段開頭補開啟。"""
+    out, carry = [], False
+    for c in chunks:
+        if carry:
+            m = re.match(r"^\(\d+/\d+\) ", c)
+            cut = m.end() if m else 0
+            c = c[:cut] + "```\n" + c[cut:]
+        if c.count("```") % 2 == 1:
+            c += "\n```"
+            carry = True
+        else:
+            carry = False
+        out.append(c)
+    return out
+
+
 def resolve_report_path(raw, repo_root: Path = REPO_ROOT):
     """report_path 解析:相對路徑以 repo root 為基準;resolve 後必須落在
     repo 內且為 .md,否則 None(stream 內容不可指到任意檔案)。"""
@@ -112,7 +193,7 @@ def build_report_messages(fields: dict, report_text,
         return summary
     if (fields.get("msg") or "").strip() in report_text:
         return summary
-    body = chunk_message(report_text, limit)
+    body = rebalance_fences(chunk_message(convert_tables(report_text), limit))
     if len(body) > max_report_chunks:
         body = body[:max_report_chunks] + ["(報告全文過長，其餘截斷 — 完整檔在 analysis/)"]
     return summary + body
