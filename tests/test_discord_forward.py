@@ -92,6 +92,16 @@ class TestFormatEntry:
         out = format_entry({"msg": "x"})
         assert out.startswith("**[inbox]**")
 
+    def test_literal_backslash_n_converted_to_newline(self):
+        # daily_synthesis 等 producer 用字面 \n 當換行 (redis-cli 不解譯)
+        out = format_entry({"topic": "routine-synthesis", "msg": "第一行\\n\\n第二行"})
+        assert "\\n" not in out
+        assert "第一行\n\n第二行" in out
+
+    def test_real_newlines_untouched(self):
+        out = format_entry({"topic": "t", "msg": "第一行\n第二行"})
+        assert out == "**[t]** 第一行\n第二行"
+
 
 # ------------------------------------------------------------------ #
 # chunk_message

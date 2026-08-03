@@ -60,7 +60,9 @@ def should_forward(fields: dict, blocklist=None) -> bool:
 def format_entry(fields: dict) -> str:
     topic = fields.get("topic") or "inbox"
     emoji = SEVERITY_EMOJI.get((fields.get("severity") or "").upper(), "")
-    return "**[%s]** %s%s" % (topic, emoji, fields.get("msg", ""))
+    # producer 常用字面 \n 當換行 (redis-cli 不解譯 escape) → 轉真換行
+    msg = fields.get("msg", "").replace("\\n", "\n")
+    return "**[%s]** %s%s" % (topic, emoji, msg)
 
 
 def chunk_message(text: str, limit: int = CHUNK_LIMIT) -> list:
