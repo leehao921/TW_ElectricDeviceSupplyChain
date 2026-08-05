@@ -442,6 +442,16 @@ def main() -> int:
     print(f"[info] tickers snapshotted: {len(snapshots)}, BB status: {len(bb_status)}, disposition: {len(disposition)}, pb_lights: {len(pb_lights)}", file=sys.stderr)
 
     msg = build_digest(state, snapshots, bb_status, disposition, pb_lights=pb_lights)
+
+    # 量能 regime gate (alpha #4): 量縮/破線警示前置;失敗不得阻擋 digest
+    try:
+        from market_regime import banner, get_regime
+        b = banner(get_regime())
+        if b:
+            msg = b + "\n\n" + msg
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] market_regime unavailable: {e}", file=sys.stderr)
+
     print(msg)
 
     if not args.dry_run:

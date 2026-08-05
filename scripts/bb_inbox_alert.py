@@ -363,6 +363,16 @@ def main(argv: list[str] | None = None) -> int:
         universe_size=scan.universe_size,
     )
 
+    # 量能 regime gate (alpha #4): 量縮/破線時前置警示,訊號本體保留
+    # (followthrough 命中率可按 regime 分段)。gate 失敗不得阻擋 alert。
+    try:
+        from market_regime import banner, get_regime
+        b = banner(get_regime())
+        if b:
+            message = b + "\n\n" + message
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] market_regime unavailable: {e}", file=sys.stderr)
+
     print("─" * 60)
     print(message)
     print("─" * 60)

@@ -71,6 +71,7 @@ _REGISTRY = [
     ("bb-followthrough", "bb-followthrough", time(15, 30), time(23, 59)),
     ("etf-smart-money", "etf-smart-money", time(19, 30), time(23, 59)),
     ("routine-synthesis", "daily-synthesis", time(15, 50), time(23, 59)),
+    ("foreign-structure", "foreign-structure", time(16, 30), time(23, 59)),
     ("news-pulse", "news-pulse", time(20, 35), time(23, 59)),
 ]
 
