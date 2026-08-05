@@ -5,8 +5,8 @@
     <key>Label</key>
     <string>com.lulala.foreign-structure</string>
 
-    <!-- 外資結構背離 foreign_structure (Mon-Fri 16:30 Asia/Taipei,
-         三大法人/期貨 OI 落地後): 現貨 5D 淨買金額 z vs TXF 淨 OI z →
+    <!-- 外資結構背離 foreign_structure (Mon-Fri 17:10 Asia/Taipei,
+         期貨 OI collector 17:00 落地後): 現貨 5D 淨買金額 z vs TXF 淨 OI z →
          hedged_accumulation / distribution_cover 分類,
          analysis/foreign_structure_<date>.md + inbox topic=foreign-structure。
          Single-shot per fire — no KeepAlive. -->
@@ -26,11 +26,11 @@
     <!-- Mon-Fri 19:30 local time (Asia/Taipei). -->
     <key>StartCalendarInterval</key>
     <array>
-        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
-        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
-        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
-        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
-        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>16</integer><key>Minute</key><integer>30</integer></dict>
+        <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>10</integer></dict>
+        <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>17</integer><key>Minute</key><integer>10</integer></dict>
     </array>
 
     <key>EnvironmentVariables</key>
