@@ -85,3 +85,21 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 
 **Top 5 真潛力股**: 2344 華邦電 / 3711 日月光 / 1605 華新 / 1303 南亞 / 2317 鴻海
 **警戒清單**: 6147 / 2449 / 6282 / 2382 / 2356 / 2481
+
+## [2026-07-08 13:40 TWT] signal + incident | 台指期 OFI 開盤三時點背離 + stock_ofi collector 開盤 crash-loop
+
+**訊號 (→ playbooks.md 新增 candidate):** 2026-07-08 TXF 開盤三窗 Trade-OFI (主買−主賣口, `ticks.tick_type`): W1 08:45 −39 (−1.0%) → W2 09:00 −183 (−6.6%, 價 45800-45960 高檔背離) → W3 09:25 −569 (−29.3%, 價 45785→45500)。開 45606→衝 45960→收 45500。**OFI 在 09:00 現貨開盤領先價格轉弱 ~25min。** 權值股僅 08:45 有 OFI: [[台積電]]+0.47 撐、AI 伺服器 [[廣達]]−0.23/[[緯創]]−0.18/[[台達電]]−0.12 被賣 → 窄多方 (與昨日 ETF smart money「投信買 Computer Hardware 動能連日收斂」同向)。
+
+**Incident — stock_ofi 09:00/09:25 空窗根因:** collector 08:46 開盤後只收到 ~5min 真實 bidask (08:46:30–08:51), 隨即 bidask starvation → 容器 crash-loop, **RestartCount=16**, 直到 10:11 台北 (broker 回收 dead session) 才站穩, 資料 10:15 才恢復。**非 hard_session_reset 自癒** (該 fix 已部署於 /opt/tmf/.../stock_ofi_collector.py, grep✓, 但它是 in-process 復原、不會 bump RestartCount)。今日是 Docker restart-policy 硬磨 16 次過開盤。7-06 log 顯示 DEGRADED snapshot polling 曾成功保命 (active=20/20 DEGRADED), 今日卻整個 exit → 研判開盤 re-login 撞 451。**[更正 2026-07-08]** 實測共用同一把 key (尾碼 `...WAiprv`) 並各自 login shioaji 的是 **4 個 collector**（非先前誤稱的 5）: `tmf-tick-collector`(SHIOAJI_API_KEY)、`tmf-stock-ofi-collector`(**API_KEY**)、`tmf-futures-ohlcv-collector`(SHIOAJI_API_KEY)、`tmf-options-iv-collector`(SHIOAJI_API_KEY); 其餘 collector 走 TAIFEX/TWSE 公開 API 不 login。shioaji per-process, 4 容器=4 條獨立 session 佔同一把 key; dead session 沒 logout → slot 未釋放 → 重啟新 login 超並發上限撞 451。**每把 key 確切並發上限數字未證實**（先前「~5」為推測), 僅確定「有上限且死 session 回收前佔額度」。**空窗不可回補** (逐筆微結構無法事後 replay; `ticks` 只收期貨不收個股)。
+
+**根治方向 (未執行):** (a) stock_ofi 專屬獨立 API key (分離 quota, 開盤 451 免競爭); (b) login 451 改 in-process 60s backoff retry 取代 sys.exit → 避免 Docker crash-loop churn; (c) 確保 exit path 優先留在 DEGRADED snapshot 模式。
+
+## [2026-08-05 TWT] 事件複盤驗證 | 6-7 月「萬箭齊發」→ 財報週 V 轉,KOL 敘事 vs 本地數據
+
+用戶轉來 KOL 貼文複盤 6/23→7/29 崩跌與 MSFT/AWS 財報週反轉。本地驗證 (TXF futures_ohlcv + institutional_stock):**期指 6/23 高 51,411 → 7/29 低 39,442 = -23.3%**,較「跌快兩成」更深;個股 7/20 後 vs 6 月峰值:**85 檔腰斬 (≤-50%)、458 檔 ≤-35%、1,067 檔 ≤-20% (universe 2,344)** — 指數跌幅被權值護盤低估、中小半導體重災說法成立。反轉催化 = [[Microsoft]] 獲利季增 + [[Amazon]] AWS 422 億美元;巨頭雲端 AI 營收單季合計破千億美元 → 「AI 推論商業模式成立」結構性 thesis。外資 7/31 全市場 +612 億首日回補、[[台積電]] 單檔 +334 億 (見 routine_synthesis_2026-08-03)。**不可驗主張 (打折):** CDS「單日最大漲幅」(無數據源,分布性形容詞未驗證)、四大基金護盤細節、韓國總統府炒股定性。**Data gap 發現: asia_index_daily 停更於 2026-05-15** (yfinance collector 斷,TWII/KS11 全缺 6-8 月) → 需在 database repo 修。
+
+## [2026-08-05 TWT] 驗證 | 「AI 推論商業模式成立」數字查核 (web 一手來源) + asia_index_daily 修復
+
+前篇 KOL 敘事的財報主張逐項查核 (公司 IR/CNBC 一手):**AWS $42.2B ✓** (YoY +37%,18 季最快);**[[Microsoft]] 獲利季增 ✓** ($31.8B→$35.8B,+12.6%) 但「先前三季停滯 ~$13B」**不成立** (實際 $27.7/38.5/31.8B,受 [[OpenAI]] 投資損益波動);**「AI 營收 1063 億」= 口徑錯置** — 精確等於 Intelligent Cloud ($39.3B) + AWS ($42.2B) + Google Cloud ($24.8B) **雲端部門營收**加總,三家皆無 AI 專項披露,[[Amazon]] 僅口頭披露 AI run rate >$25B/年;[[Meta]] 無 AI 營收項 ✓ (capex $31.1B 翻倍、FCF 剩 $0.78B)。市場反應:7/30 Nasdaq +2.8%、SOX +8.19%、MSFT +15.5% (單日市值 +$450B 紀錄);[[Alphabet]] 實際 7/22 已公布 (非財報週內)。**CDS 主張升級為成立**:[[NVIDIA]] 5yr CDS 7/27 單日 +14bp 創 82bp 歷史高、[[Oracle]] 203-215bp 為 2008 以來最高 (S&P 降至 BBB−),驅動 = 循環融資疑慮 (NVIDIA 對 OpenAI/CoreWeave 入股擔保 >$540B)。**結論:推論需求真實 (雲端營收/獲利率齊升) 但「1063 億=AI 營收」是敘事誇飾;信用市場與股市對 AI 循環融資的定價分歧是下一個觀察軸。**
+
+基礎設施:asia_index_daily 孤兒表已修 (database repo 58214ec) — 13 檔亞洲指數 collector 20:45 TPE + backfill 5/16-8/5 + staleness 告警;TWII 現貨實測 6/23 高 48,219 → 7/29 低 39,385 = **-18.3%** (期指 -23.3%)。
