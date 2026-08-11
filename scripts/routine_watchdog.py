@@ -65,6 +65,7 @@ _REGISTRY = [
     ("pb-lights", "pb-lights", time(8, 35), time(13, 30)),
     ("disposition-alert", "disposition-daily", time(8, 35), time(13, 30)),
     ("disposition-track", "disposition-daily", time(8, 35), time(13, 30)),
+    ("ddr-price", "ddr-price", time(8, 20), time(13, 30)),
     ("memory-cycle", "memory-cycle", time(8, 40), time(13, 30)),
     ("buy-list", "buy-list-daily", time(8, 50), time(13, 30)),
     ("bb-squeeze", "bb-squeeze", time(14, 30), time(23, 59)),
