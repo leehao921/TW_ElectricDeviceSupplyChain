@@ -38,8 +38,15 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 # Lazy imports — smart_money_analysis hits psycopg2 / pulls heavy deps. Wrap
 # in a function so unit tests of pure helpers don't have to pay that cost.
 DEFAULT_STATE_PATH = REPO_ROOT / "data" / "bb_consolidation_state.json"
+DISPOSITION_PATH = REPO_ROOT / "data" / "disposition_current.json"
 PERSISTENT_MIN_DAYS = 5
 INBOX_STREAM = "claude:inbox"
+
+# 強勢名單 (隔日沖池): 漲停附近 + 足夠成交值 → 隔日振幅大、當沖客聚集。
+# 與 BB squeeze (波動壓縮) 互補 — squeeze 抓爆發前, 強勢名單抓已爆發。
+STRONG_MIN_RET_PCT = 9.0
+STRONG_MIN_TURNOVER_OKU = 10.0
+STRONG_MAX_SHOW = 10
 
 
 # ------------------------------------------------------------------ #
@@ -52,6 +59,7 @@ class BBScanResult:
     buy_df: pd.DataFrame
     avoid_df: pd.DataFrame
     watch_labels: list[str]
+    ohlcv_map: dict | None = None
 
 
 def run_bb_scan_headless(as_of: date | None = None, source: str = "auto") -> BBScanResult:
@@ -94,6 +102,7 @@ def run_bb_scan_headless(as_of: date | None = None, source: str = "auto") -> BBS
             buy_df=buy_df,
             avoid_df=avoid_df,
             watch_labels=watch_labels,
+            ohlcv_map=ohlcv_map,
         )
     finally:
         conn.close()
@@ -175,6 +184,67 @@ def extract_persistent_squeeze(
 
 
 # ------------------------------------------------------------------ #
+# 強勢名單 / 隔日沖池 (pure)
+# ------------------------------------------------------------------ #
+def load_disposition_set(path: Path = DISPOSITION_PATH) -> set[str]:
+    """Tickers currently under 處置 (分盤交易, 通常停止現股當沖資格)."""
+    try:
+        data = json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError):
+        return set()
+    active = data.get("active", {})
+    return set(active.keys()) if isinstance(active, dict) else set()
+
+
+def extract_strong_momentum(
+    ohlcv_map: dict[str, pd.DataFrame],
+    *,
+    name_map: dict[str, str],
+    disposition: set[str],
+    as_of: date | None = None,
+    min_ret_pct: float = STRONG_MIN_RET_PCT,
+    min_turnover_oku: float = STRONG_MIN_TURNOVER_OKU,
+) -> list[dict]:
+    """漲停/近漲停 + 高成交值的強勢股 — 隔日沖候選池.
+
+    處置股不剔除但標 disposition=True (分盤 + 通常無現股當沖資格).
+    Returns rows sorted by turnover desc.
+    """
+    rows = []
+    for tk, df in ohlcv_map.items():
+        df = df.dropna(subset=["Close", "Volume"])
+        if as_of is not None and len(df):
+            idx_dates = (
+                df.index.tz_localize(None).normalize()
+                if df.index.tz is not None else df.index.normalize()
+            )
+            df = df[idx_dates <= pd.Timestamp(as_of)]
+        if len(df) < 2:
+            continue
+        close, prev_close = float(df["Close"].iloc[-1]), float(df["Close"].iloc[-2])
+        if prev_close <= 0:
+            continue
+        ret_pct = (close / prev_close - 1) * 100
+        turnover_oku = close * float(df["Volume"].iloc[-1]) / 1e8
+        if ret_pct < min_ret_pct or turnover_oku < min_turnover_oku:
+            continue
+        vol20 = df["Volume"].iloc[-21:-1].mean() if len(df) >= 21 else df["Volume"].iloc[:-1].mean()
+        ticker = tk.split(".")[0]
+        bar_ts = df.index[-1]
+        rows.append({
+            "ticker": ticker,
+            "name": name_map.get(ticker, ""),
+            "ret_today_pct": round(ret_pct, 2),
+            "turnover_oku": round(turnover_oku, 1),
+            "vol_ratio": round(float(df["Volume"].iloc[-1]) / vol20, 2) if vol20 else 0.0,
+            "disposition": ticker in disposition,
+            "bar_date": bar_ts.date().isoformat(),
+        })
+    rows.sort(key=lambda r: r["turnover_oku"], reverse=True)
+    return rows
+
+
+# ------------------------------------------------------------------ #
 # Message rendering (pure)
 # ------------------------------------------------------------------ #
 def _row_to_buy_line(r: pd.Series) -> str:
@@ -204,12 +274,16 @@ def build_inbox_message(
     watch_labels: Iterable[str],
     persistent: list[dict],
     universe_size: int,
+    strong: list[dict] | None = None,
 ) -> str:
     watch_list = list(watch_labels)
+    strong = strong or []
+    strong_part = f" / {len(strong)} 強勢" if strong else ""
     header = (
         f"**BB Squeeze 巡檢 {as_of.isoformat()}** "
         f"({len(buy_df)} Buy / {len(avoid_df)} Avoid / "
-        f"{len(watch_list)} Watch / {len(persistent)} 持續盤整≥{PERSISTENT_MIN_DAYS}d) "
+        f"{len(watch_list)} Watch / {len(persistent)} 持續盤整≥{PERSISTENT_MIN_DAYS}d"
+        f"{strong_part}) "
         f"· universe={universe_size}"
     )
     lines = [header, ""]
@@ -237,6 +311,25 @@ def build_inbox_message(
         shown = watch_list[:10]
         suffix = f"  (+{len(watch_list) - 10} more)" if len(watch_list) > 10 else ""
         lines.append("  " + " / ".join(shown) + suffix)
+
+    if strong:
+        lines.append("")
+        # 隔日沖池只有「今天的漲停」才有意義 — 資料落後時明示,避免拿舊訊號當今日
+        bar_dates = {s["bar_date"] for s in strong if s.get("bar_date")}
+        stale = ""
+        if bar_dates and max(bar_dates) < as_of.isoformat():
+            stale = f" ⚠️ 資料日 {max(bar_dates)}, OHLCV 落後 as_of!"
+        lines.append(f"🔥 強勢 (漲停/近漲停 + 成交值≥10億, 隔日沖池):{stale}")
+        for s in strong[:STRONG_MAX_SHOW]:
+            name = f" {s['name']}" if s.get("name") else ""
+            disp = " 🚫處置" if s.get("disposition") else ""
+            lines.append(
+                f"  • {s['ticker']}{name} "
+                f"({s['ret_today_pct']:+.2f}%, {s['turnover_oku']}億, "
+                f"vol×{s['vol_ratio']:.2f}){disp}"
+            )
+        if len(strong) > STRONG_MAX_SHOW:
+            lines.append(f"  (+{len(strong) - STRONG_MAX_SHOW} more)")
 
     if persistent:
         lines.append("")
@@ -354,6 +447,14 @@ def main(argv: list[str] | None = None) -> int:
     name_map = sm.build_ticker_name_map()
     persistent = extract_persistent_squeeze(state, name_map=name_map)
 
+    strong = extract_strong_momentum(
+        scan.ohlcv_map or {},
+        name_map=name_map,
+        disposition=load_disposition_set(),
+        as_of=scan.as_of,
+    )
+    print(f"[info] strong momentum hits: {len(strong)}", file=sys.stderr)
+
     message = build_inbox_message(
         as_of=scan.as_of,
         buy_df=scan.buy_df,
@@ -361,6 +462,7 @@ def main(argv: list[str] | None = None) -> int:
         watch_labels=scan.watch_labels,
         persistent=persistent,
         universe_size=scan.universe_size,
+        strong=strong,
     )
 
     # 量能 regime gate (alpha #4): 量縮/破線時前置警示,訊號本體保留

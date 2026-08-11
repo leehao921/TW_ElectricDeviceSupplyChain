@@ -238,3 +238,142 @@ class TestPushToInboxReportPath:
         calls = self._capture(monkeypatch)
         assert alert.push_to_inbox(message="m", as_of=date(2026, 7, 30), report_path=None)
         assert "report_path" not in calls[0]
+
+
+# ------------------------------------------------------------------ #
+# extract_strong_momentum (強勢名單 / 隔日沖池)
+# ------------------------------------------------------------------ #
+def _make_ohlcv(closes: list[float], volumes: list[float]) -> pd.DataFrame:
+    idx = pd.date_range("2026-07-01", periods=len(closes), freq="B")
+    return pd.DataFrame({"Close": closes, "Volume": volumes}, index=idx)
+
+
+def test_extract_strong_momentum_filters_and_sorts():
+    # A: +10% on 20億 turnover → hit
+    a = _make_ohlcv([100.0] * 24 + [110.0], [1_000_000] * 24 + [18_200_000])
+    # B: +10% but tiny turnover (0.11億) → filtered out
+    b = _make_ohlcv([100.0] * 24 + [110.0], [1_000_000] * 24 + [100_000])
+    # C: +3% on huge turnover → filtered out (not near limit-up)
+    c = _make_ohlcv([100.0] * 24 + [103.0], [1_000_000] * 24 + [50_000_000])
+    # D: +9.9% bigger turnover than A → hit, sorted first
+    d = _make_ohlcv([200.0] * 24 + [219.8], [1_000_000] * 24 + [20_000_000])
+    ohlcv_map = {"1111.TW": a, "2222.TW": b, "3333.TW": c, "4444.TW": d}
+    rows = alert.extract_strong_momentum(
+        ohlcv_map,
+        name_map={"1111": "甲", "4444": "丁"},
+        disposition=set(),
+        as_of=date(2026, 8, 4),
+    )
+    assert [r["ticker"] for r in rows] == ["4444", "1111"]
+    assert rows[0]["name"] == "丁"
+    assert rows[0]["turnover_oku"] > rows[1]["turnover_oku"]
+    assert rows[1]["ret_today_pct"] == pytest.approx(10.0)
+    assert all(r["disposition"] is False for r in rows)
+
+
+def test_extract_strong_momentum_marks_disposition_not_dropped():
+    a = _make_ohlcv([100.0] * 24 + [110.0], [1_000_000] * 24 + [18_200_000])
+    rows = alert.extract_strong_momentum(
+        {"6213.TW": a},
+        name_map={"6213": "聯茂"},
+        disposition={"6213"},
+        as_of=date(2026, 8, 4),
+    )
+    assert len(rows) == 1
+    assert rows[0]["disposition"] is True
+
+
+def test_extract_strong_momentum_respects_as_of():
+    # last bar is +10% but AFTER as_of → sliced away, prior bar is flat → no hit
+    a = _make_ohlcv([100.0] * 24 + [110.0], [1_000_000] * 24 + [18_200_000])
+    cutoff = a.index[-2].date()
+    rows = alert.extract_strong_momentum(
+        {"1111.TW": a}, name_map={}, disposition=set(), as_of=cutoff,
+    )
+    assert rows == []
+
+
+def test_build_inbox_message_includes_strong_section():
+    empty = pd.DataFrame()
+    strong = [
+        {"ticker": "6274", "name": "台燿", "ret_today_pct": 9.93,
+         "turnover_oku": 124.2, "vol_ratio": 1.46, "disposition": False},
+        {"ticker": "6213", "name": "聯茂", "ret_today_pct": 9.9,
+         "turnover_oku": 100.0, "vol_ratio": 2.65, "disposition": True},
+    ]
+    msg = alert.build_inbox_message(
+        as_of=date(2026, 8, 11),
+        buy_df=empty,
+        avoid_df=empty,
+        watch_labels=[],
+        persistent=[],
+        universe_size=900,
+        strong=strong,
+    )
+    assert "🔥" in msg and "2 強勢" in msg
+    assert "6274 台燿" in msg and "124.2億" in msg
+    assert "🚫處置" in msg
+    # disposition marker only on the disposition row
+    strong_lines = [l for l in msg.splitlines() if "6274" in l]
+    assert "🚫" not in strong_lines[0]
+
+
+def test_build_inbox_message_strong_default_absent():
+    empty = pd.DataFrame()
+    msg = alert.build_inbox_message(
+        as_of=date(2026, 8, 11),
+        buy_df=empty,
+        avoid_df=empty,
+        watch_labels=[],
+        persistent=[],
+        universe_size=900,
+    )
+    assert "🔥" not in msg
+
+
+def test_load_disposition_set_missing_file(tmp_path):
+    assert alert.load_disposition_set(tmp_path / "nope.json") == set()
+
+
+def test_load_disposition_set_reads_active(tmp_path):
+    p = tmp_path / "disp.json"
+    p.write_text(json.dumps({"active": {"6213": {}, "3006": {}}}))
+    assert alert.load_disposition_set(p) == {"6213", "3006"}
+
+
+def test_extract_strong_momentum_reports_bar_date():
+    a = _make_ohlcv([100.0] * 24 + [110.0], [1_000_000] * 24 + [18_200_000])
+    rows = alert.extract_strong_momentum(
+        {"1111.TW": a}, name_map={}, disposition=set(), as_of=date(2026, 8, 11),
+    )
+    assert rows[0]["bar_date"] == a.index[-1].date().isoformat()
+
+
+def test_build_inbox_message_warns_when_strong_stale():
+    empty = pd.DataFrame()
+    strong = [
+        {"ticker": "8039", "name": "台虹", "ret_today_pct": 9.95,
+         "turnover_oku": 16.9, "vol_ratio": 0.24, "disposition": False,
+         "bar_date": "2026-08-07"},
+    ]
+    msg = alert.build_inbox_message(
+        as_of=date(2026, 8, 11),
+        buy_df=empty, avoid_df=empty, watch_labels=[], persistent=[],
+        universe_size=900, strong=strong,
+    )
+    assert "資料日 2026-08-07" in msg and "落後" in msg
+
+
+def test_build_inbox_message_no_warning_when_fresh():
+    empty = pd.DataFrame()
+    strong = [
+        {"ticker": "6274", "name": "台燿", "ret_today_pct": 9.93,
+         "turnover_oku": 124.2, "vol_ratio": 1.46, "disposition": False,
+         "bar_date": "2026-08-11"},
+    ]
+    msg = alert.build_inbox_message(
+        as_of=date(2026, 8, 11),
+        buy_df=empty, avoid_df=empty, watch_labels=[], persistent=[],
+        universe_size=900, strong=strong,
+    )
+    assert "落後" not in msg
