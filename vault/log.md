@@ -111,3 +111,13 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 ## [2026-08-11 TWT] incident+fix | DDR 報價手動月更失效 3 個月 → DRAMeXchange 日更自動化
 
 用戶問 memory-cycle 為何沒自動更新報價,追查揭露兩層:(1) S1 P/B 凍在 8/8 = 外接碟事故下游 (pb-lights cache fast-path 靜默回放);(2) **S2 DDR 報價自 6/25 起一直是模板佔位值** ($2.85→3.45,「+10.6%」是假的),實際 [[DDR4]] 8Gb 現貨已 **$42.50** — 手動月更機制部署後從未被真值覆蓋,超級週期整段漲勢 monitor 沒看到 (燈號方向碰巧同為 🟢 未釀錯判)。修復: `scripts/ddr_price_daily.py` 每日 08:20 抓 DRAMeXchange 首頁現貨表 (實測可達,session avg),自動維護 yaml 月均 series;TrendForce 週報實價 seed 5-7 月 (32.8/35.67/40.03,agent 逐週查證高信度);[[DDR5]] 合約絕對價確認無免費源 → 指數基準 Q1=100/Q2=145 (+45% TrendForce 中值)。今日實價: DDR4 $42.50 (+4.4%)、DDR5 現貨 $51.93 (**+25.8% 單日**,超級週期未歇)。S2 現算真數據: MoM +6.2% 🟢 / QoQ +45% 🟢。教訓進 memory: **inputs 檔部署 ≠ 有人在餵,要驗證真值覆蓋**。
+
+## 2026-08-11 — 實際庫存入庫追蹤
+- 用戶提供券商 App 庫存截圖 (15 檔, 現值 164.9 萬, 未實現 +11.7 萬 / +7.7%)
+- 寫入 data/portfolio_holdings.json + 重寫 vault/trading/positions.md (00763U 移 defunct 待確認)
+- buy_list_state.json: 2603/7895 加入 watch_list, 新增 4 條持股 watchpoints (2408 近 tp2 505、權證到期日待查、3006/2455 處置中)
+
+## 2026-08-11 — OHLCV collector DNS stale incident + BB 強勢名單上線
+- tmf-stock-daily-collector (up 5wk) 解析不到重啟過的 trading-timescaledb → 8/10+8/11 OHLCV 全缺,今日 14:30 BB 巡檢實為 8/7 舊訊號
+- 修復: docker restart + 手動補 8/10..8/11 (917/924);重跑推送修正版 (2 Buy/3 Avoid/11 強勢)
+- BB 巡檢新增 🔥 強勢名單 (漲停≥9%+成交值≥10億,隔日沖池),處置股標🚫,OHLCV 落後時警示資料日

@@ -5,12 +5,9 @@
 # Rebuild: python3 tests/test_wikilinks.py --rebuild-baseline
 ...
 ../../Pilot_Reports/Computer Hardware/6579_研揚
-../../Pilot_Reports/Electronic Components/2317_鴻海
 ../../Pilot_Reports/Electronic Components/2383_台光電
 ../../Pilot_Reports/Electronic Components/2408_南亞科
 ../../Pilot_Reports/Electronic Components/3481_群創
-../../Pilot_Reports/Electronic Components/5469_瀚宇博
-../../Pilot_Reports/Semiconductors/2330_台積電
 ../../Pilot_Reports/Semiconductors/2408_南亞科
 ../../Pilot_Reports/Semiconductors/2454_聯發科
 ../../themes/AI_伺服器.md

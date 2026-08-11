@@ -1,0 +1,28 @@
+{
+  "as_of": "2026-08-11 18:55",
+  "source": "券商 App 庫存列表截圖 (IMG_9726~9729)",
+  "note": "預估現值為券商扣除預估手續費/交易稅後金額,隱含價格略低於收盤價",
+  "totals": {
+    "market_value": 1649066,
+    "cost_basis_est": 1531771,
+    "unrealized_pnl": 117295,
+    "unrealized_pnl_pct": 7.66
+  },
+  "holdings": [
+    {"ticker": "00891", "name": "中信關鍵半導體", "type": "ETF", "shares": 14220, "avg_cost": 28.62, "market_value": 503545, "implied_price": 35.41, "pnl": 96433, "pnl_pct": 23.69, "weight_pct": 30.5},
+    {"ticker": "00999A", "name": "主動野村臺灣高息", "type": "ETF", "shares": 20046, "avg_cost": 10.65, "market_value": 221401, "implied_price": 11.05, "pnl": 7889, "pnl_pct": 3.69, "weight_pct": 13.4},
+    {"ticker": "2454", "name": "聯發科", "type": "股票", "shares": 48, "avg_cost": 3735.5, "market_value": 192308, "implied_price": 4006.4, "pnl": 12937, "pnl_pct": 7.21, "weight_pct": 11.7},
+    {"ticker": "2603", "name": "長榮", "type": "股票", "shares": 715, "avg_cost": 187.09, "market_value": 155347, "implied_price": 217.3, "pnl": 21528, "pnl_pct": 16.09, "weight_pct": 9.4},
+    {"ticker": "066082", "name": "永續半凱基5C購01", "type": "權證", "shares": 67000, "avg_cost": 2.84, "market_value": 138501, "implied_price": 2.07, "pnl": -52000, "pnl_pct": -27.3, "weight_pct": 8.4, "expiry": "2026-12-07", "note": "用戶確認 8/11 剩 118 天到期 (≈2026-12-07);履約價/標的細節仍待查。theta 加速門檻: 10/08 剩 60 天"},
+    {"ticker": "7895", "name": "元進莊", "type": "股票(OTC)", "shares": 2000, "avg_cost": 68.58, "market_value": 129762, "implied_price": 64.88, "pnl": -7441, "pnl_pct": -5.42, "weight_pct": 7.9, "note": "食品股,非電子 coverage;OTC 無 institutional close_price"},
+    {"ticker": "2330", "name": "台積電", "type": "股票", "shares": 37, "avg_cost": 1998.7, "market_value": 88317, "implied_price": 2387.5, "pnl": 14337, "pnl_pct": 19.38, "weight_pct": 5.4},
+    {"ticker": "0050", "name": "元大台灣50", "type": "ETF", "shares": 772, "avg_cost": 79.76, "market_value": 80640, "implied_price": 104.46, "pnl": 19047, "pnl_pct": 30.92, "weight_pct": 4.9},
+    {"ticker": "2408", "name": "南亞科", "type": "股票", "shares": 100, "avg_cost": 364.0, "market_value": 48736, "implied_price": 487.4, "pnl": 12323, "pnl_pct": 33.84, "weight_pct": 3.0, "note": "buy_list tp1 460 已過,tp2 505 剩 ~3.6%"},
+    {"ticker": "2344", "name": "華邦電", "type": "股票", "shares": 200, "avg_cost": 209.5, "market_value": 35480, "implied_price": 177.4, "pnl": -6436, "pnl_pct": -15.35, "weight_pct": 2.2},
+    {"ticker": "3006", "name": "晶豪科", "type": "股票", "shares": 100, "avg_cost": 226.5, "market_value": 26660, "implied_price": 266.6, "pnl": 4001, "pnl_pct": 17.66, "weight_pct": 1.6, "note": "處置中 2026-08-11~08-17 分盤交易"},
+    {"ticker": "2317", "name": "鴻海", "type": "股票", "shares": 50, "avg_cost": 252.0, "market_value": 13106, "implied_price": 262.1, "pnl": 501, "pnl_pct": 3.97, "weight_pct": 0.8},
+    {"ticker": "2455", "name": "全新", "type": "股票", "shares": 25, "avg_cost": 426.48, "market_value": 9157, "implied_price": 366.3, "pnl": -1509, "pnl_pct": -14.15, "weight_pct": 0.6, "note": "處置中 2026-08-10~08-14;buy_list stop_loss 320"},
+    {"ticker": "703619", "name": "家登統一6C購01", "type": "權證", "shares": 10000, "avg_cost": 1.04, "market_value": 6092, "implied_price": 0.61, "pnl": -4312, "pnl_pct": -41.45, "weight_pct": 0.4, "note": "標的家登(3680);到期日/履約價待查 (統一權證網)"},
+    {"ticker": "1432", "name": "大魯閣", "type": "股票", "shares": 1, "avg_cost": 16.0, "market_value": 14, "pnl": -3, "pnl_pct": -17.65, "weight_pct": 0.0, "note": "零股 dust,可清"}
+  ]
+}
