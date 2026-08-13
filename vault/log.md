@@ -133,3 +133,4 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 容器清理: tmf-cross-basis-publisher (module .retired,停用+restart=no)、tmf-redis-timescale-sync (被 redis-bar-sync 取代的 orphan,停用)、redis-bar-sync compose YAML 摺行 bug 使 CLI args 被吃掉 (line 1002-1006,現以 defaults 運作)
 - Routine 補跑: disposition fetch + BB scan 8/13 (2 Buy: 2364 倫飛/6603 富強鑫 · 18 強勢: 奇鋐 337億/國巨 308億...) + bb-followthrough 已推 inbox
 - **2408 南亞科 8/13 收 514 (+6.53%) 突破 tp2=505** → 已推 inbox buy-list alert
+- 終驗: pg_amcheck 全庫掃描 (heap+btree, 49GB) EXIT=0 零錯誤 (17:5x 第三輪;第二輪抓到 bgw_job_stat_history 檔案消失→TRUNCATE、intraday_alpha_history 雙索引損毀→REINDEX)
