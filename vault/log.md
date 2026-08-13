@@ -121,3 +121,15 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - tmf-stock-daily-collector (up 5wk) 解析不到重啟過的 trading-timescaledb → 8/10+8/11 OHLCV 全缺,今日 14:30 BB 巡檢實為 8/7 舊訊號
 - 修復: docker restart + 手動補 8/10..8/11 (917/924);重跑推送修正版 (2 Buy/3 Avoid/11 強勢)
 - BB 巡檢新增 🔥 強勢名單 (漲停≥9%+成交值≥10億,隔日沖池),處置股標🚫,OHLCV 落後時警示資料日
+
+## [2026-08-13 17:45 TWT] update | trading-timescaledb 損毀修復 + 8/12-8/13 routine 全斷補跑
+
+- 起因: 8/11 ~21:00 Mac 重開機 → Docker Desktop engine 掛死 → 8/13 中午 watchdog "Docker.raw disk-surgery" 期間 backend crash-loop,Postgres 多次 unclean shutdown
+- 損毀範圍: 17 damaged chunks (truncated/missing files) + 12 ghost chunks (catalog 有、pg_class 無) + pg_class/timescale catalog 索引 + 88 條 dangling pg_depend + institutional_stock_pkey + futures chunk btree
+- 修復: REINDEX SYSTEM/catalog/table、drop 損毀 chunks、catalog 手術 (compression refs + ghost rows)、3 caggs (tick_rate_1m/iv_metrics_1m/iv_regime_1m) refresh、futures 1T/1D 重複清除 (8,790 rows)
+- 資料回補: stock_daily_ohlcv 8/5-8/13 (6,440 rows, 921/day)、institutional_stock 8/12 (1,812)、etf_holdings_daily 8/5-8/11 全救回 (2,436, 零損失)、news_items 救回 67 筆、futures_ohlcv 8/12 補齊
+- **永久損失**: ticks 8/3 全日 (11 chunks 檔案消失,tick 無法回補)、TXF/TMF/MXF 8/11 分鐘 bar (Shioaji kbar 該日回傳空,CDF 正常;過幾天可重試 backfill --start 2026-08-11)
+- Redis 拓撲已變 (database repo 5e00f50): master = homebrew redis :6379 (host),trading-redis 容器降為 replica 發布 :6380 → **與 FalkorDB :6380 衝突**,knowledge_manager-falkordb-1 起不來 (tw-electronics MCP 因此斷線),待決定 falkordb 換 port
+- 容器清理: tmf-cross-basis-publisher (module .retired,停用+restart=no)、tmf-redis-timescale-sync (被 redis-bar-sync 取代的 orphan,停用)、redis-bar-sync compose YAML 摺行 bug 使 CLI args 被吃掉 (line 1002-1006,現以 defaults 運作)
+- Routine 補跑: disposition fetch + BB scan 8/13 (2 Buy: 2364 倫飛/6603 富強鑫 · 18 強勢: 奇鋐 337億/國巨 308億...) + bb-followthrough 已推 inbox
+- **2408 南亞科 8/13 收 514 (+6.53%) 突破 tp2=505** → 已推 inbox buy-list alert
