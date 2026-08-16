@@ -140,3 +140,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 裝回 brew python@3.13 (3.13.15) 不相容此 macOS (pyexpat 缺符號、mac_ver 回空) → **棄 brew,venv 改建於 uv-managed CPython 3.13.12** (同 database repo 模式,免疫 brew churn);372 tests 全綠
 - 換 binary 兩坑:(1) launchd LWCR → OS_REASON_CODESIGNING 殺,需全數 bootout/bootstrap;(2) 新 TCC 身分 → launchd 下讀 Documents 卡死 open(),用戶核准對話框後恢復
 - **knowledge stack postgres volume 消失** (tw_electronics 全失,無備份) → 依 2026-04-24 plan DDL 重建 schema,回填 3 筆 (聯發科 TPU/ABF Film/TPU v8x 估值);FalkorDB 仍卡 6380 撞 port。trading-timescaledb 無恙 (有 8/15 dump)
+
+## 2026-08-16 (日) 晚 — 8/14 漏跑補齊 + 兩個修復殘留收尾
+- **補跑 8/14**: bb-squeeze (--as-of, 強勢: 2324 仁寶/8039 台虹)、bb-followthrough (--backfill)、etf-smart-money、news-pulse (--date)、ddr-price (8/16 現貨 DDR4 $42.72 +4.4% / DDR5 $52.73 **+25.5%**)；ma-touch/buy-list 盤中即時性質不補；daily-synthesis 8/14 略過
+- **futures_oi_daily 被清空** (8/13 修復殘留) → TAIFEX 逐日回填 2/1–8/13 共 136 交易日 (65s/date 限速, nohup 背景, 完後自動重跑 foreign-structure + 推 inbox)
+- **8/15 備份 dump 是 0 bytes** (撞 Docker 重啟) 且 backup_database.py 無排程呼叫 → 先手動補 selective dump 12 表 39MB (tmf_selective_20260816.dump, pg_restore -l 驗證)；**備份排程化待辦**
+- **pg_inherits 10 筆懸空條目** (ticks×6/stock_ofi/iv_metrics/iv_strikes/iv_regime, 指向不存在 pg_class oid) 擋 pg_dump "cache lookup failed" → DELETE 後 pg_dump 復原, timescaledb chunk catalog 本身乾淨
