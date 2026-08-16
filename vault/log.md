@@ -134,3 +134,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - Routine 補跑: disposition fetch + BB scan 8/13 (2 Buy: 2364 倫飛/6603 富強鑫 · 18 強勢: 奇鋐 337億/國巨 308億...) + bb-followthrough 已推 inbox
 - **2408 南亞科 8/13 收 514 (+6.53%) 突破 tp2=505** → 已推 inbox buy-list alert
 - 終驗: pg_amcheck 全庫掃描 (heap+btree, 49GB) EXIT=0 零錯誤 (17:5x 第三輪;第二輪抓到 bgw_job_stat_history 檔案消失→TRUNCATE、intraday_alpha_history 雙索引損毀→REINDEX)
+
+## 2026-08-16 (六) — launchd 全滅 incident: brew 升級移除 python@3.13
+- **8/13 21:13 重開機**前後 brew 升級移除 python@3.13 → My-TW-Coverage .venv 懸空 → **17 支 launchd routine 全部 exit 78**,8/14 (五) 整天無 BB/buy-list/處置/discord-forward,watchdog 自己也死 → 無警報無自癒 (單點故障暴露:watchdog 與被監控者共用同一 venv)
+- 裝回 brew python@3.13 (3.13.15) 不相容此 macOS (pyexpat 缺符號、mac_ver 回空) → **棄 brew,venv 改建於 uv-managed CPython 3.13.12** (同 database repo 模式,免疫 brew churn);372 tests 全綠
+- 換 binary 兩坑:(1) launchd LWCR → OS_REASON_CODESIGNING 殺,需全數 bootout/bootstrap;(2) 新 TCC 身分 → launchd 下讀 Documents 卡死 open(),用戶核准對話框後恢復
+- **knowledge stack postgres volume 消失** (tw_electronics 全失,無備份) → 依 2026-04-24 plan DDL 重建 schema,回填 3 筆 (聯發科 TPU/ABF Film/TPU v8x 估值);FalkorDB 仍卡 6380 撞 port。trading-timescaledb 無恙 (有 8/15 dump)
