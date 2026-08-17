@@ -156,3 +156,25 @@ def test_update_tracking_reentry_during_post_window():
     assert state["tracked"]["3055"]["enter_date"] == "2026-07-14"
     assert state["tracked"]["3055"]["release_date"] is None
     assert state["tracked"]["3055"]["count_n"] == 2
+
+
+def test_record_post_late_catchup_uses_historical_closes():
+    # 2026-08-17: after a multi-day outage the first run may be at dsr=10 with all
+    # checkpoints None — filling t1/t5 with the CURRENT close mislabels them.
+    # With hist_close_fn provided, each checkpoint takes its true T+N close.
+    e = {"release_date": "2026-07-16", "release_close": 100.0,
+         "post": {"t1": None, "t5": None, "t20": None}}
+    hist = {1: 102.0, 5: 111.0}
+    dt.record_post(e, {"close": 130.0}, days_since_release=10,
+                   hist_close_fn=lambda c: hist.get(c))
+    assert e["post"]["t1"] == 2.0     # from T+1 close, not 130
+    assert e["post"]["t5"] == 11.0    # from T+5 close, not 130
+    assert e["post"]["t20"] is None   # not due
+
+
+def test_record_post_hist_fn_missing_day_falls_back_to_snap():
+    e = {"release_date": "2026-07-16", "release_close": 100.0,
+         "post": {"t1": None, "t5": None, "t20": None}}
+    dt.record_post(e, {"close": 105.0}, days_since_release=1,
+                   hist_close_fn=lambda c: None)
+    assert e["post"]["t1"] == 5.0     # fallback to current snap (old behavior)

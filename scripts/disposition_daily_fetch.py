@@ -356,12 +356,18 @@ def mark_release(entry: dict, snap: dict, as_of: str) -> None:
     entry["release_close"] = snap.get("close")
 
 
-def record_post(entry: dict, snap: dict, days_since_release: int) -> None:
+def record_post(entry: dict, snap: dict, days_since_release: int,
+                hist_close_fn=None) -> None:
     """Record T+1/T+5/T+20 return vs release close.
 
     Each checkpoint fills at the FIRST trading run at/after its T+N offset that is
     still None. Calendar offsets landing on a weekend/holiday (no run that day) are
     therefore still captured on the next run, instead of being silently skipped.
+
+    hist_close_fn(n) -> close at the n-th trading day after release, or None.
+    When provided, a late catch-up (e.g. after a multi-day outage) fills each
+    checkpoint with its true T+N close instead of mislabelling the current close;
+    falls back to the current snap close when the historical day is unavailable.
     """
     base = entry.get("release_close")
     close = snap.get("close")
@@ -369,7 +375,9 @@ def record_post(entry: dict, snap: dict, days_since_release: int) -> None:
         return
     for c, key in ((1, "t1"), (5, "t5"), (20, "t20")):
         if days_since_release >= c and entry["post"].get(key) is None:
-            entry["post"][key] = round((close - base) / base * 100, 2)
+            hist = hist_close_fn(c) if hist_close_fn else None
+            px = hist if hist else close
+            entry["post"][key] = round((px - base) / base * 100, 2)
 
 
 def _grp(e):
@@ -455,8 +463,12 @@ def _trading_days_between(a: str, b: str) -> int:
     return (_date(yb, mb, db) - _date(ya, ma, da)).days
 
 
-def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: str) -> None:
-    """Advance the disposition lifecycle for as_of. market_fn(ticker, as_of)->dict abstracts the DB."""
+def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: str,
+                    nth_close_fn=None) -> None:
+    """Advance the disposition lifecycle for as_of. market_fn(ticker, as_of)->dict abstracts the DB.
+
+    nth_close_fn(ticker, release_date, n) -> n-th post-release trading close (or None);
+    passed through to record_post so outage catch-ups use true T+N closes."""
     tracked = state.setdefault("tracked", {})
     # (a) enter new dispositions
     for ticker, disp in active.items():
@@ -484,7 +496,11 @@ def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: 
                 mark_release(entry, m, as_of)     # first day out of active
         else:
             dsr = _trading_days_between(entry["release_date"], as_of)
-            record_post(entry, m, dsr)
+            hist_fn = None
+            if nth_close_fn is not None:
+                hist_fn = (lambda c, _t=ticker, _rd=entry["release_date"]:
+                           nth_close_fn(_t, _rd, c))
+            record_post(entry, m, dsr, hist_close_fn=hist_fn)
             if dsr >= POST_TRACK_DAYS:
                 history.append(entry)
                 graduated.append(ticker)
@@ -504,6 +520,20 @@ def _return_pct(conn, ticker: str, as_of: str, lookback: int) -> float | None:
         if len(rows) < 2 or not rows[-1]:
             return None
         return round((rows[0] - rows[-1]) / rows[-1] * 100, 2)
+    except Exception:
+        return None
+
+
+def _nth_close_after(conn, ticker: str, after: str, n: int) -> float | None:
+    """Close of the n-th trading row strictly after `after`, from stock_daily_ohlcv."""
+    try:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT close FROM stock_daily_ohlcv WHERE symbol=%s AND ts::date>%s
+                 ORDER BY ts ASC LIMIT %s
+            """, (ticker, after, n))
+            rows = [r[0] for r in cur.fetchall()]
+        return float(rows[n - 1]) if len(rows) >= n else None
     except Exception:
         return None
 
@@ -581,7 +611,8 @@ def main() -> int:
             }
         track_state = load_json(TRACK_STATE_PATH) or {"tracked": {}}
         track_history = load_json(TRACK_HISTORY_PATH) or []
-        update_tracking(track_state, active, track_history, market_fn, today_iso)
+        update_tracking(track_state, active, track_history, market_fn, today_iso,
+                        nth_close_fn=lambda t, rd, n: _nth_close_after(conn, t, rd, n))
         if not args.dry_run:
             _save_json(TRACK_STATE_PATH, track_state)
             _save_json(TRACK_HISTORY_PATH, track_history)

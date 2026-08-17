@@ -18,88 +18,88 @@
       "during": [
         {
           "d": "2026-07-15",
-          "close": null,
+          "close": 82.5999984741211,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-16",
-          "close": null,
-          "cumret_pct": null,
+          "close": 90.80000305175781,
+          "cumret_pct": 9.93,
           "foreign_1d": null
         },
         {
           "d": "2026-07-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 81.80000305175781,
+          "cumret_pct": -0.97,
           "foreign_1d": null
         },
         {
           "d": "2026-07-20",
-          "close": null,
-          "cumret_pct": null,
+          "close": 73.69999694824219,
+          "cumret_pct": -10.77,
           "foreign_1d": null
         },
         {
           "d": "2026-07-21",
-          "close": null,
-          "cumret_pct": null,
+          "close": 70.0999984741211,
+          "cumret_pct": -15.13,
           "foreign_1d": null
         },
         {
           "d": "2026-07-22",
-          "close": null,
-          "cumret_pct": null,
+          "close": 71.80000305175781,
+          "cumret_pct": -13.08,
           "foreign_1d": null
         },
         {
           "d": "2026-07-23",
-          "close": null,
-          "cumret_pct": null,
+          "close": 69.9000015258789,
+          "cumret_pct": -15.38,
           "foreign_1d": null
         },
         {
           "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
+          "close": 68.80000305175781,
+          "cumret_pct": -16.71,
           "foreign_1d": null
         },
         {
           "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
+          "close": 65.80000305175781,
+          "cumret_pct": -20.34,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 59.29999923706055,
+          "cumret_pct": -28.21,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 53.400001525878906,
+          "cumret_pct": -35.35,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 51.5,
+          "cumret_pct": -37.65,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 53.20000076293945,
+          "cumret_pct": -35.59,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-03",
       "release_close": 49.75,
       "post": {
-        "t1": 2.31,
-        "t5": 2.31,
+        "t1": 9.95,
+        "t5": 6.33,
         "t20": null
       }
     },
@@ -121,70 +121,70 @@
       "during": [
         {
           "d": "2026-07-15",
-          "close": null,
+          "close": 710.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-16",
-          "close": null,
-          "cumret_pct": null,
+          "close": 680.0,
+          "cumret_pct": -4.23,
           "foreign_1d": null
         },
         {
           "d": "2026-07-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 612.0,
+          "cumret_pct": -13.8,
           "foreign_1d": null
         },
         {
           "d": "2026-07-20",
-          "close": null,
-          "cumret_pct": null,
+          "close": 551.0,
+          "cumret_pct": -22.39,
           "foreign_1d": null
         },
         {
           "d": "2026-07-21",
-          "close": null,
-          "cumret_pct": null,
+          "close": 600.0,
+          "cumret_pct": -15.49,
           "foreign_1d": null
         },
         {
           "d": "2026-07-22",
-          "close": null,
-          "cumret_pct": null,
+          "close": 635.0,
+          "cumret_pct": -10.56,
           "foreign_1d": null
         },
         {
           "d": "2026-07-23",
-          "close": null,
-          "cumret_pct": null,
+          "close": 670.0,
+          "cumret_pct": -5.63,
           "foreign_1d": null
         },
         {
           "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
+          "close": 678.0,
+          "cumret_pct": -4.51,
           "foreign_1d": null
         },
         {
           "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
+          "close": 630.0,
+          "cumret_pct": -11.27,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 567.0,
+          "cumret_pct": -20.14,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-07-29",
       "release_close": 511.0,
       "post": {
-        "t1": 31.12,
-        "t5": 31.12,
+        "t1": -6.56,
+        "t5": 16.83,
         "t20": null
       }
     },
@@ -206,88 +206,88 @@
       "during": [
         {
           "d": "2026-07-16",
-          "close": null,
+          "close": 341.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 307.5,
+          "cumret_pct": -9.96,
           "foreign_1d": null
         },
         {
           "d": "2026-07-20",
-          "close": null,
-          "cumret_pct": null,
+          "close": 277.0,
+          "cumret_pct": -18.89,
           "foreign_1d": null
         },
         {
           "d": "2026-07-21",
-          "close": null,
-          "cumret_pct": null,
+          "close": 273.0,
+          "cumret_pct": -20.06,
           "foreign_1d": null
         },
         {
           "d": "2026-07-22",
-          "close": null,
-          "cumret_pct": null,
+          "close": 300.0,
+          "cumret_pct": -12.15,
           "foreign_1d": null
         },
         {
           "d": "2026-07-23",
-          "close": null,
-          "cumret_pct": null,
+          "close": 300.0,
+          "cumret_pct": -12.15,
           "foreign_1d": null
         },
         {
           "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
+          "close": 274.0,
+          "cumret_pct": -19.77,
           "foreign_1d": null
         },
         {
           "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
+          "close": 272.0,
+          "cumret_pct": -20.35,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 245.0,
+          "cumret_pct": -28.26,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 220.5,
+          "cumret_pct": -35.43,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 198.5,
+          "cumret_pct": -41.87,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 218.0,
+          "cumret_pct": -36.16,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 239.5,
+          "cumret_pct": -29.87,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-04",
       "release_close": 259.5,
       "post": {
-        "t1": 13.29,
-        "t5": 13.29,
+        "t1": 0.0,
+        "t5": 15.8,
         "t20": null
       }
     },
@@ -309,70 +309,70 @@
       "during": [
         {
           "d": "2026-07-20",
-          "close": null,
+          "close": 175.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-21",
-          "close": null,
-          "cumret_pct": null,
+          "close": 175.5,
+          "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-22",
-          "close": null,
-          "cumret_pct": null,
+          "close": 183.0,
+          "cumret_pct": 4.27,
           "foreign_1d": null
         },
         {
           "d": "2026-07-23",
-          "close": null,
-          "cumret_pct": null,
+          "close": 171.5,
+          "cumret_pct": -2.28,
           "foreign_1d": null
         },
         {
           "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
+          "close": 164.0,
+          "cumret_pct": -6.55,
           "foreign_1d": null
         },
         {
           "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
+          "close": 156.0,
+          "cumret_pct": -11.11,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 140.5,
+          "cumret_pct": -19.94,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 126.5,
+          "cumret_pct": -27.92,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 114.0,
+          "cumret_pct": -35.04,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 125.0,
+          "cumret_pct": -28.77,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-03",
       "release_close": 137.5,
       "post": {
-        "t1": 20.73,
-        "t5": 20.73,
+        "t1": 4.73,
+        "t5": 17.09,
         "t20": null
       }
     },
@@ -394,191 +394,70 @@
       "during": [
         {
           "d": "2026-07-22",
-          "close": null,
+          "close": 41.04999923706055,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-23",
-          "close": null,
-          "cumret_pct": null,
+          "close": 39.849998474121094,
+          "cumret_pct": -2.92,
           "foreign_1d": null
         },
         {
           "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
+          "close": 40.150001525878906,
+          "cumret_pct": -2.19,
           "foreign_1d": null
         },
         {
           "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
+          "close": 36.150001525878906,
+          "cumret_pct": -11.94,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 38.849998474121094,
+          "cumret_pct": -5.36,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 35.0,
+          "cumret_pct": -14.74,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 32.04999923706055,
+          "cumret_pct": -21.92,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 35.25,
+          "cumret_pct": -14.13,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 38.0,
+          "cumret_pct": -7.43,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 39.599998474121094,
+          "cumret_pct": -3.53,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-05",
       "release_close": 38.54999923706055,
       "post": {
-        "t1": -2.72,
-        "t5": -2.72,
-        "t20": null
-      }
-    },
-    "3026": {
-      "ticker": "3026",
-      "name": "禾伸堂",
-      "enter_date": "2026-07-22",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -16.32,
-      "runup_20d_pct": -15.59,
-      "foreign_5d_at_enter": 37.0422,
-      "foreign_20d_at_enter": 14.57494418,
-      "enter_close": 663.0,
-      "during": [
-        {
-          "d": "2026-07-22",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-23",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-13",
-          "close": 691.0,
-          "cumret_pct": null,
-          "foreign_1d": -33.62130291
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 679.0,
-      "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -2.85,
+        "t5": -5.45,
         "t20": null
       }
     },
@@ -600,276 +479,70 @@
       "during": [
         {
           "d": "2026-07-23",
-          "close": null,
+          "close": 300.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-24",
-          "close": null,
-          "cumret_pct": null,
+          "close": 300.5,
+          "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": null,
+          "close": 311.0,
+          "cumret_pct": 3.49,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 280.0,
+          "cumret_pct": -6.82,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 252.0,
+          "cumret_pct": -16.14,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 227.5,
+          "cumret_pct": -24.29,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 245.0,
+          "cumret_pct": -18.47,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 260.5,
+          "cumret_pct": -13.31,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 268.0,
+          "cumret_pct": -10.82,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 282.0,
+          "cumret_pct": -6.16,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-06",
       "release_close": 274.5,
       "post": {
-        "t1": -3.46,
-        "t5": -3.46,
-        "t20": null
-      }
-    },
-    "3167": {
-      "ticker": "3167",
-      "name": "大量",
-      "enter_date": "2026-07-27",
-      "disp_start": "2026-07-24",
-      "disp_end": "2026-08-06",
-      "condition": "最近三十個營業日已有十二次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -19.06,
-      "runup_20d_pct": -18.95,
-      "foreign_5d_at_enter": 0.8059,
-      "foreign_20d_at_enter": -5.94104558,
-      "enter_close": 595.0,
-      "during": [
-        {
-          "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-13",
-          "close": 674.0,
-          "cumret_pct": null,
-          "foreign_1d": 0.08762
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 676.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "7610": {
-      "ticker": "7610",
-      "name": "聯友金屬-創",
-      "enter_date": "2026-07-27",
-      "disp_start": "2026-07-27",
-      "disp_end": "2026-08-07",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -31.11,
-      "runup_20d_pct": -14.57,
-      "foreign_5d_at_enter": 4.8204,
-      "foreign_20d_at_enter": 39.03347585,
-      "enter_close": 1495.0,
-      "during": [
-        {
-          "d": "2026-07-27",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-13",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 1775.0,
-      "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -7.47,
+        "t5": -2.55,
         "t20": null
       }
     },
@@ -891,69 +564,69 @@
       "during": [
         {
           "d": "2026-07-27",
-          "close": null,
+          "close": 186.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-28",
-          "close": null,
-          "cumret_pct": null,
+          "close": 174.0,
+          "cumret_pct": -6.45,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 157.0,
+          "cumret_pct": -15.59,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 150.0,
+          "cumret_pct": -19.35,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 165.0,
+          "cumret_pct": -11.29,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 172.5,
+          "cumret_pct": -7.26,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 178.5,
+          "cumret_pct": -4.03,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 189.0,
+          "cumret_pct": 1.61,
           "foreign_1d": null
         },
         {
           "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
+          "close": 190.0,
+          "cumret_pct": 2.15,
           "foreign_1d": null
         },
         {
           "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
+          "close": 185.0,
+          "cumret_pct": -0.54,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-13",
       "release_close": 183.5,
       "post": {
-        "t1": 6.27,
+        "t1": 9.81,
         "t5": null,
         "t20": null
       }
@@ -976,63 +649,63 @@
       "during": [
         {
           "d": "2026-07-28",
-          "close": null,
+          "close": 31.25,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-07-29",
-          "close": null,
-          "cumret_pct": null,
+          "close": 28.149999618530273,
+          "cumret_pct": -9.92,
           "foreign_1d": null
         },
         {
           "d": "2026-07-30",
-          "close": null,
-          "cumret_pct": null,
+          "close": 29.25,
+          "cumret_pct": -6.4,
           "foreign_1d": null
         },
         {
           "d": "2026-07-31",
-          "close": null,
-          "cumret_pct": null,
+          "close": 32.150001525878906,
+          "cumret_pct": 2.88,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 33.400001525878906,
+          "cumret_pct": 6.88,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 34.45000076293945,
+          "cumret_pct": 10.24,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 34.099998474121094,
+          "cumret_pct": 9.12,
           "foreign_1d": null
         },
         {
           "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
+          "close": 34.79999923706055,
+          "cumret_pct": 11.36,
           "foreign_1d": null
         },
         {
           "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
+          "close": 35.5,
+          "cumret_pct": 13.6,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-13",
       "release_close": 33.099998474121094,
       "post": {
-        "t1": 0.6,
+        "t1": -5.14,
         "t5": null,
         "t20": null
       }
@@ -1055,44 +728,44 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 28.799999237060547,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 29.5,
+          "cumret_pct": 2.43,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 28.100000381469727,
+          "cumret_pct": -2.43,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 30.899999618530273,
+          "cumret_pct": 7.29,
           "foreign_1d": null
         },
         {
           "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
+          "close": 31.950000762939453,
+          "cumret_pct": 10.94,
           "foreign_1d": null
         },
         {
           "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
+          "close": 30.399999618530273,
+          "cumret_pct": 5.56,
           "foreign_1d": null
         },
         {
           "d": "2026-08-13",
-          "close": null,
-          "cumret_pct": null,
+          "close": 30.5,
+          "cumret_pct": 5.9,
           "foreign_1d": null
         }
       ],
@@ -1122,38 +795,38 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 90.4000015258789,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 93.0999984741211,
+          "cumret_pct": 2.99,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 102.0,
+          "cumret_pct": 12.83,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 112.0,
+          "cumret_pct": 23.89,
           "foreign_1d": null
         },
         {
           "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
+          "close": 110.5,
+          "cumret_pct": 22.23,
           "foreign_1d": null
         },
         {
           "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
+          "close": 103.5,
+          "cumret_pct": 14.49,
           "foreign_1d": null
         },
         {
@@ -1189,38 +862,38 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 271.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 265.0,
+          "cumret_pct": -2.39,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 291.5,
+          "cumret_pct": 7.37,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 316.5,
+          "cumret_pct": 16.57,
           "foreign_1d": null
         },
         {
           "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
+          "close": 316.0,
+          "cumret_pct": 16.39,
           "foreign_1d": null
         },
         {
           "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
+          "close": 312.5,
+          "cumret_pct": 15.1,
           "foreign_1d": null
         },
         {
@@ -1256,34 +929,34 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 40.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 37.70000076293945,
+          "cumret_pct": -5.75,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 33.95000076293945,
+          "cumret_pct": -15.12,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 37.29999923706055,
+          "cumret_pct": -6.75,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-06",
       "release_close": 41.0,
       "post": {
-        "t1": -13.78,
-        "t5": -13.78,
+        "t1": 0.0,
+        "t5": -11.22,
         "t20": null
       }
     },
@@ -1305,34 +978,34 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 38.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 38.5,
+          "cumret_pct": 1.32,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 39.0,
+          "cumret_pct": 2.63,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 40.5,
+          "cumret_pct": 6.58,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-06",
       "release_close": 39.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -7.31,
+        "t5": -10.26,
         "t20": null
       }
     },
@@ -1354,28 +1027,28 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 25.700000762939453,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 25.850000381469727,
+          "cumret_pct": 0.58,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 25.450000762939453,
+          "cumret_pct": -0.97,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-05",
       "release_close": 23.899999618530273,
       "post": {
-        "t1": -15.48,
-        "t5": -15.48,
+        "t1": -4.39,
+        "t5": -8.79,
         "t20": null
       }
     },
@@ -1397,20 +1070,20 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 216.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 238.0,
+          "cumret_pct": 9.93,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 252.5,
+          "cumret_pct": 16.63,
           "foreign_1d": null
         }
       ],
@@ -1418,7 +1091,7 @@
       "release_close": 267.5,
       "post": {
         "t1": -0.19,
-        "t5": -0.19,
+        "t5": 2.99,
         "t20": null
       }
     },
@@ -1440,28 +1113,28 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 145.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 160.0,
+          "cumret_pct": 9.97,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 164.5,
+          "cumret_pct": 13.06,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-05",
       "release_close": 165.0,
       "post": {
-        "t1": 30.91,
-        "t5": 30.91,
+        "t1": 3.64,
+        "t5": 23.33,
         "t20": null
       }
     },
@@ -1483,28 +1156,28 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 927.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 1015.0,
+          "cumret_pct": 9.49,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 1090.0,
+          "cumret_pct": 17.58,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-05",
       "release_close": 1195.0,
       "post": {
-        "t1": 11.3,
-        "t5": 11.3,
+        "t1": -0.84,
+        "t5": 6.28,
         "t20": null
       }
     },
@@ -1526,28 +1199,28 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 306.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": null,
+          "close": 336.5,
+          "cumret_pct": 9.97,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 370.0,
+          "cumret_pct": 20.92,
           "foreign_1d": null
         }
       ],
       "release_date": "2026-08-05",
       "release_close": 407.0,
       "post": {
-        "t1": 9.83,
-        "t5": 9.83,
+        "t1": -1.72,
+        "t5": -2.95,
         "t20": null
       }
     },
@@ -1569,7 +1242,7 @@
       "during": [
         {
           "d": "2026-07-31",
-          "close": null,
+          "close": 68.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         }
@@ -1577,8 +1250,8 @@
       "release_date": "2026-08-03",
       "release_close": 68.30000305175781,
       "post": {
-        "t1": 5.86,
-        "t5": 5.86,
+        "t1": 2.34,
+        "t5": 2.34,
         "t20": null
       }
     },
@@ -1600,38 +1273,38 @@
       "during": [
         {
           "d": "2026-08-03",
-          "close": null,
+          "close": 160.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
+          "close": 162.0,
+          "cumret_pct": 0.93,
           "foreign_1d": null
         },
         {
           "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
+          "close": 162.0,
+          "cumret_pct": 0.93,
           "foreign_1d": null
         },
         {
           "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
+          "close": 161.0,
+          "cumret_pct": 0.31,
           "foreign_1d": null
         },
         {
           "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
+          "close": 157.0,
+          "cumret_pct": -2.18,
           "foreign_1d": null
         },
         {
           "d": "2026-08-13",
-          "close": null,
-          "cumret_pct": null,
+          "close": 150.0,
+          "cumret_pct": -6.54,
           "foreign_1d": null
         }
       ],
@@ -1639,152 +1312,6 @@
       "release_close": 152.5,
       "post": {
         "t1": -1.97,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "6531": {
-      "ticker": "6531",
-      "name": "愛普*",
-      "enter_date": "2026-08-03",
-      "disp_start": "2026-08-03",
-      "disp_end": "2026-08-14",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": -22.26,
-      "runup_20d_pct": -32.42,
-      "foreign_5d_at_enter": 13.3974,
-      "foreign_20d_at_enter": 37.04095373,
-      "enter_close": 733.0,
-      "during": [
-        {
-          "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-13",
-          "close": 865.0,
-          "cumret_pct": null,
-          "foreign_1d": 0.16283625
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 892.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "8046": {
-      "ticker": "8046",
-      "name": "南電",
-      "enter_date": "2026-08-03",
-      "disp_start": "2026-08-03",
-      "disp_end": "2026-08-18",
-      "condition": "連續三次及當日沖銷標準",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": -17.12,
-      "runup_20d_pct": -22.36,
-      "foreign_5d_at_enter": 21.4804,
-      "foreign_20d_at_enter": -241.53352724,
-      "enter_close": 953.0,
-      "during": [
-        {
-          "d": "2026-08-03",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-05",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-06",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-07",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-13",
-          "close": 1215.0,
-          "cumret_pct": null,
-          "foreign_1d": -31.00671495
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 1350.0,
-      "post": {
-        "t1": null,
         "t5": null,
         "t20": null
       }
@@ -1807,7 +1334,7 @@
       "during": [
         {
           "d": "2026-08-13",
-          "close": null,
+          "close": 12235.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         }
@@ -1847,92 +1374,6 @@
       "release_close": 379.5,
       "post": {
         "t1": 9.88,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "2491": {
-      "ticker": "2491",
-      "name": "吉祥全",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 9.23,
-      "runup_20d_pct": 2.35,
-      "foreign_5d_at_enter": -0.1414,
-      "foreign_20d_at_enter": -0.03980205,
-      "enter_close": 34.900001525878906,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 36.04999923706055,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "3006": {
-      "ticker": "3006",
-      "name": "晶豪科",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 7.56,
-      "runup_20d_pct": 26.14,
-      "foreign_5d_at_enter": 38.7818,
-      "foreign_20d_at_enter": 49.337344455,
-      "enter_close": 277.5,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 277.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": 1.63510215
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 269.0,
-      "post": {
-        "t1": null,
         "t5": null,
         "t20": null
       }
@@ -1999,49 +1440,6 @@
         "t20": null
       }
     },
-    "3450": {
-      "ticker": "3450",
-      "name": "聯鈞",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": 7.22,
-      "runup_20d_pct": 9.79,
-      "foreign_5d_at_enter": 31.2569,
-      "foreign_20d_at_enter": 27.73138717,
-      "enter_close": 527.0,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 527.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": 4.45315
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 513.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
     "3653": {
       "ticker": "3653",
       "name": "健策",
@@ -2069,221 +1467,6 @@
       "release_close": 4855.0,
       "post": {
         "t1": 9.99,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "6213": {
-      "ticker": "6213",
-      "name": "聯茂",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 25.07,
-      "runup_20d_pct": 44.31,
-      "foreign_5d_at_enter": 56.661,
-      "foreign_20d_at_enter": 29.729330705,
-      "enter_close": 469.0,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 469.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": 9.9697206
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 481.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "6426": {
-      "ticker": "6426",
-      "name": "統新",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-12",
-      "disp_end": "2026-08-18",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 15.51,
-      "runup_20d_pct": 26.32,
-      "foreign_5d_at_enter": 0.9778,
-      "foreign_20d_at_enter": 0.230799695,
-      "enter_close": 216.0,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 216.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": 0.123228
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 221.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "6451": {
-      "ticker": "6451",
-      "name": "訊芯-KY",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": -3.54,
-      "runup_20d_pct": -8.6,
-      "foreign_5d_at_enter": 3.716,
-      "foreign_20d_at_enter": 7.63931656,
-      "enter_close": 436.0,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 436.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": -0.59684476
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 440.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "7711": {
-      "ticker": "7711",
-      "name": "永擎",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-13",
-      "disp_end": "2026-08-19",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 35.96,
-      "runup_20d_pct": 56.53,
-      "foreign_5d_at_enter": 0.3393,
-      "foreign_20d_at_enter": 0.61372729,
-      "enter_close": 491.5,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 491.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": 0.4910085
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 469.0,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "8021": {
-      "ticker": "8021",
-      "name": "尖點",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": 2.75,
-      "runup_20d_pct": -15.05,
-      "foreign_5d_at_enter": 1.4403,
-      "foreign_20d_at_enter": -4.275142995,
-      "enter_close": 429.0,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-16",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 415.0,
-      "post": {
-        "t1": null,
         "t5": null,
         "t20": null
       }
@@ -2461,14 +1644,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 522.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 534.0,
+          "cumret_pct": 2.3,
           "foreign_1d": null
         }
       ],
@@ -2498,14 +1681,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 460.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 482.5,
+          "cumret_pct": 4.89,
           "foreign_1d": null
         }
       ],
@@ -2535,14 +1718,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 702.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 699.0,
+          "cumret_pct": -0.43,
           "foreign_1d": null
         }
       ],
@@ -2572,14 +1755,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 263.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 268.0,
+          "cumret_pct": 1.9,
           "foreign_1d": null
         }
       ],
@@ -2609,14 +1792,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 91.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 92.19999694824219,
+          "cumret_pct": 0.77,
           "foreign_1d": null
         }
       ],
@@ -2646,14 +1829,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 2540.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 2730.0,
+          "cumret_pct": 7.48,
           "foreign_1d": null
         }
       ],
@@ -2683,14 +1866,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 480.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 510.0,
+          "cumret_pct": 6.25,
           "foreign_1d": null
         }
       ],
@@ -2720,14 +1903,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 133.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 131.5,
+          "cumret_pct": -1.13,
           "foreign_1d": null
         }
       ],
@@ -2757,14 +1940,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 169.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 167.0,
+          "cumret_pct": -1.18,
           "foreign_1d": null
         }
       ],
@@ -2794,14 +1977,14 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 172.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 182.0,
+          "cumret_pct": 5.81,
           "foreign_1d": null
         }
       ],
@@ -2831,50 +2014,19 @@
       "during": [
         {
           "d": "2026-08-16",
-          "close": null,
+          "close": 85.4000015258789,
           "cumret_pct": 0.0,
           "foreign_1d": null
         },
         {
           "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": null,
+          "close": 84.0,
+          "cumret_pct": -1.64,
           "foreign_1d": null
         }
       ],
       "release_date": null,
       "release_close": null,
-      "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "6225": {
-      "ticker": "6225",
-      "name": "天瀚",
-      "enter_date": "2026-08-17",
-      "disp_start": "2026-08-17",
-      "disp_end": "2026-08-21",
-      "condition": "連續三次",
-      "count_label": "人工管制撮合",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 60.29,
-      "runup_20d_pct": 73.78,
-      "foreign_5d_at_enter": 0.0008,
-      "foreign_20d_at_enter": 0.0020875,
-      "enter_close": 44.400001525878906,
-      "during": [
-        {
-          "d": "2026-08-17",
-          "close": null,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-17",
-      "release_close": 44.400001525878906,
       "post": {
         "t1": null,
         "t5": null,
@@ -2899,7 +2051,7 @@
       "during": [
         {
           "d": "2026-08-17",
-          "close": null,
+          "close": 168.0,
           "cumret_pct": 0.0,
           "foreign_1d": null
         }
@@ -2930,9 +2082,443 @@
       "during": [
         {
           "d": "2026-08-17",
-          "close": null,
+          "close": 127.5,
           "cumret_pct": 0.0,
           "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2491": {
+      "ticker": "2491",
+      "name": "吉祥全",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": 3.3,
+      "runup_20d_pct": 17.05,
+      "foreign_5d_at_enter": -0.1436,
+      "foreign_20d_at_enter": -0.05521905,
+      "enter_close": 36.04999923706055,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 36.04999923706055,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3006": {
+      "ticker": "3006",
+      "name": "晶豪科",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": -2.36,
+      "runup_20d_pct": 42.71,
+      "foreign_5d_at_enter": 19.6944,
+      "foreign_20d_at_enter": 57.871059985,
+      "enter_close": 269.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 269.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3026": {
+      "ticker": "3026",
+      "name": "禾伸堂",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-14",
+      "disp_end": "2026-08-20",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": 15.48,
+      "runup_20d_pct": 9.34,
+      "foreign_5d_at_enter": -70.4647,
+      "foreign_20d_at_enter": -7.021117535,
+      "enter_close": 679.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 679.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3167": {
+      "ticker": "3167",
+      "name": "大量",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": 3.21,
+      "runup_20d_pct": -7.78,
+      "foreign_5d_at_enter": -7.2452,
+      "foreign_20d_at_enter": -0.86001741,
+      "enter_close": 676.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 676.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3450": {
+      "ticker": "3450",
+      "name": "聯鈞",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": -2.1,
+      "runup_20d_pct": 31.88,
+      "foreign_5d_at_enter": 18.9953,
+      "foreign_20d_at_enter": 27.22843567,
+      "enter_close": 513.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 513.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6213": {
+      "ticker": "6213",
+      "name": "聯茂",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-14",
+      "disp_end": "2026-08-20",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": 12.51,
+      "runup_20d_pct": 49.15,
+      "foreign_5d_at_enter": 71.1482,
+      "foreign_20d_at_enter": 32.901306405,
+      "enter_close": 481.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 481.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6225": {
+      "ticker": "6225",
+      "name": "天瀚",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-17",
+      "disp_end": "2026-08-21",
+      "condition": "連續三次",
+      "count_label": "人工管制撮合",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": 60.29,
+      "runup_20d_pct": 73.78,
+      "foreign_5d_at_enter": 0.0008,
+      "foreign_20d_at_enter": 0.0020875,
+      "enter_close": 44.400001525878906,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 44.400001525878906,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6426": {
+      "ticker": "6426",
+      "name": "統新",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-12",
+      "disp_end": "2026-08-18",
+      "condition": "連續三次",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": 1.61,
+      "runup_20d_pct": 43.97,
+      "foreign_5d_at_enter": 1.0946,
+      "foreign_20d_at_enter": 0.203245925,
+      "enter_close": 221.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 221.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6451": {
+      "ticker": "6451",
+      "name": "訊芯-KY",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": -3.51,
+      "runup_20d_pct": 11.25,
+      "foreign_5d_at_enter": 3.9845,
+      "foreign_20d_at_enter": 9.08145234,
+      "enter_close": 440.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 440.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6531": {
+      "ticker": "6531",
+      "name": "愛普*",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": -3.36,
+      "runup_20d_pct": 14.36,
+      "foreign_5d_at_enter": -0.7328,
+      "foreign_20d_at_enter": 14.82193585,
+      "enter_close": 892.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 892.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "7610": {
+      "ticker": "7610",
+      "name": "聯友金屬-創",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": -8.97,
+      "runup_20d_pct": -18.2,
+      "foreign_5d_at_enter": 5.3566,
+      "foreign_20d_at_enter": 14.9983509,
+      "enter_close": 1775.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 1775.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "7711": {
+      "ticker": "7711",
+      "name": "永擎",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-13",
+      "disp_end": "2026-08-19",
+      "condition": "連續三次",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": 15.8,
+      "runup_20d_pct": 57.38,
+      "foreign_5d_at_enter": 0.712,
+      "foreign_20d_at_enter": 0.94371529,
+      "enter_close": 469.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 469.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "8021": {
+      "ticker": "8021",
+      "name": "尖點",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-11",
+      "disp_end": "2026-08-17",
+      "condition": "連續三次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": -4.49,
+      "runup_20d_pct": 1.34,
+      "foreign_5d_at_enter": 3.6428,
+      "foreign_20d_at_enter": -4.073614845,
+      "enter_close": 415.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 415.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "8046": {
+      "ticker": "8046",
+      "name": "南電",
+      "enter_date": "2026-08-17",
+      "disp_start": "2026-08-03",
+      "disp_end": "2026-08-18",
+      "condition": "連續三次及當日沖銷標準",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": 19.47,
+      "runup_20d_pct": 22.17,
+      "foreign_5d_at_enter": -61.6839,
+      "foreign_20d_at_enter": -101.78020036,
+      "enter_close": 1350.0,
+      "during": [
+        {
+          "d": "2026-08-17",
+          "close": 1350.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.0
         }
       ],
       "release_date": null,
