@@ -146,3 +146,8 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - **futures_oi_daily 被清空** (8/13 修復殘留) → TAIFEX 逐日回填 2/1–8/13 共 136 交易日 (65s/date 限速, nohup 背景, 完後自動重跑 foreign-structure + 推 inbox)
 - **8/15 備份 dump 是 0 bytes** (撞 Docker 重啟) 且 backup_database.py 無排程呼叫 → 先手動補 selective dump 12 表 39MB (tmf_selective_20260816.dump, pg_restore -l 驗證)；**備份排程化待辦**
 - **pg_inherits 10 筆懸空條目** (ticks×6/stock_ofi/iv_metrics/iv_strikes/iv_regime, 指向不存在 pg_class oid) 擋 pg_dump "cache lookup failed" → DELETE 後 pg_dump 復原, timescaledb chunk catalog 本身乾淨
+
+## 2026-08-17 (一) — 2408 南亞科 tp2 收割執行
+- 賣出 90/100 股 @ 521 (avg_cost 364) → **實現 +157/股 ≈ +14,130 (+43.1%)**,剩 10 股
+- 訊號鏈驗證: buy_list tp2=505 (8/13 收 514 突破推播) → 8/17 521 執行;semi-cycle playbook「高點收割」+ memory-cycle S1 P/B RED (2408 高檔警示 6/25 起) 一致
+- 殘留 10 股 = DDR5 動能追蹤倉 (現貨 8/16 +25.5%),觀察點: P/B RED + 法人調節跡象再清
