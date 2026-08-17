@@ -151,3 +151,12 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 賣出 90/100 股 @ 521 (avg_cost 364) → **實現 +157/股 ≈ +14,130 (+43.1%)**,剩 10 股
 - 訊號鏈驗證: buy_list tp2=505 (8/13 收 514 突破推播) → 8/17 521 執行;semi-cycle playbook「高點收割」+ memory-cycle S1 P/B RED (2408 高檔警示 6/25 起) 一致
 - 殘留 10 股 = DDR5 動能追蹤倉 (現貨 8/16 +25.5%),觀察點: P/B RED + 法人調節跡象再清
+
+## 2026-08-17 (一) — 「0 / None / N/A」輸出全面清查
+- 症狀: buy-list 全檔「資料 N/A」、disposition-track 報酬 None%、etf-smart-money 產業 flow +0億、pb-lights 2 檔 N/A
+- **根因 1 (主因): 8/13 修復清空的表不只 futures_oi_daily** — `stock_daily_ohlcv`(0)、`asia_index_daily`(0)、`fx_daily`(剩17) 也被清;vault 8/13 只記了 bgw/intraday_alpha 兩張 → **教訓: 修復後要對照全表 row count,不能只看 pg_amcheck**
+- 回填: asia 9,517 列 (3yr×13)、fx 4,644 列 (3yr×6 pairs)、stock 2025-01 起 (~37 萬列,yfinance .TW→.TWO fallback)
+- **根因 2: institutional_stock 假日幽靈列** — 16 個休市日各 3 列 (3289/3587/6274 殘渣) + 2026-04-03 一次 8,029 列 (close=0 壞 ingest),共 8,077 列;會佔用「近 N 交易日」視窗名額稀釋 5D/20D flow → 已刪 (8/16 selective dump 可還原);OI 回填 11 筆 fail 全數為這些假日,良性
+- 正當的 N/A (不修): pb-lights 3717 上市 243 天歷史不足、7895 無年度帳面價值 — 寧可 N/A 不給假數字
+- 尾巴修復: disposition state 23 檔進場數據 None (壞資料期間進場被永久記錄) → 用 script 自身函式重算回填 51 檔次;11 檔非電子股 (川湖/尖點/力山等) 不在 collector 的 tw_electronics_tickers.txt → 臨時名單補 824 列。**結構性 gap: OHLCV 日更只涵蓋電子股,處置股跨產業,非電子股將持續缺日更** — 待決定: 擴大 collector universe vs tracker fallback institutional_stock.close_price
+- 驗證: buy-list 0 異常 (2454 收 4040/2408 收 522 + 真實法人流) ✓ disposition 進場端 0 None ✓「處置期累計 None%」僅剩今日解除股 (需今日收盤,14:30 後自補) = 時序性正當
