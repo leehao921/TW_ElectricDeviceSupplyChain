@@ -67,6 +67,7 @@ _REGISTRY = [
     ("disposition-track", "disposition-daily", time(8, 35), time(13, 30)),
     ("ddr-price", "ddr-price", time(8, 20), time(13, 30)),
     ("brent-watch", "brent-watch", time(8, 25), time(13, 30)),
+    ("etf-00891", "etf-00891-watch", time(8, 30), time(13, 30)),
     ("memory-cycle", "memory-cycle", time(8, 40), time(13, 30)),
     ("buy-list", "buy-list-daily", time(8, 50), time(13, 30)),
     ("bb-squeeze", "bb-squeeze", time(14, 30), time(23, 59)),
