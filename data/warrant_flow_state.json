@@ -1,0 +1,213 @@
+{
+  "tracked": {
+    "3008": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 5385.0,
+      "score_at_enter": -77145520,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2408": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 501.0,
+      "score_at_enter": -64111370,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2330": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 2375.0,
+      "score_at_enter": -44586990,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3665": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 2050.0,
+      "score_at_enter": -35049530,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2344": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 177.0,
+      "score_at_enter": -33220410,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2368": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 948.0,
+      "score_at_enter": -26480080,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3042": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 177.5,
+      "score_at_enter": -23497200,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "8039": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 265.0,
+      "score_at_enter": -21540390,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2615": {
+      "side": "short",
+      "enter_date": "2026-08-24",
+      "enter_close": 124.5,
+      "score_at_enter": -21527360,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2303": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 123.5,
+      "score_at_enter": 50137090,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6770": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 70.80000305175781,
+      "score_at_enter": 47252830,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2324": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 41.599998474121094,
+      "score_at_enter": 42237500,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2301": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 287.0,
+      "score_at_enter": 34722520,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2464": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 187.5,
+      "score_at_enter": 32088950,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2451": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 316.0,
+      "score_at_enter": 28201560,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2609": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 64.5,
+      "score_at_enter": 27539390,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3711": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 592.0,
+      "score_at_enter": 26099590,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2337": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 124.0,
+      "score_at_enter": 24990540,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3006": {
+      "side": "long",
+      "enter_date": "2026-08-24",
+      "enter_close": 282.0,
+      "score_at_enter": 24663290,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    }
+  }
+}
