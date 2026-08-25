@@ -179,3 +179,10 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 
 ## 2026-08-24 — 黑天鵝質押預案分工
 - 質押參數化 (成數/維持率緩衝/加碼梯度) **用戶自行處理** — 系統側不再提醒;系統職責維持: regime broken 訊號 (39,385 去槓桿線/量能 gate) + 00891 add3 帶 (-35%) 觸發時推播,屆時執行依用戶自訂參數
+
+## 2026-08-25 (一) — infra 修復清單處理 + 權證榜標籤化
+- **(a) disposition T+N None 六日之謎破案 — 三層根因疊加**: ①tracking pass 多日死於 transaction aborted (helper 吞例外但共用交易中毒 → autocommit 修) ②晨跑偵測解除時當日收盤未入庫 → release_close=None 冪等鎖死 (→ release_date 回查自癒) ③非電子處置股無日更 (→ warrant-flow 17:40 加 OHLCV 缺口自癒)。27 檔全復原,41 檔解除股 T+N 有值。**教訓: 共用連線的 helper 吞例外 = 把病毒留給下一個查詢;讀 pass 一律 autocommit**
+- (b) 系統 python3 (brew 3.14) 補裝 redis — inbox_view 不再需繞道
+- (c) institutional heartbeat 398s = TPEx 520 重試延遲,已自癒 (54s/今日入庫完成)
+- (d) 期貨 arm 鏈路三處 nag = operator 待辦 (issue #440),不在本 repo 範疇
+- 權證榜加 名稱+產業+題材鏈 標籤 (Pilot_Reports+themes 對映,航運等非電子另建 fallback)
