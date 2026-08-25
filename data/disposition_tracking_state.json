@@ -1,466 +1,5 @@
 {
   "tracked": {
-    "2434": {
-      "ticker": "2434",
-      "name": "統懋",
-      "enter_date": "2026-07-15",
-      "disp_start": "2026-07-15",
-      "disp_end": "2026-07-28",
-      "condition": "最近十個營業日已有六次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 46.11,
-      "runup_20d_pct": 117.37,
-      "foreign_5d_at_enter": 0.3051,
-      "foreign_20d_at_enter": 0.43829005600000004,
-      "enter_close": 82.5999984741211,
-      "during": [
-        {
-          "d": "2026-07-15",
-          "close": 82.5999984741211,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-16",
-          "close": 90.80000305175781,
-          "cumret_pct": 9.93,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-17",
-          "close": 81.80000305175781,
-          "cumret_pct": -0.97,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-20",
-          "close": 73.69999694824219,
-          "cumret_pct": -10.77,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-21",
-          "close": 70.0999984741211,
-          "cumret_pct": -15.13,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-22",
-          "close": 71.80000305175781,
-          "cumret_pct": -13.08,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-23",
-          "close": 69.9000015258789,
-          "cumret_pct": -15.38,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-24",
-          "close": 68.80000305175781,
-          "cumret_pct": -16.71,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-27",
-          "close": 65.80000305175781,
-          "cumret_pct": -20.34,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": 59.29999923706055,
-          "cumret_pct": -28.21,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": 53.400001525878906,
-          "cumret_pct": -35.35,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": 51.5,
-          "cumret_pct": -37.65,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": 53.20000076293945,
-          "cumret_pct": -35.59,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-03",
-      "release_close": 49.75,
-      "post": {
-        "t1": 9.95,
-        "t5": 6.33,
-        "t20": null
-      }
-    },
-    "6831": {
-      "ticker": "6831",
-      "name": "邁科",
-      "enter_date": "2026-07-15",
-      "disp_start": "2026-07-15",
-      "disp_end": "2026-07-28",
-      "condition": "最近十個營業日已有六次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": -11.23,
-      "runup_20d_pct": -5.36,
-      "foreign_5d_at_enter": -1.2224,
-      "foreign_20d_at_enter": 15.39699379,
-      "enter_close": 710.0,
-      "during": [
-        {
-          "d": "2026-07-15",
-          "close": 710.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-16",
-          "close": 680.0,
-          "cumret_pct": -4.23,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-17",
-          "close": 612.0,
-          "cumret_pct": -13.8,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-20",
-          "close": 551.0,
-          "cumret_pct": -22.39,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-21",
-          "close": 600.0,
-          "cumret_pct": -15.49,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-22",
-          "close": 635.0,
-          "cumret_pct": -10.56,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-23",
-          "close": 670.0,
-          "cumret_pct": -5.63,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-24",
-          "close": 678.0,
-          "cumret_pct": -4.51,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-27",
-          "close": 630.0,
-          "cumret_pct": -11.27,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": 567.0,
-          "cumret_pct": -20.14,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-07-29",
-      "release_close": 511.0,
-      "post": {
-        "t1": -6.56,
-        "t5": 16.83,
-        "t20": null
-      }
-    },
-    "2492": {
-      "ticker": "2492",
-      "name": "華新科",
-      "enter_date": "2026-07-16",
-      "disp_start": "2026-07-16",
-      "disp_end": "2026-07-29",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -20.04,
-      "runup_20d_pct": -23.28,
-      "foreign_5d_at_enter": 0.5663,
-      "foreign_20d_at_enter": -73.526495275,
-      "enter_close": 341.5,
-      "during": [
-        {
-          "d": "2026-07-16",
-          "close": 341.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-17",
-          "close": 307.5,
-          "cumret_pct": -9.96,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-20",
-          "close": 277.0,
-          "cumret_pct": -18.89,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-21",
-          "close": 273.0,
-          "cumret_pct": -20.06,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-22",
-          "close": 300.0,
-          "cumret_pct": -12.15,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-23",
-          "close": 300.0,
-          "cumret_pct": -12.15,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-24",
-          "close": 274.0,
-          "cumret_pct": -19.77,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-27",
-          "close": 272.0,
-          "cumret_pct": -20.35,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": 245.0,
-          "cumret_pct": -28.26,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": 220.5,
-          "cumret_pct": -35.43,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": 198.5,
-          "cumret_pct": -41.87,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": 218.0,
-          "cumret_pct": -36.16,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 239.5,
-          "cumret_pct": -29.87,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-04",
-      "release_close": 259.5,
-      "post": {
-        "t1": 0.0,
-        "t5": 15.8,
-        "t20": null
-      }
-    },
-    "3090": {
-      "ticker": "3090",
-      "name": "日電貿",
-      "enter_date": "2026-07-20",
-      "disp_start": "2026-07-20",
-      "disp_end": "2026-07-31",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -32.11,
-      "runup_20d_pct": -41.5,
-      "foreign_5d_at_enter": 28.0132,
-      "foreign_20d_at_enter": 29.279453775,
-      "enter_close": 175.5,
-      "during": [
-        {
-          "d": "2026-07-20",
-          "close": 175.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-21",
-          "close": 175.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-22",
-          "close": 183.0,
-          "cumret_pct": 4.27,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-23",
-          "close": 171.5,
-          "cumret_pct": -2.28,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-24",
-          "close": 164.0,
-          "cumret_pct": -6.55,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-27",
-          "close": 156.0,
-          "cumret_pct": -11.11,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": 140.5,
-          "cumret_pct": -19.94,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": 126.5,
-          "cumret_pct": -27.92,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": 114.0,
-          "cumret_pct": -35.04,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": 125.0,
-          "cumret_pct": -28.77,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-03",
-      "release_close": 137.5,
-      "post": {
-        "t1": 4.73,
-        "t5": 17.09,
-        "t20": null
-      }
-    },
-    "2483": {
-      "ticker": "2483",
-      "name": "百容",
-      "enter_date": "2026-07-22",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "連續三次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -23.5,
-      "runup_20d_pct": 0.48,
-      "foreign_5d_at_enter": 0.7307,
-      "foreign_20d_at_enter": 1.8610329855,
-      "enter_close": 41.04999923706055,
-      "during": [
-        {
-          "d": "2026-07-22",
-          "close": 41.04999923706055,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-23",
-          "close": 39.849998474121094,
-          "cumret_pct": -2.92,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-24",
-          "close": 40.150001525878906,
-          "cumret_pct": -2.19,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-27",
-          "close": 36.150001525878906,
-          "cumret_pct": -11.94,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": 38.849998474121094,
-          "cumret_pct": -5.36,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": 35.0,
-          "cumret_pct": -14.74,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": 32.04999923706055,
-          "cumret_pct": -21.92,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": 35.25,
-          "cumret_pct": -14.13,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 38.0,
-          "cumret_pct": -7.43,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 39.599998474121094,
-          "cumret_pct": -3.53,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-05",
-      "release_close": 38.54999923706055,
-      "post": {
-        "t1": -2.85,
-        "t5": -5.45,
-        "t20": null
-      }
-    },
     "8028": {
       "ticker": "8028",
       "name": "昇陽半導體",
@@ -546,91 +85,6 @@
         "t20": null
       }
     },
-    "8033": {
-      "ticker": "8033",
-      "name": "雷虎",
-      "enter_date": "2026-07-27",
-      "disp_start": "2026-07-27",
-      "disp_end": "2026-08-07",
-      "condition": "連續五次",
-      "count_label": "第二次處置",
-      "count_n": 2,
-      "source": "TWSE",
-      "runup_5d_pct": -9.05,
-      "runup_20d_pct": 20.39,
-      "foreign_5d_at_enter": -8.4236,
-      "foreign_20d_at_enter": 30.77770327,
-      "enter_close": 186.0,
-      "during": [
-        {
-          "d": "2026-07-27",
-          "close": 186.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-28",
-          "close": 174.0,
-          "cumret_pct": -6.45,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-29",
-          "close": 157.0,
-          "cumret_pct": -15.59,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-30",
-          "close": 150.0,
-          "cumret_pct": -19.35,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-07-31",
-          "close": 165.0,
-          "cumret_pct": -11.29,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 172.5,
-          "cumret_pct": -7.26,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 178.5,
-          "cumret_pct": -4.03,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-05",
-          "close": 189.0,
-          "cumret_pct": 1.61,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-06",
-          "close": 190.0,
-          "cumret_pct": 2.15,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-07",
-          "close": 185.0,
-          "cumret_pct": -0.54,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-13",
-      "release_close": 183.5,
-      "post": {
-        "t1": 9.81,
-        "t5": null,
-        "t20": null
-      }
-    },
     "6969": {
       "ticker": "6969",
       "name": "成信實業*-創",
@@ -706,7 +160,7 @@
       "release_close": 33.099998474121094,
       "post": {
         "t1": -5.14,
-        "t5": null,
+        "t5": 4.83,
         "t20": null
       }
     },
@@ -773,7 +227,7 @@
       "release_close": 33.54999923706055,
       "post": {
         "t1": 6.56,
-        "t5": null,
+        "t5": 0.0,
         "t20": null
       }
     },
@@ -840,7 +294,7 @@
       "release_close": 116.0,
       "post": {
         "t1": -0.43,
-        "t5": null,
+        "t5": -6.47,
         "t20": null
       }
     },
@@ -907,7 +361,7 @@
       "release_close": 356.0,
       "post": {
         "t1": 4.63,
-        "t5": null,
+        "t5": -3.79,
         "t20": null
       }
     },
@@ -1009,252 +463,6 @@
         "t20": null
       }
     },
-    "3288": {
-      "ticker": "3288",
-      "name": "點晶",
-      "enter_date": "2026-07-31",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "點晶科技股份有限公司股票(代號：3288)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": -0.41,
-      "runup_20d_pct": 20.85,
-      "foreign_5d_at_enter": 0.0,
-      "foreign_20d_at_enter": 0.0014429999542236328,
-      "enter_close": 25.700000762939453,
-      "during": [
-        {
-          "d": "2026-07-31",
-          "close": 25.700000762939453,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 25.850000381469727,
-          "cumret_pct": 0.58,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 25.450000762939453,
-          "cumret_pct": -0.97,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-05",
-      "release_close": 23.899999618530273,
-      "post": {
-        "t1": -4.39,
-        "t5": -8.79,
-        "t20": null
-      }
-    },
-    "3675": {
-      "ticker": "3675",
-      "name": "德微",
-      "enter_date": "2026-07-31",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "德微科技股份有限公司股票(代號：3675)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一項第",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": -25.24,
-      "runup_20d_pct": -51.6,
-      "foreign_5d_at_enter": 0.0,
-      "foreign_20d_at_enter": 1.49194404,
-      "enter_close": 216.5,
-      "during": [
-        {
-          "d": "2026-07-31",
-          "close": 216.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 238.0,
-          "cumret_pct": 9.93,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 252.5,
-          "cumret_pct": 16.63,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-05",
-      "release_close": 267.5,
-      "post": {
-        "t1": -0.19,
-        "t5": 2.99,
-        "t20": null
-      }
-    },
-    "6173": {
-      "ticker": "6173",
-      "name": "信昌電",
-      "enter_date": "2026-07-31",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "信昌電子陶瓷股份有限公司股票(代號：6173)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": -27.6,
-      "runup_20d_pct": -58.46,
-      "foreign_5d_at_enter": 0.0,
-      "foreign_20d_at_enter": 0.36448365,
-      "enter_close": 145.5,
-      "during": [
-        {
-          "d": "2026-07-31",
-          "close": 145.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 160.0,
-          "cumret_pct": 9.97,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 164.5,
-          "cumret_pct": 13.06,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-05",
-      "release_close": 165.0,
-      "post": {
-        "t1": 3.64,
-        "t5": 23.33,
-        "t20": null
-      }
-    },
-    "6683": {
-      "ticker": "6683",
-      "name": "雍智科技",
-      "enter_date": "2026-07-31",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "雍智科技股份有限公司股票(代號：6683)最近30個營業日內曾發布處置，又因連續3個營業日達本中心作業要點第四條第一項第",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": -31.74,
-      "runup_20d_pct": -52.51,
-      "foreign_5d_at_enter": 0.0,
-      "foreign_20d_at_enter": 7.68998088,
-      "enter_close": 927.0,
-      "during": [
-        {
-          "d": "2026-07-31",
-          "close": 927.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 1015.0,
-          "cumret_pct": 9.49,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 1090.0,
-          "cumret_pct": 17.58,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-05",
-      "release_close": 1195.0,
-      "post": {
-        "t1": -0.84,
-        "t5": 6.28,
-        "t20": null
-      }
-    },
-    "6727": {
-      "ticker": "6727",
-      "name": "亞泰金屬",
-      "enter_date": "2026-07-31",
-      "disp_start": "2026-07-22",
-      "disp_end": "2026-08-04",
-      "condition": "亞泰金屬工業股份有限公司股票(代號：6727)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": -25.73,
-      "runup_20d_pct": -32.48,
-      "foreign_5d_at_enter": 0.0,
-      "foreign_20d_at_enter": 0.83801207,
-      "enter_close": 306.0,
-      "during": [
-        {
-          "d": "2026-07-31",
-          "close": 306.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-03",
-          "close": 336.5,
-          "cumret_pct": 9.97,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-04",
-          "close": 370.0,
-          "cumret_pct": 20.92,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-05",
-      "release_close": 407.0,
-      "post": {
-        "t1": -1.72,
-        "t5": -2.95,
-        "t20": null
-      }
-    },
-    "8383": {
-      "ticker": "8383",
-      "name": "千附",
-      "enter_date": "2026-07-31",
-      "disp_start": "2026-07-20",
-      "disp_end": "2026-07-31",
-      "condition": "千附實業股份有限公司股票(代號：8383)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": -29.2,
-      "runup_20d_pct": -0.95,
-      "foreign_5d_at_enter": 0.0,
-      "foreign_20d_at_enter": 4.072408283128395,
-      "enter_close": 68.5,
-      "during": [
-        {
-          "d": "2026-07-31",
-          "close": 68.5,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": "2026-08-03",
-      "release_close": 68.30000305175781,
-      "post": {
-        "t1": 2.34,
-        "t5": 2.34,
-        "t20": null
-      }
-    },
     "4169": {
       "ticker": "4169",
       "name": "泰宗",
@@ -1312,7 +520,7 @@
       "release_close": 152.5,
       "post": {
         "t1": -1.97,
-        "t5": null,
+        "t5": 6.89,
         "t20": null
       }
     },
@@ -1343,38 +551,7 @@
       "release_close": 12500.0,
       "post": {
         "t1": 10.0,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "2455": {
-      "ticker": "2455",
-      "name": "全新",
-      "enter_date": "2026-08-13",
-      "disp_start": "2026-08-10",
-      "disp_end": "2026-08-14",
-      "condition": "連續三次",
-      "count_label": "第一次處置",
-      "count_n": 1,
-      "source": "TWSE",
-      "runup_5d_pct": 3.23,
-      "runup_20d_pct": 22.68,
-      "foreign_5d_at_enter": 6.8358,
-      "foreign_20d_at_enter": -4.068966825,
-      "enter_close": 384.0,
-      "during": [
-        {
-          "d": "2026-08-13",
-          "close": 384.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": 1.60092288
-        }
-      ],
-      "release_date": "2026-08-16",
-      "release_close": 379.5,
-      "post": {
-        "t1": 9.88,
-        "t5": null,
+        "t5": 7.08,
         "t20": null
       }
     },
@@ -1405,7 +582,7 @@
       "release_close": 1020.0,
       "post": {
         "t1": 9.8,
-        "t5": null,
+        "t5": 6.37,
         "t20": null
       }
     },
@@ -1436,7 +613,7 @@
       "release_close": 862.0,
       "post": {
         "t1": 5.22,
-        "t5": null,
+        "t5": -5.92,
         "t20": null
       }
     },
@@ -1467,7 +644,7 @@
       "release_close": 4855.0,
       "post": {
         "t1": 9.99,
-        "t5": null,
+        "t5": 11.12,
         "t20": null
       }
     },
@@ -1498,7 +675,7 @@
       "release_close": 1675.0,
       "post": {
         "t1": -2.99,
-        "t5": null,
+        "t5": -10.75,
         "t20": null
       }
     },
@@ -1529,7 +706,7 @@
       "release_close": 89.5,
       "post": {
         "t1": -1.45,
-        "t5": null,
+        "t5": -1.9,
         "t20": null
       }
     },
@@ -1560,7 +737,7 @@
       "release_close": 111.5,
       "post": {
         "t1": 8.97,
-        "t5": null,
+        "t5": -4.93,
         "t20": null
       }
     },
@@ -1591,7 +768,7 @@
       "release_close": 1010.0,
       "post": {
         "t1": 2.97,
-        "t5": null,
+        "t5": -4.26,
         "t20": null
       }
     },
@@ -1622,7 +799,7 @@
       "release_close": 1720.0,
       "post": {
         "t1": -2.33,
-        "t5": null,
+        "t5": -6.4,
         "t20": null
       }
     },
@@ -1650,15 +827,33 @@
         },
         {
           "d": "2026-08-17",
-          "close": 534.0,
-          "cumret_pct": 2.3,
+          "close": 545.0,
+          "cumret_pct": 4.41,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-21",
+      "release_close": 577.0,
       "post": {
-        "t1": null,
+        "t1": -5.2,
         "t5": null,
         "t20": null
       }
@@ -1687,15 +882,33 @@
         },
         {
           "d": "2026-08-17",
-          "close": 482.5,
-          "cumret_pct": 4.89,
+          "close": 488.0,
+          "cumret_pct": 6.09,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-21",
+      "release_close": 481.0,
       "post": {
-        "t1": null,
+        "t1": -9.56,
         "t5": null,
         "t20": null
       }
@@ -1724,15 +937,39 @@
         },
         {
           "d": "2026-08-17",
-          "close": 699.0,
-          "cumret_pct": -0.43,
+          "close": 733.0,
+          "cumret_pct": 4.42,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-24",
+      "release_close": 727.0,
       "post": {
-        "t1": null,
+        "t1": 5.91,
         "t5": null,
         "t20": null
       }
@@ -1761,15 +998,39 @@
         },
         {
           "d": "2026-08-17",
-          "close": 268.0,
-          "cumret_pct": 1.9,
+          "close": 269.5,
+          "cumret_pct": 2.47,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-24",
+      "release_close": 252.0,
       "post": {
-        "t1": null,
+        "t1": -2.78,
         "t5": null,
         "t20": null
       }
@@ -1798,16 +1059,16 @@
         },
         {
           "d": "2026-08-17",
-          "close": 92.19999694824219,
-          "cumret_pct": 0.77,
+          "close": 96.5,
+          "cumret_pct": 5.46,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 95.30000305175781,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": 2.83,
+        "t5": 14.38,
         "t20": null
       }
     },
@@ -1835,53 +1096,16 @@
         },
         {
           "d": "2026-08-17",
-          "close": 2730.0,
-          "cumret_pct": 7.48,
+          "close": 2790.0,
+          "cumret_pct": 9.84,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 2925.0,
       "post": {
-        "t1": null,
-        "t5": null,
-        "t20": null
-      }
-    },
-    "4971": {
-      "ticker": "4971",
-      "name": "IET-KY",
-      "enter_date": "2026-08-16",
-      "disp_start": "2026-08-11",
-      "disp_end": "2026-08-17",
-      "condition": "英特磊科技股份有限公司股票(代號：4971)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，",
-      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
-      "count_n": 1,
-      "source": "TPEx",
-      "runup_5d_pct": 4.23,
-      "runup_20d_pct": 28.0,
-      "foreign_5d_at_enter": -2.4586,
-      "foreign_20d_at_enter": -4.87291624,
-      "enter_close": 480.0,
-      "during": [
-        {
-          "d": "2026-08-16",
-          "close": 480.0,
-          "cumret_pct": 0.0,
-          "foreign_1d": null
-        },
-        {
-          "d": "2026-08-17",
-          "close": 510.0,
-          "cumret_pct": 6.25,
-          "foreign_1d": null
-        }
-      ],
-      "release_date": null,
-      "release_close": null,
-      "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -8.38,
+        "t5": 1.2,
         "t20": null
       }
     },
@@ -1909,16 +1133,16 @@
         },
         {
           "d": "2026-08-17",
-          "close": 131.5,
-          "cumret_pct": -1.13,
+          "close": 135.5,
+          "cumret_pct": 1.88,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 122.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": 3.69,
+        "t5": -5.33,
         "t20": null
       }
     },
@@ -1946,16 +1170,16 @@
         },
         {
           "d": "2026-08-17",
-          "close": 167.0,
-          "cumret_pct": -1.18,
+          "close": 171.0,
+          "cumret_pct": 1.18,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 157.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -2.55,
+        "t5": -1.91,
         "t20": null
       }
     },
@@ -1983,15 +1207,33 @@
         },
         {
           "d": "2026-08-17",
-          "close": 182.0,
-          "cumret_pct": 5.81,
+          "close": 178.5,
+          "cumret_pct": 3.78,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-21",
+      "release_close": 194.5,
       "post": {
-        "t1": null,
+        "t1": -3.08,
         "t5": null,
         "t20": null
       }
@@ -2025,11 +1267,11 @@
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 77.69999694824219,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -1.54,
+        "t5": -6.95,
         "t20": null
       }
     },
@@ -2053,6 +1295,42 @@
           "d": "2026-08-17",
           "close": 168.0,
           "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
@@ -2078,19 +1356,43 @@
       "runup_20d_pct": 58.78,
       "foreign_5d_at_enter": 0.8816,
       "foreign_20d_at_enter": 0.885356313,
-      "enter_close": 127.5,
+      "enter_close": 130.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 127.5,
+          "close": 130.0,
           "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
           "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-24",
+      "release_close": 122.5,
       "post": {
-        "t1": null,
+        "t1": 4.08,
         "t5": null,
         "t20": null
       }
@@ -2118,11 +1420,11 @@
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 39.20000076293945,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -2.68,
+        "t5": 8.55,
         "t20": null
       }
     },
@@ -2140,20 +1442,20 @@
       "runup_20d_pct": 42.71,
       "foreign_5d_at_enter": 19.6944,
       "foreign_20d_at_enter": 57.871059985,
-      "enter_close": 269.0,
+      "enter_close": 273.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 269.0,
+          "close": 273.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 248.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -1.01,
+        "t5": 8.87,
         "t20": null
       }
     },
@@ -2171,19 +1473,37 @@
       "runup_20d_pct": 9.34,
       "foreign_5d_at_enter": -70.4647,
       "foreign_20d_at_enter": -7.021117535,
-      "enter_close": 679.0,
+      "enter_close": 689.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 679.0,
+          "close": 689.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-21",
+      "release_close": 639.0,
       "post": {
-        "t1": null,
+        "t1": 0.63,
         "t5": null,
         "t20": null
       }
@@ -2202,20 +1522,20 @@
       "runup_20d_pct": -7.78,
       "foreign_5d_at_enter": -7.2452,
       "foreign_20d_at_enter": -0.86001741,
-      "enter_close": 676.0,
+      "enter_close": 700.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 676.0,
+          "close": 700.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 770.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -10.0,
+        "t5": -12.47,
         "t20": null
       }
     },
@@ -2233,20 +1553,20 @@
       "runup_20d_pct": 31.88,
       "foreign_5d_at_enter": 18.9953,
       "foreign_20d_at_enter": 27.22843567,
-      "enter_close": 513.0,
+      "enter_close": 550.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 513.0,
+          "close": 550.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 579.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -2.07,
+        "t5": -7.94,
         "t20": null
       }
     },
@@ -2271,12 +1591,30 @@
           "close": 481.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-21",
+      "release_close": 513.0,
       "post": {
-        "t1": null,
+        "t1": -5.95,
         "t5": null,
         "t20": null
       }
@@ -2302,6 +1640,42 @@
           "close": 44.400001525878906,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
         }
       ],
       "release_date": null,
@@ -2326,20 +1700,26 @@
       "runup_20d_pct": 43.97,
       "foreign_5d_at_enter": 1.0946,
       "foreign_20d_at_enter": 0.203245925,
-      "enter_close": 221.0,
+      "enter_close": 239.5,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 221.0,
+          "close": 239.5,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-19",
+      "release_close": 231.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": 8.23,
+        "t5": 10.39,
         "t20": null
       }
     },
@@ -2357,20 +1737,20 @@
       "runup_20d_pct": 11.25,
       "foreign_5d_at_enter": 3.9845,
       "foreign_20d_at_enter": 9.08145234,
-      "enter_close": 440.0,
+      "enter_close": 458.5,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 440.0,
+          "close": 458.5,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 421.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -1.66,
+        "t5": 0.48,
         "t20": null
       }
     },
@@ -2388,20 +1768,20 @@
       "runup_20d_pct": 14.36,
       "foreign_5d_at_enter": -0.7328,
       "foreign_20d_at_enter": 14.82193585,
-      "enter_close": 892.0,
+      "enter_close": 873.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 892.0,
+          "close": 873.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 863.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -3.01,
+        "t5": 1.51,
         "t20": null
       }
     },
@@ -2428,11 +1808,11 @@
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 1740.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -7.76,
+        "t5": -6.03,
         "t20": null
       }
     },
@@ -2450,20 +1830,32 @@
       "runup_20d_pct": 57.38,
       "foreign_5d_at_enter": 0.712,
       "foreign_20d_at_enter": 0.94371529,
-      "enter_close": 469.0,
+      "enter_close": 475.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 469.0,
+          "close": 475.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-20",
+      "release_close": 454.0,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": 1.65,
+        "t5": 13.44,
         "t20": null
       }
     },
@@ -2490,11 +1882,11 @@
           "foreign_1d": 0.0
         }
       ],
-      "release_date": null,
-      "release_close": null,
+      "release_date": "2026-08-18",
+      "release_close": 408.5,
       "post": {
-        "t1": null,
-        "t5": null,
+        "t1": -3.67,
+        "t5": -1.1,
         "t20": null
       }
     },
@@ -2512,13 +1904,437 @@
       "runup_20d_pct": 22.17,
       "foreign_5d_at_enter": -61.6839,
       "foreign_20d_at_enter": -101.78020036,
-      "enter_close": 1350.0,
+      "enter_close": 1295.0,
       "during": [
         {
           "d": "2026-08-17",
-          "close": 1350.0,
+          "close": 1295.0,
           "cumret_pct": 0.0,
           "foreign_1d": 0.0
+        },
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": "2026-08-19",
+      "release_close": 1180.0,
+      "post": {
+        "t1": 1.27,
+        "t5": -1.69,
+        "t20": null
+      }
+    },
+    "7795": {
+      "ticker": "7795",
+      "name": "長廣",
+      "enter_date": "2026-08-18",
+      "disp_start": "2026-08-18",
+      "disp_end": "2026-08-24",
+      "condition": "連續三次",
+      "count_label": "第一次處置",
+      "count_n": 1,
+      "source": "TWSE",
+      "runup_5d_pct": 20.13,
+      "runup_20d_pct": 20.26,
+      "foreign_5d_at_enter": 0.3894,
+      "foreign_20d_at_enter": -10.46078967,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": "2026-08-25",
+      "release_close": 551.0,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "8033": {
+      "ticker": "8033",
+      "name": "雷虎",
+      "enter_date": "2026-08-18",
+      "disp_start": "2026-08-18",
+      "disp_end": "2026-08-24",
+      "condition": "連續五次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": 13.37,
+      "runup_20d_pct": -4.65,
+      "foreign_5d_at_enter": -13.8626,
+      "foreign_20d_at_enter": -19.825513095,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-18",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": "2026-08-25",
+      "release_close": 179.0,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3498": {
+      "ticker": "3498",
+      "name": "陽程",
+      "enter_date": "2026-08-19",
+      "disp_start": "2026-08-19",
+      "disp_end": "2026-08-25",
+      "condition": "陽程科技股份有限公司股票(代號：3498)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": 39.76,
+      "runup_20d_pct": 64.93,
+      "foreign_5d_at_enter": 5.7266,
+      "foreign_20d_at_enter": 6.063150922,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-19",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3490": {
+      "ticker": "3490",
+      "name": "單井",
+      "enter_date": "2026-08-20",
+      "disp_start": "2026-08-20",
+      "disp_end": "2026-08-26",
+      "condition": "單井工業股份有限公司股票(代號：3490)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": 39.7,
+      "runup_20d_pct": 69.26,
+      "foreign_5d_at_enter": 2.6304,
+      "foreign_20d_at_enter": 2.322662953,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-20",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-21",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2455": {
+      "ticker": "2455",
+      "name": "全新",
+      "enter_date": "2026-08-24",
+      "disp_start": "2026-08-24",
+      "disp_end": "2026-08-28",
+      "condition": "連續五次",
+      "count_label": "第二次處置",
+      "count_n": 2,
+      "source": "TWSE",
+      "runup_5d_pct": 6.98,
+      "runup_20d_pct": 21.92,
+      "foreign_5d_at_enter": -18.3952,
+      "foreign_20d_at_enter": -26.46713653,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "5314": {
+      "ticker": "5314",
+      "name": "世紀*",
+      "enter_date": "2026-08-24",
+      "disp_start": "2026-08-24",
+      "disp_end": "2026-08-28",
+      "condition": "世紀民生科技股份有限公司股票(代號：5314)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊",
+      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": 60.49,
+      "runup_20d_pct": 92.66,
+      "foreign_5d_at_enter": -0.5157,
+      "foreign_20d_at_enter": 0.7217263195,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "5321": {
+      "ticker": "5321",
+      "name": "美而快",
+      "enter_date": "2026-08-24",
+      "disp_start": "2026-08-24",
+      "disp_end": "2026-08-28",
+      "condition": "美而快國際股份有限公司股票(代號：5321)因最近10個營業日內有6個營業日經本中心公布注意交易資訊，爰自115年8月2",
+      "count_label": "最近10個營業日內有6個營業日",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": 14.62,
+      "runup_20d_pct": 23.77,
+      "foreign_5d_at_enter": 0.2095,
+      "foreign_20d_at_enter": 0.13696195500000002,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-24",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        },
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": null,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3625": {
+      "ticker": "3625",
+      "name": "西勝",
+      "enter_date": "2026-08-25",
+      "disp_start": "2026-08-25",
+      "disp_end": "2026-08-31",
+      "condition": "西勝國際股份有限公司股票(代號：3625)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": -10.75,
+      "runup_20d_pct": -24.32,
+      "foreign_5d_at_enter": 0.0515,
+      "foreign_20d_at_enter": 0.033019654,
+      "enter_close": 12.449999809265137,
+      "during": [
+        {
+          "d": "2026-08-25",
+          "close": 12.449999809265137,
+          "cumret_pct": 0.0,
+          "foreign_1d": -0.0039031994999999997
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "4304": {
+      "ticker": "4304",
+      "name": "勝昱",
+      "enter_date": "2026-08-25",
+      "disp_start": "2026-08-25",
+      "disp_end": "2026-08-31",
+      "condition": "勝昱科技股份有限公司股票(代號：4304)因連續3個營業日達本中心作業要點第四條第一項第一款經本中心公布注意交易資訊，爰",
+      "count_label": "因連續3個營業日達本中心作業要點第四條第一項第一款",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": null,
+      "runup_20d_pct": null,
+      "foreign_5d_at_enter": -0.0003,
+      "foreign_20d_at_enter": -0.0010345,
+      "enter_close": null,
+      "during": [
+        {
+          "d": "2026-08-25",
+          "close": null,
+          "cumret_pct": 0.0,
+          "foreign_1d": null
+        }
+      ],
+      "release_date": null,
+      "release_close": null,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "4971": {
+      "ticker": "4971",
+      "name": "IET-KY",
+      "enter_date": "2026-08-25",
+      "disp_start": "2026-08-25",
+      "disp_end": "2026-08-31",
+      "condition": "英特磊科技股份有限公司股票(代號：4971)最近30個營業日內曾發布處置，又因連續5個營業日經本中心公布注意交易資訊，爰",
+      "count_label": "連續5個營業日",
+      "count_n": 1,
+      "source": "TPEx",
+      "runup_5d_pct": -0.36,
+      "runup_20d_pct": 42.05,
+      "foreign_5d_at_enter": -5.5075,
+      "foreign_20d_at_enter": -9.52291207,
+      "enter_close": 554.0,
+      "during": [
+        {
+          "d": "2026-08-25",
+          "close": 554.0,
+          "cumret_pct": 0.0,
+          "foreign_1d": 0.414115
         }
       ],
       "release_date": null,

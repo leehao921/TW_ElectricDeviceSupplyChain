@@ -178,3 +178,23 @@ def test_record_post_hist_fn_missing_day_falls_back_to_snap():
     dt.record_post(e, {"close": 105.0}, days_since_release=1,
                    hist_close_fn=lambda c: None)
     assert e["post"]["t1"] == 5.0     # fallback to current snap (old behavior)
+
+
+def test_release_close_self_heals_on_later_run():
+    # 2026-08-25: 晨跑 (08:35) 偵測解除時當日收盤未入庫 → release_close=None 且被
+    # 冪等鎖死 → T+N 永遠 None (27 檔實災)。後續 run 須用 release_date 回查自癒。
+    tracked = {"1815": {"release_date": "2026-08-18", "release_close": None,
+                        "enter_close": 100.0,
+                        "post": {"t1": None, "t5": None, "t20": None}}}
+    state = {"tracked": tracked}
+    closes = {("1815", "2026-08-18"): 111.0, ("1815", "2026-08-25"): 120.0}
+
+    def market_fn(t, d):
+        return {"close": closes.get((t, d))}
+
+    dt.update_tracking(state, active={}, history=[], market_fn=market_fn,
+                       as_of="2026-08-25",
+                       nth_close_fn=lambda t, rd, n: 113.0 if n == 1 else None)
+    e = state["tracked"]["1815"]
+    assert e["release_close"] == 111.0                      # 自癒為解除日收盤
+    assert e["post"]["t1"] == round((113.0/111.0-1)*100, 2)  # T+1 隨之可算

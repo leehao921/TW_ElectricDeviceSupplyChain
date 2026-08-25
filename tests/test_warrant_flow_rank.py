@@ -52,3 +52,28 @@ def test_render_no_literal_newline():
                             hits={"short": (3, 5), "long": (2, 4)})
     assert "2324" in msg and "3037" in msg
     assert "\\n" not in msg
+
+
+def test_label_with_name_sector_themes():
+    labels = {"3008": {"name": "大立光", "sector": "Consumer Electronics",
+                       "themes": ["Apple", "VCSEL"]},
+              "2603": {"name": "長榮", "sector": "", "themes": []}}
+    assert wr.label("3008", labels) == "3008 大立光"
+    assert wr.label("9999", labels) == "9999"          # 無對映 → 裸代號
+    assert wr.label("2603", labels) == "2603 長榮"
+
+
+def test_label_row_md_includes_sector_and_themes():
+    labels = {"3008": {"name": "大立光", "sector": "Consumer Electronics",
+                       "themes": ["Apple", "VCSEL", "CPO", "HBM"]}}
+    cell = wr.label_detail("3008", labels)
+    assert "大立光" in cell and "Consumer Electronics" in cell
+    assert "Apple" in cell and "VCSEL" in cell
+    assert "HBM" not in cell                            # 題材最多顯示 3 個
+
+
+def test_render_summary_uses_names():
+    labels = {"2324": {"name": "仁寶", "sector": "Computer Hardware", "themes": []}}
+    msg = wr.render_summary("2026-08-25", [_row("2324", -800)], [],
+                            hits={}, labels=labels)
+    assert "2324 仁寶" in msg

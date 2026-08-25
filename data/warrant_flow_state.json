@@ -6,7 +6,7 @@
       "enter_close": 5385.0,
       "score_at_enter": -77145520,
       "post": {
-        "t1": null,
+        "t1": 6.22,
         "t5": null,
         "t20": null
       }
@@ -17,7 +17,7 @@
       "enter_close": 501.0,
       "score_at_enter": -64111370,
       "post": {
-        "t1": null,
+        "t1": 1.8,
         "t5": null,
         "t20": null
       }
@@ -28,7 +28,7 @@
       "enter_close": 2375.0,
       "score_at_enter": -44586990,
       "post": {
-        "t1": null,
+        "t1": 1.05,
         "t5": null,
         "t20": null
       }
@@ -39,7 +39,7 @@
       "enter_close": 2050.0,
       "score_at_enter": -35049530,
       "post": {
-        "t1": null,
+        "t1": 1.22,
         "t5": null,
         "t20": null
       }
@@ -50,7 +50,7 @@
       "enter_close": 177.0,
       "score_at_enter": -33220410,
       "post": {
-        "t1": null,
+        "t1": 1.13,
         "t5": null,
         "t20": null
       }
@@ -61,7 +61,7 @@
       "enter_close": 948.0,
       "score_at_enter": -26480080,
       "post": {
-        "t1": null,
+        "t1": 2.43,
         "t5": null,
         "t20": null
       }
@@ -72,7 +72,7 @@
       "enter_close": 177.5,
       "score_at_enter": -23497200,
       "post": {
-        "t1": null,
+        "t1": 4.23,
         "t5": null,
         "t20": null
       }
@@ -83,7 +83,7 @@
       "enter_close": 265.0,
       "score_at_enter": -21540390,
       "post": {
-        "t1": null,
+        "t1": 10.0,
         "t5": null,
         "t20": null
       }
@@ -94,7 +94,7 @@
       "enter_close": 124.5,
       "score_at_enter": -21527360,
       "post": {
-        "t1": null,
+        "t1": 1.61,
         "t5": null,
         "t20": null
       }
@@ -105,7 +105,7 @@
       "enter_close": 123.5,
       "score_at_enter": 50137090,
       "post": {
-        "t1": null,
+        "t1": 1.21,
         "t5": null,
         "t20": null
       }
@@ -116,7 +116,7 @@
       "enter_close": 70.80000305175781,
       "score_at_enter": 47252830,
       "post": {
-        "t1": null,
+        "t1": -2.54,
         "t5": null,
         "t20": null
       }
@@ -127,7 +127,7 @@
       "enter_close": 41.599998474121094,
       "score_at_enter": 42237500,
       "post": {
-        "t1": null,
+        "t1": -1.92,
         "t5": null,
         "t20": null
       }
@@ -138,7 +138,7 @@
       "enter_close": 287.0,
       "score_at_enter": 34722520,
       "post": {
-        "t1": null,
+        "t1": 3.14,
         "t5": null,
         "t20": null
       }
@@ -149,7 +149,7 @@
       "enter_close": 187.5,
       "score_at_enter": 32088950,
       "post": {
-        "t1": null,
+        "t1": 2.93,
         "t5": null,
         "t20": null
       }
@@ -160,7 +160,7 @@
       "enter_close": 316.0,
       "score_at_enter": 28201560,
       "post": {
-        "t1": null,
+        "t1": -5.38,
         "t5": null,
         "t20": null
       }
@@ -171,7 +171,7 @@
       "enter_close": 64.5,
       "score_at_enter": 27539390,
       "post": {
-        "t1": null,
+        "t1": -1.4,
         "t5": null,
         "t20": null
       }
@@ -182,7 +182,7 @@
       "enter_close": 592.0,
       "score_at_enter": 26099590,
       "post": {
-        "t1": null,
+        "t1": -0.17,
         "t5": null,
         "t20": null
       }
@@ -193,7 +193,7 @@
       "enter_close": 124.0,
       "score_at_enter": 24990540,
       "post": {
-        "t1": null,
+        "t1": -1.61,
         "t5": null,
         "t20": null
       }
@@ -203,6 +203,94 @@
       "enter_date": "2026-08-24",
       "enter_close": 282.0,
       "score_at_enter": 24663290,
+      "post": {
+        "t1": -4.26,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2327": {
+      "side": "short",
+      "enter_date": "2026-08-25",
+      "enter_close": 544.0,
+      "score_at_enter": -33190720,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2454": {
+      "side": "short",
+      "enter_date": "2026-08-25",
+      "enter_close": 3735.0,
+      "score_at_enter": -30171560,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2308": {
+      "side": "short",
+      "enter_date": "2026-08-25",
+      "enter_close": 1710.0,
+      "score_at_enter": -25151430,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2603": {
+      "side": "short",
+      "enter_date": "2026-08-25",
+      "enter_close": 246.0,
+      "score_at_enter": -21341820,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "2345": {
+      "side": "short",
+      "enter_date": "2026-08-25",
+      "enter_close": 2030.0,
+      "score_at_enter": -20866170,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3661": {
+      "side": "long",
+      "enter_date": "2026-08-25",
+      "enter_close": 3865.0,
+      "score_at_enter": 36190620,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "3017": {
+      "side": "long",
+      "enter_date": "2026-08-25",
+      "enter_close": 2950.0,
+      "score_at_enter": 31229440,
+      "post": {
+        "t1": null,
+        "t5": null,
+        "t20": null
+      }
+    },
+    "6213": {
+      "side": "long",
+      "enter_date": "2026-08-25",
+      "enter_close": 530.0,
+      "score_at_enter": 23414540,
       "post": {
         "t1": null,
         "t5": null,

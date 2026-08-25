@@ -495,6 +495,13 @@ def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: 
             else:
                 mark_release(entry, m, as_of)     # first day out of active
         else:
+            if entry.get("release_close") is None:
+                # 晨跑偵測解除時當日收盤未入庫 → None 被冪等鎖死;後續 run 以
+                # release_date 回查自癒 (fetch_daily_snapshot 為精確日比對,
+                # 過去日期此時已有收盤)。2026-08-25 修 27 檔實災。
+                m_rel = market_fn(ticker, entry["release_date"]) or {}
+                if m_rel.get("close"):
+                    entry["release_close"] = m_rel["close"]
             dsr = _trading_days_between(entry["release_date"], as_of)
             hist_fn = None
             if nth_close_fn is not None:
@@ -599,6 +606,10 @@ def main() -> int:
         import psycopg2
         from bb_followthrough_track import DB_CONFIG, fetch_daily_snapshot, fetch_20d_foreign
         conn = psycopg2.connect(**DB_CONFIG)
+        # 追蹤 pass 全為讀查詢: autocommit 讓單一查詢失敗不會毒化整條交易
+        # (2026-08-25 實災: 一個查詢錯 → 'transaction aborted' → 整段 pass
+        #  連續多日失敗, helper 吞例外看不到根因)。
+        conn.autocommit = True
         def market_fn(ticker, as_of_):
             snap = fetch_daily_snapshot(conn, ticker, as_of_) or {}
             return {
