@@ -158,14 +158,20 @@ def render_summary(as_of: str, shorts: list[dict], longs: list[dict],
 # IO
 # --------------------------------------------------------------------------- #
 def run_collector(as_of: str) -> None:
-    try:
-        subprocess.run(
-            ["docker", "exec", "-e", "PYTHONPATH=/opt/tmf:/opt/tmf/src",
-             "tmf-stock-daily-collector", "python",
-             "scripts/collectors/warrant_flow_daily.py", "--date", as_of],
-            check=True, capture_output=True, timeout=180)
-    except Exception as e:
-        print(f"[warn] collector trigger failed ({e}); 使用既有庫內資料", file=sys.stderr)
+    """收當日 + 重收前一交易日 (冪等) — TPEx OpenAPI 快照更新晚於 17:40,
+    當日 run 常只併到 TWSE;隔日重收自動補齊 TPEx 段 (2026-08-25 實災 423→695 檔)."""
+    from datetime import timedelta
+    d = date.fromisoformat(as_of)
+    prev = d - timedelta(days=3 if d.weekday() == 0 else 1)
+    for target in (prev.isoformat(), as_of):
+        try:
+            subprocess.run(
+                ["docker", "exec", "-e", "PYTHONPATH=/opt/tmf:/opt/tmf/src",
+                 "tmf-stock-daily-collector", "python",
+                 "scripts/collectors/warrant_flow_daily.py", "--date", target],
+                check=True, capture_output=True, timeout=180)
+        except Exception as e:
+            print(f"[warn] collector {target} failed ({e})", file=sys.stderr)
 
 
 def load_rows(conn, as_of: str) -> list[dict]:
