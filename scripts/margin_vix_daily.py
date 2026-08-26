@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""融資融券 + 台股 VIX 日報 (18:10) — 觸發 collectors 後推 inbox.
+
+- margin_daily: 大盤融資餘額 5D 趨勢 + 個股融資/融券增減 top (張)
+- vix_daily: 自家 TXO 近月 IV 衍生 (官方 VIX 已停編), 水位 + 5D 變化
+"""
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+DB = dict(host="localhost", port=5432, dbname="tmf_market_data",
+          user="tmf", password="tmf_dev_2026")
+TOP_N = 5
+
+
+def top_movers(rows: list[dict], field: str, n: int = TOP_N) -> tuple[list, list]:
+    """rows: {symbol, delta_fin, delta_short}; 回傳 (增 top n, 減 top n)."""
+    valid = [r for r in rows if r.get(field) is not None]
+    up = sorted(valid, key=lambda r: -r[field])[:n]
+    down = sorted(valid, key=lambda r: r[field])[:n]
+    return ([r for r in up if r[field] > 0], [r for r in down if r[field] < 0])
+
+
+def render(as_of: str, fin_now: float, fin_5d_chg: float, vix: float | None,
+           vix_5d_chg: float | None, fin_up: list, fin_down: list,
+           short_up: list, labels: dict | None = None) -> str:
+    def name(t):
+        info = (labels or {}).get(t)
+        return f"{t} {info['name']}" if info and info.get("name") else t
+
+    def fmt(rows, field):
+        return " / ".join(f"{name(r['symbol'])} {r[field]:+,}" for r in rows[:3]) or "—"
+    lines = [f"融資融券×VIX 日報 {as_of}"]
+    lines.append(f"大盤融資餘額 {fin_now/1e5:,.0f}億 ({fin_5d_chg:+,.0f}億/5D)")
+    if vix is not None:
+        chg = f" ({vix_5d_chg:+.1f}/5D)" if vix_5d_chg is not None else ""
+        zone = "低波動" if vix < 18 else ("常態" if vix < 25 else "高壓")
+        lines.append(f"台股VIX(TXO近月IV) {vix:.1f}{chg} · {zone}")
+    lines.append(f"融資增: {fmt(fin_up, 'delta_fin')} (張)")
+    lines.append(f"融資減: {fmt(fin_down, 'delta_fin')} (張)")
+    lines.append(f"融券增: {fmt(short_up, 'delta_short')} (張)")
+    return "\n".join(lines)
+
+
+def run_collectors(as_of: str) -> None:
+    d = date.fromisoformat(as_of)
+    prev = d - timedelta(days=3 if d.weekday() == 0 else 1)
+    for args in (["scripts/collectors/margin_daily.py", "--date", prev.isoformat()],
+                 ["scripts/collectors/margin_daily.py", "--date", as_of],
+                 ["scripts/collectors/vix_daily.py"]):
+        try:
+            subprocess.run(["docker", "exec", "-e", "PYTHONPATH=/opt/tmf:/opt/tmf/src",
+                            "tmf-stock-daily-collector", "python"] + args,
+                           check=True, capture_output=True, timeout=180)
+        except Exception as e:
+            print(f"[warn] {args[0]} {args[-1]} failed: {e}", file=sys.stderr)
+
+
+def main() -> int:
+    as_of = date.today().isoformat()
+    run_collectors(as_of)
+    import psycopg2
+    conn = psycopg2.connect(**DB)
+    conn.autocommit = True
+    cur = conn.cursor()
+    cur.execute("SELECT max(date) FROM margin_daily")
+    latest = cur.fetchone()[0]
+    if not latest:
+        print("[error] no margin data")
+        return 1
+    as_of = latest.isoformat()
+    # 大盤融資餘額 (仟元→億)
+    cur.execute("""SELECT date, fin_value_kilo_ntd FROM margin_market_daily
+                   WHERE market='TWSE' ORDER BY date DESC LIMIT 6""")
+    mk = cur.fetchall()
+    fin_now = float(mk[0][1]) if mk else 0
+    fin_5d = (fin_now - float(mk[-1][1])) / 1e5 if len(mk) > 1 else 0
+    # VIX
+    cur.execute("SELECT date, vix FROM vix_daily ORDER BY date DESC LIMIT 6")
+    vx = cur.fetchall()
+    vix = float(vx[0][1]) if vx else None
+    vix5 = (vix - float(vx[-1][1])) if vx and len(vx) > 1 else None
+    # 個股增減 (今日 vs 前日餘額欄)
+    cur.execute("""SELECT symbol, fin_balance - fin_prev, short_balance - short_prev
+                   FROM margin_daily WHERE date=%s
+                   AND symbol ~ '^[1-9][0-9]{3}$'
+                   AND fin_balance IS NOT NULL AND fin_prev IS NOT NULL""", (latest,))
+    rows = [dict(symbol=r[0], delta_fin=int(r[1]),
+                 delta_short=int(r[2]) if r[2] is not None else None) for r in cur.fetchall()]
+    fin_up, fin_down = top_movers(rows, "delta_fin")
+    short_up, _ = top_movers([r for r in rows if r["delta_short"] is not None], "delta_short")
+
+    sys.path.insert(0, str(REPO / "scripts"))
+    from warrant_flow_rank import load_labels
+    msg = render(as_of, fin_now, fin_5d, vix, vix5, fin_up, fin_down, short_up,
+                 labels=load_labels())
+    print(msg)
+    try:
+        import redis
+        redis.Redis().xadd("claude:inbox", {
+            "ts": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "from": "margin_vix", "topic": "margin-vix",
+            "tags": "margin,vix", "as_of": as_of, "msg": msg})
+    except Exception as e:
+        print(f"[warn] inbox push failed: {e}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
