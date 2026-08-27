@@ -30,10 +30,10 @@ HPO_R2 = [0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
 CONFIRM_SINCE = dt.date(2026, 7, 1)   # confirmation 資料齊備後才回填
 
 
-def fmt(x, pct=False, nd=3):
+def fmt(x, pct=False):
     if x is None:
         return "N/A"
-    return f"{x:.1%}" if pct else f"{x:.{nd}f}"
+    return f"{x:.1%}" if pct else f"{x:.3g}"
 
 
 def run(window: int, r2_min: float, step: int, do_hpo: bool, out_path: Path):
@@ -120,11 +120,14 @@ def run(window: int, r2_min: float, step: int, do_hpo: bool, out_path: Path):
         "（step=5 vs horizon=20）偏 anti-conservative，兩者並列判讀。",
         "- 捕捉語意: 訊號落在前高日與觸發日之間也計入捕捉（trigger-date 定義）。",
     ]
-    if res["n_signals_evaluable"] < 10:
+    if res["n_signals_evaluable"] == 0:
+        lines.append("- ⚠️ 訊號機制從未觸發（可評估訊號 0 個）— 此為「無訊號」的負結果，"
+                     "與「訊號觸發但預測失敗」不同，判讀時需區分。")
+    elif res["n_signals_evaluable"] < 10:
         lines.append(f"- ⚠️ 低樣本警告: 可評估訊號僅 {res['n_signals_evaluable']} 個，"
                      "MW 檢定力弱，判定信心有限。")
     lines += [
-        "", "> 誠實警告: 399 交易日樣本、事件數 "
+        f"", f"> 誠實警告: {len(index_s)} 交易日樣本、事件數 "
         f"{res['n_events']} 次，統計力天生有限；本判定不可過度外推。", "",
     ]
 
@@ -165,7 +168,7 @@ def run(window: int, r2_min: float, step: int, do_hpo: bool, out_path: Path):
               "- 本報告數字皆由本 script 對 DB 實算產出；分布性措辭（若有）依 "
               "Golden Rule 0 另跑 scripts/verify_flow_zscore.py 佐證。",
               f"- 產出指令: `.venv/bin/python scripts/lppls_study.py --window {window} "
-              f"--r2 {r2_min}`", ""]
+              f"--r2 {r2_min} --step {step}{'' if do_hpo else ' --no-hpo'}`", ""]
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines), encoding="utf-8")
@@ -182,8 +185,9 @@ def main():
     ap.add_argument("--no-hpo", action="store_true")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
-    out = Path(args.out) if args.out else Path(
-        f"analysis/lppls_study_{dt.date.today()}.md")
+    repo_root = Path(__file__).resolve().parent.parent
+    out = Path(args.out) if args.out else (
+        repo_root / f"analysis/lppls_study_{dt.date.today()}.md")
     run(args.window, args.r2, args.step, not args.no_hpo, out)
 
 

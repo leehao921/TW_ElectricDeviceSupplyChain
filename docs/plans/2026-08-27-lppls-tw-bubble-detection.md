@@ -949,6 +949,8 @@ git commit -m "feat(lppls): 四層 confirmation — 融資增速/法人調節/IV
 
 CLI 是 orchestration 膠水（各組件已有測試），不另寫單元測試；以 `--help` smoke test＋Task 8 實跑驗證。
 
+> **修訂（Task 4 review 後，實跑前）:** 準則 1 分母改用 *capturable* 事件（lookback 視窗與 walk-forward 覆蓋區重疊者）— window=100 前的事件本來就無訊號可捕捉，計入分母會系統性壓低捕捉率。報告同時並列全事件 capture_rate 以昭公信。準則 3 主判定仍用 pre-registered 的重疊樣本 MW p，但必列非重疊子樣本 p 作穩健性對照。此修訂於研究實跑（Task 8）前定案，非事後放寬。下方程式碼區塊為原始版本，實際實作以 `scripts/lppls_study.py` 為準。
+
 - [ ] **Step 1: 實作**
 
 ```python
