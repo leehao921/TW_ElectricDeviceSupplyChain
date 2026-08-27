@@ -36,7 +36,7 @@
 
 **Files:** 無程式碼變更。
 
-- [ ] **Step 1: 安裝 scipy**
+- [x] **Step 1: 安裝 scipy**
 
 ```bash
 uv pip install --python .venv/bin/python scipy
@@ -44,7 +44,7 @@ uv pip install --python .venv/bin/python scipy
 ```
 Expected: 印出版本號（≥1.11）。
 
-- [ ] **Step 2: 安裝 ETH lppls 套件（cross-check 用，允許失敗）**
+- [x] **Step 2: 安裝 ETH lppls 套件（cross-check 用，允許失敗）**
 
 ```bash
 uv pip install --python .venv/bin/python lppls || echo "SKIP: lppls package unavailable"
@@ -60,7 +60,7 @@ Expected: 成功印版本或印 SKIP。失敗不阻擋 — Task 7 會據此跳�
 - Create: `scripts/lppls/fitter.py`
 - Test: `tests/test_lppls_fitter.py`
 
-- [ ] **Step 1: 寫失敗測試**
+- [x] **Step 1: 寫失敗測試**
 
 ```python
 # tests/test_lppls_fitter.py
@@ -147,14 +147,14 @@ def test_flat_series_no_signal():
     assert not is_signal(f, 100, r2_min=0.7)
 ```
 
-- [ ] **Step 2: 跑測試確認失敗**
+- [x] **Step 2: 跑測試確認失敗**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_fitter.py -v
 ```
 Expected: FAIL — `ModuleNotFoundError: No module named 'scripts.lppls'`
 
-- [ ] **Step 3: 實作**
+- [x] **Step 3: 實作**
 
 ```bash
 touch scripts/lppls/__init__.py
@@ -304,14 +304,14 @@ def make_synthetic(n, tc, m, omega, A=10.3, B=-0.05, C1=0.001, C2=0.001,
     return np.exp(y)
 ```
 
-- [ ] **Step 4: 跑測試確認通過**
+- [x] **Step 4: 跑測試確認通過**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_fitter.py -v
 ```
 Expected: 8 passed。若 `test_full_fit_recovers_nonlinear_params` 不穩，檢查 grid seed 是否涵蓋 tc=120（n-1+5..n-1+60 含 119/124，Nelder-Mead 應收斂至 120±5）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/lppls/__init__.py scripts/lppls/fitter.py tests/test_lppls_fitter.py
@@ -329,7 +329,7 @@ git commit -m "feat(lppls): LPPLS 擬合核心 — 加權OLS線性解+grid/NM非
 - Create: `scripts/lppls/index_builder.py`
 - Test: `tests/test_lppls_index.py`
 
-- [ ] **Step 1: 寫失敗測試**
+- [x] **Step 1: 寫失敗測試**
 
 ```python
 # tests/test_lppls_index.py
@@ -397,14 +397,14 @@ def test_validate_vs_taiex_perfect_proxy():
     assert n > 100
 ```
 
-- [ ] **Step 2: 跑測試確認失敗**
+- [x] **Step 2: 跑測試確認失敗**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_index.py -v
 ```
 Expected: FAIL — `ModuleNotFoundError` 或 `ImportError`。
 
-- [ ] **Step 3: 實作**
+- [x] **Step 3: 實作**
 
 ```python
 # scripts/lppls/db.py
@@ -505,14 +505,14 @@ def validate_vs_taiex(index_s: pd.Series, taiex_s: pd.Series):
     return float(r["idx"].corr(r["taiex"])), len(r)
 ```
 
-- [ ] **Step 4: 跑測試確認通過**
+- [x] **Step 4: 跑測試確認通過**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_index.py -v
 ```
 Expected: 5 passed。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/lppls/db.py scripts/lppls/index_builder.py tests/test_lppls_index.py
@@ -527,7 +527,7 @@ git commit -m "feat(lppls): 電子權值指數建構 — CORE 10檔+市值前段
 - Create: `scripts/lppls/walkforward.py`
 - Test: `tests/test_lppls_walkforward.py`
 
-- [ ] **Step 1: 寫失敗測試**
+- [x] **Step 1: 寫失敗測試**
 
 ```python
 # tests/test_lppls_walkforward.py
@@ -592,14 +592,14 @@ def test_evaluate_criteria_shapes():
         assert key in result
 ```
 
-- [ ] **Step 2: 跑測試確認失敗**
+- [x] **Step 2: 跑測試確認失敗**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_walkforward.py -v
 ```
 Expected: FAIL — `ModuleNotFoundError`。
 
-- [ ] **Step 3: 實作**
+- [x] **Step 3: 實作**
 
 ```python
 # scripts/lppls/walkforward.py
@@ -697,14 +697,14 @@ def evaluate(series: pd.Series, wf: pd.DataFrame, events,
     )
 ```
 
-- [ ] **Step 4: 跑測試確認通過**
+- [x] **Step 4: 跑測試確認通過**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_walkforward.py -v
 ```
 Expected: 6 passed。`test_walk_forward_bubble_series_emits_signal_before_crash` 是合成泡沫的端到端檢驗；若 fail，先確認 make_synthetic 的 tc=165 落在 refit 日的 30 天訊號窗內。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/lppls/walkforward.py tests/test_lppls_walkforward.py
@@ -721,7 +721,7 @@ git commit -m "feat(lppls): walk-forward 引擎+回檔事件偵測+三條事前�
 
 設計：每層拆 pure scorer（吃 pandas 物件、可單元測試）＋ DB loader（thin SQL，不做單元測試）。
 
-- [ ] **Step 1: 寫失敗測試**
+- [x] **Step 1: 寫失敗測試**
 
 ```python
 # tests/test_lppls_confirmation.py
@@ -788,14 +788,14 @@ def test_aggregate_labels():
     assert agg["n_available"] == 3
 ```
 
-- [ ] **Step 2: 跑測試確認失敗**
+- [x] **Step 2: 跑測試確認失敗**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_confirmation.py -v
 ```
 Expected: FAIL — `ModuleNotFoundError`。
 
-- [ ] **Step 3: 實作**
+- [x] **Step 3: 實作**
 
 ```python
 # scripts/lppls/confirmation.py
@@ -926,14 +926,14 @@ def confirm(asof, components, index_ret5: float):
     return aggregate(layers)
 ```
 
-- [ ] **Step 4: 跑測試確認通過**
+- [x] **Step 4: 跑測試確認通過**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_confirmation.py -v
 ```
 Expected: 6 passed。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/lppls/confirmation.py tests/test_lppls_confirmation.py
@@ -951,7 +951,7 @@ CLI 是 orchestration 膠水（各組件已有測試），不另寫單元測試�
 
 > **修訂（Task 4 review 後，實跑前）:** 準則 1 分母改用 *capturable* 事件（lookback 視窗與 walk-forward 覆蓋區重疊者）— window=100 前的事件本來就無訊號可捕捉，計入分母會系統性壓低捕捉率。報告同時並列全事件 capture_rate 以昭公信。準則 3 主判定仍用 pre-registered 的重疊樣本 MW p，但必列非重疊子樣本 p 作穩健性對照。此修訂於研究實跑（Task 8）前定案，非事後放寬。下方程式碼區塊為原始版本，實際實作以 `scripts/lppls_study.py` 為準。
 
-- [ ] **Step 1: 實作**
+- [x] **Step 1: 實作**
 
 ```python
 #!/usr/bin/env python3
@@ -1130,21 +1130,21 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 2: Smoke test**
+- [x] **Step 2: Smoke test**
 
 ```bash
 .venv/bin/python scripts/lppls_study.py --help
 ```
 Expected: 印出 usage 與參數說明，exit 0。
 
-- [ ] **Step 3: 全套測試迴歸**
+- [x] **Step 3: 全套測試迴歸**
 
 ```bash
 .venv/bin/python -m pytest tests/test_lppls_fitter.py tests/test_lppls_index.py tests/test_lppls_walkforward.py tests/test_lppls_confirmation.py -v
 ```
 Expected: 25 passed。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add scripts/lppls_study.py
@@ -1158,7 +1158,7 @@ git commit -m "feat(lppls): study CLI — 指數建構→事件集→walk-forwar
 **Files:**
 - Create: `scripts/lppls/crosscheck.py`
 
-- [ ] **Step 1: 實作（套件缺席時優雅跳過）**
+- [x] **Step 1: 實作（套件缺席時優雅跳過）**
 
 ```python
 # scripts/lppls/crosscheck.py
@@ -1199,14 +1199,14 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-- [ ] **Step 2: 執行並記錄輸出**
+- [x] **Step 2: 執行並記錄輸出**
 
 ```bash
 .venv/bin/python -m scripts.lppls.crosscheck
 ```
 Expected: 兩邊 tc 差異 <10 交易日印 OK；或印 SKIP。輸出全文貼入 Task 8 報告的 Verification log。若差異 ≥10：先檢查 ETH 套件的 t 定義（calendar ordinal vs index）再比對，仍異常則暫停並回報用戶。
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add scripts/lppls/crosscheck.py
@@ -1221,14 +1221,14 @@ git commit -m "feat(lppls): ETH lppls 套件 tc cross-check（缺套件優雅跳
 - Create: `analysis/lppls_study_<today>.md`（由 script 產出後人工補充）
 - Modify: `docs/plans/2026-08-27-lppls-tw-bubble-detection.md`（勾選完成）
 
-- [ ] **Step 1: 主跑**
+- [x] **Step 1: 主跑**
 
 ```bash
 .venv/bin/python scripts/lppls_study.py 2>&1 | tail -20
 ```
 Expected: 印出「報告已寫入 analysis/lppls_study_<date>.md」與判定行。若 DB 連線失敗照 MCP Debugging SOP 排查（config → env → service）。
 
-- [ ] **Step 2: 審閱報告品質**
+- [x] **Step 2: 審閱報告品質**
 
 檢查產出報告：
 1. proxy 相關 >0.95（不合格 → 調整 `n_supplement` 加大成分重跑，記錄兩版相關）
@@ -1237,11 +1237,11 @@ Expected: 印出「報告已寫入 analysis/lppls_study_<date>.md」與判定行
 4. HPO 表 48 格完整
 5. cross-check 輸出（Task 7）貼入 Verification log 段
 
-- [ ] **Step 3: 人工補充報告結論**
+- [x] **Step 3: 人工補充報告結論**
 
 在報告末尾加「## 結論與後續」段：判定通過 → 列 Phase 2 routine 設計要點（收盤後 refit、confirmation score、inbox topic=lppls、watchdog 納管）；未通過 → 寫明哪條準則敗在哪、誠實負結果、是否值得改參數重試（僅可作為新研究，不得回頭改本次準則）。
 
-- [ ] **Step 4: Commit 報告**
+- [x] **Step 4: Commit 報告**
 
 ```bash
 git add analysis/lppls_study_*.md docs/plans/2026-08-27-lppls-tw-bubble-detection.md
@@ -1252,6 +1252,6 @@ capture=<X>%, FP=<Y>%, MW p=<Z>; 指數 vs TAIEX corr=<C>"
 
 （commit message 中的占位值以實跑結果代入。）
 
-- [ ] **Step 5: 收尾**
+- [x] **Step 5: 收尾**
 
 依 `superpowers:verification-before-completion`：全套 pytest 綠、報告存在、判定明確，才回報完成。若通過準則 → 與用戶確認後另開 Phase 2 spec；未通過 → 依 vault 維護工作流把負結果摘要寫入 `vault/log.md` 並推 inbox。

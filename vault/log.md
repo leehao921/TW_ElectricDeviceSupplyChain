@@ -194,3 +194,12 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 修復: ohlcv_1m_v2 cagg (tick_type IN ('trade','0')) + ohlcv_1m_txf 連續視圖 (舊段∪新段主力合約) → TXF/TMF 4/24→now 連續;options_quant 兩查詢切視圖,38 tests 綠,8/26 VRP +13.7 實跑驗證
 - **教訓: continuous aggregate 的過濾條件是隱形契約** — 上游改 enum/命名不會報錯,只會靜默凍結;data_health_monitor 監控的是表新鮮度,聚合視圖也要納入 (待辦)
 - 另: vix_daily 永久缺口 8/10-8/14 (事故鏈,IV 即時流不可回補) 已記 memory
+
+## 2026-08-27 — LPPLS 台股泡沫偵測 Phase 1: 誠實負結果收檔
+- 自建 18 檔電子權值指數 (2330 佔 65.6%, vs TAIEX corr 0.9854) 擬合 Sornette LPPLS, 399 交易日 walk-forward
+- 三條事前準則全敗: 捕捉率 16.7% (門檻50%)、FP 80% (門檻<50%)、訊號日 fwd20 無劣化 (MW p=0.401)
+- HPO 48 組無一達標且 R² 維度不束縛 (合格擬合皆 >0.9) → 結構性失效非調參問題
+- 根因: LPPLS 前提是內生泡沫崩潰,但台股 2025-26 回檔為事件驅動;2026-06 最大 -20.2% 回檔完全無訊號
+- 擬合器本身經 ETH lppls 套件 cross-check (tc 差 0.1 天) — 負結果是市場結構結論,非實作錯誤
+- 殘值: fitter qualifies 可當「加速段」描述性標記;重啟條件 = 融資驅動全市場內生泡沫 (2021 航運式)
+- 報告: analysis/lppls_study_2026-08-27.md
