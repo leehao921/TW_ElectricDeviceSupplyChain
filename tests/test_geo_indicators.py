@@ -61,3 +61,23 @@ def test_foreign_sell_accel_sign():
     assert z.iloc[-1] > 2.0
     buy = _s([1e8] * 100)
     assert abs(foreign_sell_accel(buy, baseline=60, min_periods=30).iloc[-1]) < 1.0
+
+
+# --- sd=0 邊界條件: 靜默期後爆量 ---
+
+def test_causal_zscore_flat_then_spike_fires():
+    s = _s([5.0] * 100 + [50.0])
+    z = causal_zscore(s, baseline=60, min_periods=30)
+    assert z.iloc[-1] == 10.0          # 靜默期後爆量必須觸發,不得歸零
+
+
+def test_causal_zscore_flat_constant_stays_zero():
+    s = _s([5.0] * 101)
+    z = causal_zscore(s, baseline=60, min_periods=30)
+    assert z.iloc[-1] == 0.0
+
+
+def test_gdelt_intensity_first_event_after_quiet_period():
+    counts = _s([2.0] * 100 + [40.0, 45.0, 50.0])   # 死寂後爆量
+    z = gdelt_intensity(counts, baseline=60, min_periods=30)
+    assert z.iloc[-1] >= 2.0

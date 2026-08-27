@@ -15,9 +15,14 @@ def causal_zscore(s: pd.Series, baseline: int = 250,
     mu = r.mean().shift(1)
     sd = r.std().shift(1)
     z = (s - mu) / sd
-    # 零方差序列：分母為 0 導致 NaN；若分子亦為 0（真正的零偏離），以 0.0 取代
-    zero_std = sd == 0.0
-    z = z.where(~zero_std, other=(s - mu).where(~zero_std, other=0.0))
+    resid = s - mu
+    zero_sd = sd == 0.0
+    # sd=0 且 resid=0：真正的零偏離 → z=0.0
+    z[zero_sd & (resid == 0)] = 0.0
+    # sd=0 且 resid≠0：靜默期後爆量 — 有偏離但無歷史波動，鉗至 ±10 觸發下游 z>2 邏輯
+    z[zero_sd & (resid > 0)] = 10.0
+    z[zero_sd & (resid < 0)] = -10.0
+    # NaN sd（歷史不足）→ z 維持 NaN，不干預
     return z
 
 
