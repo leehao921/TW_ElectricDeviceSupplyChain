@@ -45,6 +45,16 @@ def test_select_components_drops_short_history(monkeypatch):
     assert "3008" not in comps
 
 
+def test_select_components_raises_on_short_core_history(monkeypatch):
+    """CORE ticker with insufficient history must raise ValueError naming the ticker."""
+    monkeypatch.setattr(index_builder, "load_market_caps", lambda tickers: dict(FAKE_CAPS))
+    closes = _closes()
+    # Make 2330 (first CORE ticker) have only 350 non-NaN rows (< 390)
+    closes.iloc[:50, closes.columns.get_loc("2330")] = np.nan
+    with pytest.raises(ValueError, match="2330"):
+        select_components(closes, n_supplement=2, min_days=390)
+
+
 def test_build_index_base_100_and_weighting():
     dates = pd.bdate_range("2025-01-02", periods=3)
     closes = pd.DataFrame({"AAA": [100.0, 110.0, 121.0],
@@ -60,3 +70,35 @@ def test_validate_vs_taiex_perfect_proxy():
     corr, n = validate_vs_taiex(idx, closes["AAA"] * 3.0)
     assert corr > 0.999
     assert n > 100
+
+
+def test_build_index_ffill_fills_short_gap():
+    """3-day NaN gap within ffill limit=5 → those rows are filled, no missing dates."""
+    dates = pd.bdate_range("2025-01-02", periods=10)
+    prices_a = [100.0] * 10
+    prices_b = [200.0, 200.0, np.nan, np.nan, np.nan, 200.0, 200.0, 200.0, 200.0, 200.0]
+    closes = pd.DataFrame({"AAA": prices_a, "BBB": prices_b}, index=dates)
+    idx = build_index(closes, {"AAA": 0.5, "BBB": 0.5}, max_ffill=5)
+    # All 10 business days must be present (gap filled by ffill)
+    assert len(idx) == 10
+    assert idx.notna().all()
+
+
+def test_build_index_ffill_drops_long_gap():
+    """8-day NaN gap exceeds ffill limit=5 → those rows are dropped from the index."""
+    dates = pd.bdate_range("2025-01-02", periods=15)
+    prices_a = [100.0] * 15
+    # 8 consecutive NaNs in BBB starting at row 2
+    prices_b = [200.0, 200.0] + [np.nan] * 8 + [200.0, 200.0, 200.0, 200.0, 200.0]
+    closes = pd.DataFrame({"AAA": prices_a, "BBB": prices_b}, index=dates)
+    idx = build_index(closes, {"AAA": 0.5, "BBB": 0.5}, max_ffill=5)
+    # Rows 2–9 (8 gap days): ffill covers rows 2–6 (5 days), rows 7–9 are dropped
+    assert len(idx) < 15
+
+
+def test_build_index_raises_when_empty():
+    """All components entirely NaN → px.empty → ValueError."""
+    dates = pd.bdate_range("2025-01-02", periods=5)
+    closes = pd.DataFrame({"AAA": [np.nan] * 5, "BBB": [np.nan] * 5}, index=dates)
+    with pytest.raises(ValueError, match="無任何日期"):
+        build_index(closes, {"AAA": 0.5, "BBB": 0.5}, max_ffill=5)

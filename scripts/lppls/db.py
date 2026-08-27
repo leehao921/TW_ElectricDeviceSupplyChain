@@ -1,4 +1,5 @@
 """trading-timescaledb read-only loaders（DB_CONFIG 沿用 options_quant 慣例）。"""
+import contextlib
 import os
 import warnings
 
@@ -24,12 +25,12 @@ def load_daily_closes(symbols) -> pd.DataFrame:
     """date × symbol 的收盤價寬表。"""
     sql = ("SELECT ts::date AS date, symbol, close FROM stock_daily_ohlcv "
            "WHERE symbol = ANY(%s) ORDER BY 1")
-    with connect() as conn:
+    with contextlib.closing(connect()) as conn:
         df = pd.read_sql(sql, conn, params=(list(symbols),))
     return df.pivot(index="date", columns="symbol", values="close")
 
 
 def load_taiex() -> pd.Series:
     sql = "SELECT date, close FROM taiex_ema_daily ORDER BY date"
-    with connect() as conn:
+    with contextlib.closing(connect()) as conn:
         return pd.read_sql(sql, conn).set_index("date")["close"]
