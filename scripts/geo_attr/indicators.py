@@ -9,7 +9,8 @@ def causal_zscore(s: pd.Series, baseline: int = 250,
                   min_periods: int = 60) -> pd.Series:
     """z_t = (s_t − mean(s[t−baseline, t−1])) / std(同窗)。shift(1) 排除當前點。
 
-    std=0（常數序列）→ 回傳 0.0（無偏離 = 無壓力），而非 NaN。
+    sd=0 且無偏離 → 0.0；sd=0 且有偏離 → ±10 鉗值（靜默期後爆量，觸發下游 z>2 邏輯）。
+    歷史不足（NaN sd）→ z 維持 NaN，不干預。
     """
     r = s.rolling(baseline, min_periods=min_periods)
     mu = r.mean().shift(1)
