@@ -5,8 +5,6 @@
   2. False positive（訊號後 20 日內未跌 >3%）比率 < 50%
   3. 訊號日 20 日 forward return 劣於無訊號日（中位數 + Mann-Whitney U one-sided）
 """
-import math
-
 import numpy as np
 import pandas as pd
 from scipy.stats import mannwhitneyu
@@ -76,7 +74,7 @@ def forward_return(series: pd.Series, date, horizon: int = 20):
 
 
 def evaluate(series: pd.Series, wf: pd.DataFrame, events,
-             lookback: int = 30, horizon: int = 20, step: int = 5) -> dict:
+             lookback: int = 30, horizon: int = 20) -> dict:
     """Evaluate walk-forward results against drawdown events.
 
     Returns a dict with:
@@ -128,11 +126,9 @@ def evaluate(series: pd.Series, wf: pd.DataFrame, events,
         mw_pvalue = float(mannwhitneyu(sig_fwd, nosig_fwd,
                                        alternative="less").pvalue)
 
-    # --- Fix 2: non-overlapping Mann-Whitney ---
-    # Keep rows spaced >= horizon positions apart in series.index
-    # k = ceil(horizon / step) rows apart (step in wf rows)
+    # 非重疊 Mann-Whitney：只保留 series 位置間隔 >= horizon 的 wf 列，
+    # 使 forward-return 視窗互不重疊（消除序列相關造成的 anti-conservative p 值）
     mw_pvalue_nonoverlap = None
-    n_signals_nonoverlap = None
 
     wf_index_list = list(wf.index)
     kept_rows = []
@@ -157,8 +153,6 @@ def evaluate(series: pd.Series, wf: pd.DataFrame, events,
     if len(sig_fwd_no) >= 3 and len(nosig_fwd_no) >= 3:
         mw_pvalue_nonoverlap = float(mannwhitneyu(sig_fwd_no, nosig_fwd_no,
                                                    alternative="less").pvalue)
-    else:
-        mw_pvalue_nonoverlap = None
 
     return dict(
         n_events=len(events), captured=captured,

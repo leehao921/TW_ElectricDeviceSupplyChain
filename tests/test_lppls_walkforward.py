@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 import pandas as pd
 import pytest
@@ -60,7 +58,7 @@ def test_walk_forward_bubble_series_emits_signal_before_crash():
     crash = bubble[-1] * np.linspace(0.99, 0.85, 15)
     s = _series(np.concatenate([bubble, crash]))
     wf = with_signal(walk_forward(s, window=100, step=5), r2_min=0.7)
-    # Fix 6: use index[159] (exclusive .loc) so crash day itself is excluded
+    # index[159] = 崩盤前最後一日（.loc 切片含端點，故用 159 排除首個崩盤日）
     crash_start = s.index[159]
     assert wf.loc[:crash_start, "signal"].any()
 
@@ -166,8 +164,7 @@ def test_evaluate_exact_values():
 
     Summary:
       fp=1, tot=2, fp_rate = 1/2 = 0.5
-      sig_fwd = [-0.10, 1/9] → median = (-0.10 + 1/9) / 2 = (-0.9/9 + 1/9) / 2 = (-0.8/9) / 2
-                              = -0.4/9 = -4/90 ≈ -0.04444...
+      sig_fwd = [-0.10, 1/9] → median = (-0.10 + 1/9) / 2 = (0.1/9) / 2 = 1/180 ≈ +0.005556
       nosig_fwd = [0.0, 0.0] → median = 0.0
     """
     # sig_fwd_median exact value: mean of -0.10 and (1/9)
