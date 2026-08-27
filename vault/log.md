@@ -203,3 +203,11 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 擬合器本身經 ETH lppls 套件 cross-check (tc 差 0.1 天) — 負結果是市場結構結論,非實作錯誤
 - 殘值: fitter qualifies 可當「加速段」描述性標記;重啟條件 = 融資驅動全市場內生泡沫 (2021 航運式)
 - 報告: analysis/lppls_study_2026-08-27.md
+
+## 2026-08-27 — 地緣風險歸因研究: 外生指標領先性檢驗 (LPPLS 對照組)
+- 7 次回檔 catalyst 標註: 4 外生主導 (出口管制/DeepSeek/對等關稅鏈、美伊油價、非農升息)、2 宏觀情緒、1 內生去槓桿 (6/23 四貸同堂) — 「事件驅動為主」獲確認
+- 14 指標 × 7 事件矩陣: 僅 gdelt_semi_export_vol 通過事前準則 (領先 2/4、FAR 50%);taiwan_strait_vol 的「警戒」是 GDELT 缺口 artifact (僅蓋 1 事件) 不可用
+- foreign_sell 最接近: 6 次可評估事件領先 5 次 (-5~-30 日) 但 FAR 100% (n=3) → 有領先性無獨立行動性,降為脆弱度成分
+- IV 案例: 事件 7 見頂前一日 term_slope +0.0611 倒掛 + VRP 連 3 日轉負 → 6/26 VIX 62.8;IV 結構為脆弱度軸最有希望成分
+- 結論: 純 timing 預警不存在;composite = 事件強度軸 AND 脆弱度軸雙觸發的環境警戒儀表,先 paper-trade 累積 ≥2 新事件再正式化
+- 報告: analysis/geo_attribution_study_2026-08-27.md;GDELT backfill 基建留存 (database repo --backfill 模式)
