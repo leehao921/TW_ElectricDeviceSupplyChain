@@ -186,3 +186,11 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - (c) institutional heartbeat 398s = TPEx 520 重試延遲,已自癒 (54s/今日入庫完成)
 - (d) 期貨 arm 鏈路三處 nag = operator 待辦 (issue #440),不在本 repo 範疇
 - 權證榜加 名稱+產業+題材鏈 標籤 (Pilot_Reports+themes 對映,航運等非電子另建 fallback)
+
+
+## 2026-08-27 (三) — 用戶自算 VIX 鏈 8/15 斷點破案: ohlcv_1m 凍結
+- 用戶報自算 VIX 數據 8/15 後缺 → 追查: vix_daily/iv_metrics 全活,斷的是 **ohlcv_1m (RV/VRP 價格腿)** — options_quant 的 IV-RV 分析自 8/15 靜默失效
+- 根因: 8/15 Docker 重啟後 tick 寫入端**雙重改版** (symbol TXF→TXFI6 合約碼、tick_type 'trade'→'0' 數字),continuous aggregate 的 tick_type='trade' 過濾零匹配 → 凍結;refresh job 照報 Success (聚合本身沒錯,是沒料)
+- 修復: ohlcv_1m_v2 cagg (tick_type IN ('trade','0')) + ohlcv_1m_txf 連續視圖 (舊段∪新段主力合約) → TXF/TMF 4/24→now 連續;options_quant 兩查詢切視圖,38 tests 綠,8/26 VRP +13.7 實跑驗證
+- **教訓: continuous aggregate 的過濾條件是隱形契約** — 上游改 enum/命名不會報錯,只會靜默凍結;data_health_monitor 監控的是表新鮮度,聚合視圖也要納入 (待辦)
+- 另: vix_daily 永久缺口 8/10-8/14 (事故鏈,IV 即時流不可回補) 已記 memory

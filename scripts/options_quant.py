@@ -132,7 +132,7 @@ def fetch_oi(conn, expiry_yyyymmdd, before_date=None):
 
 def fetch_txf_bars(conn, date_str, start, end):
     sql = """
-        SELECT bucket, open, high, low, close FROM ohlcv_1m
+        SELECT bucket, open, high, low, close FROM ohlcv_1m_txf
         WHERE symbol='TXF'
           AND bucket >= %(t0)s::timestamptz AND bucket < %(t1)s::timestamptz
         ORDER BY bucket
@@ -163,7 +163,7 @@ def fetch_vrp_history(conn, date_str, start, end, days=HISTORY_DAYS):
     bars_sql = """
         SELECT (bucket at time zone 'Asia/Taipei')::date AS d,
                (bucket at time zone 'Asia/Taipei')::time AS t, close
-        FROM ohlcv_1m
+        FROM ohlcv_1m_txf
         WHERE symbol='TXF'
           AND (bucket at time zone 'Asia/Taipei')::date < %(d)s::date
           AND (bucket at time zone 'Asia/Taipei')::date >= %(d)s::date - %(days)s * interval '1 day' * 2
