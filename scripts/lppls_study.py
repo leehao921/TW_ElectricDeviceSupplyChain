@@ -11,9 +11,12 @@ Read-only vs trading-timescaledb。警戒燈定位，無 trade directives。
 """
 import argparse
 import datetime as dt
+import sys
 from pathlib import Path
 
-from scripts.lppls import confirmation
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from scripts.lppls import confirmation  # noqa: E402
 from scripts.lppls.db import load_daily_closes, load_taiex
 from scripts.lppls.index_builder import (
     CANDIDATES, CORE, build_index, select_components, validate_vs_taiex,
