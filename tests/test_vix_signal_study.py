@@ -68,3 +68,13 @@ def test_session_filter_day_only():
     s = pd.Series([1, 2, 3, 4], index=pd.DatetimeIndex(idx))
     f = vs.day_session_only(s)
     assert list(f.values) == [1, 2]                         # 夜盤全排除
+
+
+def test_intraday_delta_no_crossday():
+    # v2 審計修正: delta 必須逐日計算 — 每日前 N 筆為 NaN, 不得摻入隔夜跳空
+    idx = ([_ts(8, f"09:{m:02d}") for m in range(0, 20, 5)] +
+           [_ts(9, f"09:{m:02d}") for m in range(0, 20, 5)])
+    s = pd.Series([1, 2, 3, 4, 100, 101, 102, 103], index=pd.DatetimeIndex(idx))
+    d = vs.intraday_delta(s, periods=2)
+    assert pd.isna(d.iloc[4]) and pd.isna(d.iloc[5])      # 8/9 首兩筆 NaN (不跨日)
+    assert d.iloc[6] == 2 and d.iloc[3] == 2               # 日內差分正確

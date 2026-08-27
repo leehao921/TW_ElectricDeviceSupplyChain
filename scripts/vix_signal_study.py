@@ -32,6 +32,12 @@ def day_session_only(s: pd.Series) -> pd.Series:
     return s[(t >= DAY_START) & (t <= DAY_END)]
 
 
+def intraday_delta(series: pd.Series, periods: int) -> pd.Series:
+    """逐日差分 — 每日前 periods 筆為 NaN, 杜絕隔夜跳空混入
+    (v2 審計: 跨日 diff 曾讓 34% 事件為開盤假事件)."""
+    return series.groupby(series.index.normalize()).diff(periods)
+
+
 def detect_events(delta_series: pd.Series, z_th: float = Z_TH,
                   min_baseline: int = MIN_BASELINE,
                   decluster_min: int = DECLUSTER_MIN) -> list[pd.Timestamp]:
@@ -160,7 +166,8 @@ def load_txf_1m(conn) -> pd.Series:
 def run_intraday_signal(name: str, delta: pd.Series, bars: pd.Series,
                         settlement_days: set) -> dict:
     events = [e for e in detect_events(delta)
-              if e.normalize().date() not in settlement_days]
+              if e.normalize().date() not in settlement_days
+              and e.strftime("%H:%M") <= "12:45"]
     per_h = {}
     uncond = {h: [] for h in HORIZONS}
     # 無條件基準: 每日每 30 分格點的前瞻報酬
@@ -195,7 +202,7 @@ def main() -> int:
     settlement_days = {d.date() for d in iv_day.index.normalize().unique()
                        if d.weekday() == 2}
 
-    d15 = lambda col: iv_day[col].diff(15)  # noqa: E731
+    d15 = lambda col: intraday_delta(iv_day[col], 15)  # noqa: E731  (v2: 逐日)
     signals = [
         run_intraday_signal("S1 IV急升(Δ15m near_iv z≥2)", d15("near_iv"), bars, settlement_days),
         run_intraday_signal("S3 Skew急變(Δ15m skew z≥2)", d15("skew"), bars, settlement_days),
@@ -212,7 +219,7 @@ def main() -> int:
            (ts - last).total_seconds() >= DECLUSTER_MIN * 60:
             s2_events.append(ts)
             last = ts
-    s2 = {"name": "S2 期限倒掛 onset (near>far 轉正)", "events": s2_events, "stats": {}}
+    s2 = {"name": "S2 期限倒掛 onset (near>far 轉正) ⚠️定義失效: 本樣本 spread 43% 時間為正, 倒掛非稀有恐慌態", "events": s2_events, "stats": {}}
     uncond = {h: [] for h in HORIZONS}
     for day, day_bars in bars.groupby(bars.index.normalize()):
         for ts in day_bars.index[::30]:
@@ -272,10 +279,19 @@ def main() -> int:
               f"- 樣本 {s5['n_days']} 日, spike {s5['spikes']} 次, 次日 TXF 報酬中位 {s5['t1_median']}% / 上漲率 {s5['t1_hit_up']}",
               f"- 逐次: {s5['t1_rets']}",
               "- ⚠️ 樣本主要落在 7 月崩跌後 V 型反彈 regime — 「spike 後漲」可能是該 regime 的特徵而非通則", ""]
-    lines += ["## 價格源對照的方法論教訓", "",
+    lines += ["## v2 審計修正 (2026-08-27)", "",
+              "- A. 跨日 diff 污染: v1 的 Δ15m 跨日計算使 34% S1 事件為開盤隔夜跳空假事件 → v2 改逐日差分",
+              "- D. 12:45 後事件排除 (60m 前瞻窗完整性)",
+              "- E. S2 定義失效: near-far spread 中位 -1.23 但 43% 時間為正 — 「倒掛」在本樣本非稀有態, 其 NO-EDGE 無資訊量",
+              "- B. 1m 覆蓋健康 (中位 301/301, 9/56 日 <250 根)", "",
+              "## 價格源對照的方法論教訓", "",
               "初版以 ohlcv_1m 為價格源時 S3+15m 曾判 VALIDATED (中位 +0.147%/命中 66%) —",
               "抽查發現該表覆蓋不均 (6/11 整日缺、止於 8/15), 改用 ticks 完整重採後",
               "同訊號降為 WEAK (+0.092%/56%)。**殘缺樣本會製造假訊號** — 效度結論一律以完整源為準。", "",
+              "根因隔離實驗 (8/27): 同一組 27 個乾淨事件、45 個共同覆蓋日、兩源對比 —",
+              "ticks +0.092%/56% vs ohlcv +0.123%/59% (差僅 3bp/3pp = 測量噪音)。",
+              "→ v1 假 VALIDATED 主因是 **缺日選樣偏差** (掉的日子恰好留下較好的事件),",
+              "  次因為跨日假事件;價格測量本身兩源一致。", "",
               "## Verification log", "```",
               f"iv 1m rows={len(iv_day)}, txf 1m bars={len(bars)}, "
               f"settlement(wed) days excluded={len(settlement_days)}",
