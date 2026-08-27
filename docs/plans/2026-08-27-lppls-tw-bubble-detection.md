@@ -755,11 +755,15 @@ def test_score_institutional_buy_then_sell():
 
 
 def test_score_iv_inverted_term_or_low_vrp():
+    """term_slope 倒掛定義 Near>Far → slope POSITIVE = backwardation = stress。"""
     vrp = _s([5.0] * 30)
-    assert score_iv(term_slope_latest=-0.5, vrp_series=vrp)["score"] == 1
+    # slope > 0 → Near>Far 倒掛 → score 1
+    assert score_iv(term_slope_latest=+0.5, vrp_series=vrp)["score"] == 1
+    # low vrp regardless of slope (slope < 0 = contango, normal)
     low_vrp = _s([5.0] * 29 + [-3.0])
-    assert score_iv(term_slope_latest=0.5, vrp_series=low_vrp)["score"] == 1
-    assert score_iv(term_slope_latest=0.5, vrp_series=vrp)["score"] == 0
+    assert score_iv(term_slope_latest=-0.5, vrp_series=low_vrp)["score"] == 1
+    # slope < 0 (contango/normal) + normal vrp → score 0
+    assert score_iv(term_slope_latest=-0.5, vrp_series=vrp)["score"] == 0
 
 
 def test_score_ofi_price_up_flow_fading():
@@ -827,15 +831,26 @@ def score_institutional(fnet_series: pd.Series):
     return dict(score=int(cum20 > 0 and last3 < 0), cum20=cum20, last3=last3)
 
 
-def score_iv(term_slope_latest, vrp_series: pd.Series):
-    """term slope 倒掛 或 VRP 落入自身 20% 分位以下。"""
+def score_iv(term_slope_latest, vrp_series: pd.Series, skew_series: pd.Series = None):
+    """term slope 倒掛(Near>Far, slope>0) 或 VRP 落入自身 20% 分位以下 或 skew 陡化(> 自身 80% 分位)。
+
+    term_slope 定義（上游 option_sentiment_math.compute_term_spread）:
+        term_slope = Near ATM IV − Far ATM IV
+        POSITIVE → Near > Far → backwardation（壓力/倒掛）
+        NEGATIVE → Near < Far → contango（正常）
+    """
     if term_slope_latest is None and (vrp_series is None or vrp_series.empty):
         return None
-    inverted = term_slope_latest is not None and term_slope_latest < 0
+    # slope > 0 → Near>Far 倒掛 (backwardation) → stress signal
+    inverted = term_slope_latest is not None and term_slope_latest > 0
     vrp_low = False
     if vrp_series is not None and vrp_series.notna().sum() >= 10:
         vrp_low = bool(vrp_series.iloc[-1] < vrp_series.quantile(0.2))
-    return dict(score=int(inverted or vrp_low), inverted=inverted, vrp_low=vrp_low)
+    skew_steep = False
+    if skew_series is not None and skew_series.notna().sum() >= 10:
+        skew_steep = bool(skew_series.iloc[-1] > skew_series.quantile(0.8))
+    return dict(score=int(inverted or vrp_low or skew_steep),
+                inverted=inverted, vrp_low=vrp_low, skew_steep=skew_steep)
 
 
 def score_ofi(ofi_daily: pd.Series, index_ret5: float):
