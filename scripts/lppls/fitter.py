@@ -30,7 +30,7 @@ class LpplsFit:
     r2: float
     sse: float
     refined: bool
-    reasons: list = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)
 
     @property
     def C(self) -> float:
@@ -47,6 +47,8 @@ class LpplsFit:
         self.reasons = []
         if self.B >= 0:
             self.reasons.append("B>=0")
+        # Boundary-exact values (m==M_MIN or m==M_MAX) are intentionally disqualified;
+        # the grid search allows m==bound but constraints reject it to avoid degenerate fits.
         if not (M_MIN < self.m < M_MAX):
             self.reasons.append("m out of range")
         if not (OMEGA_MIN <= self.omega <= OMEGA_MAX):
@@ -57,6 +59,8 @@ class LpplsFit:
 
 
 def design_matrix(t: np.ndarray, tc: float, m: float, omega: float) -> np.ndarray:
+    if tc <= t.max():
+        raise ValueError(f"tc must exceed window end: tc={tc}, t_max={t.max()}")
     dt = tc - t
     f = dt ** m
     logdt = np.log(dt)
@@ -71,8 +75,8 @@ def exp_weights(n: int, half_life: float = 50.0) -> np.ndarray:
 
 
 def fit_linear(y: np.ndarray, X: np.ndarray, w: np.ndarray) -> np.ndarray:
-    Xw = X * w[:, None]
-    Z, *_ = np.linalg.lstsq(X.T @ Xw, X.T @ (w * y), rcond=None)
+    sw = np.sqrt(w)
+    Z, *_ = np.linalg.lstsq(X * sw[:, None], sw * y, rcond=None)
     return Z
 
 
@@ -82,7 +86,7 @@ def _sse(y, X, w):
     return float(np.sum(w * resid ** 2)), Z
 
 
-def fit(prices, half_life: float = 50.0, refine: bool = True) -> LpplsFit:
+def fit(prices: np.ndarray, half_life: float = 50.0, refine: bool = True) -> LpplsFit:
     """prices: 1-D 原始價格（非 log）。回傳套用約束後的 LpplsFit。"""
     y = np.log(np.asarray(prices, dtype=float))
     n = len(y)
@@ -127,7 +131,7 @@ def fit(prices, half_life: float = 50.0, refine: bool = True) -> LpplsFit:
 
 def is_signal(fit_result: LpplsFit, n: int, r2_min: float = 0.7) -> bool:
     return (fit_result.qualifies and fit_result.r2 >= r2_min
-            and fit_result.days_to_tc(n) <= SIGNAL_TC_WITHIN)
+            and 0 < fit_result.days_to_tc(n) <= SIGNAL_TC_WITHIN)
 
 
 def make_synthetic(n, tc, m, omega, A=10.3, B=-0.05, C1=0.001, C2=0.001,
