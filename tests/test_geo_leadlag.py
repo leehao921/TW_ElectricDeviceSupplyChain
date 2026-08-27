@@ -51,7 +51,7 @@ def test_false_alarm_rate_exact():
     [100−30, 100+20]=[70,120] 之外)。平盤 → 20 日 forward min return = 0 > −3%
     → 兩者皆誤報 → far = 1.0, n_alerts = 2。
     情境 B — 指數 pos 65 起跌至 90(−10%): pos50 的 forward 窗 51..70 含 pos65
-    下跌(r_min=−10%<−3%)→ 非誤報; pos60 窗 61..80 全在下跌後(90/100−1=−10%)
+    下跌(r_min=−10%<−3%)→ 非誤報; pos60 窗 61..80 自 pos65 起在低檔(r_min=90/100−1=−10%)
     → 亦非誤報 → far = 0.0, n_alerts = 2。"""
     index_flat = pd.Series(100.0, index=DATES)
     z = pd.Series(0.0, index=DATES)

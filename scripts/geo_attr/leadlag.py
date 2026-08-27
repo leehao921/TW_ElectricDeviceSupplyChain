@@ -17,6 +17,8 @@ LEAD_MIN = 3
 def classify_event(z: pd.Series, index_dates: pd.Index, trigger_date,
                    z_thr: float = Z_THR, pre: int = PRE, post: int = POST,
                    lead_min: int = LEAD_MIN) -> dict:
+    """z 必須已對齊 index_dates（呼叫端負責 reindex+ffill）；
+    未對齊者非交易日訊號將被靜默忽略。trigger_date 須為 index_dates 成員。"""
     pos = index_dates.get_loc(trigger_date)
     window = index_dates[max(0, pos - pre): min(len(index_dates), pos + post + 1)]
     zw = z.reindex(window)
