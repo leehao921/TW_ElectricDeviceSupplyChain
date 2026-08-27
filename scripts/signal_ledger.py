@@ -80,14 +80,16 @@ def margin_deciles(conn) -> str:
         if len(g) < 300:
             continue
         q = g.growth.rank(pct=True)
-        rows.append(dict(top=f[q >= 0.9].median() * 100, bot=f[q <= 0.1].median() * 100,
-                         mkt=f.median() * 100))
+        top_m, bot_m, mkt_m = (f[q >= 0.9].median() * 100, f[q <= 0.1].median() * 100,
+                               f.median() * 100)
+        rows.append(dict(top=top_m, bot=bot_m, mkt=mkt_m,
+                         top_beat=top_m > mkt_m, bot_beat=bot_m > mkt_m))
     if not rows:
         return "L7/S2 融資增速: 樣本不足"
     r = pd.DataFrame(rows)
-    return (f"L7/S2 融資增速 (n={len(r)} 日): top10% {r.top.mean():+.2f}%/5D vs "
-            f"bot10% {r.bot.mean():+.2f}% (大盤 {r.mkt.mean():+.2f}%) · "
-            f"價差 {(r.top - r.bot).mean():+.2f}%")
+    return (f"L7/S2 融資增速 (n={len(r)} 日): top10% {r.top.mean():+.2f}%/5D 贏大盤 {r.top_beat.mean()*100:.0f}% vs "
+            f"bot10% {r.bot.mean():+.2f}% 贏大盤 {r.bot_beat.mean()*100:.0f}% · "
+            f"價差 {(r.top - r.bot).mean():+.2f}% (大盤 {r.mkt.mean():+.2f}%)")
 
 
 def gauges(conn) -> list[str]:
