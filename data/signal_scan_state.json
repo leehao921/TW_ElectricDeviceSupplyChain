@@ -1,0 +1,174 @@
+{
+  "tracked": {
+    "S2v2_cap:6164:2026-08-27": {
+      "family": "S2v2_cap",
+      "symbol": "6164",
+      "enter_date": "2026-08-27",
+      "enter_close": 12.550000190734863,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_cap:6104:2026-08-27": {
+      "family": "S2v2_cap",
+      "symbol": "6104",
+      "enter_date": "2026-08-27",
+      "enter_close": 102.5,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_cap:3093:2026-08-27": {
+      "family": "S2v2_cap",
+      "symbol": "3093",
+      "enter_date": "2026-08-27",
+      "enter_close": 49.04999923706055,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_cap:1531:2026-08-27": {
+      "family": "S2v2_cap",
+      "symbol": "1531",
+      "enter_date": "2026-08-27",
+      "enter_close": 13.300000190734863,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_cap:5425:2026-08-27": {
+      "family": "S2v2_cap",
+      "symbol": "5425",
+      "enter_date": "2026-08-27",
+      "enter_close": 95.19999694824219,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_cap:3363:2026-08-27": {
+      "family": "S2v2_cap",
+      "symbol": "3363",
+      "enter_date": "2026-08-27",
+      "enter_close": 704.0,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:6206:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "6206",
+      "enter_date": "2026-08-27",
+      "enter_close": 140.5,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:8070:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "8070",
+      "enter_date": "2026-08-27",
+      "enter_close": 50.70000076293945,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:2399:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "2399",
+      "enter_date": "2026-08-27",
+      "enter_close": 46.599998474121094,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:8182:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "8182",
+      "enter_date": "2026-08-27",
+      "enter_close": 40.650001525878906,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:6770:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "6770",
+      "enter_date": "2026-08-27",
+      "enter_close": 69.5999984741211,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:4577:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "4577",
+      "enter_date": "2026-08-27",
+      "enter_close": 80.19999694824219,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:3016:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "3016",
+      "enter_date": "2026-08-27",
+      "enter_close": 99.9000015258789,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S2v2_thin:2455:2026-08-27": {
+      "family": "S2v2_thin",
+      "symbol": "2455",
+      "enter_date": "2026-08-27",
+      "enter_close": 433.0,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "S1_disp:2455:2026-08-27": {
+      "family": "S1_disp",
+      "symbol": "2455",
+      "enter_date": "2026-08-27",
+      "enter_close": 433.0,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "L1_disp:5314:2026-08-27": {
+      "family": "L1_disp",
+      "symbol": "5314",
+      "enter_date": "2026-08-27",
+      "enter_close": 38.0,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    },
+    "L1_disp:5321:2026-08-27": {
+      "family": "L1_disp",
+      "symbol": "5321",
+      "enter_date": "2026-08-27",
+      "enter_close": 85.0,
+      "post": {
+        "t5": null,
+        "t20": null
+      }
+    }
+  }
+}

@@ -60,6 +60,26 @@ def warrant_stats() -> str:
     return f"L6/S5 權證榜 T+5 命中: {' · '.join(out)}"
 
 
+def scan_stats() -> str:
+    """signal_scan 每日名單 T+5 自我校驗 (state 進行中 + history 畢業)."""
+    h = _load("signal_scan_history.json") or []
+    st = (_load("signal_scan_state.json") or {}).get("tracked", {})
+    done = [e for e in (h + list(st.values()))
+            if e.get("post", {}).get("t5") is not None]
+    if not done:
+        return f"日掃名單 T+5: 無樣本 (追蹤中 {len(st)} 筆)"
+    out = []
+    for fam, short_side in (("S2v2_cap", True), ("S2v2_thin", True),
+                            ("S1_disp", True), ("L1_disp", False)):
+        g = sorted(e["post"]["t5"] for e in done if e["family"] == fam)
+        if not g:
+            continue
+        med = g[len(g) // 2]
+        hit = sum(1 for v in g if (v < 0) == short_side)
+        out.append(f"{fam} n={len(g)} t5中位 {med:+.1f}% 方向命中 {hit}/{len(g)}")
+    return "日掃名單 T+5: " + (" · ".join(out) or f"無樣本 (追蹤中 {len(st)} 筆)")
+
+
 def margin_deciles(conn) -> str:
     import pandas as pd
     m = pd.read_sql("""SELECT date, symbol, fin_balance, fin_prev FROM margin_daily
@@ -169,7 +189,7 @@ def main() -> int:
     lines = [f"# 訊號總帳週報 {as_of}", "",
              "目錄與分級: docs/signal_registry.md (L=做多 S=做空家族)", "",
              "## 家族滾動追蹤", ""]
-    for fn in (disposition_stats, bb_stats, warrant_stats):
+    for fn in (disposition_stats, bb_stats, warrant_stats, scan_stats):
         try:
             lines.append("- " + fn())
         except Exception as e:

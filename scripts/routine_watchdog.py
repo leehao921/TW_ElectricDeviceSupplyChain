@@ -77,6 +77,7 @@ _REGISTRY = [
     ("foreign-structure", "foreign-structure", time(17, 10), time(23, 59)),
     ("warrant-flow", "warrant-flow", time(17, 40), time(23, 59)),
     ("margin-vix", "margin-vix", time(18, 10), time(23, 59)),
+    ("signal-scan", "signal-scan", time(17, 50), time(23, 59)),
     ("position-watch", "position-watch", time(15, 10), time(23, 59)),
     ("news-pulse", "news-pulse", time(20, 35), time(23, 59)),
     ("db-backup", "db-backup", time(21, 30), time(23, 59)),
