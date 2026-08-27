@@ -92,6 +92,50 @@ def margin_deciles(conn) -> str:
             f"價差 {(r.top - r.bot).mean():+.2f}% (大盤 {r.mkt.mean():+.2f}%)")
 
 
+def margin_combos(conn) -> str:
+    """v2 (2026-08-28): 空方量能交叉 + 權證反指標追蹤 — 見 analysis/margin_multifactor_20260828.md"""
+    import pandas as pd
+    m = pd.read_sql("""SELECT date, symbol, fin_balance, fin_prev FROM margin_daily
+      WHERE symbol ~ '^[1-9][0-9]{3}$' AND fin_prev >= 500 AND fin_balance IS NOT NULL""",
+                    conn, parse_dates=["date"])
+    m["fin_g"] = (m.fin_balance - m.fin_prev) / m.fin_prev
+    px = pd.read_sql("SELECT symbol, ts::date d, close, volume FROM stock_daily_ohlcv ORDER BY 1,2",
+                     conn, parse_dates=["d"])
+    wc = px.pivot(index="d", columns="symbol", values="close")
+    wv = px.pivot(index="d", columns="symbol", values="volume")
+    fwd5 = wc.shift(-5) / wc - 1
+    volr = wv / wv.rolling(20).mean()
+    w = pd.read_sql("SELECT date, underlying symbol, score FROM warrant_flow_daily",
+                    conn, parse_dates=["date"]).set_index(["date", "symbol"])["score"]
+    caps, thin, wshort = [], [], []
+    for d, g in m.groupby("date"):
+        if d not in fwd5.index or d not in volr.index:
+            continue
+        g = g.set_index("symbol")
+        f = fwd5.loc[d].reindex(g.index)
+        v = volr.loc[d].reindex(g.index)
+        df = pd.DataFrame({"fin_g": g.fin_g, "volr": v, "fwd": f}).dropna(subset=["fwd", "fin_g"])
+        if len(df) < 300:
+            continue
+        q = df.fin_g.rank(pct=True)
+        cap = df.fwd[(q <= 0.1) & (df.volr > 2)]
+        th = df.fwd[(q <= 0.1) & (df.volr < 0.8)]
+        if len(cap) >= 8:
+            caps.append(cap.median() * 100)
+        if len(th) >= 8:
+            thin.append(th.median() * 100)
+        if d in w.index.get_level_values(0):
+            ws = w.loc[d].reindex(df.index)
+            sel = df.fwd[(ws.rank(pct=True) < 0.1) & (q >= 0.8)]
+            if len(sel) >= 8:
+                wshort.append(sel.median() * 100)
+    import numpy as np
+    def _fmt(x, name):
+        return f"{name} n={len(x)}日 {np.mean(x):+.2f}%" if x else f"{name} 樣本不足"
+    return ("S2v2 空方量能交叉: " + _fmt(caps, "投降型(減×爆量)") + " · " + _fmt(thin, "陰跌型(減×縮量)")
+            + " | 權證佈空反指標: " + _fmt(wshort, "佈空×融資增"))
+
+
 def gauges(conn) -> list[str]:
     out = []
     with conn.cursor() as cur:
@@ -134,6 +178,10 @@ def main() -> int:
         lines.append("- " + margin_deciles(conn))
     except Exception as e:
         lines.append(f"- [err] margin: {e}")
+    try:
+        lines.append("- " + margin_combos(conn))
+    except Exception as e:
+        lines.append(f"- [err] combos: {e}")
     lines += ["", "## 系統性儀表", ""]
     lines += ["- " + g for g in gauges(conn)]
     lines += ["", "## 研究隊列", "",
