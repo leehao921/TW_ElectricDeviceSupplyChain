@@ -49,6 +49,15 @@ def render(as_of: str, fin_now: float, fin_5d_chg: float, vix: float | None,
         pct_txt = f" (pct {pct:.0f}, n={cm30['n']})" if pct is not None else " (歷史<20日不予分位)"
         lines.append(f"VIX30(常數期限) {cm30['vix_30d']:.1f} · RV21 {cm30.get('rv_21d') or float('nan'):.1f}"
                      f"{vrp_txt}{pct_txt}")
+    if cm30 and cm30.get("vix_w") is not None:
+        wm = cm30.get("wm_spread")
+        if wm is not None and wm > 2:
+            struct = f"🚨 倒掛 {wm:+.1f} (即期事件恐慌, 7/29=+8.2 8/5=+10.4 級距)"
+        elif wm is not None and wm > 0:
+            struct = f"⚠️ 微倒掛 {wm:+.1f}"
+        else:
+            struct = f"正價差 {wm:+.1f} (近期平靜)" if wm is not None else ""
+        lines.append(f"週選IV(最敏感) {cm30['vix_w']:.1f} · 週/月結構: {struct}")
     lines.append(f"融資增: {fmt(fin_up, 'delta_fin')} (張)")
     lines.append(f"融資減: {fmt(fin_down, 'delta_fin')} (張)")
     lines.append(f"融券增: {fmt(short_up, 'delta_short')} (張)")
@@ -94,7 +103,7 @@ def main() -> int:
     vix = float(vx[0][1]) if vx else None
     vix5 = (vix - float(vx[-1][1])) if vx and len(vx) > 1 else None
     # CM30 對齊序列 (2026-08-27 三層錯位修復): vrp_30d percentile 經 n>=20 guard
-    cur.execute("""SELECT vix_30d, rv_21d, vrp_30d FROM vix_daily
+    cur.execute("""SELECT vix_30d, rv_21d, vrp_30d, vix_w, wm_spread FROM vix_daily
                    WHERE vix_30d IS NOT NULL ORDER BY date DESC LIMIT 1""")
     row30 = cur.fetchone()
     cm30 = None
@@ -108,6 +117,8 @@ def main() -> int:
         cm30 = {"vix_30d": float(row30[0]),
                 "rv_21d": float(row30[1]) if row30[1] is not None else None,
                 "vrp_30d": float(row30[2]) if row30[2] is not None else None,
+                "vix_w": float(row30[3]) if row30[3] is not None else None,
+                "wm_spread": float(row30[4]) if row30[4] is not None else None,
                 "vrp_pct": pct, "n": len(hist)}
     # 個股增減 (今日 vs 前日餘額欄)
     cur.execute("""SELECT symbol, fin_balance - fin_prev, short_balance - short_prev

@@ -42,3 +42,16 @@ def test_render_cm30_insufficient_history_no_pct():
                     cm30={"vix_30d": 26.2, "rv_21d": 26.8, "vrp_30d": -0.55,
                           "vrp_pct": None, "n": 12})
     assert "歷史<20日不予分位" in msg
+
+
+def test_render_weekly_inversion_alarm():
+    base = dict(fin_now=1e8, fin_5d_chg=0, vix=None, vix_5d_chg=None,
+                fin_up=[], fin_down=[], short_up=[])
+    hot = mv.render("2026-07-29", **base,
+                    cm30={"vix_30d": 31.2, "rv_21d": None, "vrp_30d": None,
+                          "vix_w": 39.5, "wm_spread": 8.2, "vrp_pct": None, "n": 5})
+    assert "🚨 倒掛 +8.2" in hot
+    calm = mv.render("2026-08-27", **base,
+                     cm30={"vix_30d": 23.4, "rv_21d": None, "vrp_30d": None,
+                           "vix_w": 22.9, "wm_spread": -0.6, "vrp_pct": None, "n": 5})
+    assert "正價差 -0.6" in calm and "🚨" not in calm
