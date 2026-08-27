@@ -58,7 +58,7 @@ Spec: docs/superpowers/specs/2026-08-27-geo-attribution-study-design.md
 
 ### 4.2 IV 結構案例（vix_daily 僅覆蓋事件 6、7，不進判定）
 
-- **事件 7**（6/23 指數見頂、6/24 觸發）：6/22 `term_slope` **+0.0611 倒掛**（Near>Far，見頂前一日）＋ 6/22-25 **VRP 連續轉負**（-0.9/-1.4/-0.9，implied 落後 realized）→ 6/26 VIX 爆升至 62.8、VRP 33.8。倒掛＋VRP 轉負在本案例為同步偏領先（-1~-2 日）。
+- **事件 7**（6/23 指數見頂、6/24 觸發）：6/22 `term_slope` **+0.0611 倒掛**（Near>Far，見頂前一日）＋ 6/22、6/23、6/25 **VRP 轉負**（-0.9/-1.4/-0.9，implied 落後 realized；6/24 無資料）→ 6/26 VIX 爆升至 62.8、VRP 33.8。倒掛＋VRP 轉負在本案例為同步偏領先（-1~-2 日）。
 - **事件 6**（6/8 觸發）：5/28 倒掛 blip（+0.0162，前 7 日）＋ VIX 自 32.9 爬升至 36.4（6/2）— 壓力先於觸發累積。
 - 兩案例方向一致：**IV 結構（倒掛/VRP 轉負）是脆弱度軸最有希望的成分**，待資料累積至 ≥5 事件後正式檢驗。
 
@@ -93,5 +93,9 @@ Spec: docs/superpowers/specs/2026-08-27-geo-attribution-study-design.md
   - `tsmc` 2025-12→2026-06（影響事件 4/5/6 窗口）
   - `taiwan_strait` 2024-12→2025-06 與 2025-12→2026-06（影響事件 1/4/5/6/7 → 該 key 僅蓋事件 3,其「警戒」判定為 artifact,見 §4.1）
   - `semi_export` 2025-06→2025-12（影響事件 2/3 窗口）
+  - `mideast_oil` 止於 2026-06-01（事件 6/7 窗口尾端截斷 — 其事件 6 的「—」可能是截斷 artifact,
+    與 §4.1 台海同類;該 key 之後由 rolling collector 續接）
+  - 另註: 事件 1 整欄 ∅ 與 taiwan_strait 事件 2 的 ∅ 為 z-score warm-up 效應
+    （min_periods=60 於序列起點附近）,非 GDELT 節流所致。
   - 缺口格於矩陣以 ∅ 呈現;補齊後可重跑 `geo_attr_study.py` 更新（upsert 冪等）。
 - Catalyst 標註來源: 台新投顧美伊評析、UDN 9353610/9359002/8523648/9550875、Focus Taiwan 202606080004、Taipei Times 2003858766、TechNews（四貸同堂）、StockFeel（4/7 紀錄）— confidence 標記見 §1 表。

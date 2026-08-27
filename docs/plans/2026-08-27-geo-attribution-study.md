@@ -34,14 +34,14 @@
 - Modify: `/Users/lulala/Documents/coding/database/scripts/collectors/intl_events_daily.py`
 - Modify: `/Users/lulala/Documents/coding/database/config/intl_events.json`
 
-- [ ] **Step 1: config 加 mideast_oil**
+- [x] **Step 1: config 加 mideast_oil**
 
 `config/intl_events.json` 的 `gdelt_queries` 加：
 ```json
 "mideast_oil": "(Iran OR Hormuz) (oil OR conflict)"
 ```
 
-- [ ] **Step 2: collector 加 backfill 模式**
+- [x] **Step 2: collector 加 backfill 模式**
 
 在 `intl_events_daily.py` 加（放 `collect_gdelt` 之後；沿用現有 `_get_json`/`aggregate_gdelt_daily`/`aggregate_gdelt_tone`/`store_gdelt`/`GDELT_SLEEP_S`）：
 
@@ -88,7 +88,7 @@ def collect_gdelt_backfill(conn, config, start: str, end: str,
 
 main/argparse 處加 `--backfill START END`＋`--keys k1,k2`（逗號分隔，預設全部）分支：走 `collect_gdelt_backfill` 後直接 return，不觸發 kalshi/manifold/heartbeat。依該檔現有 CLI 結構插入（若無 argparse 則新增最小 argparse 包住現有 main 流程，預設行為不變）。
 
-- [ ] **Step 3: 執行回補**
+- [x] **Step 3: 執行回補**
 
 ```bash
 cd /Users/lulala/Documents/coding/database
@@ -97,7 +97,7 @@ cd /Users/lulala/Documents/coding/database
 ```
 預期 ~3 chunks × 5 keys × 2 calls ≈ 30 呼叫、12s 間隔 ≈ 6-7 分鐘。429 就等（`_get_json` 自帶 backoff）。
 
-- [ ] **Step 4: 驗證覆蓋**
+- [x] **Step 4: 驗證覆蓋**
 
 ```bash
 .venv/bin/python - <<'EOF'
@@ -110,7 +110,7 @@ EOF
 ```
 Expected: tariff/taiwan_strait/tsmc/semi_export/mideast_oil 的 min(date) ≤ 2024-12-07、與現行段無大缺口（GDELT timeline 可能天然缺零文章日，允許）。
 
-- [ ] **Step 5: Commit（database repo）**
+- [x] **Step 5: Commit（database repo）**
 
 ```bash
 cd /Users/lulala/Documents/coding/database
@@ -130,7 +130,7 @@ timeline API startdatetime/enddatetime 一 chunk 一呼叫,upsert 冪等與現�
 - Create: `scripts/geo_attr/indicators.py`
 - Test: `tests/test_geo_indicators.py`
 
-- [ ] **Step 1: 寫失敗測試**
+- [x] **Step 1: 寫失敗測試**
 
 ```python
 # tests/test_geo_indicators.py
@@ -199,14 +199,14 @@ def test_foreign_sell_accel_sign():
     assert abs(foreign_sell_accel(buy, baseline=60, min_periods=30).iloc[-1]) < 1.0
 ```
 
-- [ ] **Step 2: 跑測試確認失敗**
+- [x] **Step 2: 跑測試確認失敗**
 
 ```bash
 .venv/bin/python -m pytest tests/test_geo_indicators.py -v
 ```
 Expected: FAIL — ModuleNotFoundError。
 
-- [ ] **Step 3: 實作**
+- [x] **Step 3: 實作**
 
 ```python
 # scripts/geo_attr/indicators.py
@@ -265,14 +265,14 @@ def foreign_sell_accel(fnet_daily: pd.Series, baseline: int = 250,
                          baseline, min_periods)
 ```
 
-- [ ] **Step 4: 跑測試確認通過**
+- [x] **Step 4: 跑測試確認通過**
 
 ```bash
 .venv/bin/python -m pytest tests/test_geo_indicators.py -v
 ```
 Expected: 7 passed。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/geo_attr/__init__.py scripts/geo_attr/indicators.py tests/test_geo_indicators.py
@@ -287,7 +287,7 @@ git commit -m "feat(geo-attr): 指標引擎 — causal z-score(不含當前點)+
 - Create: `scripts/geo_attr/leadlag.py`
 - Test: `tests/test_geo_leadlag.py`
 
-- [ ] **Step 1: 寫失敗測試**
+- [x] **Step 1: 寫失敗測試**
 
 ```python
 # tests/test_geo_leadlag.py
@@ -358,14 +358,14 @@ def test_false_alarm_rate_exact():
     assert far2 == 0.0
 ```
 
-- [ ] **Step 2: 跑測試確認失敗**
+- [x] **Step 2: 跑測試確認失敗**
 
 ```bash
 .venv/bin/python -m pytest tests/test_geo_leadlag.py -v
 ```
 Expected: FAIL — ModuleNotFoundError。
 
-- [ ] **Step 3: 實作**
+- [x] **Step 3: 實作**
 
 ```python
 # scripts/geo_attr/leadlag.py
@@ -433,14 +433,14 @@ def false_alarm_rate(z: pd.Series, index_series: pd.Series, events,
     return ((fp / tot) if tot else None, tot)
 ```
 
-- [ ] **Step 4: 跑測試確認通過**
+- [x] **Step 4: 跑測試確認通過**
 
 ```bash
 .venv/bin/python -m pytest tests/test_geo_leadlag.py -v
 ```
 Expected: 全數通過（含你修正 expected 後的 false-alarm 第二情境）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/geo_attr/leadlag.py tests/test_geo_leadlag.py
@@ -457,7 +457,7 @@ git commit -m "feat(geo-attr): 事件窗領先/同步分類+誤報率 — 復用
 
 loaders 為 thin wrapper 不寫單元測試（Task 5 實跑驗證）；CLI 以 `--help` smoke test。
 
-- [ ] **Step 1: 實作 loaders**
+- [x] **Step 1: 實作 loaders**
 
 ```python
 # scripts/geo_attr/loaders.py
@@ -513,14 +513,14 @@ def load_brent(start="2024-12-01") -> pd.Series:
     return s
 ```
 
-- [ ] **Step 2: 確認 yfinance 可用**
+- [x] **Step 2: 確認 yfinance 可用**
 
 ```bash
 .venv/bin/python -c "import yfinance; print(yfinance.__version__)"
 ```
 若未安裝: `uv pip install --python .venv/bin/python yfinance`。
 
-- [ ] **Step 3: 實作 CLI**
+- [x] **Step 3: 實作 CLI**
 
 ```python
 #!/usr/bin/env python3
@@ -664,7 +664,7 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 4: Smoke test + 迴歸**
+- [x] **Step 4: Smoke test + 迴歸**
 
 ```bash
 env -u PYTHONPATH .venv/bin/python scripts/geo_attr_study.py --help
@@ -672,7 +672,7 @@ env -u PYTHONPATH .venv/bin/python scripts/geo_attr_study.py --help
 ```
 Expected: usage 印出 exit 0；geo+lppls 測試全綠。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/geo_attr/loaders.py scripts/geo_attr_study.py
@@ -686,8 +686,8 @@ git commit -m "feat(geo-attr): loaders(gdelt/fx/外資/Brent cache) + study CLI 
 **Files:**
 - Create: `analysis/geo_attribution_study_<today>.md`（script 產出後補標註）
 
-- [ ] **Step 1: 實跑** `.venv/bin/python scripts/geo_attr_study.py`，檢查矩陣完整（GDELT 回補後 7/7 有值、Brent/fx/外資無 ∅ 整列）。
-- [ ] **Step 2: Phase B catalyst 標註**（controller 親自做，需 WebSearch）：對 7 事件逐一查證驅動因子，寫入 `<!-- PHASE_B_CATALYST -->` 處成表（事件/catalyst 分類/佐證來源/confidence marker）；用戶提示的 2025 關稅與 2026-03 美伊油價在此驗證或推翻。
-- [ ] **Step 3: 依矩陣結果撰寫 `<!-- PHASE_B_COMPOSITE -->` 段**：獲警戒角色的指標 → composite 草案（脆弱度×事件強度雙軸）；全無領先 → 誠實負結果，建議只做同步確認儀表。併入 vix_daily 對 2026-05/2026-06 兩事件的 IV 案例觀察（spec 的案例研究義務，不進判定）。兩標記皆不得殘留。
-- [ ] **Step 4: Commit + vault/log.md append + inbox 推播**（同 LPPLS 收檔慣例，topic=study）。
-- [ ] **Step 5: verification-before-completion**：全測試綠、報告無標記殘留、判定明確，才回報完成。
+- [x] **Step 1: 實跑** `.venv/bin/python scripts/geo_attr_study.py`，檢查矩陣完整（GDELT 回補後 7/7 有值、Brent/fx/外資無 ∅ 整列）。
+- [x] **Step 2: Phase B catalyst 標註**（controller 親自做，需 WebSearch）：對 7 事件逐一查證驅動因子，寫入 `<!-- PHASE_B_CATALYST -->` 處成表（事件/catalyst 分類/佐證來源/confidence marker）；用戶提示的 2025 關稅與 2026-03 美伊油價在此驗證或推翻。
+- [x] **Step 3: 依矩陣結果撰寫 `<!-- PHASE_B_COMPOSITE -->` 段**：獲警戒角色的指標 → composite 草案（脆弱度×事件強度雙軸）；全無領先 → 誠實負結果，建議只做同步確認儀表。併入 vix_daily 對 2026-05/2026-06 兩事件的 IV 案例觀察（spec 的案例研究義務，不進判定）。兩標記皆不得殘留。
+- [x] **Step 4: Commit + vault/log.md append + inbox 推播**（同 LPPLS 收檔慣例，topic=study）。
+- [x] **Step 5: verification-before-completion**：全測試綠、報告無標記殘留、判定明確，才回報完成。
