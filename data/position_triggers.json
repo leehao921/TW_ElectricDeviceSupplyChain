@@ -1,0 +1,19 @@
+{
+  "note": "持倉觸發哨兵設定 — 部位/計畫變動時同步更新 (analysis/container_tp, compal_tp, leftside_deploy)",
+  "triggers": [
+    {"id": "2603_ladder2", "name": "長榮", "type": "ma_break", "symbol": "2603", "ma": 10,
+     "desc": "停利階梯二: 破 MA10", "action": "減 1/3 (~105 股)"},
+    {"id": "2603_ladder3", "name": "長榮", "type": "ma_break", "symbol": "2603", "ma": 20,
+     "desc": "停利階梯三: 破 MA20", "action": "全出, 之後等 213-220 殖利率帶回補"},
+    {"id": "2324_tp1", "name": "仁寶", "type": "price_above", "symbol": "2324", "level": 43.5,
+     "desc": "TP1 到價", "action": "賣 3 張回收融資本金"},
+    {"id": "2324_stop", "name": "仁寶", "type": "price_below", "symbol": "2324", "level": 36.6,
+     "desc": "硬停損 (8/12 缺口)", "action": "融資 6 張全出, 不議價"},
+    {"id": "2610_t2", "name": "華航", "type": "foreign_5d_above", "symbol": "2610", "level": 3.0,
+     "desc": "Tranche2 觸發: 外資5D>3億", "action": "第二張加碼條件成立 (Brent gate 併看)"},
+    {"id": "3532_t3", "name": "台勝科", "type": "foreign_5d_above", "symbol": "3532", "level": 0.0,
+     "desc": "Tranche3 觸發: 外資5D轉正", "action": "1 張 @~342 帶, 失效 315"},
+    {"id": "3680_invalid", "name": "家登", "type": "price_below", "symbol": "3680", "level": 445,
+     "desc": "左側 T1 失效線", "action": "若已建倉 → 出場"}
+  ]
+}
