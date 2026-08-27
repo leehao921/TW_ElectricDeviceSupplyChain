@@ -25,3 +25,20 @@ def test_render_contains_names_and_zones():
     assert "2324 仁寶" in msg and "5,469" in msg   # 仟元→億 = ÷1e5
     assert "低波動" not in msg and "常態" in msg  # 19.9 → 常態帶
     assert "\\n" not in msg
+
+
+def test_render_cm30_line_with_percentile():
+    msg = mv.render("2026-08-27", fin_now=546937698, fin_5d_chg=0, vix=25.8,
+                    vix_5d_chg=None, fin_up=[], fin_down=[], short_up=[],
+                    cm30={"vix_30d": 26.2, "rv_21d": 26.8, "vrp_30d": -0.55,
+                          "vrp_pct": 35.0, "n": 53})
+    assert "VIX30(常數期限) 26.2" in msg and "RV21 26.8" in msg
+    assert "VRP30 -0.6" in msg and "pct 35" in msg   # -0.55 → -0.6 (round-half-even 顯示)
+
+
+def test_render_cm30_insufficient_history_no_pct():
+    msg = mv.render("2026-08-27", fin_now=1e8, fin_5d_chg=0, vix=None,
+                    vix_5d_chg=None, fin_up=[], fin_down=[], short_up=[],
+                    cm30={"vix_30d": 26.2, "rv_21d": 26.8, "vrp_30d": -0.55,
+                          "vrp_pct": None, "n": 12})
+    assert "歷史<20日不予分位" in msg

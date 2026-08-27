@@ -28,7 +28,8 @@ def top_movers(rows: list[dict], field: str, n: int = TOP_N) -> tuple[list, list
 
 def render(as_of: str, fin_now: float, fin_5d_chg: float, vix: float | None,
            vix_5d_chg: float | None, fin_up: list, fin_down: list,
-           short_up: list, labels: dict | None = None) -> str:
+           short_up: list, labels: dict | None = None,
+           cm30: dict | None = None) -> str:
     def name(t):
         info = (labels or {}).get(t)
         return f"{t} {info['name']}" if info and info.get("name") else t
@@ -41,6 +42,13 @@ def render(as_of: str, fin_now: float, fin_5d_chg: float, vix: float | None,
         chg = f" ({vix_5d_chg:+.1f}/5D)" if vix_5d_chg is not None else ""
         zone = "低波動" if vix < 18 else ("常態" if vix < 25 else "高壓")
         lines.append(f"台股VIX(TXO近月IV) {vix:.1f}{chg} · {zone}")
+    if cm30 and cm30.get("vix_30d") is not None:
+        vrp = cm30.get("vrp_30d")
+        vrp_txt = f" · VRP30 {vrp:+.1f}" if vrp is not None else ""
+        pct = cm30.get("vrp_pct")
+        pct_txt = f" (pct {pct:.0f}, n={cm30['n']})" if pct is not None else " (歷史<20日不予分位)"
+        lines.append(f"VIX30(常數期限) {cm30['vix_30d']:.1f} · RV21 {cm30.get('rv_21d') or float('nan'):.1f}"
+                     f"{vrp_txt}{pct_txt}")
     lines.append(f"融資增: {fmt(fin_up, 'delta_fin')} (張)")
     lines.append(f"融資減: {fmt(fin_down, 'delta_fin')} (張)")
     lines.append(f"融券增: {fmt(short_up, 'delta_short')} (張)")
@@ -81,10 +89,26 @@ def main() -> int:
     fin_now = float(mk[0][1]) if mk else 0
     fin_5d = (fin_now - float(mk[-1][1])) / 1e5 if len(mk) > 1 else 0
     # VIX
-    cur.execute("SELECT date, vix FROM vix_daily ORDER BY date DESC LIMIT 6")
+    cur.execute("SELECT date, vix FROM vix_daily WHERE vix IS NOT NULL ORDER BY date DESC LIMIT 6")
     vx = cur.fetchall()
     vix = float(vx[0][1]) if vx else None
     vix5 = (vix - float(vx[-1][1])) if vx and len(vx) > 1 else None
+    # CM30 對齊序列 (2026-08-27 三層錯位修復): vrp_30d percentile 經 n>=20 guard
+    cur.execute("""SELECT vix_30d, rv_21d, vrp_30d FROM vix_daily
+                   WHERE vix_30d IS NOT NULL ORDER BY date DESC LIMIT 1""")
+    row30 = cur.fetchone()
+    cm30 = None
+    if row30:
+        cur.execute("SELECT vrp_30d FROM vix_daily WHERE vrp_30d IS NOT NULL ORDER BY date")
+        hist = [float(r[0]) for r in cur.fetchall()]
+        pct = None
+        if len(hist) >= 20 and row30[2] is not None:
+            cur_v = float(row30[2])
+            pct = 100.0 * sum(1 for h in hist if h < cur_v) / len(hist)
+        cm30 = {"vix_30d": float(row30[0]),
+                "rv_21d": float(row30[1]) if row30[1] is not None else None,
+                "vrp_30d": float(row30[2]) if row30[2] is not None else None,
+                "vrp_pct": pct, "n": len(hist)}
     # 個股增減 (今日 vs 前日餘額欄)
     cur.execute("""SELECT symbol, fin_balance - fin_prev, short_balance - short_prev
                    FROM margin_daily WHERE date=%s
@@ -98,7 +122,7 @@ def main() -> int:
     sys.path.insert(0, str(REPO / "scripts"))
     from warrant_flow_rank import load_labels
     msg = render(as_of, fin_now, fin_5d, vix, vix5, fin_up, fin_down, short_up,
-                 labels=load_labels())
+                 labels=load_labels(), cm30=cm30)
     print(msg)
     try:
         import redis
