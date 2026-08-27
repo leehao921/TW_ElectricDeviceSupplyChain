@@ -45,8 +45,12 @@ def build_indicator_zoo(comps, index_s):
     zoo["dxy_strength"] = ind.dxy_strength(loaders.load_fx("DXY"))
     zoo["foreign_sell"] = ind.foreign_sell_accel(loaders.load_foreign_net_value(comps))
     # 對齊指數交易日(來源日曆不同: GDELT 每日/Brent 海外盤/外資台股盤)
-    return {name: z.reindex(index_s.index).ffill(limit=3)
-            for name, z in zoo.items()}
+    aligned = {name: z.reindex(index_s.index).ffill(limit=3)
+               for name, z in zoo.items()}
+    # 海外盤收盤在台北時間隔日凌晨才可觀測 → shift(1) 避免領先天數虛增一日
+    for name in ("brent_shock", "dxy_strength"):
+        aligned[name] = aligned[name].shift(1)
+    return aligned
 
 
 def run(out_path: Path):
@@ -71,9 +75,10 @@ def run(out_path: Path):
     ]
     verdicts = {}
     for name, z in zoo.items():
-        cells, lead_count, covered = [], 0, 0
+        cells, cats, lead_count, covered = [], [], 0, 0
         for ev in events:
             r = classify_event(z, index_s.index, ev["trigger_date"])
+            cats.append(r["category"])
             if r["category"] == "資料不足":
                 cells.append("∅")
                 continue
@@ -89,12 +94,13 @@ def run(out_path: Path):
                 cells.append("—")
         far, n_alerts = false_alarm_rate(z, index_s, events)
         lead_share = (lead_count / covered) if covered else None
+        # 零警報視為空缺真滿足 <60%(完美指標不因從不誤報而降級);見 Verification log
+        far_ok = (far < QUALIFY_FAR_MAX) if far is not None else (n_alerts == 0)
         if covered == 0:
             role = "資料不足"
-        elif (lead_share >= QUALIFY_LEAD_SHARE
-              and far is not None and far < QUALIFY_FAR_MAX):
+        elif lead_share >= QUALIFY_LEAD_SHARE and far_ok:
             role = "警戒"
-        elif any(c.startswith(("領先", "同步")) for c in cells):
+        elif any(c in ("領先", "同步") for c in cats):
             role = "確認"
         else:
             role = "剔除"
@@ -114,6 +120,9 @@ def run(out_path: Path):
         "<!-- PHASE_B_COMPOSITE -->", "",
         "## Verification log", "",
         "- 數字由本 script 對 DB + yfinance cache 實算;z-score 為 causal(不含當前點)。",
+        "- 事前約定: 零警報(n_alerts=0)視為空缺真滿足誤報率 <60%(從不誤報不得降級)。",
+        "- brent_shock/dxy_strength 已 shift(1) — 海外盤收盤台北隔日凌晨才可觀測,"
+        "避免領先天數虛增一日。",
         "- 產出指令: `.venv/bin/python scripts/geo_attr_study.py`",
         "- 覆蓋聲明: vix_daily 僅蓋 2/7 事件(案例研究,未進矩陣);margin/Kalshi 0/7 未檢驗。", "",
     ]
