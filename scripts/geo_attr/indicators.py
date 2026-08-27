@@ -1,0 +1,60 @@
+"""地緣/宏觀指標 → causal z-score（僅用過去值,不含當前點 — 領先性檢驗的因果前提）。
+
+符號約定: 所有指標「值越大 = 壓力越大」。
+"""
+import pandas as pd
+
+
+def causal_zscore(s: pd.Series, baseline: int = 250,
+                  min_periods: int = 60) -> pd.Series:
+    """z_t = (s_t − mean(s[t−baseline, t−1])) / std(同窗)。shift(1) 排除當前點。
+
+    std=0（常數序列）→ 回傳 0.0（無偏離 = 無壓力），而非 NaN。
+    """
+    r = s.rolling(baseline, min_periods=min_periods)
+    mu = r.mean().shift(1)
+    sd = r.std().shift(1)
+    z = (s - mu) / sd
+    # 零方差序列：分母為 0 導致 NaN；若分子亦為 0（真正的零偏離），以 0.0 取代
+    zero_std = sd == 0.0
+    z = z.where(~zero_std, other=(s - mu).where(~zero_std, other=0.0))
+    return z
+
+
+def gdelt_intensity(count_series: pd.Series, baseline: int = 250,
+                    min_periods: int = 60) -> pd.Series:
+    """文章量 7 日和 z — 事件聲量爆量。"""
+    return causal_zscore(count_series.rolling(7, min_periods=3).sum(),
+                         baseline, min_periods)
+
+
+def gdelt_tone_deterioration(tone_series: pd.Series, baseline: int = 250,
+                             min_periods: int = 60) -> pd.Series:
+    """(−tone) 7 日均 z — tone 越負(語調惡化)值越大。"""
+    return causal_zscore((-tone_series).rolling(7, min_periods=3).mean(),
+                         baseline, min_periods)
+
+
+def brent_shock(close: pd.Series, baseline: int = 250,
+                min_periods: int = 60) -> pd.Series:
+    """|5 日報酬| z — 斷供上漲與需求崩跌皆為衝擊。"""
+    return causal_zscore(close.pct_change(5).abs(), baseline, min_periods)
+
+
+def twd_depreciation(usdtwd_close: pd.Series, baseline: int = 250,
+                     min_periods: int = 60) -> pd.Series:
+    """USDTWD 5 日升幅 z — 台幣貶值(資金撤離)為正。"""
+    return causal_zscore(usdtwd_close.pct_change(5), baseline, min_periods)
+
+
+def dxy_strength(dxy_close: pd.Series, baseline: int = 250,
+                 min_periods: int = 60) -> pd.Series:
+    """DXY 5 日升幅 z — 美元避險走強為正。"""
+    return causal_zscore(dxy_close.pct_change(5), baseline, min_periods)
+
+
+def foreign_sell_accel(fnet_daily: pd.Series, baseline: int = 250,
+                       min_periods: int = 60) -> pd.Series:
+    """(−外資淨買金額) 5 日和 z — 賣超加速為正。"""
+    return causal_zscore((-fnet_daily).rolling(5, min_periods=3).sum(),
+                         baseline, min_periods)
