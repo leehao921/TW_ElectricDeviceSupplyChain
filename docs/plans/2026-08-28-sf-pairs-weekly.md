@@ -32,8 +32,12 @@
 - history `data/sf_pairs_history.json`（畢業樣本：status=stopped/tp/expired + spread_ret）
 - 每週更新：以日 close 檢查觸價、算 spread 報酬、產統計行（命中率/平均 spread）
 
-### 排程
-- launchd `com.lulala.sf-pairs` **每週五 20:10**（margin 18:10 + ledger 19:50 之後，數據齊）
+### 期貨/股票對沖（β 蓋板，用戶追加需求 2026-08-28）
+- 現貨持倉市值 ÷ 微台名目（TXF×10）→ 全蓋/半蓋口數
+- 觸發 gate：TAIEX <39,385 或 週/月 IV 倒掛 >+2 → 蓋半至全；平時不蓋保留牛市 β
+
+### 排程（用戶指定：週一早上推送當週交易計畫）
+- launchd `com.lulala.sf-pairs` **每週一 08:00**（用上週五完整日級數據）
 - inbox topic=`sf-pairs` + report_path `analysis/sf_pairs_<date>.md`
 - 週頻 → 不入 routine_watchdog（同 signal-ledger 慣例）
 
