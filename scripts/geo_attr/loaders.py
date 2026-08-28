@@ -32,15 +32,47 @@ def load_foreign_net_value(components) -> pd.Series:
                            params=(list(components),)).set_index("date")["fnet"]
 
 
+import yfinance as yf  # noqa: E402 – imported at module level for monkeypatching
+
+
+def _cache_is_fresh(cache: Path) -> bool:
+    """Return True if the cache's max date >= (today - 1 calendar day).
+
+    Staleness rule: cache max date < today-1 → stale → refetch.
+    Within the same calendar day, subsequent runs must read from cache
+    (研究情境不變).
+    """
+    import datetime as _dt
+    try:
+        df = pd.read_csv(cache, parse_dates=["date"])
+        max_date = df["date"].max()
+        if pd.isna(max_date):
+            return False
+        # Normalise to date object regardless of dtype
+        if hasattr(max_date, "date"):
+            max_date = max_date.date()
+        elif not isinstance(max_date, _dt.date):
+            max_date = pd.Timestamp(max_date).date()
+        threshold = _dt.date.today() - _dt.timedelta(days=1)
+        return max_date >= threshold
+    except Exception:
+        return False
+
+
 def load_yf(ticker: str, cache_name: str, start="2024-12-01") -> pd.Series:
-    """yfinance 日線 Close,cache 到 analysis/cache/<cache_name>.csv(存在即直讀)。"""
+    """yfinance 日線 Close,cache 到 analysis/cache/<cache_name>.csv。
+
+    Cache 時效規則:
+    - cache 不存在 → 拉網路並寫入
+    - cache 最新日期 < 今日−1 (日曆日) → stale → 重抓覆寫
+    - cache 最新日期 ≥ 今日−1 → fresh → 直讀 (不觸網)
+    """
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache = CACHE_DIR / f"{cache_name}.csv"
-    if cache.exists():
+    if cache.exists() and _cache_is_fresh(cache):
         df = pd.read_csv(cache, parse_dates=["date"])
         df["date"] = df["date"].dt.date
         return df.set_index("date")["close"]
-    import yfinance as yf
     hist = yf.Ticker(ticker).history(start=start, auto_adjust=False)
     s = hist["Close"]
     s.index = [ts.date() for ts in s.index]
