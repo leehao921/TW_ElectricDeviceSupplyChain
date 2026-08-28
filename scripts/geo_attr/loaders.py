@@ -3,6 +3,7 @@ import contextlib
 from pathlib import Path
 
 import pandas as pd
+import yfinance as yf
 
 from scripts.lppls.db import connect
 
@@ -32,7 +33,6 @@ def load_foreign_net_value(components) -> pd.Series:
                            params=(list(components),)).set_index("date")["fnet"]
 
 
-import yfinance as yf  # noqa: E402 – imported at module level for monkeypatching
 
 
 def _cache_is_fresh(cache: Path) -> bool:

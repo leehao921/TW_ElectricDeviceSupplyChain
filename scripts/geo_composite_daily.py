@@ -6,6 +6,11 @@
 
 Architecture: §4.4 of analysis/geo_attribution_study_2026-08-28.md
 定位：paper-trade 期間警報不構成行動建議。
+
+Note — pending alerts (待對帳):
+  Derived implicitly as records where light == '紅' and 'settle' field is absent.
+  This deviates from the original plan's explicit alerts_pending field — intentional,
+  to keep state schema minimal and idempotent across re-runs.
 """
 from __future__ import annotations
 
@@ -98,13 +103,13 @@ def evaluate_fragility(
     Returns dict with:
         iv      (bool): iv_inverted OR vrp_neg
         foreign (bool): foreign_z > Z_THR
-        margin  (bool): margin_score == 1
+        margin  (bool | None): True if margin_score == 1, False if 0, None if unavailable
         triggered (bool): any component fired
     """
     iv = bool(iv_inverted or vrp_neg)
     foreign = _z_above(foreign_z)
-    margin = bool(margin_score == 1)
-    triggered = bool(iv or foreign or margin)
+    margin = None if margin_score is None else bool(margin_score == 1)
+    triggered = bool(iv or foreign or bool(margin))
     return dict(iv=iv, foreign=foreign, margin=margin, triggered=triggered)
 
 
@@ -141,9 +146,15 @@ def settle_alerts(
       - If < 20 trading days → leave unsettled
 
     Modifies records in-place and returns them.
+
+    Note: production index_s.index is object-dtype of datetime.date (not DatetimeIndex).
+    All internal comparisons are done in datetime.date to match production dtype.
     """
-    idx_dates = list(index_s.index)  # DatetimeIndex
-    idx_date_set = {d.date() if hasattr(d, "date") else d for d in idx_dates}
+    # Normalise index to a list of datetime.date regardless of source dtype.
+    idx_dates: list[dt.date] = [
+        d.date() if hasattr(d, "date") else d for d in index_s.index
+    ]
+    idx_date_set = set(idx_dates)
 
     for rec in records:
         if rec.get("light") != "紅":
@@ -164,25 +175,20 @@ def settle_alerts(
         if alert_date not in idx_date_set:
             continue  # not a trading day in the index → skip
 
-        # Find position in index_s
+        # Find position using the native index key (datetime.date)
         try:
-            pos = index_s.index.get_loc(
-                pd.Timestamp(alert_date) if not isinstance(alert_date, pd.Timestamp)
-                else alert_date
-            )
+            pos = index_s.index.get_loc(alert_date)
         except KeyError:
             continue
 
-        # Count trading days from alert to asof
-        asof_ts = pd.Timestamp(asof)
-        trading_days_since = sum(1 for d in idx_dates[pos + 1:] if d <= asof_ts)
+        # Count trading days from alert to asof (compare dates as dates)
+        trading_days_since = sum(1 for d in idx_dates[pos + 1:] if d <= asof)
 
         if trading_days_since < 20:
             continue  # not yet matured
 
-        # Compute forward return from the alert date
-        alert_ts = pd.Timestamp(alert_date)
-        _r_end, r_min = forward_return(index_s, alert_ts, horizon=20)
+        # Compute forward return using native date key
+        _r_end, r_min = forward_return(index_s, alert_date, horizon=20)
 
         if r_min is None:
             continue  # insufficient data
@@ -206,7 +212,23 @@ def _load_state(path: Path) -> list[dict]:
             return raw
         if isinstance(raw, dict):
             return raw.get("records", [])
-    except (json.JSONDecodeError, OSError):
+    except json.JSONDecodeError:
+        # Rename corrupt file to preserve evidence; never silently discard.
+        import datetime as _dt
+        stamp = _dt.datetime.now().strftime("%Y%m%d%H%M%S")
+        corrupt_path = path.with_name(f"{path.name}.corrupt-{stamp}")
+        try:
+            path.rename(corrupt_path)
+            print(
+                f"[warn] geo-composite state JSON corrupt; renamed to {corrupt_path.name}",
+                file=sys.stderr,
+            )
+        except OSError as rename_err:
+            print(
+                f"[warn] geo-composite state JSON corrupt and rename failed: {rename_err}",
+                file=sys.stderr,
+            )
+    except OSError:
         pass
     return []
 
@@ -317,12 +339,10 @@ def _build_message(
 
 def _latest_z(z_series: pd.Series) -> float | None:
     """Return the most recent non-NaN value of a z-series, or None."""
-    if z_series is None or z_series.empty:
+    if z_series is None or len(z_series) == 0:
         return None
-    valid = z_series.dropna()
-    if valid.empty:
-        return None
-    return float(valid.iloc[-1])
+    v = z_series.iloc[-1]
+    return None if pd.isna(v) else float(v)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -422,14 +442,10 @@ def main(argv: list[str] | None = None) -> int:
     }
 
     # 7. State upsert + settle
-    if args.dry_run:
-        records = _load_state(STATE_PATH)
-        _upsert_record(records, new_record)
-        records = settle_alerts(records, index_s, asof)
-    else:
-        records = _load_state(STATE_PATH)
-        _upsert_record(records, new_record)
-        records = settle_alerts(records, index_s, asof)
+    records = _load_state(STATE_PATH)
+    _upsert_record(records, new_record)
+    records = settle_alerts(records, index_s, asof)
+    if not args.dry_run:
         _save_state(STATE_PATH, records)
         print(f"[info] state written to {STATE_PATH}", file=sys.stderr)
 
