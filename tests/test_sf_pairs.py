@@ -46,6 +46,31 @@ def test_leg_levels_long_and_short_mirror():
     assert sv == {"entry": 100.0, "stop": 106.0, "tp": 90.0}
 
 
+# ---------------------------------------------------------------- cross flags
+def test_format_flags_merges_module_tags():
+    flags = sf.format_flags("2330", warrant_long={"2330"}, warrant_short=set(),
+                            scan_families={"2330": ["S2v2_cap"]},
+                            pb_lights={"2330": "RED"})
+    assert "權證佈多" in flags and "S2v2_cap" in flags and "P/B:RED" in flags
+
+
+def test_format_flags_empty_when_no_hits():
+    assert sf.format_flags("9999", warrant_long=set(), warrant_short=set(),
+                           scan_families={}, pb_lights={}) == ""
+
+
+# ---------------------------------------------------------------- options env
+def test_options_env_lines_vrp_guidance():
+    # VRP 薄/負 → 保險便宜, 建議 put 對沖優先於期貨蓋板
+    row = {"vix": 24.6, "vix_30d": 27.3, "rv_21d": 24.7, "vrp_30d": 2.7,
+           "vix_w": 23.7, "wm_spread": -3.7, "iv_skew_25d": -1.2, "term_slope": 0.5}
+    lines = sf.options_env_lines(row)
+    txt = "\n".join(lines)
+    assert "27.3" in txt and "VRP" in txt
+    thin = sf.options_env_lines({**row, "vrp_30d": -4.0})
+    assert any("保險便宜" in ln for ln in thin)
+
+
 # ---------------------------------------------------------------- tracking
 def _pair(pid="P1", enter="2026-08-21"):
     return {"id": pid, "enter_date": enter, "kind": "同鏈對偶",

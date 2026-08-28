@@ -187,6 +187,83 @@ def update_tracking(state: dict, conn, as_of: str) -> list:
     return graduated
 
 
+# ------------------------------------------------------------------ cross flags
+def format_flags(sym: str, warrant_long: set, warrant_short: set,
+                 scan_families: dict, pb_lights: dict) -> str:
+    """其他模塊交叉確認標籤: 權證榜/日掃名單/P-B 燈號."""
+    tags = []
+    if sym in warrant_long:
+        tags.append("權證佈多榜")
+    if sym in warrant_short:
+        tags.append("權證佈空榜(反指標傾向)")
+    for fam in scan_families.get(sym, []):
+        tags.append(f"日掃:{fam}")
+    if pb_lights.get(sym):
+        tags.append(f"P/B:{pb_lights[sym]}")
+    return " · ".join(tags)
+
+
+def load_cross_signals(conn) -> tuple[set, set, dict, dict]:
+    """權證佈多/佈空 top15 + 近 5 日日掃名單 + P/B 燈號."""
+    wl, ws = set(), set()
+    try:
+        wf = pd.read_sql("""SELECT underlying, score FROM warrant_flow_daily
+                            WHERE date = (SELECT max(date) FROM warrant_flow_daily)""", conn)
+        wl = set(wf.nlargest(15, "score").underlying)
+        ws = set(wf.nsmallest(15, "score").underlying)
+    except Exception:
+        pass
+    fams: dict[str, list] = {}
+    try:
+        st = json.loads((REPO / "data" / "signal_scan_state.json").read_text())
+        cutoff = (date.today() - timedelta(days=7)).isoformat()
+        for e in st.get("tracked", {}).values():
+            if e.get("enter_date", "") >= cutoff:
+                fams.setdefault(e["symbol"], []).append(e["family"])
+    except Exception:
+        pass
+    pb: dict[str, str] = {}
+    try:
+        import redis
+        for k, v in redis.Redis(decode_responses=True).hgetall("h:agent:pb_lights").items():
+            try:
+                light = json.loads(v).get("light")
+            except Exception:
+                light = v if v in ("RED", "YELLOW", "GREEN") else None
+            if light:
+                pb[k] = light
+    except Exception:
+        pass
+    return wl, ws, fams, pb
+
+
+# ------------------------------------------------------------------ options env
+def options_env_lines(row: dict) -> list:
+    """選擇權環境面板: VIX/VRP/skew → 對沖工具選擇指引."""
+    if not row:
+        return []
+    vrp = row.get("vrp_30d")
+    wm = row.get("wm_spread")
+    out = ["## 選擇權環境（對沖工具選擇）", "",
+           f"- VIX {row.get('vix', '–')} · VIX30 {row.get('vix_30d', '–')} · "
+           f"RV21 {row.get('rv_21d', '–')} · **VRP30 {vrp if vrp is not None else '–'}** · "
+           f"週選 {row.get('vix_w', '–')} · 週/月 {wm if wm is not None else '–'}"]
+    if vrp is not None:
+        if vrp < 0:
+            out.append("- VRP 為負 → **保險便宜**: 蓋板優先考慮買 put（划算）而非空期貨")
+        elif vrp > 8:
+            out.append("- VRP 肥厚 → 保險貴: 對沖用期貨蓋板, 勿買貴的 put")
+        else:
+            out.append("- VRP 中性 → 期貨蓋板與 put 成本相當, 依執行便利選")
+    if wm is not None and wm > 2:
+        out.append(f"- 🚨 週/月 IV 倒掛 {wm:+.1f} → 即期事件恐慌, 本週計畫降槓桿執行")
+    sk = row.get("iv_skew_25d")
+    if sk is not None:
+        out.append(f"- 25Δ skew {sk:+.1f}（負=下檔保護相對便宜）")
+    out.append("")
+    return out
+
+
 # ------------------------------------------------------------------ hedge
 def hedge_plan(conn) -> list:
     """期貨/股票對沖: 現貨持倉 β 蓋板需要的微台口數 + regime gate 現況."""
@@ -275,13 +352,17 @@ def main() -> int:
     HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2))
 
     # ---- report
+    wl, ws, fams, pb = load_cross_signals(conn)
+
     def leg_line(c, side):
         lv = leg_levels(c["close"], c["atr"], side)
         s2 = " ⚠S2融資投降" if c["s2"] and side == "short" else ""
+        fl = format_flags(c["symbol"], wl, ws, fams, pb)
+        fl = f"\n  ↳ 交叉: {fl}" if fl else ""
         return (f"- **{c['symbol']} {c['name']}**（{c['industry']}）score {c['score']:+.2f} · "
                 f"外資5D {c['f5']:+.1f}億/20D {c['f20']:+.1f}億 · 借券5D {c['dsbl']/1000:+,.0f}千股 · "
                 f"乖離 {c['dev20']*100:+.1f}%{s2}\n"
-                f"  入場 {lv['entry']} / 停損 {lv['stop']} / 停利 {lv['tp']}（1.5/2.5×ATR14）")
+                f"  入場 {lv['entry']} / 停損 {lv['stop']} / 停利 {lv['tp']}（1.5/2.5×ATR14）{fl}")
 
     lines = [f"# 本週交易計畫 — 股期多空配對 {as_of}", "",
              f"Universe: TAIFEX 股期標的 {len(universe)} 檔（保證金約 13.5%，無券源限制）·",
@@ -296,6 +377,29 @@ def main() -> int:
                      f"Short {p['short']['symbol']} {p['short']['name']}"
                      f"（{p['long']['industry']} vs {p['short']['industry']}）")
     lines += ["", "  Pair 出場規則: 任一腿收盤破停損 → 整組出場；spread ≥ +8% 停利；滿 20 交易日到期", ""]
+
+    # 選擇權環境
+    env = pd.read_sql("""SELECT vix, vix_30d, rv_21d, vrp_30d, vix_w, wm_spread,
+                                iv_skew_25d, term_slope
+                         FROM vix_daily ORDER BY date DESC LIMIT 1""", conn)
+    lines += options_env_lines(
+        {k: (round(float(v), 1) if v is not None and pd.notna(v) else None)
+         for k, v in env.iloc[0].items()} if not env.empty else {})
+
+    # 處置事件腿 (S1/L1 VALIDATED — 多半無股期, 現股/事件觀察)
+    try:
+        from signal_scan import scan_disposition
+        disp_l, disp_s = scan_disposition(as_of)
+        lines += ["## 處置事件腿（S1/L1 VALIDATED · 多半無股期 → 現股執行）", ""]
+        for sym, d in disp_l:
+            lines.append(f"- 多方: **{sym} {labels.get(sym, {}).get('name', '')}** {d}（買超組 +3.59%/10D 基準）")
+        for sym, d in disp_s:
+            lines.append(f"- 空方: **{sym} {labels.get(sym, {}).get('name', '')}** {d}（賣超組 -1.73%/10D · 無券可空則僅避開）")
+        if not disp_l and not disp_s:
+            lines.append("（本週 3 日內無即將解除）")
+        lines.append("")
+    except Exception as e:
+        print(f"[warn] disposition section failed: {e}", file=sys.stderr)
 
     lines += hedge_plan(conn)
     active = [p for p in state["pairs"].values() if p["enter_date"] != as_of]
