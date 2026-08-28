@@ -212,8 +212,10 @@ def push_inbox(msg: str, report_path: str) -> None:
         print(f"[warn] inbox push failed: {e}", file=sys.stderr)
 
 
-def find_missing_ohlcv(conn, tickers: list[str], as_of: str, tolerance_days: int = 3) -> list[str]:
-    """近 tolerance_days 內無任何 OHLCV 列的 tickers — 非電子處置股日更缺口偵測."""
+def find_missing_ohlcv(conn, tickers: list[str], as_of: str, tolerance_days: int = 1) -> list[str]:
+    """近 tolerance_days 內無任何 OHLCV 列的 tickers — 非電子處置股日更缺口偵測.
+    tolerance=3 曾造成滾動缺口 (8/24-25 有舊列 → 8/26-27 洞不觸發補抓, 2026-08-28 實例);
+    tolerance=1 讓落後 1 日即重補 (14 日 upsert, 過度觸發無害)."""
     missing = []
     with conn.cursor() as cur:
         for t in tickers:
