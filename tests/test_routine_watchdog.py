@@ -40,13 +40,13 @@ def test_is_trading_day_normal_weekday_true():
 def test_build_checks_expands_ma_touch_slots():
     checks = rw.build_checks()
     keys = {c.key for c in checks}
-    # 19 registry topics, but ma-touch → 3 slot checks ⇒ 22 total
-    assert len(checks) == 22
+    # 20 registry topics, but ma-touch → 3 slot checks ⇒ 23 total
+    assert len(checks) == 23
     assert {"ma-touch:preopen", "ma-touch:noon", "ma-touch:close"} <= keys
     assert {"bb-squeeze", "bb-followthrough", "etf-smart-money",
             "disposition-alert", "disposition-track", "buy-list", "pb-lights",
             "memory-cycle", "routine-synthesis", "news-pulse",
-            "foreign-structure", "ddr-price"} <= keys
+            "foreign-structure", "ddr-price", "geo-composite"} <= keys
     labels = {c.key: c.label for c in checks}
     assert labels["ma-touch:preopen"] == "com.lulala.ma-touch-preopen"
     assert labels["pb-lights"] == "com.lulala.pb-lights"

@@ -218,3 +218,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 10Y/30Y 完全冗餘取一;sox/usvix 偏同步降確認層
 - Composite v2: 事件強度軸改按通道分組 (管制關稅/利率/油價中東),利率通道=ust10y_surge
 - 報告: analysis/geo_attribution_study_2026-08-28.md (取代 v1)
+
+## 2026-08-28 — geo-composite paper-trade 儀表上線
+- launchd com.lulala.geo-composite Mon-Fri 18:20;雙軸=事件強度(管制關稅/利率/油價通道)×脆弱度(IV/外資/融資),紅=雙軸觸發
+- 首跑: 綠燈 (全指標 sub-threshold,盤勢平靜);state=data/geo_composite_state.json,紅燈滿20交易日自動對帳
+- Paper-trade 規則: 警報非行動建議;累積 ≥2 個新 ≥5% 回檔事件後結算 live 捕捉率/FAR 決定轉正式
+- Review 攔截: 對帳 date-type 靜默 no-op (production index=datetime.date vs 測試 DatetimeIndex) — 上線前修復

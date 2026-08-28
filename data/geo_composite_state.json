@@ -1,0 +1,32 @@
+[
+  {
+    "date": "2026-08-28",
+    "light": "綠",
+    "strength": {
+      "regulation": false,
+      "rates": false,
+      "oil": false,
+      "triggered": false
+    },
+    "fragility": {
+      "iv": false,
+      "foreign": false,
+      "margin": false,
+      "triggered": false
+    },
+    "z_detail": {
+      "gdelt_semi_export_vol": null,
+      "gdelt_tariff_tone": -0.0656,
+      "ust10y_surge": 0.0369,
+      "brent_shock": -0.2323,
+      "gdelt_mideast_oil_vol": null
+    },
+    "fragility_detail": {
+      "iv_inverted": false,
+      "vrp_neg": false,
+      "foreign_z": -0.8682,
+      "margin_score": 0,
+      "term_slope": -0.0498
+    }
+  }
+]
