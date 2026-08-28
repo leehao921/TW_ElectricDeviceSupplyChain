@@ -38,19 +38,22 @@ def pc_ratio(oi: dict) -> float:
     return p / c * 100 if c else float("nan")
 
 
-def wall_rows(oi: dict, spot: float, width: int = BAR_W) -> list:
-    """OI 對沖牆: Put 條 | 履約價 | Call 條, 標 PW/CW/現價◀."""
+def wall_rows(oi: dict, spot: float, width: int = BAR_W, zg: float | None = None) -> list:
+    """OI 對沖牆: Put 條 | 履約價 | Call 條, 標 PW/CW/ZG/現價◀."""
     strikes = sorted(oi, reverse=True)
     vmax = max(max(d.get("P", 0), d.get("C", 0)) for d in oi.values()) or 1
     cw = max(oi, key=lambda k: oi[k].get("C", 0))
     pw = max(oi, key=lambda k: oi[k].get("P", 0))
     nearest = min(strikes, key=lambda k: abs(k - spot))
+    zg_row = min(strikes, key=lambda k: abs(k - zg)) if zg is not None else None
     rows = []
     for k in strikes:
         p, c = oi[k].get("P", 0), oi[k].get("C", 0)
         left = hbar(p, vmax, width).rjust(width)
         right = hbar(c, vmax, width).ljust(width)
         tag = " CW" if k == cw else (" PW" if k == pw else "")
+        if k == zg_row:
+            tag += " ZG"
         arrow = "◀" if k == nearest else " "
         rows.append(f"{left}│{k:>5}│{right}{arrow}{tag}")
     return rows
@@ -92,6 +95,25 @@ def build(conn) -> str:
     pcr = pc_ratio(oi_full)          # P/C 用全鏈 (慣例口徑), 牆圖才用 ±SPAN 窗
     cw = max(oi_all, key=lambda k: oi_all[k].get("C", 0)) if oi_all else None
     pw = max(oi_all, key=lambda k: oi_all[k].get("P", 0)) if oi_all else None
+
+    # ---- GEX (盤中 iv_strikes gamma × OI, 復用 options_quant §3.1)
+    gex_total = gex_flip = gex_zone = None
+    try:
+        front_txt = front.strftime("%Y%m%d")
+        strikes_df = pd.read_sql("""
+          SELECT DISTINCT ON (strike, call_put) strike, call_put, gamma
+          FROM iv_strikes WHERE time >= now()::date AND expiry = %(e)s
+          ORDER BY strike, call_put, time DESC""", conn, params={"e": front_txt})
+        oi_df = pd.read_sql("""
+          SELECT strike, cp, open_interest, settle_date FROM option_oi_daily
+          WHERE underlying='TX' AND expiry = %(e)s
+            AND settle_date = (SELECT max(settle_date) FROM option_oi_daily)""",
+                            conn, params={"e": front})
+        from options_quant import analyze_gex
+        m = analyze_gex(strikes_df, oi_df, txf)["metrics"]
+        gex_total, gex_flip, gex_zone = m["total_gex"], m["flip"], m["zone"]
+    except Exception as e:
+        print(f"[warn] GEX layer failed: {e}", file=sys.stderr)
 
     # ---- VIX 家族
     cur.execute("""SELECT vix, vix_30d, rv_21d, vrp_30d, vix_w, wm_spread
@@ -143,8 +165,12 @@ def build(conn) -> str:
     L.append("")
     L.append(f"── TXO 近月 OI 對沖牆 (到期 {front}) ──")
     L.append(f"{'Put OI':>{BAR_W}}│ 履約 │Call OI")
-    L += wall_rows(oi_all, txf)
+    L += wall_rows(oi_all, txf, zg=gex_flip)
     L.append(f" P/C(OI) {pcr:.1f}% {pcr_tag} · CallWall {cw:,} · PutWall {pw:,}")
+    if gex_total is not None:
+        zone_txt = "磁吸(pinning)" if gex_zone == "pinning" else "放大(expansion)"
+        L.append(f" GEX {gex_total/1e8:+,.0f}億/1% · ZeroGamma "
+                 + (f"{gex_flip:,.0f}" if gex_flip else "n/a") + f" · {zone_txt}")
     L.append("")
     L.append("── 波動率 ──")
     L.append(f" VIX {vix} · CM30 {v30} · RV21 {rv} · VRP {vrp:+.1f}")

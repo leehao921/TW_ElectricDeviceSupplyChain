@@ -26,6 +26,15 @@ def test_wall_rows_marks_walls_and_spot():
     assert "◀" in [r for r in rows if "46300" in r][0]
 
 
+def test_wall_rows_tags_zero_gamma():
+    oi = {46100: {"P": 300, "C": 100}, 46300: {"P": 100, "C": 200},
+          46500: {"P": 50, "C": 300}}
+    rows = ad.wall_rows(oi, spot=46331.0, width=8, zg=46317.8)
+    # ZG 標在最接近 flip 的履約價列 (46300)
+    assert any("ZG" in r and "46300" in r for r in rows)
+    assert not any("ZG" in r for r in ad.wall_rows(oi, spot=46331.0, width=8))
+
+
 def test_pc_ratio():
     oi = {46100: {"P": 300, "C": 100}, 46500: {"P": 100, "C": 300}}
     assert abs(ad.pc_ratio(oi) - 100.0) < 1e-9
