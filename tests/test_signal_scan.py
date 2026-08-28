@@ -55,6 +55,27 @@ def test_update_tracking_fills_t5_then_graduates_on_t20():
     assert state["tracked"] == {}
 
 
+def test_classify_fear_greed_fear_needs_weak_price_and_short_pressure():
+    # 恐懼區 = 價弱 (乖離 ≤ -5%) 且至少一條空壓腿 (借券增/融券增/融資減)
+    zone, desc = ss.classify_fear_greed(dev20=-0.08, dfin_5d=0, dshort_5d=0, dsbl_5d=5_000_000)
+    assert zone == "fear" and "借券" in desc
+    # 只跌但無空壓 ≠ 恐懼結構
+    assert ss.classify_fear_greed(dev20=-0.08, dfin_5d=0, dshort_5d=0, dsbl_5d=0)[0] is None
+
+
+def test_classify_fear_greed_greed_needs_hot_price_and_crowding():
+    # 貪婪區 = 乖離 ≥ +10% 且籌碼擁擠 (融資增或借券增)
+    zone, desc = ss.classify_fear_greed(dev20=0.15, dfin_5d=2000, dshort_5d=0, dsbl_5d=0)
+    assert zone == "greed" and "融資" in desc
+    # 過熱但無擁擠腿 → 不標
+    assert ss.classify_fear_greed(dev20=0.15, dfin_5d=0, dshort_5d=0, dsbl_5d=0)[0] is None
+
+
+def test_classify_fear_greed_neutral_and_none_inputs():
+    assert ss.classify_fear_greed(dev20=0.02, dfin_5d=-500, dshort_5d=100, dsbl_5d=0)[0] is None
+    assert ss.classify_fear_greed(dev20=None, dfin_5d=1, dshort_5d=1, dsbl_5d=1)[0] is None
+
+
 def test_update_tracking_skips_symbols_without_close():
     state = {"tracked": {}}
     listed = {"S2v2_thin": [("9999", "no px")]}

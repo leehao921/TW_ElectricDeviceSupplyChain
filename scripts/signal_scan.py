@@ -80,6 +80,90 @@ def scan_overheat(conn) -> list:
     return [(s, f"乖離{v*100:+.1f}%") for s, v in hot.head(MAX_PER_LIST).items()]
 
 
+def classify_fear_greed(dev20, dfin_5d, dshort_5d, dsbl_5d) -> tuple:
+    """別人恐懼我貪婪: 恐懼區=價弱+空壓結構(左側買點), 貪婪區=過熱+籌碼擁擠(收割區).
+
+    恐懼 ≠ 單純下跌 — 要有人在空它 (借券/融券增或散戶融資投降) 才構成錯價候選。
+    貪婪 ≠ 單純上漲 — 要有擁擠腿 (融資追價或法人借券對沖增) 才構成收割訊號。
+    """
+    if dev20 is None:
+        return None, ""
+    legs = []
+    if dev20 <= -0.05:
+        if (dsbl_5d or 0) > 0:
+            legs.append(f"借券+{dsbl_5d/1e3:,.0f}千股")
+        if (dshort_5d or 0) > 0:
+            legs.append(f"融券+{dshort_5d:,.0f}張")
+        if (dfin_5d or 0) < 0:
+            legs.append(f"融資{dfin_5d:,.0f}張")
+        if legs:
+            return "fear", f"乖離{dev20*100:+.1f}% · " + "/".join(legs)
+    elif dev20 >= 0.10:
+        if (dfin_5d or 0) > 0:
+            legs.append(f"融資+{dfin_5d:,.0f}張")
+        if (dsbl_5d or 0) > 0:
+            legs.append(f"借券+{dsbl_5d/1e3:,.0f}千股")
+        if legs:
+            return "greed", f"乖離{dev20*100:+.1f}% · " + "/".join(legs)
+    return None, ""
+
+
+def watch_universe() -> list:
+    """恐懼/貪婪儀表的掃描池: 持股 + 買入清單 + position-watch 觸發標的."""
+    syms = set()
+    for fname, extract in (
+        ("portfolio_holdings.json", lambda d: [h.get("ticker") for h in d.get("holdings", [])]),
+        ("buy_list_state.json", lambda d: [p.get("ticker") for p in d.get("picks", [])]),
+        ("position_triggers.json", lambda d: [t.get("symbol") for t in d.get("triggers", [])]),
+    ):
+        f = REPO / "data" / fname
+        if not f.exists():
+            continue
+        try:
+            for s in extract(json.loads(f.read_text())):
+                s = str(s or "")
+                if len(s) == 4 and s.isdigit() and s[0] != "0":  # 排除 ETF (00xxx)
+                    syms.add(s)
+        except Exception:
+            continue
+    return sorted(syms)
+
+
+def scan_fear_greed(conn, symbols: list) -> tuple[list, list]:
+    """持股+觀察池逐檔 恐懼(左側買點候選)/貪婪(收割區) 標註."""
+    if not symbols:
+        return [], []
+    df = pd.read_sql("""
+      WITH d5 AS (SELECT DISTINCT date FROM margin_daily ORDER BY date DESC LIMIT 5)
+      SELECT symbol,
+             max(fin_balance) FILTER (WHERE date=(SELECT max(date) FROM d5))
+               - max(fin_balance) FILTER (WHERE date=(SELECT min(date) FROM d5)) AS dfin,
+             max(short_balance) FILTER (WHERE date=(SELECT max(date) FROM d5))
+               - max(short_balance) FILTER (WHERE date=(SELECT min(date) FROM d5)) AS dshort,
+             max(sbl_balance) FILTER (WHERE date=(SELECT max(date) FROM d5))
+               - max(sbl_balance) FILTER (WHERE date=(SELECT min(date) FROM d5)) AS dsbl
+      FROM margin_daily WHERE date IN (SELECT date FROM d5) AND symbol = ANY(%(syms)s)
+      GROUP BY symbol""", conn, params={"syms": symbols}).set_index("symbol")
+    px = pd.read_sql("""SELECT symbol, ts::date d, close FROM stock_daily_ohlcv
+                        WHERE ts >= now() - interval '45 days' AND symbol = ANY(%(syms)s)
+                        ORDER BY 1,2""", conn, params={"syms": symbols}, parse_dates=["d"])
+    close = px.pivot(index="d", columns="symbol", values="close")
+    dev = (close / close.rolling(20).mean() - 1).iloc[-1]
+    fear, greed = [], []
+    for sym in symbols:
+        m = df.loc[sym] if sym in df.index else None
+        zone, desc = classify_fear_greed(
+            dev.get(sym),
+            float(m.dfin) if m is not None and pd.notna(m.dfin) else 0,
+            float(m.dshort) if m is not None and pd.notna(m.dshort) else 0,
+            float(m.dsbl) if m is not None and pd.notna(m.dsbl) else 0)
+        if zone == "fear":
+            fear.append((sym, desc))
+        elif zone == "greed":
+            greed.append((sym, desc))
+    return fear, greed
+
+
 def update_tracking(state: dict, listed: dict, as_of: str, close_fn, nth_fn) -> list:
     """名單股 T+5/T+20 追蹤 (沿用 warrant tracker 語意)."""
     tracked = state.setdefault("tracked", {})
@@ -122,6 +206,7 @@ def main() -> int:
     cap, thin = scan_margin_volume(conn, as_of)
     disp_l, disp_s = scan_disposition(as_of)
     hot = scan_overheat(conn)
+    fear, greed = scan_fear_greed(conn, watch_universe())
 
     def close_fn(sym, d):
         with conn.cursor() as cur:
@@ -154,6 +239,9 @@ def main() -> int:
     lines += sec("L1 即將解除·外資買超（VALIDATED）", disp_l)
     lines += ["## 過熱觀察（S3 — regime 條件型，牛市=動能勿逕空）", ""]
     lines += sec("乖離 98 分位", hot)
+    lines += ["## 恐懼/貪婪儀表（持股+觀察池 — 別人恐懼我貪婪）", ""]
+    lines += sec("😱 恐懼區（價弱+空壓 = 左側買點候選，需疊基本面確認）", fear)
+    lines += sec("🤑 貪婪區（過熱+籌碼擁擠 = 收割區候選）", greed)
     done_t5 = [h for h in history if h["post"].get("t5") is not None]
     lines += ["## 名單自我校驗（畢業樣本）", "",
               f"- 累積 {len(history)} 筆；t5 有值 {len(done_t5)} 筆（命中統計見週五總帳）", "",
@@ -171,7 +259,8 @@ def main() -> int:
             "from": "signal_scan", "topic": "signal-scan",
             "tags": "signals,daily-scan", "as_of": as_of,
             "msg": f"訊號掃描 {as_of}: 空方 {n_short} 檔 (投降{len(cap)}/陰跌{len(thin)}/處置賣超{len(disp_s)}) · "
-                   f"多方 {n_long} 檔 (處置買超) · 過熱觀察 {len(hot)} 檔",
+                   f"多方 {n_long} 檔 (處置買超) · 過熱觀察 {len(hot)} 檔 · "
+                   f"恐懼區 {len(fear)} / 貪婪區 {len(greed)} (持股池)",
             "report_path": f"analysis/{out.name}"})
     except Exception as e:
         print(f"[warn] inbox push failed: {e}", file=sys.stderr)
