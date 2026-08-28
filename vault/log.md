@@ -211,3 +211,10 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - IV 案例: 事件 7 見頂前一日 term_slope +0.0611 倒掛 + VRP 連 3 日轉負 → 6/26 VIX 62.8;IV 結構為脆弱度軸最有希望成分
 - 結論: 純 timing 預警不存在;composite = 事件強度軸 AND 脆弱度軸雙觸發的環境警戒儀表,先 paper-trade 累積 ≥2 新事件再正式化
 - 報告: analysis/geo_attribution_study_2026-08-27.md;GDELT backfill 基建留存 (database repo --backfill 模式)
+
+## 2026-08-28 — 地緣歸因研究 v2: 美債殖利率等金融指標擴充
+- 新增 ust10y/ust30y 殖利率急升、sox_shock、usvix_spike (yfinance, shift(1)) → 18 指標重跑
+- 關鍵發現: 殖利率指標具機制選擇性 — 只在利率驅動事件 5/6/7 出現 (同步-1/領先-15/領先-26)、對關稅/地緣事件全沉默、FAR 0%;與 catalyst 標註互證
+- 10Y/30Y 完全冗餘取一;sox/usvix 偏同步降確認層
+- Composite v2: 事件強度軸改按通道分組 (管制關稅/利率/油價中東),利率通道=ust10y_surge
+- 報告: analysis/geo_attribution_study_2026-08-28.md (取代 v1)
