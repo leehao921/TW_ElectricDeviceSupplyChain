@@ -3,7 +3,7 @@ import pandas as pd
 
 from scripts.geo_attr.indicators import (
     causal_zscore, gdelt_intensity, gdelt_tone_deterioration, brent_shock,
-    twd_depreciation, foreign_sell_accel,
+    twd_depreciation, foreign_sell_accel, yield_surge, sox_shock, usvix_spike,
 )
 
 
@@ -81,3 +81,25 @@ def test_gdelt_intensity_first_event_after_quiet_period():
     counts = _s([2.0] * 100 + [40.0, 45.0, 50.0])   # 死寂後爆量
     z = gdelt_intensity(counts, baseline=60, min_periods=30)
     assert z.iloc[-1] >= 2.0
+
+
+def test_yield_surge_sign():
+    up = _s([4.0] * 95 + [4.0, 4.1, 4.25, 4.4, 4.6])    # +60bp/5d
+    z = yield_surge(up, baseline=60, min_periods=30)
+    assert z.iloc[-1] > 2.0
+    dn = _s([4.0] * 95 + [4.0, 3.9, 3.75, 3.6, 3.4])    # 急降 → 不觸發(z 為負)
+    assert yield_surge(dn, baseline=60, min_periods=30).iloc[-1] < 0
+
+
+def test_sox_shock_drop_is_positive():
+    drop = _s([5000.0] * 95 + [5000, 4900, 4700, 4500, 4200])   # -16%/5d
+    z = sox_shock(drop, baseline=60, min_periods=30)
+    assert z.iloc[-1] > 2.0
+    rally = _s([5000.0] * 95 + [5000, 5100, 5300, 5500, 5800])
+    assert sox_shock(rally, baseline=60, min_periods=30).iloc[-1] < 0
+
+
+def test_usvix_spike_sign():
+    spike = _s([15.0] * 95 + [15, 17, 21, 26, 33])
+    z = usvix_spike(spike, baseline=60, min_periods=30)
+    assert z.iloc[-1] > 2.0

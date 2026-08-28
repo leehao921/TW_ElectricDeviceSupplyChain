@@ -44,11 +44,16 @@ def build_indicator_zoo(comps, index_s):
     zoo["twd_depreciation"] = ind.twd_depreciation(loaders.load_fx("USDTWD"))
     zoo["dxy_strength"] = ind.dxy_strength(loaders.load_fx("DXY"))
     zoo["foreign_sell"] = ind.foreign_sell_accel(loaders.load_foreign_net_value(comps))
+    zoo["ust10y_surge"] = ind.yield_surge(loaders.load_yf("^TNX", "ust10y_daily"))
+    zoo["ust30y_surge"] = ind.yield_surge(loaders.load_yf("^TYX", "ust30y_daily"))
+    zoo["sox_shock"] = ind.sox_shock(loaders.load_yf("^SOX", "sox_daily"))
+    zoo["usvix_spike"] = ind.usvix_spike(loaders.load_yf("^VIX", "usvix_daily"))
     # 對齊指數交易日(來源日曆不同: GDELT 每日/Brent 海外盤/外資台股盤)
     aligned = {name: z.reindex(index_s.index).ffill(limit=3)
                for name, z in zoo.items()}
     # 海外盤收盤在台北時間隔日凌晨才可觀測 → shift(1) 避免領先天數虛增一日
-    for name in ("brent_shock", "dxy_strength"):
+    for name in ("brent_shock", "dxy_strength", "ust10y_surge", "ust30y_surge",
+                 "sox_shock", "usvix_spike"):
         aligned[name] = aligned[name].shift(1)
     return aligned
 
@@ -121,8 +126,8 @@ def run(out_path: Path):
         "## Verification log", "",
         "- 數字由本 script 對 DB + yfinance cache 實算;z-score 為 causal(不含當前點)。",
         "- 事前約定: 零警報(n_alerts=0)視為空缺真滿足誤報率 <60%(從不誤報不得降級)。",
-        "- brent_shock/dxy_strength 已 shift(1) — 海外盤收盤台北隔日凌晨才可觀測,"
-        "避免領先天數虛增一日。",
+        "- brent_shock/dxy_strength/ust10y_surge/ust30y_surge/sox_shock/usvix_spike 已 shift(1)"
+        " — 海外盤收盤台北隔日凌晨才可觀測,避免領先天數虛增一日。",
         "- 產出指令: `.venv/bin/python scripts/geo_attr_study.py`",
         "- 覆蓋聲明: vix_daily 僅蓋 2/7 事件(案例研究,未進矩陣);margin/Kalshi 0/7 未檢驗。", "",
     ]

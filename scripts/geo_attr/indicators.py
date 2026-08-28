@@ -64,3 +64,21 @@ def foreign_sell_accel(fnet_daily: pd.Series, baseline: int = 250,
     """(−外資淨買金額) 5 日和 z — 賣超加速為正。"""
     return causal_zscore((-fnet_daily).rolling(5, min_periods=3).sum(),
                          baseline, min_periods)
+
+
+def yield_surge(yield_close: pd.Series, baseline: int = 250,
+                min_periods: int = 60) -> pd.Series:
+    """美債殖利率 5 日變動(百分點) z — 急升(升息/通膨壓力)為正。用 diff 非 pct_change(利率本身是 %)。"""
+    return causal_zscore(yield_close.diff(5), baseline, min_periods)
+
+
+def sox_shock(sox_close: pd.Series, baseline: int = 250,
+              min_periods: int = 60) -> pd.Series:
+    """費半 5 日跌幅 z — 下跌為正壓力(取負報酬)。"""
+    return causal_zscore(-sox_close.pct_change(5), baseline, min_periods)
+
+
+def usvix_spike(vix_close: pd.Series, baseline: int = 250,
+                min_periods: int = 60) -> pd.Series:
+    """US VIX 5 日變動(點) z — 急升為壓力。"""
+    return causal_zscore(vix_close.diff(5), baseline, min_periods)

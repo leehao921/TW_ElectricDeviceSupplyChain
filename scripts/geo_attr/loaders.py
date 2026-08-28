@@ -32,19 +32,24 @@ def load_foreign_net_value(components) -> pd.Series:
                            params=(list(components),)).set_index("date")["fnet"]
 
 
-def load_brent(start="2024-12-01") -> pd.Series:
-    """BZ=F 日線,cache 到 analysis/cache/brent_daily.csv(存在即直讀不重抓)。"""
+def load_yf(ticker: str, cache_name: str, start="2024-12-01") -> pd.Series:
+    """yfinance 日線 Close,cache 到 analysis/cache/<cache_name>.csv(存在即直讀)。"""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache = CACHE_DIR / "brent_daily.csv"
+    cache = CACHE_DIR / f"{cache_name}.csv"
     if cache.exists():
         df = pd.read_csv(cache, parse_dates=["date"])
         df["date"] = df["date"].dt.date
         return df.set_index("date")["close"]
     import yfinance as yf
-    hist = yf.Ticker("BZ=F").history(start=start, auto_adjust=False)
+    hist = yf.Ticker(ticker).history(start=start, auto_adjust=False)
     s = hist["Close"]
     s.index = [ts.date() for ts in s.index]
     s.index.name = "date"
     s.name = "close"
     s.to_frame().to_csv(cache)
     return s
+
+
+def load_brent(start="2024-12-01") -> pd.Series:
+    """BZ=F 日線(向後相容 wrapper)。"""
+    return load_yf("BZ=F", "brent_daily", start)
