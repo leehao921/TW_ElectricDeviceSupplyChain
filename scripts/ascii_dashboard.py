@@ -175,6 +175,23 @@ def build(conn) -> str:
     L.append("── 波動率 ──")
     L.append(f" VIX {vix} · CM30 {v30} · RV21 {rv} · VRP {vrp:+.1f}")
     L.append(f" 週選 {vw} · 週/月 {wm:+.1f} ({'倒掛🚨' if wm and wm > 2 else '正常'})")
+    try:
+        from gex_regime_monitor import (classify_regime, compute_composite,
+                                        front_iv_history, iv_curve, z_windows)
+        curve = iv_curve(conn, txf)
+        if curve:
+            L.append(" IV curve: " + " / ".join(f"{e[4:6]}/{e[6:]}:{v}" for e, v in curve))
+            zs = z_windows(curve[0][1], front_iv_history(conn))
+            L.append(" 前緣IV z: " + " · ".join(
+                f"{k[1:]}d {d['z']:+.1f}(n={d['n']})" if d["z"] is not None
+                else f"{k[1:]}d n/a(n={d['n']})" for k, d in zs.items()))
+        comp = compute_composite(conn, txf)
+        if comp:
+            reg = classify_regime(txf, comp["zg"], comp["total_gex"])
+            L.append(f" 複合(W1+W2+M1): {reg} · ZG {comp['zg']:,.0f} · "
+                     f"GEX {comp['total_gex']/1e8:+,.0f}億/1%")
+    except Exception as e:
+        print(f"[warn] iv-curve/regime layer failed: {e}", file=sys.stderr)
     L.append("")
     L.append("── 法人/融資 ──")
     L.append(f" TXF淨OI: 外資 {foi.get('外資', 0):+,} · 投信 {foi.get('投信', 0):+,} 口")
