@@ -67,10 +67,10 @@ def build(conn) -> str:
     cur.execute("""SELECT last(close, bucket) FROM ohlcv_1m_txf
                    WHERE symbol='TXF' AND bucket >= now() - interval '3 days'""")
     txf = float(cur.fetchone()[0] or 0)
-    cur.execute("""SELECT close FROM asia_index_daily WHERE symbol='TWII'
+    cur.execute("""SELECT close, ts::date FROM asia_index_daily WHERE symbol='TWII'
                    ORDER BY ts DESC LIMIT 1""")
     r = cur.fetchone()
-    twii = float(r[0]) if r else None
+    twii, twii_d = (float(r[0]), r[1]) if r else (None, None)
     cur.execute("""SELECT ts::date, close FROM stock_daily_ohlcv WHERE symbol='2330'
                    ORDER BY ts DESC LIMIT 5""")
     tsm = [float(x[1]) for x in cur.fetchall()]
@@ -160,8 +160,8 @@ def build(conn) -> str:
 
     L = []
     L.append(f"╔══ TW 監控儀表 {today} {datetime.now():%H:%M} ══╗")
-    L.append(f" TXF {txf:,.0f} · 加權 {twii:,.0f}" + (f" · 台積電 {tsmc:,.0f}"
-             f"(5MA {tsmc_ma5:,.0f})" if tsmc else ""))
+    L.append(f" TXF {txf:,.0f}(即時) · 加權 {twii:,.0f}({twii_d:%m/%d}收)"
+             + (f" · 台積電 {tsmc:,.0f}(5MA {tsmc_ma5:,.0f})" if tsmc else ""))
     L.append("")
     L.append(f"── TXO 近月 OI 對沖牆 (到期 {front}) ──")
     L.append(f"{'Put OI':>{BAR_W}}│ 履約 │Call OI")
