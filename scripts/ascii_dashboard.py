@@ -166,7 +166,9 @@ def build(conn) -> str:
     L.append(f"── TXO 近月 OI 對沖牆 (到期 {front}) ──")
     L.append(f"{'Put OI':>{BAR_W}}│ 履約 │Call OI")
     L += wall_rows(oi_all, txf, zg=gex_flip)
-    L.append(f" P/C(OI) {pcr:.1f}% {pcr_tag} · CallWall {cw:,} · PutWall {pw:,}")
+    settle_note = "（週三結算日: 到期 OI 清倉, P/C 驟變有機械成分）" \
+        if date.today().weekday() == 2 else ""
+    L.append(f" P/C(OI) {pcr:.1f}% {pcr_tag} · CallWall {cw:,} · PutWall {pw:,}{settle_note}")
     if gex_total is not None:
         zone_txt = "磁吸(pinning)" if gex_zone == "pinning" else "放大(expansion)"
         L.append(f" GEX {gex_total/1e8:+,.0f}億/1% · ZeroGamma "
