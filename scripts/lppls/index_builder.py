@@ -45,15 +45,34 @@ def select_components(closes: pd.DataFrame, n_supplement: int = 8,
     return comps, {s: caps[s] / total for s in comps}
 
 
+CORP_ACTION_RET = 0.15   # 台股漲跌停 ±10% → |日報酬|>15% 必為公司行動(分割/減資/除權)非行情
+
+
+def _splice_corporate_actions(px: pd.DataFrame) -> pd.DataFrame:
+    """|日報酬| > CORP_ACTION_RET 視為公司行動：該日前的歷史價格乘上跳點比率
+    (P_after/P_before)，等效分割還原，使報酬序列連續。
+    起源: 2026-09-01 6669 未還原分割 (-63.1%) 污染 live 指數。"""
+    px = px.copy()
+    for s in px.columns:
+        r = px[s].pct_change()
+        for d in r.index[r.abs() > CORP_ACTION_RET]:
+            pos = px.index.get_loc(d)
+            ratio = px[s].iloc[pos] / px[s].iloc[pos - 1]
+            px.iloc[:pos, px.columns.get_loc(s)] *= ratio
+    return px
+
+
 def build_index(closes: pd.DataFrame, weights: dict, max_ffill: int = 5) -> pd.Series:
     """定基買進持有指數（snapshot 市值權重套在基期）；權重取自當前市值快照，非嚴格 Laspeyres 基期量。
 
     index_t = Σ w_i × (P_it / P_i0) × 100；停牌 forward-fill 上限 max_ffill 日。
+    公司行動(|日報酬|>15%)自動 splice 還原，見 _splice_corporate_actions。
     """
     px = closes[list(weights)].ffill(limit=max_ffill).dropna()
     if px.empty:
         raise ValueError(
             f"無任何日期讓全部 {len(weights)} 檔成分同時有價 (ffill limit={max_ffill})")
+    px = _splice_corporate_actions(px)
     rel = px / px.iloc[0]
     return (rel * pd.Series(weights)).sum(axis=1) * 100.0
 

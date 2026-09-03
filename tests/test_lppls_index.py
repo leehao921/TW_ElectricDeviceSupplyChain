@@ -102,3 +102,17 @@ def test_build_index_raises_when_empty():
     closes = pd.DataFrame({"AAA": [np.nan] * 5, "BBB": [np.nan] * 5}, index=dates)
     with pytest.raises(ValueError, match="無任何日期"):
         build_index(closes, {"AAA": 0.5, "BBB": 0.5}, max_ffill=5)
+
+
+def test_build_index_neutralizes_corporate_action():
+    """成分股分割日 (|ret|>15%, 台股漲跌停 ±10% 下不可能為真實行情) 應自動 splice,
+    不得把 -50% 分割當崩盤計入指數。"""
+    dates = pd.bdate_range("2025-01-02", periods=5)
+    # BBB 第 3 天 1拆2 (200→100),其後真實走勢平盤
+    closes = pd.DataFrame({"AAA": [100.0, 101.0, 102.0, 103.0, 104.0],
+                           "BBB": [200.0, 202.0, 101.0, 101.0, 101.0]}, index=dates)
+    idx = build_index(closes, {"AAA": 0.5, "BBB": 0.5})
+    # 分割日: AAA +0.99%, BBB 真實 = 101/(202/2) = 0% → 指數 ≈ +0.5%,絕不該 -25%
+    r = idx.pct_change()
+    assert abs(r.iloc[2] - 0.00495) < 0.002
+    assert (r.dropna().abs() < 0.02).all()
