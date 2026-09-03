@@ -59,21 +59,22 @@ def evaluate_strength(z: dict[str, float | None]) -> dict:
            None is treated as not triggered.
 
     Returns dict with:
-        regulation (bool): semi_export_vol > Z_THR OR tariff_tone > Z_THR
-        rates      (bool): ust10y_surge > Z_THR
-        oil        (bool): brent_shock > Z_THR AND mideast_oil_vol > Z_THR (dual confirm)
-        triggered  (bool): any channel triggered
+        regulation (bool|None): semi_export_vol > Z_THR OR tariff_tone > Z_THR;
+                                兩輸入皆 None → None(資料降級,訊息渲染 ∅)
+        rates      (bool|None): ust10y_surge > Z_THR;輸入 None → None
+        oil        (bool|None): brent_shock > Z_THR AND mideast_oil_vol > Z_THR(雙確認);
+                                任一輸入 None 即無法確認 → None
+        triggered  (bool): any channel triggered (None 視為未觸發)
         detail     (dict): per-indicator z values for logging
     """
-    regulation = (
-        _z_above(z.get("gdelt_semi_export_vol")) or
-        _z_above(z.get("gdelt_tariff_tone"))
-    )
-    rates = _z_above(z.get("ust10y_surge"))
-    oil = (
-        _z_above(z.get("brent_shock")) and
-        _z_above(z.get("gdelt_mideast_oil_vol"))
-    )
+    semi, tone = z.get("gdelt_semi_export_vol"), z.get("gdelt_tariff_tone")
+    regulation = (None if semi is None and tone is None
+                  else _z_above(semi) or _z_above(tone))
+    ust = z.get("ust10y_surge")
+    rates = None if ust is None else _z_above(ust)
+    brent, mideast = z.get("brent_shock"), z.get("gdelt_mideast_oil_vol")
+    oil = (None if brent is None or mideast is None
+           else _z_above(brent) and _z_above(mideast))
     triggered = bool(regulation or rates or oil)
     detail = {
         "gdelt_semi_export_vol": z.get("gdelt_semi_export_vol"),

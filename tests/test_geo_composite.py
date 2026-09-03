@@ -140,22 +140,23 @@ class TestEvaluateStrength:
         r = evaluate_strength(z)
         assert r["oil"] is False
 
-    # --- None values treated as not triggered ---
+    # --- None inputs → channel None (資料降級可見, 2026-09-03 契約變更) ---
 
-    def test_none_z_values_not_triggered(self):
+    def test_none_z_values_degrade_to_channel_none(self):
         z = {k: None for k in self._base_z()}
         r = evaluate_strength(z)
-        assert r["regulation"] is False
-        assert r["rates"] is False
-        assert r["oil"] is False
+        assert r["regulation"] is None
+        assert r["rates"] is None
+        assert r["oil"] is None
         assert r["triggered"] is False
 
-    def test_none_oil_brent_not_triggered(self):
+    def test_none_oil_brent_degrades_channel(self):
         z = self._base_z()
         z["brent_shock"] = None
         z["gdelt_mideast_oil_vol"] = 3.0
         r = evaluate_strength(z)
-        assert r["oil"] is False
+        assert r["oil"] is None
+        assert r["triggered"] is False
 
     # --- triggered = any channel ---
 
@@ -618,3 +619,35 @@ class TestLoadStateCorruptHandling:
         state_file = tmp_path / "geo_composite_state.json"
         result = _load_state(state_file)
         assert result == []
+
+
+# ---- 通道級資料降級可見性 (2026-09-03 效度稽核後補) ----
+
+def test_strength_regulation_none_when_both_inputs_none():
+    r = evaluate_strength({"gdelt_semi_export_vol": None, "gdelt_tariff_tone": None,
+                           "ust10y_surge": 1.0, "brent_shock": 0.5,
+                           "gdelt_mideast_oil_vol": 0.2})
+    assert r["regulation"] is None
+    assert r["triggered"] is False
+
+
+def test_strength_regulation_bool_when_one_input_present():
+    r = evaluate_strength({"gdelt_semi_export_vol": None, "gdelt_tariff_tone": 0.5,
+                           "ust10y_surge": 1.0, "brent_shock": 0.5,
+                           "gdelt_mideast_oil_vol": 0.2})
+    assert r["regulation"] is False
+
+
+def test_strength_oil_none_when_either_input_none():
+    r = evaluate_strength({"gdelt_semi_export_vol": 0.1, "gdelt_tariff_tone": 0.5,
+                           "ust10y_surge": 1.0, "brent_shock": 3.0,
+                           "gdelt_mideast_oil_vol": None})
+    assert r["oil"] is None
+    assert r["triggered"] is False
+
+
+def test_strength_rates_none_when_input_none():
+    r = evaluate_strength({"gdelt_semi_export_vol": 0.1, "gdelt_tariff_tone": 0.5,
+                           "ust10y_surge": None, "brent_shock": 0.5,
+                           "gdelt_mideast_oil_vol": 0.2})
+    assert r["rates"] is None
