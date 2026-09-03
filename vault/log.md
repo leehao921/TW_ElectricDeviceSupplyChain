@@ -224,3 +224,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 首跑: 綠燈 (全指標 sub-threshold,盤勢平靜);state=data/geo_composite_state.json,紅燈滿20交易日自動對帳
 - Paper-trade 規則: 警報非行動建議;累積 ≥2 個新 ≥5% 回檔事件後結算 live 捕捉率/FAR 決定轉正式
 - Review 攔截: 對帳 date-type 靜默 no-op (production index=datetime.date vs 測試 DatetimeIndex) — 上線前修復
+
+## 2026-09-03 — geo-composite 資料效度稽核
+- 健康: stock_daily/fx/institutional/vix/margin 全新鮮 (≤T-1);yfinance 5 cache 時效邏輯運作正常;state 4/4 無漏跑
+- 故障: GDELT rolling DEGRADED (heartbeat 確認) — semi_export/tsmc/memory 止於 8/23-24、mideast_oil 從未接上 rolling;僅 tariff 斷續存活
+- 修復: (1) 儀表通道級降級可見 — 輸入缺失渲染 ∅ 非 ✗ (52 tests);(2) database repo GDELT_SLEEP_S 12→30s
+- 真訊號: 8/31 起連三黃燈 = 融資 5 日增速 z>1;融資餘額 8/24 545.3 → 9/2 585.7 十億 (+7.4%/7 日) — 槓桿再加速,脆弱度軸持續觸發中
