@@ -878,3 +878,353 @@ def test_publish_struct_hset_and_expire(monkeypatch):
     assert "as_of" in hset and "2026-09-07" in hset
     expire = calls[1]
     assert "EXPIRE" in expire and "86400" in expire
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NEW: gamma_regime / bucket_age_days / build_struct_payload / _publish_struct
+# ══════════════════════════════════════════════════════════════════════════════
+
+from scripts.txf_level_map import (  # noqa: E402
+    gamma_regime,
+    bucket_age_days,
+    build_struct_payload,
+)
+
+
+class TestGammaRegime:
+    """gamma_regime(spot, flip, deadband_pct=0.003) -> str"""
+
+    def test_above(self):
+        """spot clearly above flip and outside deadband → ABOVE."""
+        assert gamma_regime(47500.0, 47000.0) == "ABOVE"
+
+    def test_below(self):
+        """spot clearly below flip and outside deadband → BELOW."""
+        assert gamma_regime(46500.0, 47000.0) == "BELOW"
+
+    def test_neutral_inside_deadband(self):
+        """|spot - flip| < 0.3% * spot → NEUTRAL."""
+        spot = 47000.0
+        # 0.3% of 47000 = 141; so offset of 100 < 141 → NEUTRAL
+        assert gamma_regime(47100.0, 47000.0, deadband_pct=0.003) == "NEUTRAL"
+
+    def test_neutral_inside_deadband_below_side(self):
+        """deadband applies symmetrically — just below flip also NEUTRAL."""
+        spot = 47000.0
+        flip = 47100.0
+        # |47000 - 47100| = 100; 0.3% * 47000 = 141 → inside deadband
+        assert gamma_regime(spot, flip, deadband_pct=0.003) == "NEUTRAL"
+
+    def test_boundary_exactly_at_deadband_edge_is_not_neutral(self):
+        """Boundary: |spot - flip| == deadband_pct * spot → NOT NEUTRAL (strict <)."""
+        spot = 47000.0
+        deadband_pct = 0.003
+        # |spot - flip| = deadband_pct * spot exactly → ABOVE or BELOW, not NEUTRAL
+        flip = spot - deadband_pct * spot  # spot > flip by exactly deadband amount
+        result = gamma_regime(spot, flip, deadband_pct=deadband_pct)
+        assert result == "ABOVE"  # strict < → exactly at boundary → not NEUTRAL
+
+    def test_flip_none_is_unknown(self):
+        """flip is None → UNKNOWN."""
+        assert gamma_regime(47000.0, None) == "UNKNOWN"
+
+    def test_spot_none_is_unknown(self):
+        """spot is None → UNKNOWN."""
+        assert gamma_regime(None, 47000.0) == "UNKNOWN"
+
+    def test_both_none_is_unknown(self):
+        """Both None → UNKNOWN."""
+        assert gamma_regime(None, None) == "UNKNOWN"
+
+
+class TestBucketAgeDays:
+    """bucket_age_days(bars, levels, bucket_pts=100) -> dict[int, int]
+
+    bars: DataFrame[bucket(UTC tz-aware), close, volume]
+    levels: list of int levels to query (100-pt bucket floors)
+    Returns: {level: age_in_trading_days} — level absent if never seen.
+
+    age = (rank of last TPE trading date in bars) - (rank of first TPE date
+    where that 100-pt bucket had volume > 0).
+    Rank is 0-based index in sorted unique TPE dates present in bars.
+    """
+
+    def _make_multi_day_bars(self) -> pd.DataFrame:
+        """3 trading days: Mon 2026-09-01, Tue 2026-09-02, Mon 2026-09-07.
+        (Wed 9/3 → Fri 9/5 skipped, weekend 9/6 skipped — only Mon 9/7 is next)
+
+        Level 47000 (bucket 47000): appears only on Mon 9/1 (first date, rank 0)
+        Level 47100 (bucket 47100): appears on Mon 9/1 AND Mon 9/7 (first=rank 0, last rank=2)
+        Level 46900 (bucket 46900): appears only on Tue 9/2 (rank 1)
+        Level 46800 (bucket 46800): never seen
+
+        Last date rank = 2 (Mon 9/7).
+        age(47000) = 2 - 0 = 2  (first seen on rank-0 day, last day is rank-2)
+        age(47100) = 2 - 0 = 2  (first seen on rank-0 day)
+        age(46900) = 2 - 1 = 1  (first seen on rank-1 day)
+        age(46800) = omitted (never seen)
+        """
+        import pytz
+        utc = pytz.utc
+        rows = [
+            # Mon 2026-09-01 (TPE): UTC = Mon 2026-09-01 01:00
+            (dt.datetime(2026, 9, 1, 1, 0, tzinfo=utc), 47050.0, 100.0),  # bucket 47000
+            (dt.datetime(2026, 9, 1, 2, 0, tzinfo=utc), 47150.0, 200.0),  # bucket 47100
+            # Tue 2026-09-02 (TPE): UTC = Tue 2026-09-02 01:00
+            (dt.datetime(2026, 9, 2, 1, 0, tzinfo=utc), 46950.0, 150.0),  # bucket 46900
+            (dt.datetime(2026, 9, 2, 2, 0, tzinfo=utc), 47150.0, 50.0),   # bucket 47100 again
+            # Mon 2026-09-07 (TPE): UTC = Mon 2026-09-07 01:00
+            (dt.datetime(2026, 9, 7, 1, 0, tzinfo=utc), 47180.0, 80.0),   # bucket 47100
+            (dt.datetime(2026, 9, 7, 2, 0, tzinfo=utc), 47050.0, 60.0),   # bucket 47000 again
+        ]
+        df = pd.DataFrame(rows, columns=["bucket", "close", "volume"])
+        return df
+
+    def test_age_trading_days_not_calendar(self):
+        """Mon-Tue gap then Mon: bucket_age_days counts trading days not calendar days."""
+        bars = self._make_multi_day_bars()
+        result = bucket_age_days(bars, levels=[47000, 47100, 46900], bucket_pts=100)
+        # 3 distinct TPE dates: ranks 0=9/1, 1=9/2, 2=9/7
+        # last rank = 2
+        assert result[47000] == 2  # first seen rank 0, last date rank 2 → age 2
+        assert result[47100] == 2  # first seen rank 0, last date rank 2 → age 2
+        assert result[46900] == 1  # first seen rank 1, last date rank 2 → age 1
+
+    def test_unseen_level_omitted(self):
+        """Level 46800 never appears in bars → omitted from result dict."""
+        bars = self._make_multi_day_bars()
+        result = bucket_age_days(bars, levels=[46800], bucket_pts=100)
+        assert 46800 not in result
+
+    def test_weekend_gap_not_counted(self):
+        """Fri → Mon gap: age is 1 trading day, not 3 calendar days."""
+        import pytz
+        utc = pytz.utc
+        # Fri 2026-08-21 TPE = Fri 2026-08-21 01:00 UTC
+        # Mon 2026-08-24 TPE = Mon 2026-08-24 01:00 UTC
+        rows = [
+            (dt.datetime(2026, 8, 21, 1, 0, tzinfo=utc), 47050.0, 100.0),  # Fri, bucket 47000
+            (dt.datetime(2026, 8, 24, 1, 0, tzinfo=utc), 47050.0, 80.0),   # Mon, bucket 47000
+        ]
+        df = pd.DataFrame(rows, columns=["bucket", "close", "volume"])
+        result = bucket_age_days(df, levels=[47000], bucket_pts=100)
+        # 2 distinct dates: rank 0 = Fri, rank 1 = Mon
+        # last date rank = 1, first seen rank = 0 → age = 1 (not 3 calendar days)
+        assert result[47000] == 1
+
+    def test_single_day_age_is_zero(self):
+        """Level only seen today (last date) → age = 0."""
+        import pytz
+        utc = pytz.utc
+        rows = [
+            (dt.datetime(2026, 9, 7, 1, 0, tzinfo=utc), 47050.0, 100.0),
+        ]
+        df = pd.DataFrame(rows, columns=["bucket", "close", "volume"])
+        result = bucket_age_days(df, levels=[47000], bucket_pts=100)
+        assert result[47000] == 0
+
+    def test_empty_bars_returns_empty(self):
+        """Empty bars → empty dict for all requested levels."""
+        df = pd.DataFrame(columns=["bucket", "close", "volume"])
+        result = bucket_age_days(df, levels=[47000, 46900], bucket_pts=100)
+        assert result == {}
+
+
+class TestBuildStructPayload:
+    """build_struct_payload(...) -> dict[str, str]
+    Every value may be None → "" / "UNKNOWN" / "[]" / "{}" per schema.
+    """
+
+    def _all_none_kwargs(self):
+        return dict(
+            as_of=dt.date(2026, 9, 7),
+            spot=None,
+            day_close=None,
+            night_close=None,
+            flip=None,
+            gex_total=None,
+            front_expiry=None,
+            weekly_oi_dict=None,
+            monthly_walls=None,
+            vacuum_list=None,
+            hvn_list=None,
+            value_note=None,
+            foreign_net=None,
+            trust_net=None,
+            overnight=None,
+            asia=None,
+            usdtwd=None,
+        )
+
+    def _full_kwargs(self):
+        return dict(
+            as_of=dt.date(2026, 9, 7),
+            spot=47177.0,
+            day_close=46701.0,
+            night_close=47177.0,
+            flip=47050.0,
+            gex_total=-1.2e9,
+            front_expiry=dt.date(2026, 9, 10),
+            weekly_oi_dict={
+                47500: {"C": 8123, "P": 0},
+                46600: {"C": 0, "P": 7900},
+            },
+            monthly_walls=[{"strike": 49000, "cp": "C", "oi": 1119}],
+            vacuum_list=[{"level": 46300, "age_days": 3}],
+            hvn_list=[{"level": 45800, "share": 0.17}],
+            value_note="價值區: 45800▤17%",
+            foreign_net=-82389,
+            trust_net=76174,
+            overnight={"sox_chg": 1.2, "vix": 14.2, "ust10y": 4.78,
+                       "brent": 95.4, "dxy": 99.2},
+            asia={"N225": 1.3, "KS11": 1.6},
+            usdtwd=31.62,
+        )
+
+    def test_all_none_no_crash(self):
+        """All-None inputs: must not raise."""
+        payload = build_struct_payload(**self._all_none_kwargs())
+        assert isinstance(payload, dict)
+
+    def test_all_none_gamma_regime_unknown(self):
+        """All-None: gamma_regime == 'UNKNOWN'."""
+        payload = build_struct_payload(**self._all_none_kwargs())
+        assert payload["gamma_regime"] == "UNKNOWN"
+
+    def test_all_none_json_fields_load_to_empty(self):
+        """All-None: JSON fields parse to empty containers."""
+        import json as _json
+        payload = build_struct_payload(**self._all_none_kwargs())
+        # These JSON fields should be present and load cleanly
+        for field in ("walls_month_json", "vacuum_json", "hvn_json",
+                      "overnight_json", "asia_json", "value_area_json"):
+            raw = payload[field]
+            parsed = _json.loads(raw)
+            # Should be an empty list or empty dict
+            assert parsed == [] or parsed == {}, (
+                f"field {field!r} expected empty, got {parsed!r}"
+            )
+
+    def test_full_inputs_cw_w_pw_w(self):
+        """weekly_oi_dict with C and P → cw_w/cw_w_oi and pw_w/pw_w_oi correct."""
+        payload = build_struct_payload(**self._full_kwargs())
+        # cw_w = strike with max C oi = 47500 (C=8123)
+        assert payload["cw_w"] == "47500"
+        assert payload["cw_w_oi"] == "8123"
+        # pw_w = strike with max P oi = 46600 (P=7900)
+        assert payload["pw_w"] == "46600"
+        assert payload["pw_w_oi"] == "7900"
+
+    def test_is_settle_day_true(self):
+        """front_expiry == as_of → is_settle_day == '1'."""
+        kwargs = self._full_kwargs()
+        kwargs["front_expiry"] = kwargs["as_of"]  # same date
+        payload = build_struct_payload(**kwargs)
+        assert payload["is_settle_day"] == "1"
+
+    def test_is_settle_day_false(self):
+        """front_expiry != as_of → is_settle_day == '0'."""
+        kwargs = self._full_kwargs()
+        # front_expiry=2026-09-10, as_of=2026-09-07 → not settle day
+        assert kwargs["front_expiry"] != kwargs["as_of"]
+        payload = build_struct_payload(**kwargs)
+        assert payload["is_settle_day"] == "0"
+
+    def test_is_settle_day_none_expiry(self):
+        """front_expiry=None → is_settle_day == '0'."""
+        kwargs = self._all_none_kwargs()
+        payload = build_struct_payload(**kwargs)
+        assert payload["is_settle_day"] == "0"
+
+    def test_expires_at_contains_time_and_offset(self):
+        """expires_at = as_of 13:45 TPE as ISO string with +08:00 offset."""
+        payload = build_struct_payload(**self._full_kwargs())
+        expires_at = payload["expires_at"]
+        assert "13:45" in expires_at, f"Expected 13:45 in expires_at: {expires_at}"
+        assert "+08:00" in expires_at, f"Expected +08:00 in expires_at: {expires_at}"
+
+    def test_json_fields_load_cleanly_with_full_inputs(self):
+        """Full inputs: all JSON fields parse without error."""
+        import json as _json
+        payload = build_struct_payload(**self._full_kwargs())
+        for field in ("walls_month_json", "vacuum_json", "hvn_json",
+                      "overnight_json", "asia_json", "value_area_json"):
+            raw = payload[field]
+            _json.loads(raw)  # must not raise
+
+    def test_gamma_regime_above(self):
+        """spot > flip → gamma_regime == 'ABOVE'."""
+        kwargs = self._full_kwargs()
+        # spot=47177, flip=47050 → ABOVE (difference 127 > 0.3%*47177=141.5... wait)
+        # 0.3% * 47177 = 141.5; 47177-47050=127 < 141.5 → actually NEUTRAL!
+        # Use a bigger difference to ensure ABOVE
+        kwargs["spot"] = 47300.0
+        kwargs["flip"] = 47000.0
+        # |47300-47000|=300 > 0.3%*47300=141.9 → ABOVE
+        payload = build_struct_payload(**kwargs)
+        assert payload["gamma_regime"] == "ABOVE"
+
+    def test_gamma_regime_below(self):
+        """spot < flip clearly → gamma_regime == 'BELOW'."""
+        kwargs = self._full_kwargs()
+        kwargs["spot"] = 46700.0
+        kwargs["flip"] = 47000.0
+        # |46700-47000|=300 > 0.3%*46700=140.1 → BELOW
+        payload = build_struct_payload(**kwargs)
+        assert payload["gamma_regime"] == "BELOW"
+
+    def test_gamma_regime_neutral(self):
+        """|spot-flip| < deadband → gamma_regime == 'NEUTRAL'."""
+        kwargs = self._full_kwargs()
+        kwargs["spot"] = 47050.0
+        kwargs["flip"] = 47000.0
+        # |47050-47000|=50 < 0.3%*47050=141.2 → NEUTRAL
+        payload = build_struct_payload(**kwargs)
+        assert payload["gamma_regime"] == "NEUTRAL"
+
+    def test_as_of_in_payload(self):
+        """as_of always present in payload."""
+        payload = build_struct_payload(**self._full_kwargs())
+        assert payload["as_of"] == "2026-09-07"
+
+
+class TestPublishStructNewPayload:
+    """_publish_struct with build_struct_payload output — field/value flattening
+    and EXPIRE key checks."""
+
+    def test_hset_key_and_fields(self, monkeypatch):
+        """HSET targets STRUCT_KEY; fields appear as flat alternating pairs."""
+        from scripts import txf_level_map as mod
+        calls: list[list[str]] = []
+
+        class _R:
+            returncode = 0
+            stdout = "OK"
+            stderr = ""
+
+        monkeypatch.setattr(mod.subprocess, "run", lambda cmd, **kw: (calls.append(cmd), _R())[1])
+
+        payload = {"as_of": "2026-09-07", "spot": "47177.0", "gamma_regime": "ABOVE"}
+        ok = mod._publish_struct(payload)
+        assert ok is True
+        hset_cmd = calls[0]
+        assert "HSET" in hset_cmd
+        assert "h:agent:txf_levels:latest" in hset_cmd
+        # Fields should be present as flat list
+        assert "spot" in hset_cmd
+        assert "47177.0" in hset_cmd
+        assert "gamma_regime" in hset_cmd
+        assert "ABOVE" in hset_cmd
+
+    def test_failure_returns_false_no_raise(self, monkeypatch):
+        """Simulated redis-cli failure → False without raising."""
+        from scripts import txf_level_map as mod
+
+        class _Fail:
+            returncode = 1
+            stdout = ""
+            stderr = "CONNREFUSED"
+
+        monkeypatch.setattr(mod.subprocess, "run", lambda cmd, **kw: _Fail())
+        result = mod._publish_struct({"as_of": "2026-09-07"})
+        assert result is False
