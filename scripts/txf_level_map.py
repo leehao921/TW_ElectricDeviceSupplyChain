@@ -1,0 +1,662 @@
+#!/usr/bin/env python3
+"""TXF 盤前位置圖 + 亞洲市場地圖 — 每日 08:40 推播 claude:inbox topic=txf-levels.
+
+Architecture: docs/plans/2026-09-06-txf-level-map.md
+  - volume profile (ohlcv_1m_txf 近 20 交易日)
+  - OI 牆 (option_oi_daily 只取 expiry >= today)
+  - GEX flip (subprocess options_quant.py 解析)
+  - 夜盤 / 日盤切割
+  - 外資 / 投信期貨淨 OI
+  - 美股隔夜 (geo_attr loaders.load_yf cache)
+  - 亞股 T-1 (asia_index_daily) + FX (fx_daily)
+  - --dry-run: 只印，不推 inbox
+
+Usage:
+  .venv/bin/python scripts/txf_level_map.py [--dry-run] [--as-of YYYY-MM-DD]
+"""
+from __future__ import annotations
+
+import argparse
+import contextlib
+import datetime as dt
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+import pytz
+
+# ── 路徑設置 ──────────────────────────────────────────────────────────────────
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.lppls.db import connect  # noqa: E402
+from scripts.geo_attr.loaders import load_yf  # noqa: E402
+
+INBOX_STREAM = "claude:inbox"
+TPE_TZ = pytz.timezone("Asia/Taipei")
+TPE_DAY_CLOSE_HOUR = 13
+TPE_DAY_CLOSE_MINUTE = 45
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Pure Functions (unit-tested)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def split_day_night(bars: pd.DataFrame) -> tuple:
+    """bars: DataFrame[bucket(tz-aware UTC), close, volume] 最新交易日相關列。
+
+    回傳 (day_close, night_close, night_chg)。
+    日盤界 = TPE 13:45 (含);夜盤 = 之後至次晨。
+    以最後一根 bar 的 TPE 日曆日為錨:當日 <=13:45 的最後 close 為 day_close;
+    之後的最後 close 為 night_close (無夜盤 bar → night_close=None, chg=None)。
+    """
+    if bars.empty:
+        return None, None, None
+
+    df = bars.copy()
+    # Convert bucket to TPE local time
+    df["tpe_dt"] = df["bucket"].dt.tz_convert(TPE_TZ)
+    df["tpe_time"] = df["tpe_dt"].apply(
+        lambda x: x.hour * 60 + x.minute  # minutes since midnight
+    )
+
+    # Boundary in minutes
+    boundary = TPE_DAY_CLOSE_HOUR * 60 + TPE_DAY_CLOSE_MINUTE  # 13:45 = 825
+
+    day_bars = df[df["tpe_time"] <= boundary]
+    night_bars = df[df["tpe_time"] > boundary]
+
+    day_close = float(day_bars["close"].iloc[-1]) if not day_bars.empty else None
+    night_close = float(night_bars["close"].iloc[-1]) if not night_bars.empty else None
+
+    if day_close is not None and night_close is not None:
+        night_chg = night_close - day_close
+    else:
+        night_chg = None
+
+    return day_close, night_close, night_chg
+
+
+def volume_profile(bars: pd.DataFrame, bucket_pts: int = 100) -> pd.Series:
+    """close//bucket_pts*bucket_pts 分組 volume 加總,回傳降冪 Series。
+
+    bars: DataFrame with columns [close, volume].
+    Returns pd.Series indexed by bucket level (float), sorted descending by volume.
+    """
+    df = bars.copy()
+    df["level"] = (df["close"] // bucket_pts * bucket_pts).astype(float)
+    profile = df.groupby("level")["volume"].sum()
+    return profile.sort_values(ascending=False)
+
+
+def hvn_lvn(profile: pd.Series, spot: float, top_n: int = 3) -> dict:
+    """回傳 dict(hvn=[(level, share), ...前top_n], lvn_above=現價上方最近低量區 level|None,
+    lvn_below=下方最近|None)。
+
+    share = vol/total。
+    LVN 定義: volume <= 25th percentile of the entire profile.
+    lvn_above/below: among levels in LVN set, nearest to spot (above/below).
+    """
+    if profile.empty:
+        return {"hvn": [], "lvn_above": None, "lvn_below": None}
+
+    total = profile.sum()
+    if total == 0:
+        return {"hvn": [], "lvn_above": None, "lvn_below": None}
+
+    # HVN: top_n levels by volume
+    top = profile.nlargest(top_n)
+    hvn = [(float(lvl), float(vol) / total) for lvl, vol in top.items()]
+
+    # LVN threshold: 25th percentile of volume values
+    lvn_threshold = float(profile.quantile(0.25))
+
+    # LVN candidates: levels with volume <= 25th percentile
+    lvn_levels = profile[profile <= lvn_threshold].index.tolist()
+
+    above = [lvl for lvl in lvn_levels if lvl > spot]
+    below = [lvl for lvl in lvn_levels if lvl < spot]
+
+    lvn_above = float(min(above)) if above else None   # nearest above = smallest
+    lvn_below = float(max(below)) if below else None   # nearest below = largest
+
+    return {"hvn": hvn, "lvn_above": lvn_above, "lvn_below": lvn_below}
+
+
+def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3) -> dict:
+    """oi: DataFrame[expiry, strike, cp, open_interest] (已濾未到期).
+
+    近週選 = min(expiry);
+    月選 = OI 總量最大的 expiry (that is not the weekly, if possible; else same).
+    各 expiry 取 put/call 前 n (by open_interest, descending).
+    回傳 dict(weekly=dict(call=[(strike, oi)...], put=[...]),
+              monthly=dict(call=..., put=...))。
+
+    cp matching is case-insensitive startswith.
+    """
+    empty_result: dict[str, Any] = {
+        "weekly": {"call": [], "put": []},
+        "monthly": {"call": [], "put": []},
+    }
+
+    if oi.empty:
+        return empty_result
+
+    df = oi.copy()
+    # Ensure consistent types
+    df["cp"] = df["cp"].astype(str).str.upper()
+
+    # Weekly = nearest (min) expiry
+    expiries = sorted(df["expiry"].unique())
+    if not expiries:
+        return empty_result
+
+    weekly_exp = expiries[0]
+
+    # Monthly = expiry with highest total OI (fallback: same as weekly if only one)
+    total_oi_by_exp = df.groupby("expiry")["open_interest"].sum()
+    monthly_exp = total_oi_by_exp.idxmax()
+
+    def _top_n(sub: pd.DataFrame, cp_letter: str, top: int) -> list[tuple[int, int]]:
+        cp_rows = sub[sub["cp"].str.startswith(cp_letter)]
+        top_rows = cp_rows.nlargest(top, "open_interest")
+        return [(int(r["strike"]), int(r["open_interest"]))
+                for _, r in top_rows.iterrows()]
+
+    weekly_df = df[df["expiry"] == weekly_exp]
+    monthly_df = df[df["expiry"] == monthly_exp]
+
+    return {
+        "weekly": {
+            "call": _top_n(weekly_df, "C", n),
+            "put": _top_n(weekly_df, "P", n),
+        },
+        "monthly": {
+            "call": _top_n(monthly_df, "C", n),
+            "put": _top_n(monthly_df, "P", n),
+        },
+    }
+
+
+def build_msg(
+    as_of: dt.date,
+    day_close: float | None,
+    night_close: float | None,
+    night_chg: float | None,
+    walls: dict | None,
+    flip: float | None,
+    foreign_net: int | None,
+    toshin_net: int | None,
+    sox: float | None,
+    vix: float | None,
+    ust10y: float | None,
+    brent: float | None,
+    dxy: float | None,
+    asia: dict | None,
+    fx: dict | None,
+) -> str:
+    """組裝多行訊息,格式照 plan;任何缺項印 N/A 不 crash。"""
+
+    def _fmt(v: float | None, fmt: str = ".0f", suffix: str = "") -> str:
+        if v is None:
+            return "N/A"
+        return f"{v:{fmt}}{suffix}"
+
+    def _fmt_signed(v: float | None, fmt: str = ".0f", suffix: str = "") -> str:
+        if v is None:
+            return "N/A"
+        sign = "+" if v >= 0 else ""
+        return f"{sign}{v:{fmt}}{suffix}"
+
+    # ── Line 1: header ────────────────────────────────────────────────────────
+    date_str = f"{as_of.month}/{as_of.day}"
+    if night_close is not None and day_close is not None:
+        chg_str = _fmt_signed(night_chg, ".0f")
+        header = (f"📍 TXF 位置圖 {date_str} | "
+                  f"夜盤 {_fmt(night_close)} ({chg_str}, 日盤收 {_fmt(day_close)})")
+    elif day_close is not None:
+        header = f"📍 TXF 位置圖 {date_str} | 日盤收 {_fmt(day_close)} | 夜盤 N/A"
+    else:
+        header = f"📍 TXF 位置圖 {date_str} | 收盤 N/A"
+
+    # ── Line 2: 壓力 (calls) ──────────────────────────────────────────────────
+    call_parts: list[str] = []
+    if walls:
+        weekly_calls = walls.get("weekly", {}).get("call", [])
+        monthly_calls = walls.get("monthly", {}).get("call", [])
+        monthly_exp_strikes = {s for s, _ in monthly_calls}
+
+        # Merge and deduplicate, label monthly
+        all_calls: list[tuple[int, int, str]] = []
+        for strike, oi_val in weekly_calls:
+            label = "(月)" if strike in monthly_exp_strikes else ""
+            all_calls.append((strike, oi_val, label))
+        # Add monthly-only strikes not in weekly
+        weekly_strikes = {s for s, _ in weekly_calls}
+        for strike, oi_val in monthly_calls:
+            if strike not in weekly_strikes:
+                all_calls.append((strike, oi_val, "(月)"))
+        all_calls.sort(key=lambda x: x[0])
+        for strike, oi_val, label in all_calls:
+            call_parts.append(f"{strike} C牆{oi_val}{label}")
+
+    flip_str = f"{_fmt(flip)} flip" if flip is not None else "flip=N/A"
+    resistance_line = "壓力: " + (" | ".join(call_parts) if call_parts else "N/A")
+
+    # ── Line 3: 支撐 (puts + flip + HVN/LVN) ─────────────────────────────────
+    put_parts: list[str] = []
+    if walls:
+        weekly_puts = walls.get("weekly", {}).get("put", [])
+        monthly_puts = walls.get("monthly", {}).get("put", [])
+        monthly_put_strikes = {s for s, _ in monthly_puts}
+        all_puts: list[tuple[int, int, str]] = []
+        for strike, oi_val in weekly_puts:
+            label = "(月)" if strike in monthly_put_strikes else ""
+            all_puts.append((strike, oi_val, label))
+        weekly_put_strikes = {s for s, _ in weekly_puts}
+        for strike, oi_val in monthly_puts:
+            if strike not in weekly_put_strikes:
+                all_puts.append((strike, oi_val, "(月)"))
+        all_puts.sort(key=lambda x: x[0], reverse=True)
+        for strike, oi_val, label in all_puts:
+            put_parts.append(f"{strike} P牆{oi_val}{label}")
+
+    support_items = [flip_str] + put_parts
+    support_line = "支撐: " + (" | ".join(support_items) if support_items else "N/A")
+
+    # ── Line 4: 外資/投信期淨 OI ───────────────────────────────────────────────
+    foreign_str = (f"外資期淨 {_fmt_signed(foreign_net, ',d')} 口"
+                   if foreign_net is not None else "外資期淨 N/A")
+    toshin_str = (f"投信 {_fmt_signed(toshin_net, ',d')}"
+                  if toshin_net is not None else "投信 N/A")
+    oi_line = f"{foreign_str} | {toshin_str}"
+
+    # ── Line 5: 隔夜美股 ────────────────────────────────────────────────────────
+    sox_str = _fmt_signed(sox, ".1f", "%") if sox is not None else "SOX N/A"
+    vix_str = f"VIX {_fmt(vix, '.1f')}"
+    ust_str = f"UST10Y {_fmt(ust10y, '.2f')}"
+    brent_str = f"Brent {_fmt(brent, '.1f')}"
+    dxy_str = f"DXY {_fmt(dxy, '.1f')}"
+    overnight_line = f"🌏 隔夜: SOX {sox_str} {vix_str} {ust_str} {brent_str} {dxy_str}"
+
+    # ── Line 6: 亞股 T-1 ──────────────────────────────────────────────────────
+    asia_symbols = ["N225", "KS11", "HSI", "CSI300", "TWII", "NSEI"]
+    if asia:
+        asia_parts = []
+        for sym in asia_symbols:
+            v = asia.get(sym)
+            asia_parts.append(f"{sym} {_fmt_signed(v, '.1f', '%') if v is not None else 'N/A'}")
+        asia_line = "亞股T-1: " + " ".join(asia_parts)
+    else:
+        asia_line = "亞股T-1: N/A"
+
+    # Append FX
+    if fx:
+        twd = fx.get("USDTWD")
+        jpy = fx.get("USDJPY")
+        dxy_fx = fx.get("DXY")
+        fx_parts = []
+        if twd is not None:
+            fx_parts.append(f"USD/TWD {twd:.2f}")
+        if jpy is not None:
+            fx_parts.append(f"USD/JPY {jpy:.1f}")
+        if dxy_fx is not None:
+            fx_parts.append(f"DXY {dxy_fx:.1f}")
+        if fx_parts:
+            asia_line += " | " + " ".join(fx_parts)
+
+    lines = [header, resistance_line, support_line, oi_line, overnight_line, asia_line]
+    return "\n".join(lines)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# I/O Glue (not unit-tested)
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def _load_1m_bars(trading_days: int = 20) -> pd.DataFrame:
+    """Load ohlcv_1m_txf for the last `trading_days` trading days (UTC buckets)."""
+    sql = """
+        SELECT bucket, symbol, open, high, low, close, volume
+        FROM ohlcv_1m_txf
+        WHERE bucket >= NOW() - INTERVAL '35 days'
+          AND symbol = 'TXF'
+        ORDER BY bucket
+    """
+    with contextlib.closing(connect()) as conn:
+        df = pd.read_sql(sql, conn)
+    if df.empty:
+        return df
+    # Ensure bucket is tz-aware UTC
+    if df["bucket"].dt.tz is None:
+        df["bucket"] = df["bucket"].dt.tz_localize("UTC")
+    else:
+        df["bucket"] = df["bucket"].dt.tz_convert("UTC")
+    # Get distinct trading days in TPE
+    df["tpe_date"] = df["bucket"].dt.tz_convert(TPE_TZ).dt.date
+    # Keep last `trading_days` distinct TPE calendar days
+    all_dates = sorted(df["tpe_date"].unique())
+    keep_dates = set(all_dates[-trading_days:])
+    return df[df["tpe_date"].isin(keep_dates)].copy()
+
+
+def _load_oi(today: dt.date) -> pd.DataFrame:
+    """Load option_oi_daily for latest settle_date, expiry >= today."""
+    sql = """
+        SELECT settle_date, expiry, strike, cp, open_interest
+        FROM option_oi_daily
+        WHERE underlying = 'TX'
+          AND settle_date = (
+              SELECT MAX(settle_date) FROM option_oi_daily WHERE underlying = 'TX'
+          )
+          AND expiry >= %(today)s
+        ORDER BY expiry, strike
+    """
+    with contextlib.closing(connect()) as conn:
+        df = pd.read_sql(sql, conn, params={"today": today})
+    if not df.empty and "expiry" in df.columns:
+        df["expiry"] = pd.to_datetime(df["expiry"]).dt.date
+    return df
+
+
+def _load_futures_oi() -> dict:
+    """Load latest futures_oi_daily for 外資 and 投信 net_oi.
+
+    Note: futures_oi_daily uses 'TXF' as underlying (not 'TX').
+    """
+    sql = """
+        SELECT participant_type, net_oi
+        FROM futures_oi_daily
+        WHERE underlying = 'TXF'
+          AND settle_date = (
+              SELECT MAX(settle_date) FROM futures_oi_daily WHERE underlying = 'TXF'
+          )
+    """
+    with contextlib.closing(connect()) as conn:
+        df = pd.read_sql(sql, conn)
+    result: dict[str, int | None] = {"外資": None, "投信": None}
+    for _, row in df.iterrows():
+        pt = str(row["participant_type"]).strip()
+        if pt in result:
+            result[pt] = int(row["net_oi"])
+    return result
+
+
+def _load_asia_index() -> dict:
+    """Load asia_index_daily last two rows per symbol → 1d % change."""
+    sql = """
+        SELECT ts, symbol, close
+        FROM asia_index_daily
+        WHERE symbol = ANY(%(syms)s)
+          AND ts >= CURRENT_DATE - INTERVAL '10 days'
+        ORDER BY symbol, ts
+    """
+    symbols = ["N225", "KS11", "HSI", "CSI300", "TWII", "NSEI"]
+    with contextlib.closing(connect()) as conn:
+        df = pd.read_sql(sql, conn, params={"syms": symbols})
+    if df.empty:
+        return {}
+    result: dict[str, float | None] = {}
+    for sym in symbols:
+        sub = df[df["symbol"] == sym].sort_values("ts")
+        if len(sub) >= 2:
+            prev = float(sub["close"].iloc[-2])
+            last = float(sub["close"].iloc[-1])
+            result[sym] = (last / prev - 1) * 100 if prev != 0 else None
+        else:
+            result[sym] = None
+    return result
+
+
+def _load_fx() -> dict:
+    """Load fx_daily most recent close for USDTWD/USDJPY/DXY."""
+    sql = """
+        SELECT pair, close
+        FROM fx_daily
+        WHERE pair = ANY(%(pairs)s)
+          AND ts = (SELECT MAX(ts) FROM fx_daily WHERE pair = ANY(%(pairs)s))
+    """
+    pairs = ["USDTWD", "USDJPY", "DXY"]
+    with contextlib.closing(connect()) as conn:
+        df = pd.read_sql(sql, conn, params={"pairs": pairs})
+    result: dict[str, float | None] = {}
+    for _, row in df.iterrows():
+        result[str(row["pair"])] = float(row["close"])
+    return result
+
+
+def _get_gex_flip(date: dt.date) -> float | None:
+    """Run options_quant.py --date <date> --window 08:45-13:45, parse flip."""
+    python = str(REPO_ROOT / ".venv" / "bin" / "python")
+    script = str(REPO_ROOT / "scripts" / "options_quant.py")
+    cmd = [python, script, "--date", date.isoformat(), "--window", "08:45-13:45"]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        output = result.stdout + result.stderr
+        m = re.search(r"flip=([\d.]+)", output)
+        if m:
+            return float(m.group(1))
+        print(f"[warn] txf-level-map: flip not found in options_quant output", file=sys.stderr)
+        return None
+    except Exception as exc:
+        print(f"[warn] txf-level-map: options_quant subprocess error: {exc}", file=sys.stderr)
+        return None
+
+
+def _load_us_overnight() -> dict:
+    """Load US overnight data via geo_attr loaders.load_yf."""
+    result: dict[str, float | None] = {
+        "sox": None, "vix": None, "ust10y": None, "brent": None, "dxy": None,
+    }
+    try:
+        sox_s = load_yf("^SOX", "sox_daily")
+        if len(sox_s) >= 2:
+            prev, last = float(sox_s.iloc[-2]), float(sox_s.iloc[-1])
+            result["sox"] = (last / prev - 1) * 100 if prev != 0 else None
+    except Exception as e:
+        print(f"[warn] txf-level-map: SOX load error: {e}", file=sys.stderr)
+
+    try:
+        vix_s = load_yf("^VIX", "usvix_daily")
+        if len(vix_s) >= 1:
+            result["vix"] = float(vix_s.iloc[-1])
+    except Exception as e:
+        print(f"[warn] txf-level-map: VIX load error: {e}", file=sys.stderr)
+
+    try:
+        tnx_s = load_yf("^TNX", "ust10y_daily")
+        if len(tnx_s) >= 1:
+            result["ust10y"] = float(tnx_s.iloc[-1])
+    except Exception as e:
+        print(f"[warn] txf-level-map: TNX load error: {e}", file=sys.stderr)
+
+    try:
+        brent_s = load_yf("BZ=F", "brent_daily")
+        if len(brent_s) >= 1:
+            result["brent"] = float(brent_s.iloc[-1])
+    except Exception as e:
+        print(f"[warn] txf-level-map: Brent load error: {e}", file=sys.stderr)
+
+    try:
+        dxy_s = load_yf("DX-Y.NYB", "dxy_daily")
+        if len(dxy_s) >= 1:
+            result["dxy"] = float(dxy_s.iloc[-1])
+    except Exception as e:
+        print(f"[warn] txf-level-map: DXY load error: {e}", file=sys.stderr)
+
+    return result
+
+
+def _push_inbox(message: str, as_of: dt.date) -> bool:
+    """Push to claude:inbox via redis-cli subprocess. Fail-soft."""
+    import datetime as _datetime
+    now_iso = _datetime.datetime.now().astimezone().isoformat()
+    fields = [
+        "ts", now_iso,
+        "from", "txf-level-map",
+        "topic", "txf-levels",
+        "tags", "txf,levels,oi,gex,overnight",
+        "as_of", as_of.isoformat(),
+        "msg", message,
+    ]
+    host = os.environ.get("REDIS_HOST", "localhost")
+    port = os.environ.get("REDIS_PORT", "6379")
+    cmd = ["redis-cli", "-h", host, "-p", port, "XADD", INBOX_STREAM, "*", *fields]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+        if result.returncode != 0:
+            print(f"[warn] txf-level-map XADD failed: {result.stderr.strip()}", file=sys.stderr)
+            return False
+        print(f"[info] txf-level-map XADD ok, id={result.stdout.strip()}", file=sys.stderr)
+        return True
+    except Exception as exc:
+        print(f"[warn] txf-level-map inbox push error: {exc}", file=sys.stderr)
+        return False
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Main
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="TXF 盤前位置圖推播")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="Print only — no inbox push")
+    ap.add_argument("--as-of", default=None, help="YYYY-MM-DD (default: today)")
+    args = ap.parse_args(argv)
+
+    today = (dt.date.fromisoformat(args.as_of) if args.as_of else dt.date.today())
+    print(f"[info] txf-level-map as_of={today}", file=sys.stderr)
+
+    # 1. 1m bars → split day/night + volume profile
+    print("[info] loading 1m bars …", file=sys.stderr)
+    try:
+        bars = _load_1m_bars(trading_days=20)
+    except Exception as e:
+        print(f"[warn] 1m bars load error: {e}", file=sys.stderr)
+        bars = pd.DataFrame()
+
+    day_close: float | None = None
+    night_close: float | None = None
+    night_chg: float | None = None
+    spot: float | None = None
+
+    if not bars.empty:
+        # Latest session (last calendar day in data)
+        latest_date = bars["tpe_date"].max()
+        latest_bars = bars[bars["tpe_date"] == latest_date].copy()
+        day_close, night_close, night_chg = split_day_night(latest_bars)
+        spot = night_close if night_close is not None else day_close
+        print(f"[info] day={day_close} night={night_close} chg={night_chg}", file=sys.stderr)
+
+        # Volume profile: all 20d bars
+        profile = volume_profile(bars, bucket_pts=100)
+        print(f"[info] volume profile buckets={len(profile)}", file=sys.stderr)
+    else:
+        profile = pd.Series(dtype=float)
+        print("[warn] no 1m bars found", file=sys.stderr)
+
+    # HVN/LVN
+    hvn_result: dict | None = None
+    if not profile.empty and spot is not None:
+        hvn_result = hvn_lvn(profile, spot=spot, top_n=3)
+        print(f"[info] hvn={hvn_result['hvn'][:2]}... lvn_above={hvn_result['lvn_above']} lvn_below={hvn_result['lvn_below']}", file=sys.stderr)
+
+    # 2. OI walls
+    print("[info] loading OI walls …", file=sys.stderr)
+    try:
+        oi_df = _load_oi(today)
+        print(f"[info] OI rows={len(oi_df)}", file=sys.stderr)
+    except Exception as e:
+        print(f"[warn] OI load error: {e}", file=sys.stderr)
+        oi_df = pd.DataFrame()
+
+    walls: dict | None = None
+    if not oi_df.empty and spot is not None:
+        # Filter ±2500 from spot
+        oi_filtered = oi_df[
+            (oi_df["strike"] >= spot - 2500) &
+            (oi_df["strike"] <= spot + 2500)
+        ].copy()
+        walls = oi_walls(oi_filtered, spot=spot, n=3)
+    elif not oi_df.empty:
+        walls = oi_walls(oi_df, spot=47000.0, n=3)  # fallback spot
+
+    # 3. GEX flip (T-1)
+    t1 = today - dt.timedelta(days=1)
+    # Skip weekends for T-1
+    while t1.weekday() >= 5:
+        t1 -= dt.timedelta(days=1)
+    print(f"[info] fetching GEX flip for T-1={t1} …", file=sys.stderr)
+    flip = _get_gex_flip(t1)
+    print(f"[info] flip={flip}", file=sys.stderr)
+
+    # 4. Futures OI
+    print("[info] loading futures OI …", file=sys.stderr)
+    try:
+        futures_oi = _load_futures_oi()
+        foreign_net = futures_oi.get("外資")
+        toshin_net = futures_oi.get("投信")
+        print(f"[info] 外資={foreign_net} 投信={toshin_net}", file=sys.stderr)
+    except Exception as e:
+        print(f"[warn] futures OI load error: {e}", file=sys.stderr)
+        foreign_net = None
+        toshin_net = None
+
+    # 5. US overnight
+    print("[info] loading US overnight …", file=sys.stderr)
+    us = _load_us_overnight()
+
+    # 6. Asia + FX
+    print("[info] loading Asia index + FX …", file=sys.stderr)
+    try:
+        asia = _load_asia_index()
+    except Exception as e:
+        print(f"[warn] Asia index load error: {e}", file=sys.stderr)
+        asia = {}
+
+    try:
+        fx = _load_fx()
+    except Exception as e:
+        print(f"[warn] FX load error: {e}", file=sys.stderr)
+        fx = {}
+
+    # 7. Build message
+    msg = build_msg(
+        as_of=today,
+        day_close=day_close,
+        night_close=night_close,
+        night_chg=night_chg,
+        walls=walls,
+        flip=flip,
+        foreign_net=foreign_net,
+        toshin_net=toshin_net,
+        sox=us.get("sox"),
+        vix=us.get("vix"),
+        ust10y=us.get("ust10y"),
+        brent=us.get("brent"),
+        dxy=us.get("dxy"),
+        asia=asia if asia else None,
+        fx=fx if fx else None,
+    )
+
+    print("─" * 70)
+    print(msg)
+    print("─" * 70)
+
+    if args.dry_run:
+        print("[info] dry-run: skipping inbox push", file=sys.stderr)
+        return 0
+
+    _push_inbox(msg, today)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
