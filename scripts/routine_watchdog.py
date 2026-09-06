@@ -78,6 +78,7 @@ _REGISTRY = [
     ("warrant-flow", "warrant-flow", time(17, 40), time(23, 59)),
     ("margin-vix", "margin-vix", time(18, 10), time(23, 59)),
     ("geo-composite", "geo-composite", time(18, 20), time(23, 59)),
+    ("txf-levels", "txf-level-map", time(8, 40), time(13, 30)),
     ("signal-scan", "signal-scan", time(17, 50), time(23, 59)),
     ("position-watch", "position-watch", time(15, 10), time(23, 59)),
     ("news-pulse", "news-pulse", time(20, 35), time(23, 59)),

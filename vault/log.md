@@ -236,3 +236,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 修復: build_index 加 _splice_corporate_actions (|日報酬|>15% = 漲跌停外不可能 → 自動回溯調整);歷史掃描僅此一筆,LPPLS/歸因研究 (資料至8/27) 皆未污染
 - **教訓: 原始 close 建指數必防公司行動** — 除權息季 (7-9月) 尤其;檢測法=漲跌停極限當物理約束
 - 本週真實行情: 9/1 +1.29% (2454 +9.9% 領漲) → 9/2 -2.18% (2308 -7.2%);現距 6/23 前高 -5.28% 仍在事件7未收復段
+
+## 2026-09-06 — TXF level map 盤前推播上線 + 油價異動
+- launchd com.lulala.txf-level-map Mon-Fri 08:40: volume profile HVN/LVN + TXO 未到期 OI 牆(週/月分離) + GEX flip + 夜盤變動 + 外資期 OI + 隔夜美股/亞股T-1;topic=txf-levels;watchdog 24 checks
+- Review 攔截×2: 已到期 OI 牆誤導 (9/4 殘牆)、夜盤跨午夜切割錯置 (47177 誤標日盤)
+- **市場: Brent 85.8→95.4 (+11%/週) 事件4型態疑似重演;UST10Y 4.78;TXF 週五夜盤 +476 至 47177;外資期空 -82k 口 vs 上方 47300 真空 = squeeze 結構**
+- brent_shock z 僅 0.2-0.6 → 基線含 3 月戰爭期波動被去敏化 (校準債);mideast_oil GDELT 仍 429 油價通道盲區未解
