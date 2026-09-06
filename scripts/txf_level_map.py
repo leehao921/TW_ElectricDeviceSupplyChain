@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import datetime as dt
+import json
 import os
 import re
 import subprocess
@@ -601,6 +602,106 @@ def _load_us_overnight() -> dict:
     return result
 
 
+STRUCT_KEY = "h:agent:txf_levels:latest"
+STRUCT_TTL_SEC = 86400  # next 08:40 run overwrites; stale map must self-expire
+
+
+def build_struct_fields(
+    *,
+    as_of: dt.date,
+    spot: float | None,
+    day_close: float | None,
+    flip: float | None,
+    gex_total: float | None,
+    walls: dict | None,
+    hvn_result: dict | None,
+    foreign_net: int | None,
+    toshin_net: int | None,
+    us: dict | None,
+    asia: dict | None,
+    fx: dict | None,
+) -> dict[str, str]:
+    """Flatten the morning-map intermediates into a Redis-hash field map for
+    the nautilus-shioaji trading loop (structured second sink alongside the
+    ASCII inbox push). Missing inputs OMIT their fields (consumer treats
+    absent = unknown) — except gamma_regime, which always exists:
+    ABOVE_FLIP / BELOW_FLIP needs both spot and flip, else UNKNOWN."""
+    fields: dict[str, str] = {"as_of": as_of.isoformat()}
+    if spot is not None:
+        fields["spot"] = str(spot)
+    if day_close is not None:
+        fields["day_close"] = str(day_close)
+    if flip is not None:
+        fields["flip"] = str(flip)
+    if gex_total is not None:
+        fields["gex_total"] = str(gex_total)
+    if spot is not None and flip is not None:
+        fields["gamma_regime"] = "ABOVE_FLIP" if spot > flip else "BELOW_FLIP"
+    else:
+        fields["gamma_regime"] = "UNKNOWN"
+    weekly = (walls or {}).get("weekly") or {}
+    if weekly.get("call"):
+        strike, oi_v = weekly["call"][0]
+        fields["cw_w"] = str(int(strike))
+        fields["cw_w_oi"] = str(int(oi_v))
+    if weekly.get("put"):
+        strike, oi_v = weekly["put"][0]
+        fields["pw_w"] = str(int(strike))
+        fields["pw_w_oi"] = str(int(oi_v))
+    monthly = (walls or {}).get("monthly") or {}
+    if monthly.get("call") or monthly.get("put"):
+        fields["walls_month_json"] = json.dumps(monthly)
+    if hvn_result:
+        if hvn_result.get("hvn"):
+            fields["hvn_json"] = json.dumps(hvn_result["hvn"])
+        if hvn_result.get("lvn_above") is not None:
+            fields["lvn_above"] = str(int(hvn_result["lvn_above"]))
+        if hvn_result.get("lvn_below") is not None:
+            fields["lvn_below"] = str(int(hvn_result["lvn_below"]))
+    if foreign_net is not None:
+        fields["foreign_net"] = str(foreign_net)
+    if toshin_net is not None:
+        fields["trust_net"] = str(toshin_net)
+    if us:
+        fields["overnight_json"] = json.dumps(us)
+    if asia:
+        fields["asia_json"] = json.dumps(asia)
+    usdtwd = (fx or {}).get("USDTWD")
+    if usdtwd is not None:
+        fields["usdtwd"] = str(usdtwd)
+    return fields
+
+
+def _publish_struct(fields: dict[str, str]) -> bool:
+    """HSET the structured map + EXPIRE, via redis-cli subprocess. Fail-soft —
+    a struct publish failure must never block the inbox push path."""
+    host = os.environ.get("REDIS_HOST", "localhost")
+    port = os.environ.get("REDIS_PORT", "6379")
+    base = ["redis-cli", "-h", host, "-p", port]
+    flat: list[str] = []
+    for k, v in fields.items():
+        flat.extend([k, v])
+    try:
+        result = subprocess.run(
+            [*base, "HSET", STRUCT_KEY, *flat], capture_output=True, text=True, timeout=10
+        )
+        if result.returncode != 0:
+            print(f"[warn] txf-level-map struct HSET failed: {result.stderr.strip()}", file=sys.stderr)
+            return False
+        result = subprocess.run(
+            [*base, "EXPIRE", STRUCT_KEY, str(STRUCT_TTL_SEC)],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode != 0:
+            print(f"[warn] txf-level-map struct EXPIRE failed: {result.stderr.strip()}", file=sys.stderr)
+            return False
+        print(f"[info] txf-level-map struct publish ok ({len(fields)} fields)", file=sys.stderr)
+        return True
+    except Exception as exc:
+        print(f"[warn] txf-level-map struct publish error: {exc}", file=sys.stderr)
+        return False
+
+
 def _push_inbox(message: str, as_of: dt.date) -> bool:
     """Push to claude:inbox via redis-cli subprocess. Fail-soft."""
     import datetime as _datetime
@@ -827,11 +928,28 @@ def main(argv: list[str] | None = None) -> int:
     print(msg)
     print("─" * 70)
 
+    struct_fields = build_struct_fields(
+        as_of=today,
+        spot=spot,
+        day_close=day_close,
+        flip=flip,
+        gex_total=total_gex,
+        walls=walls,
+        hvn_result=hvn_result,
+        foreign_net=foreign_net,
+        toshin_net=toshin_net,
+        us=us,
+        asia=asia,
+        fx=fx,
+    )
+
     if args.dry_run:
-        print("[info] dry-run: skipping inbox push", file=sys.stderr)
+        print("[info] dry-run: skipping inbox + struct publish", file=sys.stderr)
+        print(f"[info] struct fields ({len(struct_fields)}): {sorted(struct_fields)}", file=sys.stderr)
         return 0
 
     _push_inbox(msg, today)
+    _publish_struct(struct_fields)
     return 0
 
 

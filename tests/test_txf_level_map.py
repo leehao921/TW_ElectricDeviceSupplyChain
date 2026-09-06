@@ -775,3 +775,106 @@ def test_annotate_ladder_value_area_footer_when_hvn_below_range():
     assert note is not None and "45800" in note and "▤" in note
     note2 = value_area_note(prof, ladder_lo=45700, ladder_hi=46200, top_n=3)
     assert note2 is None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Structured publish — h:agent:txf_levels:latest (nautilus-shioaji consumer)
+# ══════════════════════════════════════════════════════════════════════════════
+
+from scripts.txf_level_map import build_struct_fields  # noqa: E402
+
+
+def _full_struct_inputs():
+    return dict(
+        as_of=dt.date(2026, 9, 7),
+        spot=47177.0,
+        day_close=46701.0,
+        flip=47050.0,
+        gex_total=-1.2e9,
+        walls={
+            "weekly": {"call": [(47500, 8123), (48000, 5000)],
+                       "put": [(46600, 7900), (46000, 3000)]},
+            "monthly": {"call": [(49000, 1119), (48000, 1542)],
+                        "put": [(45000, 842), (46000, 479)]},
+        },
+        hvn_result={"hvn": [(45800, 0.17), (45900, 0.16)],
+                    "lvn_above": 47300, "lvn_below": 46900},
+        foreign_net=-82389,
+        toshin_net=76174,
+        us={"sox": 3.4, "vix": 14.2, "ust10y": 4.78, "brent": 95.4, "dxy": 99.2},
+        asia={"N225": 1.3, "KS11": 1.6},
+        fx={"USDTWD": 31.62},
+    )
+
+
+class TestBuildStructFields:
+    def test_full_inputs_field_shapes(self):
+        f = build_struct_fields(**_full_struct_inputs())
+        assert f["as_of"].startswith("2026-09-07")
+        assert f["spot"] == "47177.0"
+        assert f["gamma_regime"] == "ABOVE_FLIP"  # spot 47177 > flip 47050
+        assert f["cw_w"] == "47500" and f["cw_w_oi"] == "8123"
+        assert f["pw_w"] == "46600" and f["pw_w_oi"] == "7900"
+        assert f["lvn_above"] == "47300" and f["lvn_below"] == "46900"
+        assert f["foreign_net"] == "-82389" and f["trust_net"] == "76174"
+        assert f["usdtwd"] == "31.62"
+        import json as _json
+        month = _json.loads(f["walls_month_json"])
+        assert month["call"][0] == [49000, 1119]
+        hvn = _json.loads(f["hvn_json"])
+        assert hvn[0] == [45800, 0.17]
+        over = _json.loads(f["overnight_json"])
+        assert over["vix"] == 14.2
+
+    def test_below_flip(self):
+        args = _full_struct_inputs()
+        args["spot"] = 46900.0
+        f = build_struct_fields(**args)
+        assert f["gamma_regime"] == "BELOW_FLIP"
+
+    def test_missing_flip_or_spot_is_unknown(self):
+        args = _full_struct_inputs()
+        args["flip"] = None
+        f = build_struct_fields(**args)
+        assert f["gamma_regime"] == "UNKNOWN"
+        args2 = _full_struct_inputs()
+        args2["spot"] = None
+        assert build_struct_fields(**args2)["gamma_regime"] == "UNKNOWN"
+
+    def test_missing_walls_and_optionals_omit_fields(self):
+        args = _full_struct_inputs()
+        args.update(walls=None, hvn_result=None, foreign_net=None,
+                    toshin_net=None, us={}, asia=None, fx=None,
+                    gex_total=None, flip=None, day_close=None)
+        f = build_struct_fields(**args)
+        assert "cw_w" not in f and "pw_w" not in f
+        assert "foreign_net" not in f and "usdtwd" not in f
+        assert f["gamma_regime"] == "UNKNOWN"
+        # never crashes; always carries as_of + spot presence contract
+        assert f["as_of"].startswith("2026-09-07")
+
+
+def test_publish_struct_hset_and_expire(monkeypatch):
+    """_publish_struct sends HSET + EXPIRE via redis-cli, fail-soft."""
+    from scripts import txf_level_map as mod
+
+    calls: list[list[str]] = []
+
+    class _R:
+        returncode = 0
+        stdout = "OK"
+        stderr = ""
+
+    def fake_run(cmd, **kw):
+        calls.append(cmd)
+        return _R()
+
+    monkeypatch.setattr(mod.subprocess, "run", fake_run)
+    ok = mod._publish_struct({"as_of": "2026-09-07", "spot": "47177.0"})
+    assert ok is True
+    assert len(calls) == 2
+    hset = calls[0]
+    assert "HSET" in hset and "h:agent:txf_levels:latest" in hset
+    assert "as_of" in hset and "2026-09-07" in hset
+    expire = calls[1]
+    assert "EXPIRE" in expire and "86400" in expire
