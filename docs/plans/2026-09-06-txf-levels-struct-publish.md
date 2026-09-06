@@ -49,3 +49,14 @@
 - [ ] `--dry-run` 印 payload；實跑一次驗 `redis-cli HGETALL h:agent:txf_levels:latest` 欄位齊
 - [ ] 週一 08:40 live 驗證清單（W37 觀察項）：hash 落地、flip 為數值非 UNKNOWN、consumer 端由 nautilus session 接手驗
 - [ ] memory/vault 更新、commit
+
+---
+
+## 定案後記 (2026-09-06 23:00)
+
+實作期間發現 nautilus session 已於 20:25 (f2678b8) 自行實作一版 builder，與本計畫版並存造成同 key 雙 schema。已收斂 (9260486)：
+- **以 f2678b8 慣例為底**（consumer 相容）：缺省省略欄位、hvn/walls tuple 陣列、ABOVE_FLIP/BELOW_FLIP token、lvn_above/lvn_below、TTL 86400
+- **疊加本計畫強化**：NEUTRAL deadband (0.3%)、vacuum_json 帶 age_days、is_settle_day、front_expiry、expires_at (13:45 advisory)、night_close
+- 必在欄位：as_of / gamma_regime / is_settle_day / expires_at；其餘缺省即省略
+- 已透過 claude:inbox topic=coordination 廣播 schema 契約給 nautilus session
+- **教訓：跨 session 同 repo 並行開發，動共用 key 前先查 git log 近時段他人 commit**
