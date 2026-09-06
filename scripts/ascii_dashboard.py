@@ -149,10 +149,23 @@ def build(conn) -> str:
     cur.execute("""SELECT last(close, bucket) FROM ohlcv_1m_txf
                    WHERE symbol='TXF' AND bucket >= now() - interval '3 days'""")
     txf = float(cur.fetchone()[0] or 0)
-    cur.execute("""SELECT close, ts::date FROM asia_index_daily WHERE symbol='TWII'
-                   ORDER BY ts DESC LIMIT 1""")
-    r = cur.fetchone()
-    twii, twii_d = (float(r[0]), r[1]) if r else (None, None)
+    # 加權現貨: index_spot (MIS 盤中 30s) 新鮮 (<10min) 優先, 否則日線收盤
+    twii = twii_d = None
+    twii_live = False
+    try:
+        cur.execute("""SELECT value, ts FROM index_spot WHERE symbol='TAIEX'
+                       AND ts >= now() - interval '10 minutes'
+                       ORDER BY ts DESC LIMIT 1""")
+        r = cur.fetchone()
+        if r:
+            twii, twii_d, twii_live = float(r[0]), r[1].date(), True
+    except Exception:
+        conn.rollback()
+    if twii is None:
+        cur.execute("""SELECT close, ts::date FROM asia_index_daily WHERE symbol='TWII'
+                       ORDER BY ts DESC LIMIT 1""")
+        r = cur.fetchone()
+        twii, twii_d = (float(r[0]), r[1]) if r else (None, None)
     cur.execute("""SELECT ts::date, close FROM stock_daily_ohlcv WHERE symbol='2330'
                    ORDER BY ts DESC LIMIT 5""")
     tsm = [float(x[1]) for x in cur.fetchall()]
@@ -212,7 +225,8 @@ def build(conn) -> str:
 
     L = []
     L.append(f"╔══ TW 監控儀表 {today} {datetime.now():%H:%M} ══╗")
-    L.append(f" TXF {txf:,.0f}(即時) · 加權 {twii:,.0f}({twii_d:%m/%d}收)"
+    twii_tag = "即時" if twii_live else f"{twii_d:%m/%d}收"
+    L.append(f" TXF {txf:,.0f}(即時) · 加權 {twii:,.0f}({twii_tag})"
              + (f" · 台積電 {tsmc:,.0f}(5MA {tsmc_ma5:,.0f})" if tsmc else ""))
     L.append("")
     L.append(f"── TXO 近月 OI 對沖牆 (到期 {front}) ──")
