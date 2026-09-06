@@ -53,7 +53,11 @@ def _cache_is_fresh(cache: Path) -> bool:
             max_date = max_date.date()
         elif not isinstance(max_date, _dt.date):
             max_date = pd.Timestamp(max_date).date()
+        # 門檻 = 上一個「工作日」而非日曆日 — 市場數據不可能比最後交易日新;
+        # 用日曆日會讓每個週日誤判 stale (cache 最多到週五、門檻卻是週六)
         threshold = _dt.date.today() - _dt.timedelta(days=1)
+        while threshold.weekday() >= 5:
+            threshold -= _dt.timedelta(days=1)
         return max_date >= threshold
     except Exception:
         return False

@@ -57,6 +57,17 @@ def test_detect_events_zg_shift_and_z_cross():
                    for e in gm.detect_events(_st(z20=2.3), _st(z20=2.6)))
 
 
+# ---------------------------------------------------------------- session
+def test_in_session_calendar_gate():
+    from datetime import datetime as dt
+    assert gm.in_session(dt(2026, 9, 4, 10, 30)) is True    # 週五日盤
+    assert gm.in_session(dt(2026, 9, 4, 22, 0)) is True     # 週五夜盤
+    assert gm.in_session(dt(2026, 9, 5, 3, 0)) is True      # 週六凌晨 = 夜盤尾
+    assert gm.in_session(dt(2026, 9, 5, 13, 0)) is False    # 週六下午
+    assert gm.in_session(dt(2026, 9, 6, 13, 42)) is False   # 週日 (2026-09-06 實例)
+    assert gm.in_session(dt(2026, 9, 4, 14, 30)) is False   # 平日盤間空檔
+
+
 # ---------------------------------------------------------------- zscore
 def test_zscore_windows_honest_n():
     hist = list(range(30))                        # 30 筆歷史

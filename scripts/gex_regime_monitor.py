@@ -101,8 +101,21 @@ def detect_events(prev: dict, curr: dict) -> list:
     return ev
 
 
+def in_session(now: datetime) -> bool:
+    """TXO 交易時段日曆 gate — 日盤 08:45-13:45 / 夜盤 15:00-次日 05:00.
+    2026-09-06 教訓: collector 週末灌 stale 快照騙過純數據新鮮度 gate,
+    monitor 週末照跑推假事件 → 雙重防線 (日曆 AND 數據新鮮)."""
+    w, t = now.weekday(), now.time()
+    from datetime import time as _t
+    if w <= 4 and (_t(8, 45) <= t <= _t(13, 45) or t >= _t(15, 0)):
+        return True
+    return 1 <= w <= 5 and t < _t(5, 0)     # 夜盤跨日尾 (二~六凌晨)
+
+
 # ------------------------------------------------------------------ data
 def market_live(cur) -> bool:
+    if not in_session(datetime.now()):
+        return False
     cur.execute("SELECT extract(epoch FROM now() - max(time)) FROM iv_strikes "
                 "WHERE time >= now() - interval '1 day'")
     r = cur.fetchone()
