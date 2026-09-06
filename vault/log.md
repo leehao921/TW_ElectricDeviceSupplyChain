@@ -242,3 +242,10 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - Review 攔截×2: 已到期 OI 牆誤導 (9/4 殘牆)、夜盤跨午夜切割錯置 (47177 誤標日盤)
 - **市場: Brent 85.8→95.4 (+11%/週) 事件4型態疑似重演;UST10Y 4.78;TXF 週五夜盤 +476 至 47177;外資期空 -82k 口 vs 上方 47300 真空 = squeeze 結構**
 - brent_shock z 僅 0.2-0.6 → 基線含 3 月戰爭期波動被去敏化 (校準債);mideast_oil GDELT 仍 429 油價通道盲區未解
+
+## 2026-09-06 休市垃圾數據事故 — 三 collector 無 session gate
+- **規模**: iv_strikes 61.33M / iv_metrics 616K / stock_ofi 15.39M 列休市垃圾 (自 6 月累積)
+- **根因**: options-iv (snapshot poll + IV flush) 與 stock-ofi (publish loop) 休市時仍寫入凍結快取; `_is_market_hours()` 存在但只 gate watchdog 評分
+- **連鎖**: stale 寫入騙過 gex-regime 純數據新鮮度 gate → 週末推假 IV_Z_CROSS 事件
+- **修復**: 三處 session gate (database ae68044/b900a1c + My-TW 8e5aff8) + 全量分批清除 (驗證歸零, 留存合法夜盤跨日尾)
+- **教訓**: 「數據在動」≠「市場在動」— 新鮮度 gate 必須疊日曆; collector 的寫入路徑逐條盤點 gate, 別信函式存在就以為有掛
