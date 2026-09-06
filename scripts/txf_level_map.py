@@ -167,6 +167,40 @@ def hvn_lvn(profile: pd.Series, spot: float, top_n: int = 3) -> dict:
     return {"hvn": hvn, "lvn_above": lvn_above, "lvn_below": lvn_below}
 
 
+def annotate_ladder(rows: list[str], strikes: list[int], profile_20d: pd.Series,
+                    lvn_levels: set[int], top_n: int = 5) -> list[str]:
+    """在 wall_rows 產出的每列右側加掛 volume-profile 標註。
+    strikes[i] 對應 rows[i] 的履約價。
+    該價位所屬 100 點 bucket 若為 20 日 HVN 前 top_n → 加 ' ▤{share:.0%}';
+    若屬 LVN 集合 → 加 ' ·真空'。
+    其餘不動。
+    """
+    if profile_20d.empty:
+        return list(rows)
+
+    total = profile_20d.sum()
+    if total == 0:
+        return list(rows)
+
+    # HVN: top_n levels by volume
+    hvn_set = set(profile_20d.nlargest(top_n).index.tolist())
+
+    result = []
+    for i, row in enumerate(rows):
+        if i >= len(strikes):
+            result.append(row)
+            continue
+        bucket = float((strikes[i] // 100) * 100)
+        if bucket in hvn_set:
+            share = profile_20d[bucket] / total
+            result.append(row + f" ▤{share:.0%}")
+        elif strikes[i] in lvn_levels:
+            result.append(row + " ·真空")
+        else:
+            result.append(row)
+    return result
+
+
 def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3,
              expiry_ref: pd.DataFrame | None = None) -> dict:
     """oi: DataFrame[expiry, strike, cp, open_interest] (已濾未到期, 可已用 spot 範圍篩).
@@ -251,6 +285,9 @@ def build_msg(
     dxy: float | None,
     asia: dict | None,
     fx: dict | None,
+    # New params (all optional, default None):
+    gex_total: float | None = None,
+    ladder_rows: list[str] | None = None,  # pre-built annotated ladder lines
 ) -> str:
     """組裝多行訊息,格式照 plan;任何缺項印 N/A 不 crash。"""
 
@@ -270,86 +307,49 @@ def build_msg(
     if night_close is not None and day_close is not None:
         chg_str = _fmt_signed(night_chg, ".0f")
         header = (f"📍 TXF 位置圖 {date_str} | "
-                  f"夜盤 {_fmt(night_close)} ({chg_str}, 日盤收 {_fmt(day_close)})")
+                  f"夜盤 {_fmt(night_close)} ({chg_str}, 日盤 {_fmt(day_close)})")
     elif day_close is not None:
         header = f"📍 TXF 位置圖 {date_str} | 日盤收 {_fmt(day_close)} | 夜盤 N/A"
     else:
         header = f"📍 TXF 位置圖 {date_str} | 收盤 N/A"
 
-    # ── Line 2: 壓力 (calls) ──────────────────────────────────────────────────
-    call_parts: list[str] = []
-    if walls:
-        weekly_calls = walls.get("weekly", {}).get("call", [])
-        monthly_calls = walls.get("monthly", {}).get("call", [])
-
-        # Build lookup dicts: strike → oi for each expiry
-        weekly_call_map = {s: oi_val for s, oi_val in weekly_calls}
-        monthly_call_map = {s: oi_val for s, oi_val in monthly_calls}
-
-        # Merge: collect all strikes; for shared strikes keep monthly OI (bigger)
-        # Label: (月) if strike is in monthly; (週) if weekly-only
-        all_call_strikes = sorted(
-            set(weekly_call_map) | set(monthly_call_map)
-        )
-        all_calls: list[tuple[int, int, str]] = []
-        for strike in all_call_strikes:
-            in_weekly = strike in weekly_call_map
-            in_monthly = strike in monthly_call_map
-            if in_monthly:
-                oi_val = monthly_call_map[strike]
-                label = "(月)"
-            else:
-                oi_val = weekly_call_map[strike]
-                label = "(週)"
-            all_calls.append((strike, oi_val, label))
-
-        for strike, oi_val, label in all_calls:
-            call_parts.append(f"{strike} C牆{oi_val}{label}")
-
-    flip_str = f"{_fmt(flip)} flip" if flip is not None else "flip=N/A"
-    resistance_line = "壓力: " + (" | ".join(call_parts) if call_parts else "N/A")
-
-    # ── Line 3: 支撐 (puts + flip + HVN/LVN) ─────────────────────────────────
-    put_parts: list[str] = []
-    if walls:
-        weekly_puts = walls.get("weekly", {}).get("put", [])
-        monthly_puts = walls.get("monthly", {}).get("put", [])
-
-        # Build lookup dicts: strike → oi for each expiry
-        weekly_put_map = {s: oi_val for s, oi_val in weekly_puts}
-        monthly_put_map = {s: oi_val for s, oi_val in monthly_puts}
-
-        # Merge: collect all strikes; for shared strikes keep monthly OI (bigger)
-        # Label: (月) if strike is in monthly; (週) if weekly-only
-        all_put_strikes = sorted(
-            set(weekly_put_map) | set(monthly_put_map),
-            reverse=True
-        )
-        all_puts: list[tuple[int, int, str]] = []
-        for strike in all_put_strikes:
-            in_monthly = strike in monthly_put_map
-            if in_monthly:
-                oi_val = monthly_put_map[strike]
-                label = "(月)"
-            else:
-                oi_val = weekly_put_map[strike]
-                label = "(週)"
-            all_puts.append((strike, oi_val, label))
-
-        for strike, oi_val, label in all_puts:
-            put_parts.append(f"{strike} P牆{oi_val}{label}")
-
-    support_items = [flip_str] + put_parts
-    support_line = "支撐: " + (" | ".join(support_items) if support_items else "N/A")
-
-    # ── Line 4: 外資/投信期淨 OI ───────────────────────────────────────────────
-    foreign_str = (f"外資期淨 {_fmt_signed(foreign_net, ',d')} 口"
+    # ── Line 2: 外資/投信期淨 OI + GEX ─────────────────────────────────────────
+    foreign_str = (f"外資期淨 {_fmt_signed(foreign_net, ',d')}"
                    if foreign_net is not None else "外資期淨 N/A")
     toshin_str = (f"投信 {_fmt_signed(toshin_net, ',d')}"
                   if toshin_net is not None else "投信 N/A")
-    oi_line = f"{foreign_str} | {toshin_str}"
+    flip_str = f"flip {_fmt(flip, '.0f')}" if flip is not None else "flip N/A"
+    if gex_total is not None:
+        gex_yi = gex_total / 1e8
+        gex_str = f"GEX {gex_yi:.0f}億/1% {flip_str}"
+    else:
+        gex_str = flip_str
+    oi_line = f"{foreign_str} | {toshin_str} | {gex_str}"
 
-    # ── Line 5: 隔夜美股 ────────────────────────────────────────────────────────
+    # ── Line 3: 月牆 ──────────────────────────────────────────────────────────
+    if walls:
+        monthly_calls = walls.get("monthly", {}).get("call", [])
+        monthly_puts = walls.get("monthly", {}).get("put", [])
+        # Sort calls descending by strike, puts descending by strike (highest first)
+        monthly_calls_sorted = sorted(monthly_calls, key=lambda x: x[1], reverse=True)[:2]
+        monthly_puts_sorted = sorted(monthly_puts, key=lambda x: x[1], reverse=True)[:2]
+        # Build display: top2 C by OI sorted descending, top2 P by OI sorted descending
+        wall_parts = []
+        for s, o in sorted(monthly_calls_sorted, key=lambda x: x[0], reverse=True):
+            wall_parts.append(f"{s} C{o}")
+        for s, o in sorted(monthly_puts_sorted, key=lambda x: x[0], reverse=True):
+            wall_parts.append(f"{s} P{o}")
+        monthly_line = "月牆: " + " | ".join(wall_parts) if wall_parts else "月牆: N/A"
+    else:
+        monthly_line = "月牆: N/A"
+
+    # ── Ladder block ──────────────────────────────────────────────────────────
+    if ladder_rows is not None and len(ladder_rows) > 0:
+        ladder_block = "```\n" + "\n".join(ladder_rows) + "\n```"
+    else:
+        ladder_block = "```\n(梯圖無資料)\n```"
+
+    # ── 隔夜美股 ────────────────────────────────────────────────────────────────
     sox_str = _fmt_signed(sox, ".1f", "%") if sox is not None else "SOX N/A"
     vix_str = f"VIX {_fmt(vix, '.1f')}"
     ust_str = f"UST10Y {_fmt(ust10y, '.2f')}"
@@ -357,7 +357,7 @@ def build_msg(
     dxy_str = f"DXY {_fmt(dxy, '.1f')}"
     overnight_line = f"🌏 隔夜: SOX {sox_str} {vix_str} {ust_str} {brent_str} {dxy_str}"
 
-    # ── Line 6: 亞股 T-1 ──────────────────────────────────────────────────────
+    # ── 亞股 T-1 ──────────────────────────────────────────────────────────────
     asia_symbols = ["N225", "KS11", "HSI", "CSI300", "TWII", "NSEI"]
     if asia:
         asia_parts = []
@@ -383,7 +383,7 @@ def build_msg(
         if fx_parts:
             asia_line += " | " + " ".join(fx_parts)
 
-    lines = [header, resistance_line, support_line, oi_line, overnight_line, asia_line]
+    lines = [header, oi_line, monthly_line, ladder_block, overnight_line, asia_line]
     return "\n".join(lines)
 
 
@@ -503,22 +503,33 @@ def _load_fx() -> dict:
     return result
 
 
-def _get_gex_flip(date: dt.date) -> float | None:
-    """Run options_quant.py --date <date> --window 08:45-13:45, parse flip."""
-    python = str(REPO_ROOT / ".venv" / "bin" / "python")
-    script = str(REPO_ROOT / "scripts" / "options_quant.py")
-    cmd = [python, script, "--date", date.isoformat(), "--window", "08:45-13:45"]
+def _get_gex(date: dt.date, spot: float) -> tuple[float | None, float | None, str | None]:
+    """Return (total_gex, flip, zone) using ascii_dashboard.compute_gex.
+    Falls back gracefully if import or DB fails.
+    """
+    scripts_dir = str(Path(__file__).resolve().parent)
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-        output = result.stdout + result.stderr
-        m = re.search(r"flip=([\d.]+)", output)
-        if m:
-            return float(m.group(1))
-        print(f"[warn] txf-level-map: flip not found in options_quant output", file=sys.stderr)
-        return None
+        import psycopg2
+        from ascii_dashboard import compute_gex, DB
+        conn = psycopg2.connect(**DB)
+        conn.autocommit = True
+        cur = conn.cursor()
+        cur.execute("""SELECT min(expiry) FROM option_oi_daily
+                       WHERE underlying='TX' AND settle_date=(SELECT max(settle_date)
+                       FROM option_oi_daily WHERE underlying='TX') AND expiry >= %s""", (date,))
+        row = cur.fetchone()
+        if row is None or row[0] is None:
+            conn.close()
+            return None, None, None
+        front = row[0]
+        total_gex, flip, zone = compute_gex(conn, spot, front)
+        conn.close()
+        return total_gex, flip, zone
     except Exception as exc:
-        print(f"[warn] txf-level-map: options_quant subprocess error: {exc}", file=sys.stderr)
-        return None
+        print(f"[warn] txf-level-map: _get_gex error: {exc}", file=sys.stderr)
+        return None, None, None
 
 
 def _load_us_overnight() -> dict:
@@ -667,14 +678,45 @@ def main(argv: list[str] | None = None) -> int:
     elif not oi_df.empty:
         walls = oi_walls(oi_df, spot=47000.0, n=3)  # fallback spot
 
-    # 3. GEX flip (T-1)
+    # 3. GEX (T-1) — now uses compute_gex via _get_gex
     t1 = today - dt.timedelta(days=1)
     # Skip weekends for T-1
     while t1.weekday() >= 5:
         t1 -= dt.timedelta(days=1)
-    print(f"[info] fetching GEX flip for T-1={t1} …", file=sys.stderr)
-    flip = _get_gex_flip(t1)
-    print(f"[info] flip={flip}", file=sys.stderr)
+    print(f"[info] fetching GEX for T-1={t1} …", file=sys.stderr)
+    total_gex, flip, zone = _get_gex(t1, spot or 47000.0)
+    print(f"[info] total_gex={total_gex} flip={flip} zone={zone}", file=sys.stderr)
+
+    # 3b. Build near-week ladder
+    ladder_rows: list[str] | None = None
+    try:
+        scripts_dir = str(Path(__file__).resolve().parent)
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        from ascii_dashboard import wall_rows as _wall_rows, STEP as _STEP, SPAN as _SPAN
+        if spot is not None and not oi_df.empty:
+            weekly_expiries = sorted(oi_df["expiry"].unique())
+            if weekly_expiries:
+                near_exp = weekly_expiries[0]
+                near_df = oi_df[oi_df["expiry"] == near_exp]
+                # Build oi dict for wall_rows: {strike: {P: oi, C: oi}}
+                oi_dict: dict[int, dict] = {}
+                for _, row_r in near_df.iterrows():
+                    k = int(row_r["strike"])
+                    if abs(k - spot) <= _SPAN and k % _STEP == 0:
+                        oi_dict.setdefault(k, {})[str(row_r["cp"])[0].upper()] = int(row_r["open_interest"])
+                if oi_dict:
+                    raw_rows = _wall_rows(oi_dict, spot, zg=flip)
+                    strikes_list = sorted(oi_dict.keys(), reverse=True)
+                    # Build LVN set from 25th percentile of profile
+                    lvn_set: set[int] = set()
+                    if not profile.empty:
+                        lvn_threshold = float(profile.quantile(0.25))
+                        lvn_set = {int(k) for k in profile[profile <= lvn_threshold].index}
+                    ladder_rows = annotate_ladder(raw_rows, strikes_list, profile, lvn_set, top_n=5)
+                    print(f"[info] ladder built: {len(ladder_rows)} rows", file=sys.stderr)
+    except Exception as e:
+        print(f"[warn] ladder build error: {e}", file=sys.stderr)
 
     # 4. Futures OI
     print("[info] loading futures OI …", file=sys.stderr)
@@ -723,6 +765,8 @@ def main(argv: list[str] | None = None) -> int:
         dxy=us.get("dxy"),
         asia=asia if asia else None,
         fx=fx if fx else None,
+        gex_total=total_gex,
+        ladder_rows=ladder_rows,
     )
 
     print("─" * 70)

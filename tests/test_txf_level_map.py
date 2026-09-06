@@ -21,6 +21,7 @@ from scripts.txf_level_map import (
     hvn_lvn,
     oi_walls,
     build_msg,
+    annotate_ladder,
 )
 
 
@@ -500,72 +501,59 @@ class TestBuildMsg:
         # date should appear somewhere in the message
         assert "9/6" in msg or "2026-09-06" in msg or "09-06" in msg
 
-    def test_build_msg_monthly_label_in_resistance(self):
-        """Monthly-expiry-only strikes appear labeled (月) in 壓力 line;
-        weekly-only strikes appear labeled (週); shared strikes show one entry."""
-        # weekly: 47000 C only; monthly: 47500 C and 48000 C (not in weekly)
+    def test_build_msg_monthly_wall_line(self):
+        """月牆 line shows top2 C + top2 P from monthly walls."""
         walls = {
-            "weekly": {
-                "call": [(47000, 711)],
-                "put": [(46500, 479)],
-            },
-            "monthly": {
-                "call": [(47500, 1800), (48000, 2500)],
-                "put": [(46000, 1700)],
-            },
+            "weekly": {"call": [(47500, 711)], "put": [(46500, 479)]},
+            "monthly": {"call": [(48000, 2500), (47500, 1800)], "put": [(46000, 1700), (45500, 1200)]},
         }
         msg = build_msg(
             as_of=dt.date(2026, 9, 6),
-            day_close=46711.0,
-            night_close=47177.0,
-            night_chg=466.0,
-            walls=walls,
-            flip=None,
+            day_close=46711.0, night_close=47177.0, night_chg=466.0,
+            walls=walls, flip=None,
             foreign_net=None, toshin_net=None,
             sox=None, vix=None, ust10y=None, brent=None, dxy=None,
             asia=None, fx=None,
         )
-        # 47500 and 48000 are monthly-only → must carry (月) label
-        assert "47500" in msg
-        assert "48000" in msg
-        # The monthly-only strikes must have (月) label
-        resistance_line = [l for l in msg.splitlines() if l.startswith("壓力")][0]
-        assert "47500 C牆1800(月)" in resistance_line
-        assert "48000 C牆2500(月)" in resistance_line
-        # 47000 is weekly-only → must carry (週) label
-        assert "47000 C牆711(週)" in resistance_line
+        monthly_line = [l for l in msg.splitlines() if l.startswith("月牆")][0]
+        assert "48000 C2500" in monthly_line
+        assert "47500 C1800" in monthly_line
+        assert "46000 P1700" in monthly_line
+        assert "45500 P1200" in monthly_line
 
-    def test_build_msg_weekly_monthly_same_strike_deduped(self):
-        """When a strike appears in both weekly and monthly, it renders once with (月) label."""
-        walls = {
-            "weekly": {
-                "call": [(47500, 400), (48000, 1542)],
-                "put": [(46500, 479)],
-            },
-            "monthly": {
-                "call": [(47500, 1800), (48000, 2500)],
-                "put": [(46500, 1900)],
-            },
-        }
+    def test_build_msg_ladder_block_present(self):
+        """Ladder rows appear inside triple-backtick block."""
+        ladder = ["  row1  ", "  row2  "]
         msg = build_msg(
             as_of=dt.date(2026, 9, 6),
-            day_close=46711.0,
-            night_close=47177.0,
-            night_chg=466.0,
-            walls=walls,
-            flip=None,
+            day_close=46711.0, night_close=47177.0, night_chg=466.0,
+            walls=None, flip=None,
             foreign_net=None, toshin_net=None,
             sox=None, vix=None, ust10y=None, brent=None, dxy=None,
             asia=None, fx=None,
+            ladder_rows=ladder,
         )
-        resistance_line = [l for l in msg.splitlines() if l.startswith("壓力")][0]
-        # 47500 and 48000 are in both → deduplicated, labeled (月), monthly OI wins
-        # Should appear exactly once each
-        assert resistance_line.count("47500") == 1
-        assert resistance_line.count("48000") == 1
-        # Monthly OI (bigger) is kept
-        assert "47500 C牆1800(月)" in resistance_line
-        assert "48000 C牆2500(月)" in resistance_line
+        assert "```" in msg
+        assert "row1" in msg
+        assert "row2" in msg
+
+    def test_build_msg_gex_line(self):
+        """Line 2 shows GEX total + flip when provided."""
+        msg = build_msg(
+            as_of=dt.date(2026, 9, 6),
+            day_close=46711.0, night_close=47177.0, night_chg=466.0,
+            walls=None, flip=46650.0,
+            foreign_net=-82389, toshin_net=76174,
+            sox=None, vix=None, ust10y=None, brent=None, dxy=None,
+            asia=None, fx=None,
+            gex_total=33600000000.0,  # 336億
+        )
+        lines = msg.splitlines()
+        gex_line = lines[1]  # second line
+        assert "外資期淨" in gex_line
+        assert "GEX" in gex_line
+        assert "336" in gex_line
+        assert "46650" in gex_line
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -659,3 +647,60 @@ class TestSplitDayNightPostMidnight:
         assert day_close == pytest.approx(46711.0)
         assert night_close is None
         assert night_chg is None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# annotate_ladder
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestAnnotateLadder:
+    def _make_rows(self):
+        # 3 rows from wall_rows-like format:
+        # Strike 47000, 46900, 46800
+        return [
+            "            │47000│            ",   # strike 47000
+            "████████████│46900│▏           ",   # strike 46900
+            "▏           │46800│████████████",   # strike 46800
+        ], [47000, 46900, 46800]
+
+    def test_hvn_annotated(self):
+        """HVN bucket gets ▤XX% suffix."""
+        rows, strikes = self._make_rows()
+        # profile: 47000 bucket (47000//100*100=47000) is HVN top_5
+        profile = pd.Series({47000.0: 5000.0, 46900.0: 100.0, 46800.0: 50.0})
+        lvn = set()
+        result = annotate_ladder(rows, strikes, profile, lvn, top_n=5)
+        # row[0] (strike 47000, bucket 47000) → HVN → has ▤ suffix
+        assert "▤" in result[0]
+        # Let's use top_n=1 to be precise
+        result2 = annotate_ladder(rows, strikes, profile, lvn, top_n=1)
+        assert "▤" in result2[0]
+        assert "▤" not in result2[1]
+        assert "▤" not in result2[2]
+
+    def test_lvn_annotated(self):
+        """LVN bucket gets ·真空 suffix."""
+        rows, strikes = self._make_rows()
+        # profile: 47000 is HVN; 46900 bucket is LVN
+        profile = pd.Series({47000.0: 5000.0, 46900.0: 100.0, 46800.0: 3000.0})
+        lvn = {46900}  # 46900 is explicitly LVN
+        result = annotate_ladder(rows, strikes, profile, lvn, top_n=1)
+        assert "·真空" in result[1]
+        assert "·真空" not in result[0]
+        assert "·真空" not in result[2]
+
+    def test_untouched_row(self):
+        """Row whose bucket is neither HVN nor LVN → unchanged."""
+        rows, strikes = self._make_rows()
+        profile = pd.Series({47000.0: 5000.0, 46900.0: 100.0, 46800.0: 50.0})
+        lvn = set()  # no LVN
+        result = annotate_ladder(rows, strikes, profile, lvn, top_n=1)
+        # row[1] (46900) and row[2] (46800) are not HVN top_1, not LVN → unchanged
+        assert result[1] == rows[1]
+        assert result[2] == rows[2]
+
+    def test_empty_profile_no_change(self):
+        """Empty profile → all rows returned unchanged."""
+        rows, strikes = self._make_rows()
+        result = annotate_ladder(rows, strikes, pd.Series(dtype=float), set(), top_n=5)
+        assert result == rows

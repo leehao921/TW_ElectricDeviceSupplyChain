@@ -59,6 +59,31 @@ def wall_rows(oi: dict, spot: float, width: int = BAR_W, zg: float | None = None
     return rows
 
 
+def compute_gex(conn, spot: float, front_expiry) -> tuple[float | None, float | None, str | None]:
+    """Compute GEX metrics using iv_strikes + option_oi_daily.
+    Returns (total_gex, flip, zone). Each may be None on failure.
+    """
+    import pandas as pd
+    gex_total = gex_flip = gex_zone = None
+    try:
+        front_txt = front_expiry.strftime("%Y%m%d")
+        strikes_df = pd.read_sql("""
+          SELECT DISTINCT ON (strike, call_put) strike, call_put, gamma
+          FROM iv_strikes WHERE time >= now()::date AND expiry = %(e)s
+          ORDER BY strike, call_put, time DESC""", conn, params={"e": front_txt})
+        oi_df = pd.read_sql("""
+          SELECT strike, cp, open_interest, settle_date FROM option_oi_daily
+          WHERE underlying='TX' AND expiry = %(e)s
+            AND settle_date = (SELECT max(settle_date) FROM option_oi_daily)""",
+                            conn, params={"e": front_expiry})
+        from options_quant import analyze_gex
+        m = analyze_gex(strikes_df, oi_df, spot)["metrics"]
+        gex_total, gex_flip, gex_zone = m["total_gex"], m["flip"], m["zone"]
+    except Exception as e:
+        print(f"[warn] GEX layer failed: {e}", file=sys.stderr)
+    return gex_total, gex_flip, gex_zone
+
+
 def build(conn) -> str:
     import pandas as pd
     cur = conn.cursor()
@@ -97,23 +122,7 @@ def build(conn) -> str:
     pw = max(oi_all, key=lambda k: oi_all[k].get("P", 0)) if oi_all else None
 
     # ---- GEX (盤中 iv_strikes gamma × OI, 復用 options_quant §3.1)
-    gex_total = gex_flip = gex_zone = None
-    try:
-        front_txt = front.strftime("%Y%m%d")
-        strikes_df = pd.read_sql("""
-          SELECT DISTINCT ON (strike, call_put) strike, call_put, gamma
-          FROM iv_strikes WHERE time >= now()::date AND expiry = %(e)s
-          ORDER BY strike, call_put, time DESC""", conn, params={"e": front_txt})
-        oi_df = pd.read_sql("""
-          SELECT strike, cp, open_interest, settle_date FROM option_oi_daily
-          WHERE underlying='TX' AND expiry = %(e)s
-            AND settle_date = (SELECT max(settle_date) FROM option_oi_daily)""",
-                            conn, params={"e": front})
-        from options_quant import analyze_gex
-        m = analyze_gex(strikes_df, oi_df, txf)["metrics"]
-        gex_total, gex_flip, gex_zone = m["total_gex"], m["flip"], m["zone"]
-    except Exception as e:
-        print(f"[warn] GEX layer failed: {e}", file=sys.stderr)
+    gex_total, gex_flip, gex_zone = compute_gex(conn, txf, front)
 
     # ---- VIX 家族
     cur.execute("""SELECT vix, vix_30d, rv_21d, vrp_30d, vix_w, wm_spread
