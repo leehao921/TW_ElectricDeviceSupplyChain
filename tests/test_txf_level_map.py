@@ -704,3 +704,15 @@ class TestAnnotateLadder:
         rows, strikes = self._make_rows()
         result = annotate_ladder(rows, strikes, pd.Series(dtype=float), set(), top_n=5)
         assert result == rows
+
+
+def test_annotate_ladder_value_area_footer_when_hvn_below_range():
+    """HVN 全在梯圖範圍外時,value_area_note 回傳價值區行;範圍內有 HVN 則回 None。"""
+    import pandas as pd
+    from scripts.txf_level_map import value_area_note
+    prof = pd.Series({45800.0: 500.0, 45900.0: 480.0, 46100.0: 370.0,
+                      47000.0: 10.0, 47100.0: 8.0})
+    note = value_area_note(prof, ladder_lo=46400, ladder_hi=47900, top_n=3)
+    assert note is not None and "45800" in note and "▤" in note
+    note2 = value_area_note(prof, ladder_lo=45700, ladder_hi=46200, top_n=3)
+    assert note2 is None

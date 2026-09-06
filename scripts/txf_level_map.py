@@ -201,6 +201,23 @@ def annotate_ladder(rows: list[str], strikes: list[int], profile_20d: pd.Series,
     return result
 
 
+def value_area_note(profile_20d: pd.Series, ladder_lo: int, ladder_hi: int,
+                    top_n: int = 5) -> str | None:
+    """HVN 前 top_n 全落在梯圖 [lo, hi] 之外時,回傳價值區註記行
+    (價格乖離價值區本身是關鍵交易資訊,不可因梯圖範圍而不可見);
+    範圍內已有 HVN → None(梯圖已標)。"""
+    if profile_20d.empty or profile_20d.sum() == 0:
+        return None
+    top = profile_20d.nlargest(top_n)
+    if any(ladder_lo <= lvl <= ladder_hi for lvl in top.index):
+        return None
+    total = profile_20d.sum()
+    pos = "下方" if top.index.max() < ladder_lo else "上方"
+    parts = " ".join(f"{lvl:.0f}▤{v / total:.0%}"
+                     for lvl, v in top.head(3).items())
+    return f"價值區: {parts} (梯圖{pos})"
+
+
 def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3,
              expiry_ref: pd.DataFrame | None = None) -> dict:
     """oi: DataFrame[expiry, strike, cp, open_interest] (已濾未到期, 可已用 spot 範圍篩).
@@ -714,6 +731,9 @@ def main(argv: list[str] | None = None) -> int:
                         lvn_threshold = float(profile.quantile(0.25))
                         lvn_set = {int(k) for k in profile[profile <= lvn_threshold].index}
                     ladder_rows = annotate_ladder(raw_rows, strikes_list, profile, lvn_set, top_n=5)
+                    note = value_area_note(profile, min(strikes_list), max(strikes_list))
+                    if note:
+                        ladder_rows.append(note)
                     print(f"[info] ladder built: {len(ladder_rows)} rows", file=sys.stderr)
     except Exception as e:
         print(f"[warn] ladder build error: {e}", file=sys.stderr)
