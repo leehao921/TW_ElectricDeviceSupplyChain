@@ -538,7 +538,7 @@ class TestBuildMsg:
         assert "row2" in msg
 
     def test_build_msg_gex_line(self):
-        """Line 2 shows GEX total + flip when provided."""
+        """Line 2 shows GEX total + flip; 外資/投信 moved to 法人段 inside block."""
         msg = build_msg(
             as_of=dt.date(2026, 9, 6),
             day_close=46711.0, night_close=47177.0, night_chg=466.0,
@@ -550,10 +550,69 @@ class TestBuildMsg:
         )
         lines = msg.splitlines()
         gex_line = lines[1]  # second line
-        assert "外資期淨" in gex_line
+        # 外資/投信 no longer in line 2 (they live in inst_lines inside the block)
+        assert "外資期淨" not in gex_line
         assert "GEX" in gex_line
         assert "336" in gex_line
         assert "46650" in gex_line
+
+    def test_build_msg_vol_inst_sections_in_block(self):
+        """vol_lines and inst_lines render inside the ``` block."""
+        vol = ["── 波動率 ──", " VIX 18.5 · CM30 20.0 · RV21 15.2 · VRP +4.8"]
+        inst = ["── 法人/融資 ──", " TXF淨OI: 外資 -1,000 · 投信 +500 口"]
+        msg = build_msg(
+            as_of=dt.date(2026, 9, 6),
+            day_close=46711.0, night_close=47177.0, night_chg=466.0,
+            walls=None, flip=None,
+            foreign_net=None, toshin_net=None,
+            sox=None, vix=None, ust10y=None, brent=None, dxy=None,
+            asia=None, fx=None,
+            ladder_rows=["  row1  "],
+            vol_lines=vol,
+            inst_lines=inst,
+        )
+        # Everything between the ``` fences
+        assert "```" in msg
+        block_start = msg.index("```\n") + 4
+        block_end = msg.index("\n```", block_start)
+        block = msg[block_start:block_end]
+        assert "── 波動率 ──" in block
+        assert "VIX 18.5" in block
+        assert "── 法人/融資 ──" in block
+        assert "TXF淨OI" in block
+
+    def test_build_msg_vol_inst_none_skipped(self):
+        """None vol_lines/inst_lines → block still renders, no crash, no extra lines."""
+        msg = build_msg(
+            as_of=dt.date(2026, 9, 6),
+            day_close=46711.0, night_close=47177.0, night_chg=466.0,
+            walls=None, flip=None,
+            foreign_net=None, toshin_net=None,
+            sox=None, vix=None, ust10y=None, brent=None, dxy=None,
+            asia=None, fx=None,
+            ladder_rows=["  row1  "],
+            vol_lines=None,
+            inst_lines=None,
+        )
+        assert "```" in msg
+        assert "── 波動率 ──" not in msg
+        assert "── 法人/融資 ──" not in msg
+
+    def test_build_msg_vol_inst_empty_skipped(self):
+        """Empty list vol_lines/inst_lines → treated same as None (not injected)."""
+        msg = build_msg(
+            as_of=dt.date(2026, 9, 6),
+            day_close=46711.0, night_close=47177.0, night_chg=466.0,
+            walls=None, flip=None,
+            foreign_net=None, toshin_net=None,
+            sox=None, vix=None, ust10y=None, brent=None, dxy=None,
+            asia=None, fx=None,
+            ladder_rows=["  row1  "],
+            vol_lines=[],
+            inst_lines=[],
+        )
+        assert "── 波動率 ──" not in msg
+        assert "── 法人/融資 ──" not in msg
 
 
 # ══════════════════════════════════════════════════════════════════════════════

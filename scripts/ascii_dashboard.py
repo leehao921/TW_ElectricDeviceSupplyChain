@@ -84,6 +84,63 @@ def compute_gex(conn, spot: float, front_expiry) -> tuple[float | None, float | 
     return gex_total, gex_flip, gex_zone
 
 
+def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
+    """── 波動率 ── 區塊 (VIX 家族 + IV curve/複合 regime, fail-soft)。
+
+    Returns (lines, wm) where wm is the 週/月 spread value (used by caller
+    for the gate_iv signal).  wm is None if the vix_daily query returns no row.
+    """
+    cur.execute("""SELECT vix, vix_30d, rv_21d, vrp_30d, vix_w, wm_spread
+                   FROM vix_daily ORDER BY date DESC LIMIT 1""")
+    vix, v30, rv, vrp, vw, wm = [round(float(x), 1) if x is not None else None
+                                 for x in (cur.fetchone() or [None] * 6)]
+    L: list[str] = []
+    L.append("── 波動率 ──")
+    L.append(f" VIX {vix} · CM30 {v30} · RV21 {rv} · VRP {vrp:+.1f}")
+    L.append(f" 週選 {vw} · 週/月 {wm:+.1f} ({'倒掛🚨' if wm and wm > 2 else '正常'})")
+    try:
+        from gex_regime_monitor import (classify_regime, compute_composite,
+                                        front_iv_history, iv_curve, z_windows)
+        curve = iv_curve(conn, txf)
+        if curve:
+            L.append(" IV curve: " + " / ".join(f"{e[4:6]}/{e[6:]}:{v}" for e, v in curve))
+            zs = z_windows(curve[0][1], front_iv_history(conn))
+            L.append(" 前緣IV z: " + " · ".join(
+                f"{k[1:]}d {d['z']:+.1f}(n={d['n']})" if d["z"] is not None
+                else f"{k[1:]}d n/a(n={d['n']})" for k, d in zs.items()))
+        comp = compute_composite(conn, txf)
+        if comp:
+            reg = classify_regime(txf, comp["zg"], comp["total_gex"])
+            L.append(f" 複合(W1+W2+M1): {reg} · ZG {comp['zg']:,.0f} · "
+                     f"GEX {comp['total_gex']/1e8:+,.0f}億/1%")
+    except Exception as e:
+        print(f"[warn] iv-curve/regime layer failed: {e}", file=sys.stderr)
+    return L, wm
+
+
+def inst_section_lines(cur) -> list[str]:
+    """── 法人/融資 ── 區塊。"""
+    cur.execute("""SELECT participant_type, net_oi FROM futures_oi_daily
+                   WHERE underlying='TXF'
+                     AND settle_date=(SELECT max(settle_date) FROM futures_oi_daily)""")
+    foi = dict(cur.fetchall())
+    cur.execute("""SELECT sum(foreign_net * close_price) / 1e8 FROM institutional_stock
+                   WHERE date=(SELECT max(date) FROM institutional_stock)""")
+    fspot = float(cur.fetchone()[0] or 0)
+    cur.execute("""SELECT date, fin_value_kilo_ntd / 1e5 FROM margin_market_daily
+                   ORDER BY date DESC LIMIT 2""")
+    mg = cur.fetchall()
+    fin_now = float(mg[0][1]) if mg else None
+    fin_chg = (float(mg[0][1]) - float(mg[1][1])) if len(mg) == 2 else None
+
+    L: list[str] = []
+    L.append("── 法人/融資 ──")
+    L.append(f" TXF淨OI: 外資 {foi.get('外資', 0):+,} · 投信 {foi.get('投信', 0):+,} 口")
+    L.append(f" 現貨外資 {fspot:+,.0f} 億 · 大盤融資 {fin_now:,.0f} 億"
+             + (f" ({fin_chg:+,.0f})" if fin_chg is not None else ""))
+    return L
+
+
 def build(conn) -> str:
     import pandas as pd
     cur = conn.cursor()
@@ -124,25 +181,8 @@ def build(conn) -> str:
     # ---- GEX (盤中 iv_strikes gamma × OI, 復用 options_quant §3.1)
     gex_total, gex_flip, gex_zone = compute_gex(conn, txf, front)
 
-    # ---- VIX 家族
-    cur.execute("""SELECT vix, vix_30d, rv_21d, vrp_30d, vix_w, wm_spread
-                   FROM vix_daily ORDER BY date DESC LIMIT 1""")
-    vix, v30, rv, vrp, vw, wm = [round(float(x), 1) if x is not None else None
-                                 for x in (cur.fetchone() or [None] * 6)]
-
-    # ---- 法人
-    cur.execute("""SELECT participant_type, net_oi FROM futures_oi_daily
-                   WHERE underlying='TXF'
-                     AND settle_date=(SELECT max(settle_date) FROM futures_oi_daily)""")
-    foi = dict(cur.fetchall())
-    cur.execute("""SELECT sum(foreign_net * close_price) / 1e8 FROM institutional_stock
-                   WHERE date=(SELECT max(date) FROM institutional_stock)""")
-    fspot = float(cur.fetchone()[0] or 0)
-    cur.execute("""SELECT date, fin_value_kilo_ntd / 1e5 FROM margin_market_daily
-                   ORDER BY date DESC LIMIT 2""")
-    mg = cur.fetchall()
-    fin_now = float(mg[0][1]) if mg else None
-    fin_chg = (float(mg[0][1]) - float(mg[1][1])) if len(mg) == 2 else None
+    # ---- 波動率區塊 (VIX 家族 + IV curve/複合 regime); wm 保留供 gate_iv
+    vol_lines, wm = vol_section_lines(conn, cur, txf)
 
     # ---- 訊號面 (今日日掃 + 恐懼/貪婪)
     today = date.today().isoformat()
@@ -167,6 +207,9 @@ def build(conn) -> str:
     gate_iv = "🟢" if (wm is None or wm <= 2) else "🔴"
     pcr_tag = "偏多" if pcr > 110 else ("偏空" if pcr < 90 else "中性")
 
+    # ---- 法人/融資區塊
+    inst_lines = inst_section_lines(cur)
+
     L = []
     L.append(f"╔══ TW 監控儀表 {today} {datetime.now():%H:%M} ══╗")
     L.append(f" TXF {txf:,.0f}(即時) · 加權 {twii:,.0f}({twii_d:%m/%d}收)"
@@ -183,31 +226,9 @@ def build(conn) -> str:
         L.append(f" GEX {gex_total/1e8:+,.0f}億/1% · ZeroGamma "
                  + (f"{gex_flip:,.0f}" if gex_flip else "n/a") + f" · {zone_txt}")
     L.append("")
-    L.append("── 波動率 ──")
-    L.append(f" VIX {vix} · CM30 {v30} · RV21 {rv} · VRP {vrp:+.1f}")
-    L.append(f" 週選 {vw} · 週/月 {wm:+.1f} ({'倒掛🚨' if wm and wm > 2 else '正常'})")
-    try:
-        from gex_regime_monitor import (classify_regime, compute_composite,
-                                        front_iv_history, iv_curve, z_windows)
-        curve = iv_curve(conn, txf)
-        if curve:
-            L.append(" IV curve: " + " / ".join(f"{e[4:6]}/{e[6:]}:{v}" for e, v in curve))
-            zs = z_windows(curve[0][1], front_iv_history(conn))
-            L.append(" 前緣IV z: " + " · ".join(
-                f"{k[1:]}d {d['z']:+.1f}(n={d['n']})" if d["z"] is not None
-                else f"{k[1:]}d n/a(n={d['n']})" for k, d in zs.items()))
-        comp = compute_composite(conn, txf)
-        if comp:
-            reg = classify_regime(txf, comp["zg"], comp["total_gex"])
-            L.append(f" 複合(W1+W2+M1): {reg} · ZG {comp['zg']:,.0f} · "
-                     f"GEX {comp['total_gex']/1e8:+,.0f}億/1%")
-    except Exception as e:
-        print(f"[warn] iv-curve/regime layer failed: {e}", file=sys.stderr)
+    L += vol_lines
     L.append("")
-    L.append("── 法人/融資 ──")
-    L.append(f" TXF淨OI: 外資 {foi.get('外資', 0):+,} · 投信 {foi.get('投信', 0):+,} 口")
-    L.append(f" 現貨外資 {fspot:+,.0f} 億 · 大盤融資 {fin_now:,.0f} 億"
-             + (f" ({fin_chg:+,.0f})" if fin_chg is not None else ""))
+    L += inst_lines
     L.append("")
     L.append("── 訊號/Gate ──")
     L.append(f" 日掃新名單: {', '.join(f'{k}×{v}' for k, v in fams.items()) or '無'}")

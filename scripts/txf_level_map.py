@@ -305,6 +305,8 @@ def build_msg(
     # New params (all optional, default None):
     gex_total: float | None = None,
     ladder_rows: list[str] | None = None,  # pre-built annotated ladder lines
+    vol_lines: list[str] | None = None,    # 波動率 section lines from ascii_dashboard
+    inst_lines: list[str] | None = None,   # 法人/融資 section lines from ascii_dashboard
 ) -> str:
     """組裝多行訊息,格式照 plan;任何缺項印 N/A 不 crash。"""
 
@@ -330,18 +332,13 @@ def build_msg(
     else:
         header = f"📍 TXF 位置圖 {date_str} | 收盤 N/A"
 
-    # ── Line 2: 外資/投信期淨 OI + GEX ─────────────────────────────────────────
-    foreign_str = (f"外資期淨 {_fmt_signed(foreign_net, ',d')}"
-                   if foreign_net is not None else "外資期淨 N/A")
-    toshin_str = (f"投信 {_fmt_signed(toshin_net, ',d')}"
-                  if toshin_net is not None else "投信 N/A")
+    # ── Line 2: GEX + flip (外資/投信 moved to 法人段 inside ladder block) ────
     flip_str = f"flip {_fmt(flip, '.0f')}" if flip is not None else "flip N/A"
     if gex_total is not None:
         gex_yi = gex_total / 1e8
-        gex_str = f"GEX {gex_yi:.0f}億/1% {flip_str}"
+        oi_line = f"GEX {gex_yi:.0f}億/1% {flip_str}"
     else:
-        gex_str = flip_str
-    oi_line = f"{foreign_str} | {toshin_str} | {gex_str}"
+        oi_line = flip_str
 
     # ── Line 3: 月牆 ──────────────────────────────────────────────────────────
     if walls:
@@ -360,11 +357,22 @@ def build_msg(
     else:
         monthly_line = "月牆: N/A"
 
-    # ── Ladder block ──────────────────────────────────────────────────────────
+    # ── Ladder block (包含 vol/inst 段) ───────────────────────────────────────
+    inner_lines: list[str] = []
     if ladder_rows is not None and len(ladder_rows) > 0:
-        ladder_block = "```\n" + "\n".join(ladder_rows) + "\n```"
+        inner_lines.extend(ladder_rows)
     else:
-        ladder_block = "```\n(梯圖無資料)\n```"
+        inner_lines.append("(梯圖無資料)")
+
+    if vol_lines:
+        inner_lines.append("")
+        inner_lines.extend(vol_lines)
+
+    if inst_lines:
+        inner_lines.append("")
+        inner_lines.extend(inst_lines)
+
+    ladder_block = "```\n" + "\n".join(inner_lines) + "\n```"
 
     # ── 隔夜美股 ────────────────────────────────────────────────────────────────
     sox_str = _fmt_signed(sox, ".1f", "%") if sox is not None else "SOX N/A"
@@ -738,6 +746,30 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as e:
         print(f"[warn] ladder build error: {e}", file=sys.stderr)
 
+    # 3c. 波動率 + 法人/融資 sections from ascii_dashboard (fail-soft)
+    vol_lines: list[str] | None = None
+    inst_lines: list[str] | None = None
+    try:
+        scripts_dir = str(Path(__file__).resolve().parent)
+        if scripts_dir not in sys.path:
+            sys.path.insert(0, scripts_dir)
+        import psycopg2
+        from ascii_dashboard import vol_section_lines, inst_section_lines, DB as _DASH_DB
+        _dash_conn = psycopg2.connect(**_DASH_DB)
+        _dash_conn.autocommit = True
+        _dash_cur = _dash_conn.cursor()
+        try:
+            _vol_lines, _wm = vol_section_lines(_dash_conn, _dash_cur,
+                                                spot or 47000.0)
+            vol_lines = _vol_lines
+            _inst_lines = inst_section_lines(_dash_cur)
+            inst_lines = _inst_lines
+            print(f"[info] vol/inst sections loaded ok, wm={_wm}", file=sys.stderr)
+        finally:
+            _dash_conn.close()
+    except Exception as _sec_exc:
+        print(f"[warn] vol/inst section load failed: {_sec_exc}", file=sys.stderr)
+
     # 4. Futures OI
     print("[info] loading futures OI …", file=sys.stderr)
     try:
@@ -787,6 +819,8 @@ def main(argv: list[str] | None = None) -> int:
         fx=fx if fx else None,
         gex_total=total_gex,
         ladder_rows=ladder_rows,
+        vol_lines=vol_lines,
+        inst_lines=inst_lines,
     )
 
     print("─" * 70)
