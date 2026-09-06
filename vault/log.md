@@ -249,3 +249,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - **連鎖**: stale 寫入騙過 gex-regime 純數據新鮮度 gate → 週末推假 IV_Z_CROSS 事件
 - **修復**: 三處 session gate (database ae68044/b900a1c + My-TW 8e5aff8) + 全量分批清除 (驗證歸零, 留存合法夜盤跨日尾)
 - **教訓**: 「數據在動」≠「市場在動」— 新鮮度 gate 必須疊日曆; collector 的寫入路徑逐條盤點 gate, 別信函式存在就以為有掛
+
+## 2026-09-06 — txf-levels 結構化發布上線 + 跨 session 協調事故
+- h:agent:txf_levels:latest 23 欄位實測落 Redis (TTL 86400): 牆/flip/gamma_regime/真空age/月牆/期淨/隔夜/亞股
+- 事故: nautilus session 於 20:25 已自行實作一版 builder,與本 session 版並存 → 同 key 雙 schema 危險;已收斂 (9260486, consumer 慣例為底+四強化),schema 契約經 inbox topic=coordination 廣播
+- 教訓: 跨 session 同 repo 並行,動共用 key 前先 git log 查近時段 commit
+- 週一 08:40 live 驗證項: hash 落地、flip 非 UNKNOWN、consumer 端接手
