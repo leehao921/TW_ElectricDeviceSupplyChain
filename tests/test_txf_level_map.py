@@ -787,9 +787,10 @@ from scripts.txf_level_map import build_struct_fields  # noqa: E402
 def _full_struct_inputs():
     return dict(
         as_of=dt.date(2026, 9, 7),
-        spot=47177.0,
+        spot=47500.0,
         day_close=46701.0,
-        flip=47050.0,
+        night_close=47177.0,
+        flip=47000.0,
         gex_total=-1.2e9,
         walls={
             "weekly": {"call": [(47500, 8123), (48000, 5000)],
@@ -804,6 +805,9 @@ def _full_struct_inputs():
         us={"sox": 3.4, "vix": 14.2, "ust10y": 4.78, "brent": 95.4, "dxy": 99.2},
         asia={"N225": 1.3, "KS11": 1.6},
         fx={"USDTWD": 31.62},
+        front_expiry=dt.date(2026, 9, 10),
+        vacuum_list=[{"level": 46300, "age_days": 3}],
+        value_note="價值區: 45800▤17%",
     )
 
 
@@ -811,13 +815,18 @@ class TestBuildStructFields:
     def test_full_inputs_field_shapes(self):
         f = build_struct_fields(**_full_struct_inputs())
         assert f["as_of"].startswith("2026-09-07")
-        assert f["spot"] == "47177.0"
-        assert f["gamma_regime"] == "ABOVE_FLIP"  # spot 47177 > flip 47050
+        assert f["spot"] == "47500.0"
+        assert f["gamma_regime"] == "ABOVE_FLIP"  # spot 47500 > flip 47000, diff=500 > deadband
         assert f["cw_w"] == "47500" and f["cw_w_oi"] == "8123"
         assert f["pw_w"] == "46600" and f["pw_w_oi"] == "7900"
         assert f["lvn_above"] == "47300" and f["lvn_below"] == "46900"
         assert f["foreign_net"] == "-82389" and f["trust_net"] == "76174"
         assert f["usdtwd"] == "31.62"
+        assert f["is_settle_day"] == "0"  # front_expiry=Sept 10 != as_of Sept 7
+        assert "expires_at" in f and "13:45" in f["expires_at"]
+        assert "night_close" in f
+        assert "vacuum_json" in f
+        assert "value_area_json" in f
         import json as _json
         month = _json.loads(f["walls_month_json"])
         assert month["call"][0] == [49000, 1119]
@@ -828,7 +837,8 @@ class TestBuildStructFields:
 
     def test_below_flip(self):
         args = _full_struct_inputs()
-        args["spot"] = 46900.0
+        args["spot"] = 46900.0   # diff vs flip=47000: 100, but 0.3%*46900=140.7 → NEUTRAL
+        args["spot"] = 46400.0   # diff vs flip=47000: 600 > 0.3%*46400=139.2 → BELOW_FLIP
         f = build_struct_fields(**args)
         assert f["gamma_regime"] == "BELOW_FLIP"
 
@@ -845,13 +855,166 @@ class TestBuildStructFields:
         args = _full_struct_inputs()
         args.update(walls=None, hvn_result=None, foreign_net=None,
                     toshin_net=None, us={}, asia=None, fx=None,
-                    gex_total=None, flip=None, day_close=None)
+                    gex_total=None, flip=None, day_close=None,
+                    night_close=None, front_expiry=None, vacuum_list=None,
+                    value_note=None)
         f = build_struct_fields(**args)
         assert "cw_w" not in f and "pw_w" not in f
         assert "foreign_net" not in f and "usdtwd" not in f
         assert f["gamma_regime"] == "UNKNOWN"
+        assert "night_close" not in f
+        assert "vacuum_json" not in f
+        assert "value_area_json" not in f
         # never crashes; always carries as_of + spot presence contract
         assert f["as_of"].startswith("2026-09-07")
+
+    def test_omission_policy_all_none(self):
+        """All optional inputs None → only as_of/gamma_regime/is_settle_day/expires_at present."""
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7),
+            spot=None, day_close=None, night_close=None, flip=None,
+            gex_total=None, walls=None, hvn_result=None,
+            foreign_net=None, toshin_net=None, us=None, asia=None, fx=None,
+            front_expiry=None, vacuum_list=None, value_note=None,
+        )
+        assert f["as_of"] == "2026-09-07"
+        assert f["gamma_regime"] == "UNKNOWN"
+        assert f["is_settle_day"] == "0"
+        assert "expires_at" in f
+        # These must NOT be present
+        for key in ("spot", "night_close", "flip", "cw_w", "vacuum_json", "value_area_json",
+                    "front_expiry", "foreign_net", "usdtwd"):
+            assert key not in f, f"Key {key!r} should be omitted but found"
+
+    def test_neutral_deadband(self):
+        """|spot - flip| < 0.3% * spot → NEUTRAL."""
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7), spot=47050.0, day_close=None, flip=47000.0,
+            gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+        )
+        # |47050-47000|=50 < 0.3%*47050=141.15 → NEUTRAL
+        assert f["gamma_regime"] == "NEUTRAL"
+
+    def test_neutral_exact_boundary_is_not_neutral(self):
+        """Boundary: |spot - flip| == deadband → ABOVE_FLIP (strict <)."""
+        spot = 47000.0
+        flip = spot - 0.003 * spot  # exactly at boundary
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7), spot=spot, day_close=None, flip=flip,
+            gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+        )
+        assert f["gamma_regime"] == "ABOVE_FLIP"
+
+    def test_settle_day_true(self):
+        """front_expiry == as_of → is_settle_day == '1'."""
+        today = dt.date(2026, 9, 7)
+        f = build_struct_fields(
+            as_of=today, spot=None, day_close=None, flip=None,
+            gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+            front_expiry=today,
+        )
+        assert f["is_settle_day"] == "1"
+        assert f["front_expiry"] == "2026-09-07"
+
+    def test_settle_day_false(self):
+        """front_expiry != as_of → is_settle_day == '0'."""
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+            gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+            front_expiry=dt.date(2026, 9, 10),
+        )
+        assert f["is_settle_day"] == "0"
+
+    def test_vacuum_present_and_omit(self):
+        """vacuum_list non-empty → vacuum_json present; empty/None → absent."""
+        def _make(vl):
+            return build_struct_fields(
+                as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+                gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+                toshin_net=None, us=None, asia=None, fx=None,
+                vacuum_list=vl,
+            )
+        import json as _json
+        f = _make([{"level": 46300, "age_days": 3}])
+        assert "vacuum_json" in f
+        vac = _json.loads(f["vacuum_json"])
+        assert vac[0]["level"] == 46300 and vac[0]["age_days"] == 3
+        assert "vacuum_json" not in _make([])
+        assert "vacuum_json" not in _make(None)
+
+    def test_value_area_present_and_omit(self):
+        """value_note present → value_area_json = {"note": ...}; None → absent."""
+        def _make(vn):
+            return build_struct_fields(
+                as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+                gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+                toshin_net=None, us=None, asia=None, fx=None,
+                value_note=vn,
+            )
+        import json as _json
+        f = _make("價值區: 45800▤17%")
+        assert "value_area_json" in f
+        assert _json.loads(f["value_area_json"]) == {"note": "價值區: 45800▤17%"}
+        assert "value_area_json" not in _make(None)
+
+    def test_night_close_present_and_omit(self):
+        """night_close present → field present; None → absent."""
+        def _make(nc):
+            return build_struct_fields(
+                as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+                gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+                toshin_net=None, us=None, asia=None, fx=None,
+                night_close=nc,
+            )
+        assert "night_close" in _make(47177.0)
+        assert _make(47177.0)["night_close"] == "47177.0"
+        assert "night_close" not in _make(None)
+
+    def test_hvn_old_format(self):
+        """hvn_result["hvn"] as list of tuples → json.dumps gives [[level, share], ...]."""
+        import json as _json
+        hvn_result = {"hvn": [(45800, 0.17), (45900, 0.16)], "lvn_above": 47300, "lvn_below": 46900}
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+            gex_total=None, walls=None, hvn_result=hvn_result, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+        )
+        assert "hvn_json" in f
+        hvn = _json.loads(f["hvn_json"])
+        assert hvn[0] == [45800, 0.17]
+        assert hvn[1] == [45900, 0.16]
+
+    def test_walls_month_old_format(self):
+        """monthly walls → json.dumps as dict with call/put lists of [strike, oi] arrays."""
+        import json as _json
+        walls = {
+            "weekly": {"call": [(47500, 8123)], "put": [(46600, 7900)]},
+            "monthly": {"call": [(49000, 1119), (48000, 1542)], "put": [(45000, 842)]},
+        }
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+            gex_total=None, walls=walls, hvn_result=None, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+        )
+        assert "walls_month_json" in f
+        month = _json.loads(f["walls_month_json"])
+        assert month["call"][0] == [49000, 1119]
+        assert month["put"][0] == [45000, 842]
+
+    def test_expires_at_format(self):
+        """expires_at = as_of 13:45 TPE ISO with +08:00."""
+        f = build_struct_fields(
+            as_of=dt.date(2026, 9, 7), spot=None, day_close=None, flip=None,
+            gex_total=None, walls=None, hvn_result=None, foreign_net=None,
+            toshin_net=None, us=None, asia=None, fx=None,
+        )
+        assert "expires_at" in f
+        assert "13:45" in f["expires_at"]
+        assert "+08:00" in f["expires_at"]
 
 
 def test_publish_struct_hset_and_expire(monkeypatch):
@@ -887,7 +1050,6 @@ def test_publish_struct_hset_and_expire(monkeypatch):
 from scripts.txf_level_map import (  # noqa: E402
     gamma_regime,
     bucket_age_days,
-    build_struct_payload,
 )
 
 
@@ -895,12 +1057,12 @@ class TestGammaRegime:
     """gamma_regime(spot, flip, deadband_pct=0.003) -> str"""
 
     def test_above(self):
-        """spot clearly above flip and outside deadband → ABOVE."""
-        assert gamma_regime(47500.0, 47000.0) == "ABOVE"
+        """spot clearly above flip and outside deadband → ABOVE_FLIP."""
+        assert gamma_regime(47500.0, 47000.0) == "ABOVE_FLIP"
 
     def test_below(self):
-        """spot clearly below flip and outside deadband → BELOW."""
-        assert gamma_regime(46500.0, 47000.0) == "BELOW"
+        """spot clearly below flip and outside deadband → BELOW_FLIP."""
+        assert gamma_regime(46500.0, 47000.0) == "BELOW_FLIP"
 
     def test_neutral_inside_deadband(self):
         """|spot - flip| < 0.3% * spot → NEUTRAL."""
@@ -919,10 +1081,10 @@ class TestGammaRegime:
         """Boundary: |spot - flip| == deadband_pct * spot → NOT NEUTRAL (strict <)."""
         spot = 47000.0
         deadband_pct = 0.003
-        # |spot - flip| = deadband_pct * spot exactly → ABOVE or BELOW, not NEUTRAL
+        # |spot - flip| = deadband_pct * spot exactly → ABOVE_FLIP or BELOW_FLIP, not NEUTRAL
         flip = spot - deadband_pct * spot  # spot > flip by exactly deadband amount
         result = gamma_regime(spot, flip, deadband_pct=deadband_pct)
-        assert result == "ABOVE"  # strict < → exactly at boundary → not NEUTRAL
+        assert result == "ABOVE_FLIP"  # strict < → exactly at boundary → not NEUTRAL
 
     def test_flip_none_is_unknown(self):
         """flip is None → UNKNOWN."""
@@ -1030,162 +1192,6 @@ class TestBucketAgeDays:
         assert result == {}
 
 
-class TestBuildStructPayload:
-    """build_struct_payload(...) -> dict[str, str]
-    Every value may be None → "" / "UNKNOWN" / "[]" / "{}" per schema.
-    """
-
-    def _all_none_kwargs(self):
-        return dict(
-            as_of=dt.date(2026, 9, 7),
-            spot=None,
-            day_close=None,
-            night_close=None,
-            flip=None,
-            gex_total=None,
-            front_expiry=None,
-            weekly_oi_dict=None,
-            monthly_walls=None,
-            vacuum_list=None,
-            hvn_list=None,
-            value_note=None,
-            foreign_net=None,
-            trust_net=None,
-            overnight=None,
-            asia=None,
-            usdtwd=None,
-        )
-
-    def _full_kwargs(self):
-        return dict(
-            as_of=dt.date(2026, 9, 7),
-            spot=47177.0,
-            day_close=46701.0,
-            night_close=47177.0,
-            flip=47050.0,
-            gex_total=-1.2e9,
-            front_expiry=dt.date(2026, 9, 10),
-            weekly_oi_dict={
-                47500: {"C": 8123, "P": 0},
-                46600: {"C": 0, "P": 7900},
-            },
-            monthly_walls=[{"strike": 49000, "cp": "C", "oi": 1119}],
-            vacuum_list=[{"level": 46300, "age_days": 3}],
-            hvn_list=[{"level": 45800, "share": 0.17}],
-            value_note="價值區: 45800▤17%",
-            foreign_net=-82389,
-            trust_net=76174,
-            overnight={"sox_chg": 1.2, "vix": 14.2, "ust10y": 4.78,
-                       "brent": 95.4, "dxy": 99.2},
-            asia={"N225": 1.3, "KS11": 1.6},
-            usdtwd=31.62,
-        )
-
-    def test_all_none_no_crash(self):
-        """All-None inputs: must not raise."""
-        payload = build_struct_payload(**self._all_none_kwargs())
-        assert isinstance(payload, dict)
-
-    def test_all_none_gamma_regime_unknown(self):
-        """All-None: gamma_regime == 'UNKNOWN'."""
-        payload = build_struct_payload(**self._all_none_kwargs())
-        assert payload["gamma_regime"] == "UNKNOWN"
-
-    def test_all_none_json_fields_load_to_empty(self):
-        """All-None: JSON fields parse to empty containers."""
-        import json as _json
-        payload = build_struct_payload(**self._all_none_kwargs())
-        # These JSON fields should be present and load cleanly
-        for field in ("walls_month_json", "vacuum_json", "hvn_json",
-                      "overnight_json", "asia_json", "value_area_json"):
-            raw = payload[field]
-            parsed = _json.loads(raw)
-            # Should be an empty list or empty dict
-            assert parsed == [] or parsed == {}, (
-                f"field {field!r} expected empty, got {parsed!r}"
-            )
-
-    def test_full_inputs_cw_w_pw_w(self):
-        """weekly_oi_dict with C and P → cw_w/cw_w_oi and pw_w/pw_w_oi correct."""
-        payload = build_struct_payload(**self._full_kwargs())
-        # cw_w = strike with max C oi = 47500 (C=8123)
-        assert payload["cw_w"] == "47500"
-        assert payload["cw_w_oi"] == "8123"
-        # pw_w = strike with max P oi = 46600 (P=7900)
-        assert payload["pw_w"] == "46600"
-        assert payload["pw_w_oi"] == "7900"
-
-    def test_is_settle_day_true(self):
-        """front_expiry == as_of → is_settle_day == '1'."""
-        kwargs = self._full_kwargs()
-        kwargs["front_expiry"] = kwargs["as_of"]  # same date
-        payload = build_struct_payload(**kwargs)
-        assert payload["is_settle_day"] == "1"
-
-    def test_is_settle_day_false(self):
-        """front_expiry != as_of → is_settle_day == '0'."""
-        kwargs = self._full_kwargs()
-        # front_expiry=2026-09-10, as_of=2026-09-07 → not settle day
-        assert kwargs["front_expiry"] != kwargs["as_of"]
-        payload = build_struct_payload(**kwargs)
-        assert payload["is_settle_day"] == "0"
-
-    def test_is_settle_day_none_expiry(self):
-        """front_expiry=None → is_settle_day == '0'."""
-        kwargs = self._all_none_kwargs()
-        payload = build_struct_payload(**kwargs)
-        assert payload["is_settle_day"] == "0"
-
-    def test_expires_at_contains_time_and_offset(self):
-        """expires_at = as_of 13:45 TPE as ISO string with +08:00 offset."""
-        payload = build_struct_payload(**self._full_kwargs())
-        expires_at = payload["expires_at"]
-        assert "13:45" in expires_at, f"Expected 13:45 in expires_at: {expires_at}"
-        assert "+08:00" in expires_at, f"Expected +08:00 in expires_at: {expires_at}"
-
-    def test_json_fields_load_cleanly_with_full_inputs(self):
-        """Full inputs: all JSON fields parse without error."""
-        import json as _json
-        payload = build_struct_payload(**self._full_kwargs())
-        for field in ("walls_month_json", "vacuum_json", "hvn_json",
-                      "overnight_json", "asia_json", "value_area_json"):
-            raw = payload[field]
-            _json.loads(raw)  # must not raise
-
-    def test_gamma_regime_above(self):
-        """spot > flip → gamma_regime == 'ABOVE'."""
-        kwargs = self._full_kwargs()
-        # spot=47177, flip=47050 → ABOVE (difference 127 > 0.3%*47177=141.5... wait)
-        # 0.3% * 47177 = 141.5; 47177-47050=127 < 141.5 → actually NEUTRAL!
-        # Use a bigger difference to ensure ABOVE
-        kwargs["spot"] = 47300.0
-        kwargs["flip"] = 47000.0
-        # |47300-47000|=300 > 0.3%*47300=141.9 → ABOVE
-        payload = build_struct_payload(**kwargs)
-        assert payload["gamma_regime"] == "ABOVE"
-
-    def test_gamma_regime_below(self):
-        """spot < flip clearly → gamma_regime == 'BELOW'."""
-        kwargs = self._full_kwargs()
-        kwargs["spot"] = 46700.0
-        kwargs["flip"] = 47000.0
-        # |46700-47000|=300 > 0.3%*46700=140.1 → BELOW
-        payload = build_struct_payload(**kwargs)
-        assert payload["gamma_regime"] == "BELOW"
-
-    def test_gamma_regime_neutral(self):
-        """|spot-flip| < deadband → gamma_regime == 'NEUTRAL'."""
-        kwargs = self._full_kwargs()
-        kwargs["spot"] = 47050.0
-        kwargs["flip"] = 47000.0
-        # |47050-47000|=50 < 0.3%*47050=141.2 → NEUTRAL
-        payload = build_struct_payload(**kwargs)
-        assert payload["gamma_regime"] == "NEUTRAL"
-
-    def test_as_of_in_payload(self):
-        """as_of always present in payload."""
-        payload = build_struct_payload(**self._full_kwargs())
-        assert payload["as_of"] == "2026-09-07"
 
 
 class TestPublishStructNewPayload:

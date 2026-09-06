@@ -224,10 +224,10 @@ def gamma_regime(spot: float | None, flip: float | None,
     """Four-state gamma regime classifier.
 
     Returns:
-      "UNKNOWN"  — spot or flip is None
-      "NEUTRAL"  — |spot − flip| < deadband_pct * spot  (strict less-than)
-      "ABOVE"    — spot > flip and outside deadband
-      "BELOW"    — spot < flip and outside deadband
+      "UNKNOWN"     — spot or flip is None
+      "NEUTRAL"     — |spot − flip| < deadband_pct * spot  (strict less-than)
+      "ABOVE_FLIP"  — spot > flip and outside deadband
+      "BELOW_FLIP"  — spot < flip and outside deadband
 
     deadband_pct default = 0.3% (plan spec).
     """
@@ -236,7 +236,7 @@ def gamma_regime(spot: float | None, flip: float | None,
     diff = abs(spot - flip)
     if diff < deadband_pct * spot:
         return "NEUTRAL"
-    return "ABOVE" if spot > flip else "BELOW"
+    return "ABOVE_FLIP" if spot > flip else "BELOW_FLIP"
 
 
 def bucket_age_days(bars: pd.DataFrame, levels: list[int],
@@ -285,94 +285,6 @@ def bucket_age_days(bars: pd.DataFrame, levels: list[int],
 
     return result
 
-
-def build_struct_payload(
-    as_of: dt.date,
-    spot: float | None,
-    day_close: float | None,
-    night_close: float | None,
-    flip: float | None,
-    gex_total: float | None,
-    front_expiry: dt.date | None,
-    weekly_oi_dict: dict | None,
-    monthly_walls: list | None,
-    vacuum_list: list | None,
-    hvn_list: list | None,
-    value_note: str | None,
-    foreign_net: int | None,
-    trust_net: int | None,
-    overnight: dict | None,
-    asia: dict | None,
-    usdtwd: float | None,
-) -> dict[str, str]:
-    """Build the structured Redis hash payload for h:agent:txf_levels:latest.
-
-    Every value may be None — missing numerics → "", missing JSON arrays → "[]",
-    missing JSON objects → "{}", gamma_regime → "UNKNOWN" when flip/spot None.
-
-    Fields per plan schema:
-      as_of, expires_at, spot, day_close, night_close, flip, gex_total,
-      gamma_regime, front_expiry, is_settle_day,
-      cw_w, cw_w_oi, pw_w, pw_w_oi,
-      walls_month_json, vacuum_json, hvn_json, value_area_json,
-      foreign_net, trust_net, overnight_json, asia_json, usdtwd.
-    """
-    p: dict[str, str] = {}
-
-    # Scalar fields
-    p["as_of"] = as_of.isoformat()
-
-    # expires_at = as_of 13:45 TPE (+08:00)
-    expires_naive = dt.datetime.combine(as_of, dt.time(13, 45))
-    expires_tpe = TPE_TZ.localize(expires_naive)
-    p["expires_at"] = expires_tpe.isoformat()
-
-    p["spot"] = str(spot) if spot is not None else ""
-    p["day_close"] = str(day_close) if day_close is not None else ""
-    p["night_close"] = str(night_close) if night_close is not None else ""
-    p["flip"] = str(flip) if flip is not None else ""
-    p["gex_total"] = str(gex_total) if gex_total is not None else ""
-
-    # gamma_regime: four-state, uses new pure function
-    p["gamma_regime"] = gamma_regime(spot, flip)
-
-    # front_expiry and is_settle_day
-    p["front_expiry"] = front_expiry.isoformat() if front_expiry is not None else ""
-    p["is_settle_day"] = "1" if (front_expiry is not None and front_expiry == as_of) else "0"
-
-    # Weekly wall levels: cw_w/pw_w from weekly_oi_dict (max C oi / max P oi)
-    _wd = weekly_oi_dict or {}
-    cw_strike, cw_oi, pw_strike, pw_oi = None, None, None, None
-    for strike, cp_dict in _wd.items():
-        c_oi = cp_dict.get("C", 0) or 0
-        if cw_strike is None or c_oi > cw_oi:
-            if c_oi > 0:
-                cw_strike, cw_oi = int(strike), int(c_oi)
-        p_oi = cp_dict.get("P", 0) or 0
-        if pw_strike is None or p_oi > pw_oi:
-            if p_oi > 0:
-                pw_strike, pw_oi = int(strike), int(p_oi)
-    p["cw_w"] = str(cw_strike) if cw_strike is not None else ""
-    p["cw_w_oi"] = str(cw_oi) if cw_oi is not None else ""
-    p["pw_w"] = str(pw_strike) if pw_strike is not None else ""
-    p["pw_w_oi"] = str(pw_oi) if pw_oi is not None else ""
-
-    # JSON array / object fields
-    p["walls_month_json"] = json.dumps(monthly_walls) if monthly_walls is not None else "[]"
-    p["vacuum_json"] = json.dumps(vacuum_list) if vacuum_list is not None else "[]"
-    p["hvn_json"] = json.dumps(hvn_list) if hvn_list is not None else "[]"
-    p["value_area_json"] = json.dumps({"note": value_note}) if value_note else "{}"
-
-    # Institutional / FX
-    p["foreign_net"] = str(foreign_net) if foreign_net is not None else ""
-    p["trust_net"] = str(trust_net) if trust_net is not None else ""
-
-    p["overnight_json"] = json.dumps(overnight) if overnight is not None else "{}"
-    p["asia_json"] = json.dumps(asia) if asia is not None else "{}"
-
-    p["usdtwd"] = str(usdtwd) if usdtwd is not None else ""
-
-    return p
 
 
 def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3,
@@ -767,6 +679,7 @@ def build_struct_fields(
     as_of: dt.date,
     spot: float | None,
     day_close: float | None,
+    night_close: float | None = None,
     flip: float | None,
     gex_total: float | None,
     walls: dict | None,
@@ -776,25 +689,41 @@ def build_struct_fields(
     us: dict | None,
     asia: dict | None,
     fx: dict | None,
+    front_expiry: dt.date | None = None,
+    vacuum_list: list | None = None,
+    value_note: str | None = None,
 ) -> dict[str, str]:
     """Flatten the morning-map intermediates into a Redis-hash field map for
     the nautilus-shioaji trading loop (structured second sink alongside the
     ASCII inbox push). Missing inputs OMIT their fields (consumer treats
-    absent = unknown) — except gamma_regime, which always exists:
-    ABOVE_FLIP / BELOW_FLIP needs both spot and flip, else UNKNOWN."""
+    absent = unknown) — except as_of, gamma_regime, is_settle_day, and
+    expires_at which always exist."""
     fields: dict[str, str] = {"as_of": as_of.isoformat()}
+
+    # expires_at = as_of 13:45 TPE (+08:00) — always present; advisory intraday-decay marker
+    expires_naive = dt.datetime.combine(as_of, dt.time(13, 45))
+    expires_tpe = TPE_TZ.localize(expires_naive)
+    fields["expires_at"] = expires_tpe.isoformat()
+
     if spot is not None:
         fields["spot"] = str(spot)
     if day_close is not None:
         fields["day_close"] = str(day_close)
+    if night_close is not None:
+        fields["night_close"] = str(night_close)
     if flip is not None:
         fields["flip"] = str(flip)
     if gex_total is not None:
         fields["gex_total"] = str(gex_total)
-    if spot is not None and flip is not None:
-        fields["gamma_regime"] = "ABOVE_FLIP" if spot > flip else "BELOW_FLIP"
-    else:
-        fields["gamma_regime"] = "UNKNOWN"
+
+    # gamma_regime: four-state, always present; uses pure function
+    fields["gamma_regime"] = gamma_regime(spot, flip)
+
+    # front_expiry + is_settle_day
+    if front_expiry is not None:
+        fields["front_expiry"] = front_expiry.isoformat()
+    fields["is_settle_day"] = "1" if (front_expiry is not None and front_expiry == as_of) else "0"
+
     weekly = (walls or {}).get("weekly") or {}
     if weekly.get("call"):
         strike, oi_v = weekly["call"][0]
@@ -814,6 +743,15 @@ def build_struct_fields(
             fields["lvn_above"] = str(int(hvn_result["lvn_above"]))
         if hvn_result.get("lvn_below") is not None:
             fields["lvn_below"] = str(int(hvn_result["lvn_below"]))
+
+    # vacuum_json: omit if empty/None
+    if vacuum_list:
+        fields["vacuum_json"] = json.dumps(vacuum_list)
+
+    # value_area_json: omit if None
+    if value_note:
+        fields["value_area_json"] = json.dumps({"note": value_note})
+
     if foreign_net is not None:
         fields["foreign_net"] = str(foreign_net)
     if toshin_net is not None:
@@ -884,18 +822,6 @@ def _push_inbox(message: str, as_of: dt.date) -> bool:
         print(f"[warn] txf-level-map inbox push error: {exc}", file=sys.stderr)
         return False
 
-
-def _build_monthly_walls(walls: dict | None) -> list | None:
-    """Flatten monthly walls dict → [{strike, cp, oi}] list for struct payload."""
-    if not walls:
-        return None
-    monthly = walls.get("monthly") or {}
-    rows = []
-    for s, o in (monthly.get("call") or []):
-        rows.append({"strike": int(s), "cp": "C", "oi": int(o)})
-    for s, o in (monthly.get("put") or []):
-        rows.append({"strike": int(s), "cp": "P", "oi": int(o)})
-    return rows or None
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1098,10 +1024,9 @@ def main(argv: list[str] | None = None) -> int:
     print(msg)
     print("─" * 70)
 
-    # 8. Assemble struct payload (build_struct_payload — new schema)
+    # 8. Assemble struct fields (build_struct_fields — merged schema)
     # vacuum_list: LVN levels within ±SPAN of spot, with trading-day age
     vacuum_list: list[dict] | None = None
-    hvn_list: list[dict] | None = None
     value_note_str: str | None = None
     front_expiry: dt.date | None = None
 
@@ -1137,53 +1062,47 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[warn] vacuum_list build error: {e}", file=sys.stderr)
 
     try:
-        # hvn_list: top-5 HVN levels with share
-        if hvn_result and hvn_result.get("hvn"):
-            top_hvn = hvn_lvn(profile, spot=spot, top_n=5) if (spot and not profile.empty) else hvn_result
-            hvn_list = [{"level": int(lvl), "share": round(share, 4)}
-                        for lvl, share in (top_hvn.get("hvn") or [])[:5]]
         # value_area note (reuse from ladder build if available)
         if not profile.empty and oi_dict:
             strikes_l = sorted(oi_dict.keys())
             value_note_str = value_area_note(profile, min(strikes_l), max(strikes_l))
     except Exception as e:
-        print(f"[warn] hvn_list/value_note build error: {e}", file=sys.stderr)
+        print(f"[warn] value_note build error: {e}", file=sys.stderr)
 
-    struct_payload = build_struct_payload(
+    struct_fields = build_struct_fields(
         as_of=today,
         spot=spot,
         day_close=day_close,
         night_close=night_close,
         flip=flip,
         gex_total=total_gex,
-        front_expiry=front_expiry,
-        weekly_oi_dict=oi_dict if oi_dict else None,
-        monthly_walls=_build_monthly_walls(walls),
-        vacuum_list=vacuum_list,
-        hvn_list=hvn_list,
-        value_note=value_note_str,
+        walls=walls,
+        hvn_result=hvn_result,
         foreign_net=foreign_net,
-        trust_net=toshin_net,
-        overnight={
-            "sox_chg": us.get("sox"),
+        toshin_net=toshin_net,
+        us={
+            "sox": us.get("sox"),
             "vix": us.get("vix"),
             "ust10y": us.get("ust10y"),
             "brent": us.get("brent"),
             "dxy": us.get("dxy"),
         } if us else None,
         asia=asia if asia else None,
-        usdtwd=(fx or {}).get("USDTWD"),
+        fx=fx if fx else None,
+        front_expiry=front_expiry,
+        vacuum_list=vacuum_list,
+        value_note=value_note_str,
     )
 
     if args.dry_run:
         print("[info] dry-run: skipping inbox + struct publish", file=sys.stderr)
-        print("\n── struct payload (sorted keys) ──")
-        for k in sorted(struct_payload):
-            print(f"  {k}: {struct_payload[k]!r}")
+        print("\n── struct fields (sorted keys) ──")
+        for k in sorted(struct_fields):
+            print(f"  {k}: {struct_fields[k]!r}")
         return 0
 
     _push_inbox(msg, today)
-    _publish_struct(struct_payload)
+    _publish_struct(struct_fields)
     return 0
 
 
