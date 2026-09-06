@@ -51,9 +51,20 @@ def split_day_night(bars: pd.DataFrame) -> tuple:
     """bars: DataFrame[bucket(tz-aware UTC), close, volume] 最新交易日相關列。
 
     回傳 (day_close, night_close, night_chg)。
-    日盤界 = TPE 13:45 (含);夜盤 = 之後至次晨。
-    以最後一根 bar 的 TPE 日曆日為錨:當日 <=13:45 的最後 close 為 day_close;
-    之後的最後 close 為 night_close (無夜盤 bar → night_close=None, chg=None)。
+
+    Correct cross-midnight logic:
+      TXF night session spans midnight: TPE 15:00 → next-morning 05:00.
+      Example: Friday night bars (TPE Sat 00:00–04:59) must be classified as
+      the FRIDAY night session, not Saturday day session.
+
+    Algorithm:
+      1. Find the last bar whose TPE time is in [08:45, 13:45].
+         Its TPE calendar date = trading day D.
+      2. day_close = last close of bars on date D with TPE time in [08:45, 13:45].
+      3. night bars = all bars with UTC bucket > last day bar's UTC bucket
+         AND within the night window ending at D+1 05:00 TPE.
+      4. night_close = last close of night bars (None if none exist yet).
+      5. night_chg = night_close − day_close (None if either is None).
     """
     if bars.empty:
         return None, None, None
@@ -64,17 +75,45 @@ def split_day_night(bars: pd.DataFrame) -> tuple:
     df["tpe_time"] = df["tpe_dt"].apply(
         lambda x: x.hour * 60 + x.minute  # minutes since midnight
     )
+    df["tpe_date"] = df["tpe_dt"].dt.date
 
-    # Boundary in minutes
-    boundary = TPE_DAY_CLOSE_HOUR * 60 + TPE_DAY_CLOSE_MINUTE  # 13:45 = 825
+    # Day session boundary in minutes (08:45 = 525, 13:45 = 825)
+    DAY_OPEN = 8 * 60 + 45   # 525 minutes
+    DAY_CLOSE = TPE_DAY_CLOSE_HOUR * 60 + TPE_DAY_CLOSE_MINUTE  # 825
 
-    day_bars = df[df["tpe_time"] <= boundary]
-    night_bars = df[df["tpe_time"] > boundary]
+    # Step 1: find trading day D = date of last bar with TPE time in [08:45, 13:45]
+    day_session_mask = (df["tpe_time"] >= DAY_OPEN) & (df["tpe_time"] <= DAY_CLOSE)
+    day_session_bars = df[day_session_mask]
 
-    day_close = float(day_bars["close"].iloc[-1]) if not day_bars.empty else None
+    if day_session_bars.empty:
+        # No day bars at all — only night bars present
+        night_close = float(df["close"].iloc[-1])
+        return None, night_close, None
+
+    # Trading day D and day_close
+    last_day_bar = day_session_bars.iloc[-1]
+    trading_day_D = last_day_bar["tpe_date"]
+    day_session_on_D = day_session_bars[day_session_bars["tpe_date"] == trading_day_D]
+    day_close = float(day_session_on_D["close"].iloc[-1])
+
+    # Step 2: night bars = all bars after the last day bar on D
+    last_day_bar_utc = last_day_bar["bucket"]
+    # Night session ends at D+1 05:00 TPE
+    night_end_tpe = TPE_TZ.localize(
+        dt.datetime.combine(
+            trading_day_D + dt.timedelta(days=1),
+            dt.time(5, 0)
+        )
+    )
+    night_mask = (
+        (df["bucket"] > last_day_bar_utc) &
+        (df["tpe_dt"] <= night_end_tpe)
+    )
+    night_bars = df[night_mask]
+
     night_close = float(night_bars["close"].iloc[-1]) if not night_bars.empty else None
 
-    if day_close is not None and night_close is not None:
+    if night_close is not None:
         night_chg = night_close - day_close
     else:
         night_chg = None
@@ -128,12 +167,16 @@ def hvn_lvn(profile: pd.Series, spot: float, top_n: int = 3) -> dict:
     return {"hvn": hvn, "lvn_above": lvn_above, "lvn_below": lvn_below}
 
 
-def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3) -> dict:
-    """oi: DataFrame[expiry, strike, cp, open_interest] (已濾未到期).
+def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3,
+             expiry_ref: pd.DataFrame | None = None) -> dict:
+    """oi: DataFrame[expiry, strike, cp, open_interest] (已濾未到期, 可已用 spot 範圍篩).
 
-    近週選 = min(expiry);
-    月選 = OI 總量最大的 expiry (that is not the weekly, if possible; else same).
-    各 expiry 取 put/call 前 n (by open_interest, descending).
+    近週選 = min(expiry) in oi;
+    月選 = expiry with highest total open_interest sum, determined from
+           `expiry_ref` when provided (unfiltered, full-strike dataset) or from
+           `oi` itself (fallback).  This avoids spot-range filtering distorting
+           which expiry has the most total OI.
+    各 expiry 取 put/call 前 n (by open_interest, descending) from `oi`.
     回傳 dict(weekly=dict(call=[(strike, oi)...], put=[...]),
               monthly=dict(call=..., put=...))。
 
@@ -151,16 +194,25 @@ def oi_walls(oi: pd.DataFrame, spot: float, n: int = 3) -> dict:
     # Ensure consistent types
     df["cp"] = df["cp"].astype(str).str.upper()
 
-    # Weekly = nearest (min) expiry
+    # Weekly = nearest (min) expiry in the (filtered) oi
     expiries = sorted(df["expiry"].unique())
     if not expiries:
         return empty_result
 
     weekly_exp = expiries[0]
 
-    # Monthly = expiry with highest total OI (fallback: same as weekly if only one)
-    total_oi_by_exp = df.groupby("expiry")["open_interest"].sum()
-    monthly_exp = total_oi_by_exp.idxmax()
+    # Monthly = expiry with highest total OI.
+    # Use expiry_ref (unfiltered) when provided so the spot-range filter does not
+    # distort the selection (weekly/thin expiries may have many strikes in range
+    # but low aggregate OI overall).
+    ref = expiry_ref if expiry_ref is not None and not expiry_ref.empty else df
+    ref_norm = ref.copy()
+    ref_norm["cp"] = ref_norm["cp"].astype(str).str.upper()
+    total_oi_by_exp = ref_norm.groupby("expiry")["open_interest"].sum()
+    # Only consider expiries that are also present in the filtered oi
+    valid_expiries = set(expiries)
+    total_oi_valid = total_oi_by_exp[total_oi_by_exp.index.isin(valid_expiries)]
+    monthly_exp = total_oi_valid.idxmax() if not total_oi_valid.empty else weekly_exp
 
     def _top_n(sub: pd.DataFrame, cp_letter: str, top: int) -> list[tuple[int, int]]:
         cp_rows = sub[sub["cp"].str.startswith(cp_letter)]
@@ -229,19 +281,28 @@ def build_msg(
     if walls:
         weekly_calls = walls.get("weekly", {}).get("call", [])
         monthly_calls = walls.get("monthly", {}).get("call", [])
-        monthly_exp_strikes = {s for s, _ in monthly_calls}
 
-        # Merge and deduplicate, label monthly
+        # Build lookup dicts: strike → oi for each expiry
+        weekly_call_map = {s: oi_val for s, oi_val in weekly_calls}
+        monthly_call_map = {s: oi_val for s, oi_val in monthly_calls}
+
+        # Merge: collect all strikes; for shared strikes keep monthly OI (bigger)
+        # Label: (月) if strike is in monthly; (週) if weekly-only
+        all_call_strikes = sorted(
+            set(weekly_call_map) | set(monthly_call_map)
+        )
         all_calls: list[tuple[int, int, str]] = []
-        for strike, oi_val in weekly_calls:
-            label = "(月)" if strike in monthly_exp_strikes else ""
+        for strike in all_call_strikes:
+            in_weekly = strike in weekly_call_map
+            in_monthly = strike in monthly_call_map
+            if in_monthly:
+                oi_val = monthly_call_map[strike]
+                label = "(月)"
+            else:
+                oi_val = weekly_call_map[strike]
+                label = "(週)"
             all_calls.append((strike, oi_val, label))
-        # Add monthly-only strikes not in weekly
-        weekly_strikes = {s for s, _ in weekly_calls}
-        for strike, oi_val in monthly_calls:
-            if strike not in weekly_strikes:
-                all_calls.append((strike, oi_val, "(月)"))
-        all_calls.sort(key=lambda x: x[0])
+
         for strike, oi_val, label in all_calls:
             call_parts.append(f"{strike} C牆{oi_val}{label}")
 
@@ -253,16 +314,28 @@ def build_msg(
     if walls:
         weekly_puts = walls.get("weekly", {}).get("put", [])
         monthly_puts = walls.get("monthly", {}).get("put", [])
-        monthly_put_strikes = {s for s, _ in monthly_puts}
+
+        # Build lookup dicts: strike → oi for each expiry
+        weekly_put_map = {s: oi_val for s, oi_val in weekly_puts}
+        monthly_put_map = {s: oi_val for s, oi_val in monthly_puts}
+
+        # Merge: collect all strikes; for shared strikes keep monthly OI (bigger)
+        # Label: (月) if strike is in monthly; (週) if weekly-only
+        all_put_strikes = sorted(
+            set(weekly_put_map) | set(monthly_put_map),
+            reverse=True
+        )
         all_puts: list[tuple[int, int, str]] = []
-        for strike, oi_val in weekly_puts:
-            label = "(月)" if strike in monthly_put_strikes else ""
+        for strike in all_put_strikes:
+            in_monthly = strike in monthly_put_map
+            if in_monthly:
+                oi_val = monthly_put_map[strike]
+                label = "(月)"
+            else:
+                oi_val = weekly_put_map[strike]
+                label = "(週)"
             all_puts.append((strike, oi_val, label))
-        weekly_put_strikes = {s for s, _ in weekly_puts}
-        for strike, oi_val in monthly_puts:
-            if strike not in weekly_put_strikes:
-                all_puts.append((strike, oi_val, "(月)"))
-        all_puts.sort(key=lambda x: x[0], reverse=True)
+
         for strike, oi_val, label in all_puts:
             put_parts.append(f"{strike} P牆{oi_val}{label}")
 
@@ -548,9 +621,13 @@ def main(argv: list[str] | None = None) -> int:
     spot: float | None = None
 
     if not bars.empty:
-        # Latest session (last calendar day in data)
-        latest_date = bars["tpe_date"].max()
-        latest_bars = bars[bars["tpe_date"] == latest_date].copy()
+        # Pass the last 2 TPE calendar days to split_day_night so it can find
+        # Friday day bars even when the most recent bar is Saturday morning
+        # (post-midnight night session).  split_day_night internally anchors on
+        # the last bar whose TPE time is in [08:45, 13:45].
+        all_dates = sorted(bars["tpe_date"].unique())
+        session_dates = set(all_dates[-2:])  # last 2 calendar days
+        latest_bars = bars[bars["tpe_date"].isin(session_dates)].copy()
         day_close, night_close, night_chg = split_day_night(latest_bars)
         spot = night_close if night_close is not None else day_close
         print(f"[info] day={day_close} night={night_close} chg={night_chg}", file=sys.stderr)
@@ -579,12 +656,14 @@ def main(argv: list[str] | None = None) -> int:
 
     walls: dict | None = None
     if not oi_df.empty and spot is not None:
-        # Filter ±2500 from spot
+        # Filter ±2500 from spot for wall display, but pass full oi_df as
+        # expiry_ref so monthly selection uses unfiltered total OI (avoids
+        # thin near-expiry inflating OI sum within the narrow price range).
         oi_filtered = oi_df[
             (oi_df["strike"] >= spot - 2500) &
             (oi_df["strike"] <= spot + 2500)
         ].copy()
-        walls = oi_walls(oi_filtered, spot=spot, n=3)
+        walls = oi_walls(oi_filtered, spot=spot, n=3, expiry_ref=oi_df)
     elif not oi_df.empty:
         walls = oi_walls(oi_df, spot=47000.0, n=3)  # fallback spot
 

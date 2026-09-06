@@ -350,6 +350,59 @@ class TestOiWalls:
         assert len(result["weekly"]["call"]) == 1
         assert len(result["weekly"]["put"]) == 1
 
+    def test_expiry_ref_overrides_filtered_monthly_selection(self):
+        """When a thin near-expiry dominates the spot-filtered OI but the fat
+        monthly has higher global OI, expiry_ref causes the fat monthly to be
+        selected as monthly.
+
+        Scenario:
+          - weekly (9/9): 6 strikes in ±2500 range, each OI=100 → total_filtered=600
+          - monthly (9/16): 2 strikes in range, each OI=200 → total_filtered=400
+          BUT in the full universe:
+          - 9/9 global OI = 600 (all strikes in range)
+          - 9/16 global OI = 2000 (400 in range + 1600 further OTM)
+        Without expiry_ref: oi_walls picks 9/9 as monthly (600 > 400 in filtered).
+        With expiry_ref=full_df: oi_walls picks 9/16 as monthly (2000 > 600 global).
+        """
+        weekly_exp = dt.date(2026, 9, 9)
+        monthly_exp = dt.date(2026, 9, 16)
+
+        # Filtered oi (±2500 from spot=47000): 9/9 has 6 rows, 9/16 has 2 rows
+        filtered_rows = []
+        for strike in [46000, 46500, 47000, 47500, 48000, 48500]:
+            filtered_rows.append({"expiry": weekly_exp, "strike": strike,
+                                   "cp": "C", "open_interest": 100})
+        for strike in [48000, 48500]:
+            filtered_rows.append({"expiry": monthly_exp, "strike": strike,
+                                   "cp": "C", "open_interest": 200})
+        filtered_df = pd.DataFrame(filtered_rows)
+
+        # Full universe: 9/16 has additional OTM strikes with large OI
+        extra_rows = list(filtered_rows)  # start with filtered
+        for strike in [49000, 49500, 50000, 50500]:
+            extra_rows.append({"expiry": monthly_exp, "strike": strike,
+                                "cp": "C", "open_interest": 400})
+        full_df = pd.DataFrame(extra_rows)
+
+        # Without expiry_ref: monthly = 9/9 (600 > 400 in filtered)
+        result_no_ref = oi_walls(filtered_df, spot=47000.0, n=3)
+        weekly_exp_no_ref = weekly_exp  # always min
+        # Both weekly and monthly point to 9/9 when no ref
+        monthly_calls_no_ref = result_no_ref["monthly"]["call"]
+        # 9/9 top-3: 48500(100), 48000(100), 47500(100) — all OI=100
+        # All from 9/9
+        assert all(oi_val == 100 for _, oi_val in monthly_calls_no_ref)
+
+        # With expiry_ref: monthly = 9/16 (2000 > 600 global)
+        result_ref = oi_walls(filtered_df, spot=47000.0, n=3, expiry_ref=full_df)
+        monthly_calls_ref = result_ref["monthly"]["call"]
+        # 9/16 top-2 in filtered range: 48000(200) and 48500(200)
+        monthly_call_strikes = [s for s, _ in monthly_calls_ref]
+        assert 48000 in monthly_call_strikes
+        assert 48500 in monthly_call_strikes
+        # All from 9/16 → OI = 200
+        assert all(oi_val == 200 for _, oi_val in monthly_calls_ref)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # build_msg
@@ -446,3 +499,163 @@ class TestBuildMsg:
         )
         # date should appear somewhere in the message
         assert "9/6" in msg or "2026-09-06" in msg or "09-06" in msg
+
+    def test_build_msg_monthly_label_in_resistance(self):
+        """Monthly-expiry-only strikes appear labeled (月) in 壓力 line;
+        weekly-only strikes appear labeled (週); shared strikes show one entry."""
+        # weekly: 47000 C only; monthly: 47500 C and 48000 C (not in weekly)
+        walls = {
+            "weekly": {
+                "call": [(47000, 711)],
+                "put": [(46500, 479)],
+            },
+            "monthly": {
+                "call": [(47500, 1800), (48000, 2500)],
+                "put": [(46000, 1700)],
+            },
+        }
+        msg = build_msg(
+            as_of=dt.date(2026, 9, 6),
+            day_close=46711.0,
+            night_close=47177.0,
+            night_chg=466.0,
+            walls=walls,
+            flip=None,
+            foreign_net=None, toshin_net=None,
+            sox=None, vix=None, ust10y=None, brent=None, dxy=None,
+            asia=None, fx=None,
+        )
+        # 47500 and 48000 are monthly-only → must carry (月) label
+        assert "47500" in msg
+        assert "48000" in msg
+        # The monthly-only strikes must have (月) label
+        resistance_line = [l for l in msg.splitlines() if l.startswith("壓力")][0]
+        assert "47500 C牆1800(月)" in resistance_line
+        assert "48000 C牆2500(月)" in resistance_line
+        # 47000 is weekly-only → must carry (週) label
+        assert "47000 C牆711(週)" in resistance_line
+
+    def test_build_msg_weekly_monthly_same_strike_deduped(self):
+        """When a strike appears in both weekly and monthly, it renders once with (月) label."""
+        walls = {
+            "weekly": {
+                "call": [(47500, 400), (48000, 1542)],
+                "put": [(46500, 479)],
+            },
+            "monthly": {
+                "call": [(47500, 1800), (48000, 2500)],
+                "put": [(46500, 1900)],
+            },
+        }
+        msg = build_msg(
+            as_of=dt.date(2026, 9, 6),
+            day_close=46711.0,
+            night_close=47177.0,
+            night_chg=466.0,
+            walls=walls,
+            flip=None,
+            foreign_net=None, toshin_net=None,
+            sox=None, vix=None, ust10y=None, brent=None, dxy=None,
+            asia=None, fx=None,
+        )
+        resistance_line = [l for l in msg.splitlines() if l.startswith("壓力")][0]
+        # 47500 and 48000 are in both → deduplicated, labeled (月), monthly OI wins
+        # Should appear exactly once each
+        assert resistance_line.count("47500") == 1
+        assert resistance_line.count("48000") == 1
+        # Monthly OI (bigger) is kept
+        assert "47500 C牆1800(月)" in resistance_line
+        assert "48000 C牆2500(月)" in resistance_line
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Bug 1 regression: post-midnight night bars (Friday night → Saturday morning)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestSplitDayNightPostMidnight:
+    """Reproduce the Friday-night/Saturday-morning classification bug.
+
+    TXF night session: Fri 15:00 TPE (= Fri 07:00 UTC) → Sat 05:00 TPE (= Fri 21:00 UTC).
+    Day session bars: Fri 00:45–05:45 UTC (= Fri 08:45–13:45 TPE).
+    Post-midnight night bars: Fri 16:00 UTC → Fri 20:59 UTC (= Sat 00:00–04:59 TPE).
+
+    Old (broken) code: anchored on tpe_date of the LAST bar, which for post-midnight
+    bars is Saturday.  Saturday has NO bars in [08:45,13:45] → day_close=None.
+
+    New (correct) logic: find the last bar in [08:45,13:45] TPE to identify trading day D;
+    day_close = last close in D[08:45,13:45]; night bars = everything from D 15:00 TPE
+    onward (regardless of calendar day); night_close = last of those.
+    """
+
+    def _make_friday_shape(self) -> pd.DataFrame:
+        """Build a realistic Friday-shape DataFrame using raw UTC timestamps.
+
+        Day bars (Fri TPE 08:45–13:45 = Fri UTC 00:45–05:45):
+          Fri 00:45 UTC  close=46000
+          Fri 03:00 UTC  close=46500
+          Fri 05:45 UTC  close=46711   ← day close
+
+        Night bars spanning midnight (Fri TPE 15:00 = Fri 07:00 UTC)
+        → Sat TPE 04:59 = Fri 20:59 UTC:
+          Fri 07:00 UTC  close=46750   (= TPE Fri 15:00 — night session opens)
+          Fri 14:00 UTC  close=47000   (= TPE Fri 22:00)
+          Fri 20:59 UTC  close=47177   (= TPE Sat 04:59) ← night close
+        """
+        import pytz
+        utc = pytz.utc
+
+        rows = [
+            # Day bars — Friday UTC times mapping to TPE 08:45-13:45
+            (dt.datetime(2026, 8, 21, 0, 45, tzinfo=utc),  46000.0, 100),
+            (dt.datetime(2026, 8, 21, 3,  0, tzinfo=utc),  46500.0, 200),
+            (dt.datetime(2026, 8, 21, 5, 45, tzinfo=utc),  46711.0, 150),
+            # Night bars — Fri UTC 07:00 to Fri UTC 20:59 = TPE Fri 15:00 to Sat 04:59
+            (dt.datetime(2026, 8, 21, 7,  0, tzinfo=utc),  46750.0,  80),
+            (dt.datetime(2026, 8, 21, 14,  0, tzinfo=utc), 47000.0,  90),
+            (dt.datetime(2026, 8, 21, 20, 59, tzinfo=utc), 47177.0, 120),
+        ]
+        df = pd.DataFrame(rows, columns=["bucket", "close", "volume"])
+        return df
+
+    def test_day_close_is_friday_tpe_session(self):
+        """day_close must be 46711 (last bar in Fri TPE [08:45,13:45])."""
+        bars = self._make_friday_shape()
+        day_close, night_close, night_chg = split_day_night(bars)
+        assert day_close == pytest.approx(46711.0), (
+            f"day_close={day_close!r}; expected 46711.0 (last Fri TPE day bar). "
+            "Bug: old code anchors on tpe_date of last bar (Saturday) → no day bars found."
+        )
+
+    def test_night_close_is_saturday_morning_bar(self):
+        """night_close must be 47177 (Sat 04:59 TPE bar, the last night bar)."""
+        bars = self._make_friday_shape()
+        day_close, night_close, night_chg = split_day_night(bars)
+        assert night_close == pytest.approx(47177.0), (
+            f"night_close={night_close!r}; expected 47177.0."
+        )
+
+    def test_night_chg_correct(self):
+        """night_chg = night_close − day_close = 47177 − 46711 = 466."""
+        bars = self._make_friday_shape()
+        day_close, night_close, night_chg = split_day_night(bars)
+        assert night_chg == pytest.approx(466.0), (
+            f"night_chg={night_chg!r}; expected 466.0."
+        )
+
+    def test_no_night_yet_friday_shape(self):
+        """If only day bars exist (night not started yet), night_close=None."""
+        import pytz
+        utc = pytz.utc
+        day_only = pd.DataFrame({
+            "bucket": [
+                dt.datetime(2026, 8, 21, 0, 45, tzinfo=utc),
+                dt.datetime(2026, 8, 21, 3,  0, tzinfo=utc),
+                dt.datetime(2026, 8, 21, 5, 45, tzinfo=utc),
+            ],
+            "close": [46000.0, 46500.0, 46711.0],
+            "volume": [100, 200, 150],
+        })
+        day_close, night_close, night_chg = split_day_night(day_only)
+        assert day_close == pytest.approx(46711.0)
+        assert night_close is None
+        assert night_chg is None
