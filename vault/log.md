@@ -255,3 +255,10 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 事故: nautilus session 於 20:25 已自行實作一版 builder,與本 session 版並存 → 同 key 雙 schema 危險;已收斂 (9260486, consumer 慣例為底+四強化),schema 契約經 inbox topic=coordination 廣播
 - 教訓: 跨 session 同 repo 並行,動共用 key 前先 git log 查近時段 commit
 - 週一 08:40 live 驗證項: hash 落地、flip 非 UNKNOWN、consumer 端接手
+
+## 2026-09-07 — flip 週一 UNKNOWN 生產事故 + 修復
+- 事故: 08:40 首發 flip=UNKNOWN → nautilus gamma-regime 規則無訊號,fade 程式趨勢日全速跑
+- 根因: compute_gex 當日過濾在週一/連假後 08:40 必撲空 (夜盤 rows 屬前一交易日、日盤 IV 08:45 起才有)
+- 修復: iv_strikes 96h lookback 取每履約價最新快照 + flip_asof 新鮮度欄位;今日 hash 已重發 (ABOVE_FLIP, flip 45700, spot 47491);consumer 經 inbox coordination 通知
+- 附帶: staleness 測試 fixture 日期敏感修正 (today-3 週一恰為工作日門檻)
+- 觀察: 週選換前緣後 GEX 量級跳動 (9/4 到期 336億 → 9/9 前緣 7719億) — 近到期 gamma 密度機械性效應,consumer 讀 GEX 絕對值需 per-expiry 常態化 (W37 觀察項)
