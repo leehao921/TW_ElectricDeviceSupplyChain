@@ -597,7 +597,8 @@ def _load_fx() -> dict:
     return result
 
 
-def _get_gex(date: dt.date, spot: float) -> tuple[float | None, float | None, str | None]:
+def _get_gex(date: dt.date, spot: float
+             ) -> tuple[float | None, float | None, str | None, object]:
     """Return (total_gex, flip, zone) using ascii_dashboard.compute_gex.
     Falls back gracefully if import or DB fails.
     """
@@ -616,14 +617,14 @@ def _get_gex(date: dt.date, spot: float) -> tuple[float | None, float | None, st
         row = cur.fetchone()
         if row is None or row[0] is None:
             conn.close()
-            return None, None, None
+            return None, None, None, None
         front = row[0]
-        total_gex, flip, zone = compute_gex(conn, spot, front)
+        total_gex, flip, zone, iv_asof = compute_gex(conn, spot, front)
         conn.close()
-        return total_gex, flip, zone
+        return total_gex, flip, zone, iv_asof
     except Exception as exc:
         print(f"[warn] txf-level-map: _get_gex error: {exc}", file=sys.stderr)
-        return None, None, None
+        return None, None, None, None
 
 
 def _load_us_overnight() -> dict:
@@ -905,8 +906,9 @@ def main(argv: list[str] | None = None) -> int:
     while t1.weekday() >= 5:
         t1 -= dt.timedelta(days=1)
     print(f"[info] fetching GEX for T-1={t1} …", file=sys.stderr)
-    total_gex, flip, zone = _get_gex(t1, spot or 47000.0)
-    print(f"[info] total_gex={total_gex} flip={flip} zone={zone}", file=sys.stderr)
+    total_gex, flip, zone, iv_asof = _get_gex(t1, spot or 47000.0)
+    print(f"[info] total_gex={total_gex} flip={flip} zone={zone} "
+          f"iv_asof={iv_asof}", file=sys.stderr)
 
     # 3b. Build near-week ladder
     ladder_rows: list[str] | None = None
@@ -1093,6 +1095,9 @@ def main(argv: list[str] | None = None) -> int:
         vacuum_list=vacuum_list,
         value_note=value_note_str,
     )
+    # flip 快照時戳 — consumer 判斷新鮮度(週一/連假後為前一夜盤,可達 -3.5 日)
+    if iv_asof is not None and "flip" in struct_fields:
+        struct_fields["flip_asof"] = str(iv_asof)
 
     if args.dry_run:
         print("[info] dry-run: skipping inbox + struct publish", file=sys.stderr)

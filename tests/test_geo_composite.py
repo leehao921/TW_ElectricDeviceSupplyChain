@@ -385,7 +385,8 @@ class TestLoadYfStaleness:
     def test_stale_cache_triggers_refetch(self):
         """If cache is 2+ days old, yfinance.Ticker must be called."""
         today = dt.date.today()
-        stale_date = today - dt.timedelta(days=3)  # clearly stale
+        # today-3 在週一恰為上週五(=工作日門檻)會誤判 fresh — 用 -7 保證任何星期皆 stale
+        stale_date = today - dt.timedelta(days=7)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             cache_dir = Path(tmpdir)
