@@ -268,3 +268,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 同分鐘買 2610 華航 1,000 股 @20.4 → Tranche2 完成, 總持 2 張均價 20.475 (失效線 18.5)
 - 哲學對位: 「別人貪婪」(漲停+利多見報) 收割 → 資金輪入左側錯價標的; 2610_t2 觸發器移除 (手動執行早於外資觸發)
 - 大盤 47,326.27 (+775.14)
+
+## 2026-09-08 — GEX 常態化: 7719億歸因為 bug + gross/dte/coverage 欄位
+- 歸因(plan 模式探針): 週一 7719億 = _get_gex 前緣選擇用 t1(週五)把已到期 9/4 合約當前緣 — 週一 bug 家族第二例;修復後真實序列 net 26→35億穩定
+- netting 實錘: gross 158.6億 vs |net| 3.5億 — total_gex 為淨值,平衡時過零翻符,量級規則不可用 net
+- 新欄位: gex_gross(量級規則用)/gex_dte/gex_coverage(品質gate);gex_history.json 開始累積,≥20日後同DTE百分位化另案
+- consumer 指引已廣播(inbox coordination);下週一 08:40 = 前緣 bug 修復關鍵驗證日
