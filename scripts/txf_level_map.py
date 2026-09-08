@@ -168,6 +168,69 @@ def hvn_lvn(profile: pd.Series, spot: float, top_n: int = 3) -> dict:
     return {"hvn": hvn, "lvn_above": lvn_above, "lvn_below": lvn_below}
 
 
+def pick_front_expiry(expiries: list[dt.date], as_of: dt.date) -> dt.date | None:
+    """Return the nearest expiry that is >= as_of (i.e., still alive today).
+
+    Pure function — no DB access, fully unit-testable.
+
+    Bug context: _get_gex originally passed t1 (T-1) to the SQL expiry >= clause.
+    On Monday t1 = Friday, so the already-expired Friday weekly contract was
+    selected as front, producing garbage near-expiry gamma (7719億 on 2026-09-07).
+    This function always receives today (as_of) and skips any past expiry.
+    """
+    candidates = [e for e in expiries if e >= as_of]
+    return min(candidates) if candidates else None
+
+
+# ── GEX history helpers (Task 3) ─────────────────────────────────────────────
+GEX_HISTORY_PATH = REPO_ROOT / "data" / "gex_history.json"
+
+
+def _load_gex_history(path: Path) -> list[dict]:
+    """Load gex_history list from JSON.  Corrupt file → rename to .corrupt-<ts>."""
+    if not path.exists():
+        return []
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(raw, list):
+            return raw
+    except json.JSONDecodeError:
+        import datetime as _dt
+        stamp = _dt.datetime.now().strftime("%Y%m%d%H%M%S")
+        corrupt_path = path.with_name(f"{path.name}.corrupt-{stamp}")
+        try:
+            path.rename(corrupt_path)
+            print(
+                f"[warn] gex-history JSON corrupt; renamed to {corrupt_path.name}",
+                file=sys.stderr,
+            )
+        except OSError as rename_err:
+            print(
+                f"[warn] gex-history JSON corrupt and rename failed: {rename_err}",
+                file=sys.stderr,
+            )
+    except OSError:
+        pass
+    return []
+
+
+def _save_gex_history(path: Path, records: list[dict]) -> None:
+    """Persist gex_history list to JSON."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
+def _upsert_gex_record(records: list[dict], new_rec: dict) -> list[dict]:
+    """Replace same-day record if present, otherwise append (idempotent rerun)."""
+    as_of_str = new_rec["as_of"]
+    for i, rec in enumerate(records):
+        if rec.get("as_of") == as_of_str:
+            records[i] = new_rec
+            return records
+    records.append(new_rec)
+    return records
+
+
 def annotate_ladder(rows: list[str], strikes: list[int], profile_20d: pd.Series,
                     lvn_levels: set[int], top_n: int = 5) -> list[str]:
     """在 wall_rows 產出的每列右側加掛 volume-profile 標註。
@@ -598,33 +661,47 @@ def _load_fx() -> dict:
 
 
 def _get_gex(date: dt.date, spot: float
-             ) -> tuple[float | None, float | None, str | None, object]:
-    """Return (total_gex, flip, zone) using ascii_dashboard.compute_gex.
-    Falls back gracefully if import or DB fails.
+             ) -> tuple[float | None, float | None, str | None, object, dict | None]:
+    """Return (total_gex, flip, zone, iv_asof, extras) using ascii_dashboard.compute_gex.
+
+    Falls back gracefully if import or DB fails (returns 5-tuple of Nones).
+
+    Fix (2026-09-08): front-expiry selection now uses dt.date.today() NOT t1 (T-1).
+    On Monday t1=Friday — the old code picked already-expired Friday contracts,
+    producing garbage near-expiry gamma.  We fetch ALL distinct expiries from the
+    latest settle_date, then call pick_front_expiry(expiries, today) to get the
+    minimum expiry that is still alive.  t1 is only used in the log line.
+
+    extras = dict(gross_gex, n_c, n_p) from analyze_gex; None on failure.
     """
     scripts_dir = str(Path(__file__).resolve().parent)
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
+    today = dt.date.today()
     try:
         import psycopg2
         from ascii_dashboard import compute_gex, DB
         conn = psycopg2.connect(**DB)
         conn.autocommit = True
         cur = conn.cursor()
-        cur.execute("""SELECT min(expiry) FROM option_oi_daily
+        # Fetch ALL expiries from the latest settle_date (unfiltered)
+        cur.execute("""SELECT DISTINCT expiry FROM option_oi_daily
                        WHERE underlying='TX' AND settle_date=(SELECT max(settle_date)
-                       FROM option_oi_daily WHERE underlying='TX') AND expiry >= %s""", (date,))
-        row = cur.fetchone()
-        if row is None or row[0] is None:
+                       FROM option_oi_daily WHERE underlying='TX')""")
+        expiry_rows = cur.fetchall()
+        expiries = [r[0] for r in expiry_rows if r[0] is not None]
+        front = pick_front_expiry(expiries, as_of=today)
+        print(f"[info] txf-level-map: _get_gex t1={date} today={today} "
+              f"all_expiries={sorted(expiries)} front={front}", file=sys.stderr)
+        if front is None:
             conn.close()
-            return None, None, None, None
-        front = row[0]
-        total_gex, flip, zone, iv_asof = compute_gex(conn, spot, front)
+            return None, None, None, None, None
+        total_gex, flip, zone, iv_asof, extras = compute_gex(conn, spot, front)
         conn.close()
-        return total_gex, flip, zone, iv_asof
+        return total_gex, flip, zone, iv_asof, extras
     except Exception as exc:
         print(f"[warn] txf-level-map: _get_gex error: {exc}", file=sys.stderr)
-        return None, None, None, None
+        return None, None, None, None, None
 
 
 def _load_us_overnight() -> dict:
@@ -693,6 +770,7 @@ def build_struct_fields(
     front_expiry: dt.date | None = None,
     vacuum_list: list | None = None,
     value_note: str | None = None,
+    gex_extras: dict | None = None,
 ) -> dict[str, str]:
     """Flatten the morning-map intermediates into a Redis-hash field map for
     the nautilus-shioaji trading loop (structured second sink alongside the
@@ -764,6 +842,19 @@ def build_struct_fields(
     usdtwd = (fx or {}).get("USDTWD")
     if usdtwd is not None:
         fields["usdtwd"] = str(usdtwd)
+
+    # GEX extended fields (Task 2: gross / coverage / dte) — omit when absent
+    if gex_extras is not None:
+        gross = gex_extras.get("gross_gex")
+        n_c = gex_extras.get("n_c")
+        n_p = gex_extras.get("n_p")
+        if gross is not None:
+            fields["gex_gross"] = str(gross)
+        if n_c is not None and n_p is not None:
+            fields["gex_coverage"] = f"C{n_c}/P{n_p}"
+        if front_expiry is not None:
+            fields["gex_dte"] = str((front_expiry - as_of).days)
+
     return fields
 
 
@@ -900,15 +991,16 @@ def main(argv: list[str] | None = None) -> int:
     elif not oi_df.empty:
         walls = oi_walls(oi_df, spot=47000.0, n=3)  # fallback spot
 
-    # 3. GEX (T-1) — now uses compute_gex via _get_gex
+    # 3. GEX — front expiry selected by pick_front_expiry(expiries, today) inside _get_gex.
+    # t1 (T-1) is passed only for log labelling; front-selection always uses today.
     t1 = today - dt.timedelta(days=1)
-    # Skip weekends for T-1
+    # Skip weekends for T-1 (log label only)
     while t1.weekday() >= 5:
         t1 -= dt.timedelta(days=1)
-    print(f"[info] fetching GEX for T-1={t1} …", file=sys.stderr)
-    total_gex, flip, zone, iv_asof = _get_gex(t1, spot or 47000.0)
+    print(f"[info] fetching GEX (front by today={today}, t1={t1} for log) …", file=sys.stderr)
+    total_gex, flip, zone, iv_asof, gex_extras = _get_gex(t1, spot or 47000.0)
     print(f"[info] total_gex={total_gex} flip={flip} zone={zone} "
-          f"iv_asof={iv_asof}", file=sys.stderr)
+          f"iv_asof={iv_asof} gex_extras={gex_extras}", file=sys.stderr)
 
     # 3b. Build near-week ladder
     ladder_rows: list[str] | None = None
@@ -1094,20 +1186,48 @@ def main(argv: list[str] | None = None) -> int:
         front_expiry=front_expiry,
         vacuum_list=vacuum_list,
         value_note=value_note_str,
+        gex_extras=gex_extras,
     )
     # flip 快照時戳 — consumer 判斷新鮮度(週一/連假後為前一夜盤,可達 -3.5 日)
     if iv_asof is not None and "flip" in struct_fields:
         struct_fields["flip_asof"] = str(iv_asof)
+
+    # 9. GEX history (Task 3) — write on LIVE run only; dry-run prints the record
+    gex_hist_rec: dict | None = None
+    if total_gex is not None or gex_extras is not None:
+        gex_hist_rec = {
+            "as_of": today.isoformat(),
+            "front_expiry": front_expiry.isoformat() if front_expiry else None,
+            "dte": (front_expiry - today).days if front_expiry else None,
+            "net": total_gex,
+            "gross": (gex_extras or {}).get("gross_gex"),
+            "spot": spot,
+            "iv_asof": str(iv_asof) if iv_asof is not None else None,
+        }
 
     if args.dry_run:
         print("[info] dry-run: skipping inbox + struct publish", file=sys.stderr)
         print("\n── struct fields (sorted keys) ──")
         for k in sorted(struct_fields):
             print(f"  {k}: {struct_fields[k]!r}")
+        if gex_hist_rec is not None:
+            print(f"\n── gex_history record (dry-run preview) ──")
+            print(f"  {json.dumps(gex_hist_rec, ensure_ascii=False)}")
         return 0
 
     _push_inbox(msg, today)
     _publish_struct(struct_fields)
+
+    # Write gex_history after successful publish (live run only)
+    if gex_hist_rec is not None:
+        try:
+            hist_records = _load_gex_history(GEX_HISTORY_PATH)
+            hist_records = _upsert_gex_record(hist_records, gex_hist_rec)
+            _save_gex_history(GEX_HISTORY_PATH, hist_records)
+            print(f"[info] gex_history written ({len(hist_records)} records)", file=sys.stderr)
+        except Exception as hist_exc:
+            print(f"[warn] gex_history write error: {hist_exc}", file=sys.stderr)
+
     return 0
 
 

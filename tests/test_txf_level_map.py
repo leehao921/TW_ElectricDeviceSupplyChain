@@ -709,6 +709,290 @@ class TestSplitDayNightPostMidnight:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# Task 1: pick_front_expiry (pure function — GEX front-selection fix)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestPickFrontExpiry:
+    """TDD RED → GREEN for the pure front-expiry selector.
+
+    Bug: _get_gex used t1 (T-1) for expiry >= clause.  On Monday t1=Friday,
+    so already-expired Friday weekly contracts were selected as "front",
+    producing explosive near-expiry gamma (7719億 → bug value).
+
+    Fix: extract pick_front_expiry(expiries, as_of) → min(e for e in expiries if e >= as_of).
+    """
+
+    def _dates(self, *iso: str) -> list[dt.date]:
+        return [dt.date.fromisoformat(s) for s in iso]
+
+    def test_monday_skips_expired_friday(self):
+        """Monday as_of: past Friday expiry must be skipped; next week selected."""
+        expiries = self._dates("2026-09-04", "2026-09-09", "2026-09-16")
+        from scripts.txf_level_map import pick_front_expiry
+        result = pick_front_expiry(expiries, as_of=dt.date(2026, 9, 7))  # Monday
+        assert result == dt.date(2026, 9, 9), (
+            f"Expected 9/9, got {result!r}. "
+            "On Monday as_of=9/7, expired 9/4 must not be front."
+        )
+
+    def test_settle_day_self_selects(self):
+        """as_of == earliest expiry: that expiry is still front (settle day)."""
+        expiries = self._dates("2026-09-09", "2026-09-16")
+        from scripts.txf_level_map import pick_front_expiry
+        result = pick_front_expiry(expiries, as_of=dt.date(2026, 9, 9))
+        assert result == dt.date(2026, 9, 9)
+
+    def test_empty_list_returns_none(self):
+        """Empty expiry list → None."""
+        from scripts.txf_level_map import pick_front_expiry
+        assert pick_front_expiry([], as_of=dt.date(2026, 9, 7)) is None
+
+    def test_all_past_returns_none(self):
+        """All expiries strictly before as_of → None."""
+        expiries = self._dates("2026-09-04", "2026-09-01")
+        from scripts.txf_level_map import pick_front_expiry
+        assert pick_front_expiry(expiries, as_of=dt.date(2026, 9, 7)) is None
+
+    def test_single_future_expiry(self):
+        """Single expiry in the future → that expiry."""
+        from scripts.txf_level_map import pick_front_expiry
+        result = pick_front_expiry(
+            [dt.date(2026, 9, 16)], as_of=dt.date(2026, 9, 9)
+        )
+        assert result == dt.date(2026, 9, 16)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Task 2: analyze_gex additive keys (gross_gex, n_c, n_p)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestAnalyzeGexAdditiveKeys:
+    """TDD for gross_gex / n_c / n_p added to analyze_gex metrics dict."""
+
+    def _make_frames(self, rows):
+        """rows: list of (strike, cp, gamma, oi).
+        Returns (strikes_df, oi_df) as analyze_gex expects.
+        """
+        import pandas as pd
+        strikes_df = pd.DataFrame(
+            [(r[0], r[1], r[2]) for r in rows],
+            columns=["strike", "call_put", "gamma"],
+        )
+        oi_df = pd.DataFrame(
+            [(r[0], r[1], r[3], "2026-09-08") for r in rows],
+            columns=["strike", "cp", "open_interest", "settle_date"],
+        )
+        return strikes_df, oi_df
+
+    def test_gross_gex_equals_sum_abs_per_row(self):
+        """gross_gex == sum of |gex| per merged row (before groupby)."""
+        # Two calls, one put — net may cancel but gross must not
+        rows = [
+            (47000, "C", 0.002, 1000),   # gex > 0
+            (46500, "P", 0.002, 1000),   # gex < 0
+        ]
+        from scripts.options_quant import analyze_gex, CONTRACT_MULTIPLIER
+        strikes_df, oi_df = self._make_frames(rows)
+        result = analyze_gex(strikes_df, oi_df, spot=47000.0)
+        m = result["metrics"]
+        assert "gross_gex" in m, "gross_gex key missing from metrics"
+        # gross_gex must be >= |total_gex|
+        assert m["gross_gex"] >= abs(m["total_gex"]), (
+            f"gross={m['gross_gex']!r} < |net|={abs(m['total_gex'])!r}"
+        )
+
+    def test_gross_ge_abs_net_invariant(self):
+        """gross_gex >= |total_gex| always (invariant for any input)."""
+        rows = [
+            (46000, "C", 0.001, 500),
+            (46500, "C", 0.003, 200),
+            (46000, "P", 0.002, 300),
+            (46500, "P", 0.001, 400),
+        ]
+        from scripts.options_quant import analyze_gex
+        strikes_df, oi_df = self._make_frames(rows)
+        result = analyze_gex(strikes_df, oi_df, spot=46250.0)
+        m = result["metrics"]
+        assert m["gross_gex"] >= abs(m["total_gex"])
+
+    def test_n_c_n_p_counts(self):
+        """n_c/n_p count the merged Call/Put rows (after dropna)."""
+        rows = [
+            (47000, "C", 0.002, 1000),
+            (46500, "C", 0.003, 800),
+            (46500, "P", 0.002, 700),
+        ]
+        from scripts.options_quant import analyze_gex
+        strikes_df, oi_df = self._make_frames(rows)
+        result = analyze_gex(strikes_df, oi_df, spot=46750.0)
+        m = result["metrics"]
+        assert "n_c" in m, "n_c key missing"
+        assert "n_p" in m, "n_p key missing"
+        assert m["n_c"] == 2
+        assert m["n_p"] == 1
+
+    def test_existing_keys_unchanged(self):
+        """Existing keys (total_gex, flip, zone, top_strikes) still present + correct."""
+        rows = [
+            (47000, "C", 0.002, 1000),
+            (46500, "P", 0.002, 1000),
+        ]
+        from scripts.options_quant import analyze_gex
+        strikes_df, oi_df = self._make_frames(rows)
+        result = analyze_gex(strikes_df, oi_df, spot=46750.0)
+        m = result["metrics"]
+        assert "total_gex" in m
+        assert "flip" in m
+        assert "zone" in m
+        assert "top_strikes" in m
+        assert isinstance(m["top_strikes"], list)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Task 2b: build_struct_fields new GEX fields
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestBuildStructFieldsGex:
+    """TDD for gex_gross / gex_dte / gex_coverage optional fields."""
+
+    def _base_kwargs(self) -> dict:
+        """Minimal valid kwargs that produce no crash."""
+        return dict(
+            as_of=dt.date(2026, 9, 8),
+            spot=47000.0,
+            day_close=47000.0,
+            night_close=None,
+            flip=None,
+            gex_total=None,
+            walls=None,
+            hvn_result=None,
+            foreign_net=None,
+            toshin_net=None,
+            us=None,
+            asia=None,
+            fx=None,
+        )
+
+    def test_gex_gross_present_when_extras_supplied(self):
+        from scripts.txf_level_map import build_struct_fields
+        kw = self._base_kwargs()
+        kw["gex_extras"] = {"gross_gex": 1.5e10, "n_c": 50, "n_p": 45}
+        fields = build_struct_fields(**kw)
+        assert "gex_gross" in fields
+        assert fields["gex_gross"] == str(1.5e10)
+
+    def test_gex_coverage_present_when_extras_supplied(self):
+        from scripts.txf_level_map import build_struct_fields
+        kw = self._base_kwargs()
+        kw["gex_extras"] = {"gross_gex": 1.5e10, "n_c": 50, "n_p": 45}
+        fields = build_struct_fields(**kw)
+        assert "gex_coverage" in fields
+        assert fields["gex_coverage"] == "C50/P45"
+
+    def test_gex_dte_present_when_front_expiry_supplied(self):
+        from scripts.txf_level_map import build_struct_fields
+        kw = self._base_kwargs()
+        kw["front_expiry"] = dt.date(2026, 9, 9)  # tomorrow
+        kw["gex_extras"] = {"gross_gex": 1.5e10, "n_c": 50, "n_p": 45}
+        fields = build_struct_fields(**kw)
+        assert "gex_dte" in fields
+        assert fields["gex_dte"] == str((dt.date(2026, 9, 9) - dt.date(2026, 9, 8)).days)  # 1
+
+    def test_gex_gross_omitted_when_no_extras(self):
+        from scripts.txf_level_map import build_struct_fields
+        kw = self._base_kwargs()
+        fields = build_struct_fields(**kw)
+        assert "gex_gross" not in fields
+        assert "gex_coverage" not in fields
+
+    def test_gex_dte_omitted_when_no_front_expiry(self):
+        from scripts.txf_level_map import build_struct_fields
+        kw = self._base_kwargs()
+        kw["gex_extras"] = {"gross_gex": 1.5e10, "n_c": 50, "n_p": 45}
+        # no front_expiry → gex_dte absent
+        fields = build_struct_fields(**kw)
+        assert "gex_dte" not in fields
+
+    def test_dte_arithmetic(self):
+        """gex_dte = (front_expiry - as_of).days, integer string."""
+        from scripts.txf_level_map import build_struct_fields
+        kw = self._base_kwargs()
+        kw["front_expiry"] = dt.date(2026, 9, 16)  # 8 days from as_of
+        kw["gex_extras"] = {"gross_gex": 2e10, "n_c": 30, "n_p": 25}
+        fields = build_struct_fields(**kw)
+        assert fields["gex_dte"] == "8"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Task 3: GEX history file (append + idempotent + corrupt-file guard)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TestGexHistory:
+    """TDD for _load_gex_history / _save_gex_history / _upsert_gex_record."""
+
+    def test_append_new_record(self, tmp_path):
+        """First write creates file with one record."""
+        from scripts.txf_level_map import _load_gex_history, _save_gex_history, _upsert_gex_record
+        path = tmp_path / "gex_history.json"
+        records = _load_gex_history(path)
+        assert records == []
+        rec = {"as_of": "2026-09-08", "front_expiry": "2026-09-09",
+               "dte": 1, "net": 2.6e9, "gross": 5e9, "spot": 47000.0,
+               "iv_asof": "2026-09-08T07:30:00+08:00"}
+        records = _upsert_gex_record(records, rec)
+        _save_gex_history(path, records)
+        loaded = _load_gex_history(path)
+        assert len(loaded) == 1
+        assert loaded[0]["as_of"] == "2026-09-08"
+
+    def test_same_day_idempotent(self, tmp_path):
+        """Re-running same day replaces the existing record, not appends."""
+        from scripts.txf_level_map import _load_gex_history, _save_gex_history, _upsert_gex_record
+        path = tmp_path / "gex_history.json"
+        rec1 = {"as_of": "2026-09-08", "front_expiry": "2026-09-09",
+                "dte": 1, "net": 2.6e9, "gross": 5e9, "spot": 47000.0,
+                "iv_asof": "2026-09-08T07:30:00+08:00"}
+        records = _upsert_gex_record([], rec1)
+        _save_gex_history(path, records)
+
+        # Second run same day, different values
+        rec2 = {**rec1, "net": 3.0e9, "gross": 6e9}
+        records2 = _load_gex_history(path)
+        records2 = _upsert_gex_record(records2, rec2)
+        _save_gex_history(path, records2)
+
+        final = _load_gex_history(path)
+        assert len(final) == 1, f"Expected 1 record, got {len(final)}"
+        assert final[0]["net"] == 3.0e9, "Idempotent replace failed"
+
+    def test_multi_day_append(self, tmp_path):
+        """Different days accumulate as separate records."""
+        from scripts.txf_level_map import _load_gex_history, _save_gex_history, _upsert_gex_record
+        path = tmp_path / "gex_history.json"
+        records = []
+        for i, date_str in enumerate(["2026-09-05", "2026-09-08"]):
+            rec = {"as_of": date_str, "front_expiry": "2026-09-09",
+                   "dte": 4 - i, "net": float(i), "gross": float(i + 1),
+                   "spot": 47000.0, "iv_asof": "n/a"}
+            records = _upsert_gex_record(records, rec)
+        _save_gex_history(path, records)
+        loaded = _load_gex_history(path)
+        assert len(loaded) == 2
+
+    def test_corrupt_file_renamed(self, tmp_path):
+        """Corrupt JSON → file renamed to .corrupt-<ts>, returns empty list."""
+        from scripts.txf_level_map import _load_gex_history
+        path = tmp_path / "gex_history.json"
+        path.write_text("this is not json{{", encoding="utf-8")
+        records = _load_gex_history(path)
+        assert records == []
+        corrupt_files = list(tmp_path.glob("gex_history.json.corrupt-*"))
+        assert len(corrupt_files) == 1, (
+            f"Expected 1 .corrupt-* file, found {corrupt_files}"
+        )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # annotate_ladder
 # ══════════════════════════════════════════════════════════════════════════════
 

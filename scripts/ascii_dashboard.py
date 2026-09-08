@@ -60,9 +60,11 @@ def wall_rows(oi: dict, spot: float, width: int = BAR_W, zg: float | None = None
 
 
 def compute_gex(conn, spot: float, front_expiry
-                ) -> tuple[float | None, float | None, str | None, object]:
+                ) -> tuple[float | None, float | None, str | None, object, dict | None]:
     """Compute GEX metrics using iv_strikes + option_oi_daily.
-    Returns (total_gex, flip, zone, iv_asof). Each may be None on failure.
+    Returns (total_gex, flip, zone, iv_asof, extras). Each may be None on failure.
+
+    extras = dict(gross_gex, n_c, n_p) — additive fields from analyze_gex (Task 2).
 
     iv_strikes 窗口為 96h lookback 取每履約價最新快照 — 非嚴格「當日」:
     週一/連假後 08:40 沒有任何當日 rows(夜盤屬前一交易日、日盤 IV 08:45 起),
@@ -70,7 +72,7 @@ def compute_gex(conn, spot: float, front_expiry
     iv_asof = 所用快照最新 timestamp,供 consumer 判斷新鮮度。
     """
     import pandas as pd
-    gex_total = gex_flip = gex_zone = iv_asof = None
+    gex_total = gex_flip = gex_zone = iv_asof = extras = None
     try:
         front_txt = front_expiry.strftime("%Y%m%d")
         strikes_df = pd.read_sql("""
@@ -88,9 +90,14 @@ def compute_gex(conn, spot: float, front_expiry
         from options_quant import analyze_gex
         m = analyze_gex(strikes_df.drop(columns=["time"]), oi_df, spot)["metrics"]
         gex_total, gex_flip, gex_zone = m["total_gex"], m["flip"], m["zone"]
+        extras = {
+            "gross_gex": m.get("gross_gex"),
+            "n_c": m.get("n_c"),
+            "n_p": m.get("n_p"),
+        }
     except Exception as e:
         print(f"[warn] GEX layer failed: {e}", file=sys.stderr)
-    return gex_total, gex_flip, gex_zone, iv_asof
+    return gex_total, gex_flip, gex_zone, iv_asof, extras
 
 
 def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
@@ -201,7 +208,7 @@ def build(conn) -> str:
     pw = max(oi_all, key=lambda k: oi_all[k].get("P", 0)) if oi_all else None
 
     # ---- GEX (盤中 iv_strikes gamma × OI, 復用 options_quant §3.1)
-    gex_total, gex_flip, gex_zone, _iv_asof = compute_gex(conn, txf, front)
+    gex_total, gex_flip, gex_zone, _iv_asof, _gex_extras = compute_gex(conn, txf, front)
 
     # ---- 波動率區塊 (VIX 家族 + IV curve/複合 regime); wm 保留供 gate_iv
     vol_lines, wm = vol_section_lines(conn, cur, txf)

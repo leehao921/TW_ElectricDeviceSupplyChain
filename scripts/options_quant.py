@@ -237,6 +237,10 @@ def analyze_gex(strikes_df, oi_df, spot):
     sign = df["call_put"].map({"C": 1.0, "P": -1.0})
     df = df.assign(gex=df["gamma"] * df["open_interest"] * CONTRACT_MULTIPLIER
                         * spot * spot * 0.01 * sign)
+    # Additive keys (Task 2): gross_gex and n_c/n_p before groupby
+    gross_gex = float(df["gex"].abs().sum())
+    n_c = int((df["call_put"] == "C").sum())
+    n_p = int((df["call_put"] == "P").sum())
     by_k = df.groupby("strike")["gex"].sum().sort_index()
     cum = by_k.cumsum()
     flip = None
@@ -272,7 +276,8 @@ def analyze_gex(strikes_df, oi_df, spot):
     if n_excluded > 0:
         verification.append(f"excluded {n_excluded} rows with NaN gamma/OI from GEX")
     return {"metrics": {"total_gex": total, "flip": flip, "zone": zone,
-                        "top_strikes": top},
+                        "top_strikes": top,
+                        "gross_gex": gross_gex, "n_c": n_c, "n_p": n_p},
             "verdict": verdict, "verification": verification}
 
 
