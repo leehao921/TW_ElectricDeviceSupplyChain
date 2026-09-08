@@ -54,6 +54,15 @@
       "level": 445,
       "desc": "左側 T1 失效線",
       "action": "若已建倉 → 出場"
+    },
+    {
+      "id": "2610_stop",
+      "name": "華航",
+      "type": "price_below",
+      "symbol": "2610",
+      "level": 18.5,
+      "desc": "失效線 (Tranche1+2 共 2 張均價 20.475)",
+      "action": "左側 thesis 失效 — 全出檢討 (分析標註非指令)"
     }
   ],
   "log": [
