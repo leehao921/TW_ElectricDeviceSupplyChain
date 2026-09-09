@@ -1,0 +1,159 @@
+<title>TW Coverage 訊號平台架構</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F2EF; --band:#E8E7E3; --band-line:#D6D5D0; --node:#FFFFFF; --ink:#1E2226; --muted:#6C7178;
+  --line:#2B2F33; --tag-bg:#F1F1EF; --tag-ink:#4B5057; --in-bg:#EAF0F7; --in-line:#9DB3CC;
+  --data-bg:#F4F1EC; --ledger-bg:#FBF0EC; --ledger-line:#E7B9A5; --focal:#E0602A; --focal-bg:#FCEDE4; --auto-line:#9A9E9A;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1D20; --band:#25282C; --band-line:#3A3E44; --node:#2C3035; --ink:#ECEDEA; --muted:#A3A8AE;
+    --line:#D8DAD6; --tag-bg:#3A3E44; --tag-ink:#C9CDD2; --in-bg:#2C3844; --in-line:#5B7A99;
+    --data-bg:#33312D; --ledger-bg:#3A2C27; --ledger-line:#8A5A48; --focal:#F08A55; --focal-bg:#4A2E22; --auto-line:#6B6F6B;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1D20; --band:#25282C; --band-line:#3A3E44; --node:#2C3035; --ink:#ECEDEA; --muted:#A3A8AE;
+  --line:#D8DAD6; --tag-bg:#3A3E44; --tag-ink:#C9CDD2; --in-bg:#2C3844; --in-line:#5B7A99;
+  --data-bg:#33312D; --ledger-bg:#3A2C27; --ledger-line:#8A5A48; --focal:#F08A55; --focal-bg:#4A2E22; --auto-line:#6B6F6B;
+}
+body{background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;margin:0}
+.wrap{overflow-x:auto;padding:24px 16px 32px}
+.canvas{position:relative;width:1180px;height:1180px;margin:0 auto}
+.band{position:absolute;background:var(--band);border:1px solid var(--band-line);border-radius:6px}
+.band.ledger{background:var(--ledger-bg);border:1px dashed var(--ledger-line)}
+.band-title{position:absolute;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.12em;color:var(--muted);background:var(--bg);padding:0 6px;transform:translateY(-50%)}
+.band.ledger .band-title{color:var(--focal)}
+.node{position:absolute;background:var(--node);border:1px solid var(--line);border-radius:5px;box-sizing:border-box;padding:22px 12px 10px;text-align:center}
+.node.in{background:var(--in-bg);border-color:var(--in-line)}
+.node.data{background:var(--data-bg);border-color:var(--band-line)}
+.node.ext{background:var(--band);border-color:var(--band-line)}
+.node.auto{background:transparent;border:1px dashed var(--auto-line)}
+.node.ledger{background:var(--node)}
+.node.focal{border:2px solid var(--focal);background:var(--focal-bg)}
+.tag{position:absolute;top:6px;left:6px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.1em;color:var(--tag-ink);background:var(--tag-bg);border:1px solid var(--band-line);border-radius:3px;padding:1px 5px}
+.node.focal .tag{color:var(--focal);border-color:var(--focal)}
+.node h3{margin:0 0 4px;font-size:14px;font-weight:700;letter-spacing:.02em}
+.node p{margin:0;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;line-height:1.5;color:var(--muted)}
+svg.arrows{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.arrows path{fill:none;stroke:var(--line);stroke-width:1.4}
+.arrows path.fb{stroke:var(--focal);stroke-dasharray:6 5}
+.arrows text{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;fill:var(--muted)}
+.note{position:absolute;font-size:13px;color:var(--focal);font-style:italic;line-height:1.6;width:200px}
+.note small{display:block;font-family:"JetBrains Mono",ui-monospace,monospace;font-style:normal;font-size:10px;letter-spacing:.1em;margin-bottom:6px}
+.legend{width:1180px;margin:8px auto 0;border-top:1px solid var(--band-line);padding-top:10px;display:flex;gap:26px;flex-wrap:wrap;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;color:var(--muted);align-items:center}
+.legend .lt{letter-spacing:.14em}
+.sw{display:inline-block;width:14px;height:10px;border:1px solid var(--line);border-radius:2px;vertical-align:middle;margin-right:6px;background:var(--node)}
+.sw.focal{border:2px solid var(--focal);background:var(--focal-bg)}
+.sw.in{background:var(--in-bg);border-color:var(--in-line)}
+.sw.data{background:var(--data-bg);border-color:var(--band-line)}
+.sw.ledger{background:var(--ledger-bg);border-color:var(--ledger-line)}
+.sw.auto{background:transparent;border:1px dashed var(--auto-line)}
+.ln{display:inline-block;width:26px;border-top:1.4px solid var(--line);vertical-align:middle;margin-right:6px}
+.ln.fb{border-top:1.4px dashed var(--focal)}
+.cap{width:1180px;margin:0 auto 6px;font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10px;color:var(--muted);letter-spacing:.06em}
+</style>
+
+<div class="wrap">
+  <div class="cap">My-TW-Coverage · 台股數據 × 訊號 × 驗證平台 · 2026-09-09 · 資料真相層 / routine 產線 / 訊號產品層 / 驗證帳本層</div>
+  <div class="canvas" id="c">
+    <svg class="arrows" id="svg">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line)" stroke="none"></path></marker>
+        <marker id="ahf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--focal)" stroke="none"></path></marker>
+      </defs>
+    </svg>
+  </div>
+  <div class="legend">
+    <span class="lt">LEGEND</span>
+    <span><span class="sw focal"></span>FOCAL · 事前準則迴圈</span>
+    <span><span class="sw"></span>一般節點</span>
+    <span><span class="sw in"></span>輸入</span>
+    <span><span class="sw data"></span>資料 / 外部</span>
+    <span><span class="sw ledger"></span>驗證帳本層</span>
+    <span><span class="sw auto"></span>自動 / 排程</span>
+    <span><span class="ln"></span>一般流程</span>
+    <span><span class="ln fb"></span>回饋路徑</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var c=document.getElementById('c'), svg=document.getElementById('svg');
+  var N={};
+  function band(x,y,w,h,title,cls){var b=document.createElement('div');b.className='band'+(cls?' '+cls:'');b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px';c.appendChild(b);var t=document.createElement('div');t.className='band-title';t.style.cssText='left:'+(x+w/2-70)+'px;top:'+y+'px';t.textContent=title;if(cls==='ledger'){t.style.left=(x+w/2-80)+'px';}c.appendChild(t);}
+  function node(id,x,y,w,h,tag,title,sub,cls){var d=document.createElement('div');d.className='node'+(cls?' '+cls:'');d.style.cssText='left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px';d.innerHTML='<span class="tag">'+tag+'</span><h3>'+title+'</h3><p>'+sub+'</p>';c.appendChild(d);N[id]={x:x,y:y,w:w,h:h};}
+  function pt(id,side,f){var n=N[id];f=f==null?0.5:f;if(side==='b')return[n.x+n.w*f,n.y+n.h];if(side==='t')return[n.x+n.w*f,n.y];if(side==='l')return[n.x,n.y+n.h*f];return[n.x+n.w,n.y+n.h*f];}
+  function path(d,fb,label,lx,ly){var p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('d',d);if(fb)p.setAttribute('class','fb');p.setAttribute('marker-end',fb?'url(#ahf)':'url(#ah)');svg.appendChild(p);if(label){var t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',lx);t.setAttribute('y',ly);t.textContent=label;svg.appendChild(t);}}
+  function down(a,fa,b,fb,label){var s=pt(a,'b',fa),e=pt(b,'t',fb);var my=(s[1]+e[1])/2;path('M'+s[0]+','+s[1]+' L'+s[0]+','+my+' L'+e[0]+','+my+' L'+e[0]+','+e[1],false,label,(s[0]+e[0])/2+6,my-4);}
+  function right(a,b,label){var s=pt(a,'r'),e=pt(b,'l');path('M'+s[0]+','+s[1]+' L'+e[0]+','+e[1],false,label,(s[0]+e[0])/2-14,s[1]-6);}
+
+  // ── bands ──
+  band(250,206,690,118,'STEP 0 · 資料真相');
+  band(90,542,1000,96,'訊號產品層 · PRODUCERS');
+  band(250,676,690,262,'驗證帳本層 · 誠實迴圈','ledger');
+
+  // ── IN ──
+  node('in',470,26,250,74,'IN','用戶 / 排程','USER 對話裁決 · launchd 24 routines\nwatchdog 30 分自癒 · claude:inbox 喚醒','in');
+
+  // ── 產線 ──
+  node('sk1',300,126,260,74,'RTN','盤前產線 08:20-08:50','ddr · brent · 00891 · pb-lights · disposition\nmemory-cycle · txf-level-map · buy-list');
+  node('sk2',620,126,300,74,'RTN','盤中→盤後產線','ma-touch×3 · bb 14:30/15:30 · synthesis 15:50\nforeign 17:10 · warrant/signal/margin/geo · backup 21:30');
+
+  // ── STEP 0 ──
+  node('s1',268,238,196,74,'DB','trading-timescaledb','tmf-* collectors · 價量/法人/融資\nIV/GDELT/亞股/權證 · read-only');
+  node('s2',498,238,196,74,'CACHE','yfinance 時效快取','Brent · 美債 10Y/30Y · SOX · VIX\nstaleness 工作日門檻自動重抓');
+  node('s3',728,238,196,74,'KB','研究庫 926 檔','Pilot_Reports · wikilink 圖譜\n市值 metadata → 指數權重');
+  node('data',966,232,190,80,'DATA','Redis 匯流','claude:inbox 訊息流\nh:agent:* hash (txf_levels 27 欄\npb_lights / heartbeat)','data');
+
+  // ── agents ──
+  node('op',250,368,220,86,'AGENT','Operator (Claude)','研究 · 實作 · 雙審 subagent\n事前準則裁決 · 事故歸因');
+  node('loop',498,368,196,86,'AUTO','routine-watchdog','24 checks 漏跑 kickstart\n逾窗警報 · 30 分輪詢','auto');
+  node('cyc',728,368,212,86,'EXT','nautilus-shioaji','交易迴路 consumer · 牆→shelf clamp\ngamma frame · 跨 session 並行','ext');
+
+  // ── 訊號產品層 ──
+  node('placer',110,556,300,70,'SIG','txf_level_map 08:40','ASCII 牆圖+波動率+法人+亞洲地圖\nh:agent:txf_levels · flip/GEX/真空/價值區');
+  node('daemon',440,556,330,70,'SIG','geo-composite 18:20','雙軸警戒 強度(管制/利率/油價)×脆弱(IV/外資/融資)\nPAPER-TRADE · 紅燈 20 日自動對帳');
+  node('broker',800,556,270,70,'SIG','dashboard / 量化模組','08:30 監控儀表 · options_quant GEX/VRP\nBB 家族 · P/B lights · signal-scan');
+
+  // ── 驗證帳本層 ──
+  node('tree',268,700,200,64,'LDG','事前準則','先驗證再上線 · 準則寫死\n捕捉率/FP/MW 不得事後放寬','ledger focal');
+  node('prior',498,700,196,64,'LDG','研究報告','LPPLS 負結果 · 地緣歸因 v2\n金融指標擴充 · 誠實負結果傳統','ledger');
+  node('intent',728,700,196,64,'LDG','對帳簿','geo settle hit/false · gex_history\nlive FAR vs 回測 FP 同語意','ledger');
+  node('rules',268,790,200,64,'LDG','vault + memory','事故/教訓 log · 週一 bug 家族\nschema 契約 · routine 名錄','ledger');
+  node('notes',498,790,196,64,'LDG','W37 觀察項','結算日牆半衰 · 快照日內衰減\n換月污染 · DTE 常態化','ledger');
+  node('trade',728,790,196,64,'LDG','TDD / 雙審','spec+quality reviewer · 6xx tests\npre-commit 全集 · 攔截紀錄','ledger');
+  node('cand',498,866,196,58,'LDG','升級候選','paper-trade ≥2 事件結算轉正式\ngex_pct ≥20 日 · IV 層 ≥5 案例','ledger');
+
+  // ── AUTO / OUT ──
+  node('auto',110,980,300,74,'AUTO','launchd 排程','Mon-Fri 08:20 → 21:30 · 24 支\nvenv python 直跑 (TCC 教訓)','auto');
+  node('out',498,980,196,74,'OUT','投遞','claude:inbox → Discord 轉發\n研究報告 md · SendUserFile');
+  node('gh',728,980,212,74,'EXT','跨 session 協調','coordination 廣播 schema 契約\ngit 並行守則 · 共用 key 先查 log','ext');
+
+  // ── arrows ──
+  down('in',0.3,'sk1',0.5); down('in',0.7,'sk2',0.5);
+  down('sk1',0.5,'s1',0.5); down('sk2',0.35,'s2',0.5); down('sk2',0.75,'s3',0.5);
+  right('s1','s2'); right('s2','s3'); right('s3','data','XADD / HSET');
+  down('s1',0.5,'op',0.5); down('s2',0.5,'loop',0.5); down('s3',0.5,'cyc',0.5);
+  right('op','loop','上線→納管');
+  (function(){var s=pt('cyc','l'),e=pt('loop','r');path('M'+s[0]+','+s[1]+' L'+e[0]+','+e[1],false,'消費回饋',(s[0]+e[0])/2-22,s[1]-6);})();
+  down('op',0.3,'placer',0.5,'TDD 實作'); down('loop',0.5,'daemon',0.5,'kickstart'); down('cyc',0.5,'broker',0.5,'讀 hash');
+  right('placer','daemon'); right('daemon','broker');
+  down('placer',0.5,'tree',0.5,'準則約束');
+  down('daemon',0.5,'intent',0.5,'settle 寫回');
+  down('broker',0.5,'trade',0.5,'審查證據');
+  right('tree','prior','判定'); right('prior','intent');
+  down('tree',0.5,'rules',0.5); down('prior',0.5,'notes',0.5); down('intent',0.5,'trade',0.5);
+  down('notes',0.5,'cand',0.5);
+  down('cand',0.5,'out',0.5,'轉正式/收檔'); right('auto','out'); right('out','gh','廣播');
+
+  // feedback loops (dashed)
+  var p1=pt('prior','l'); path('M'+p1[0]+','+p1[1]+' L'+230+','+p1[1]+' L230,'+(N.s1.y+N.s1.h*0.5)+' L'+N.s1.x+','+(N.s1.y+N.s1.h*0.5),true,'回補需求 → collector 擴充',236,p1[1]-8);
+  var p2=pt('cand','l'); path('M'+p2[0]+','+p2[1]+' L'+(N.rules.x+N.rules.w/2)+','+p2[1]+' L'+(N.rules.x+N.rules.w/2)+','+(N.rules.y+N.rules.h),true,'結算批准',300,p2[1]-8);
+  var p3=pt('trade','r'); path('M'+p3[0]+','+p3[1]+' L1000,'+p3[1]+' L1000,'+(N.s2.y+N.s2.h+8)+' L'+(N.data.x+N.data.w/2)+','+(N.s2.y+N.s2.h+8)+' L'+(N.data.x+N.data.w/2)+','+(N.data.y+N.data.h),true,'攔截 → 資料修復 (6669 splice / 週一家族)',808,p3[1]-8);
+  var note=document.createElement('div');note.className='note';note.style.cssText='left:8px;top:396px';
+  note.innerHTML='<small>誠實迴圈</small>任何訊號未過事前準則不得機器化；paper-trade 警報非行動建議；分布性措辭先驗證（Golden Rule 0）。';
+  c.appendChild(note);
+})();
+</script>
