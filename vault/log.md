@@ -280,3 +280,11 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 退役: launchctl bootout + plist 移 disabled/ (回滾=移回+bootstrap)
 - 過程抓到兩個潛伏 bug: daily-restart sys.exit 殭屍 (os._exit 已修 b1c2eff)、ticks 表無唯一約束+舊 collector 時區標籤 bug (TPE 標成 UTC, 新碼刻意鏡像維持口徑, 矯正列後續議題)
 - 終態 4 sessions: 期貨 tick / 選擇權 IV / 個股 (tick+BidAsk 合一) / 交易
+
+## 2026-09-10 Shioaji SDK 統一 1.7.4 (原 1.3.3/1.7.2/1.7.4 碎裂)
+- Changelog 驅動選版: 1.7.4 (自家兩週實證) 非 day-zero 1.7.5; 動機=v1.7.3 Solace session recovery (BidAsk 飢餓類官方修復)
+- Simulation 關卡抓到 breaking change: 1.7.0+ login() 移除 contracts_timeout/cb/fetch_contract → 40 檔清理 + safe_login inspect 相容層 (1.3.3 回滾雙容)
+- deprecated quote.set_on_* 22 處全清; delivery_date 1.7.4=原生 date (雙形態防禦驗證必要)
+- 6,003 nautilus tests 新舊兩版全綠; 生產 smoke 通過全 SDK 層、止於自家 R16 風控閘 (by design)
+- 夜盤 trail active 紅線遵守: daemon 明晨 08:40 pre-open 窗自動載新版
+- 待辦: api.Contracts→api.contracts 新 deprecation; 1.7.5 陳化一週後評估
