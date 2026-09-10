@@ -274,3 +274,9 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - netting 實錘: gross 158.6億 vs |net| 3.5億 — total_gex 為淨值,平衡時過零翻符,量級規則不可用 net
 - 新欄位: gex_gross(量級規則用)/gex_dte/gex_coverage(品質gate);gex_history.json 開始累積,≥20日後同DTE百分位化另案
 - consumer 指引已廣播(inbox coordination);下週一 08:40 = 前緣 bug 修復關鍵驗證日
+
+## 2026-09-10 Shioaji session 5→4 完成 — stock_tick_collector 退役
+- Parity: 9/9 全日 127,798 = 127,798 (100%, 一列不差); 9/10 10:18 起新腿獨挑
+- 退役: launchctl bootout + plist 移 disabled/ (回滾=移回+bootstrap)
+- 過程抓到兩個潛伏 bug: daily-restart sys.exit 殭屍 (os._exit 已修 b1c2eff)、ticks 表無唯一約束+舊 collector 時區標籤 bug (TPE 標成 UTC, 新碼刻意鏡像維持口徑, 矯正列後續議題)
+- 終態 4 sessions: 期貨 tick / 選擇權 IV / 個股 (tick+BidAsk 合一) / 交易
