@@ -288,3 +288,28 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 - 6,003 nautilus tests 新舊兩版全綠; 生產 smoke 通過全 SDK 層、止於自家 R16 風控閘 (by design)
 - 夜盤 trail active 紅線遵守: daemon 明晨 08:40 pre-open 窗自動載新版
 - 待辦: api.Contracts→api.contracts 新 deprecation; 1.7.5 陳化一週後評估
+
+## 2026-09-15 事故 — options-IV collector 全天死亡 75.8h 空洞,零偵測零自癒 (六缺陷)
+**時間線**: 9/12 04:59 TPE 夜盤最後一筆 IV → 9/14 (週一) collector 整個交易日 `Resolved 0 expiries` 每 5 分鐘重複 → 9/16 09:00 因無關重啟才恢復;`iv_metrics`/`iv_strikes` 空洞 75.8 小時,`vix_daily` 9/14 永久缺漏 (tick 級 IV 無法事後重建)。整段期間**所有監控全綠**。
+
+**根因鏈**: Shioaji `SessionNotEstablished` → 所有 product `list()` 失敗 → fallback `_rebuild_contracts_via_cache()` → `/root/.shioaji` 是未掛載的容器暫存層、沒有任何 parquet → 零訂閱 → 零寫入。自癒路徑**結構上不可能生效**。
+
+**六個缺陷 (計畫列五個,D6 為實作時新發現)**:
+- D1 `/root/.shioaji` 無 volume → cache fallback 永遠空手 → `95fb1ac`
+- D2 `_resolve_expiries` 把 0 expiries 當正常返回,status 保持 OK、tick-starvation watchdog 因無訂閱可餓而永不觸發 → `95bfc78` (盤中連 3 次 → `sys.exit(1)` 自癒)
+- D3 watchdog / healthcheck 都讀 `last_write_ts` (5 秒 liveness 心跳) 而非 `last_db_write_ts` (INSERT 成功才 bump) → 程式活著但零寫入 = 全綠。collector 自己 2026-04-27 就發布了誠實欄位,consumer 三年沒跟上 → `51ebe87` (nautilus) + `3f95240` (database)
+- D4 consumer 無條件接受 96h lookback 的陳舊 IV → 連兩天把上週五 flip=46500 當今日值發佈 → `a6c681f` (日曆感知 `gex_staleness` 硬 gate)
+- D5 `:+.1f` 套在 None 上 → 08:30 dashboard 連續四個交易日 exit 1 無人知;同一例外讓 08:40 level map 靜默掉 VIX＋法人兩區塊 (共用單一 try) → `a118b7d`
+- **D6 (新)** cache fallback 即使有 parquet 也讀不到,三層獨立壞掉: 扁平 glob 漏掉 shioaji 1.7.x 的 `contracts-v2-1.7/` 子目錄、`category` 欄位在新版已移除、`sorted(paths)[-1]` 字母序會挑到 `info-TXO` 而非 `base` → `e00467e`
+
+**設計偏離 (兩項,有證據)**:
+1. **Shioaji cache 用 per-service volume** (`shioaji_cache_tick/ofi/iv/broker`) 而非計畫的單一共享 volume — shioaji 1.7.4 未帶 `filelock`,四容器並行寫 parquet 的損毀風險未經驗證,隔離優先。
+2. **只有 9/15 是幽靈觀測,9/14 不是** — 計畫 Task 6 說兩筆都標 `iv_stale`,但其 Task 4 驗證段自己寫明「週一 08:40, iv_asof=週五夜盤 → FRESH ✓」,而 9/14 正是週一。已提交且有測試的 `gex_staleness` 述詞回傳 9/14=FRESH (59.7h)、9/15=STALE (83.7h)。週六 05:00 到週一 08:45 之間沒有任何盤,健康系統在週一 08:40 拿到的就是同一筆週五夜盤 IV。計畫自相矛盾,以測試過的述詞為準。
+
+**新發現的限制 (不在計畫內,未修)**: `gex_staleness` 量的是 IV **年齡**,不是 IV 對 spot 的 **basis**。實測 `ohlcv_1m_txf`: 週五夜盤收盤 (週六 04:59 TPE) TXF=**46551**,週一 9/14 08:37 spot=**45550** — 週末跳空 -1,001 點 (-2.2%)。9/14 的讀值日曆上新鮮、經濟上已偏移:IV 曲面取樣點離套用的 spot 有 1,001 點。這是 08:40 盤前推播在跳空日的結構性性質,非本次事故產物。
+
+**實測數據 (取代猜測)**: `iv_metrics` 盤中寫入間隔 14 天 n=65,541 → p50=10s / p99=10s / max=97s (故 healthcheck 門檻定 180s ≈ 1.9× 餘裕,120s 只有 1.2×);`stock_ofi` 寫入窗 6 個交易日均為 08:45:0x → 13:45:5x、夜盤零寫入 (故用日盤 gate 而非日或夜 gate);`h:health:options_iv:v2` 實際發布 `last_db_write_ts 0.000` (故 zero-guard 是實測需求非防禦性猜測)。
+
+**善後**: `data/gex_history.json` 9/15 標 `iv_stale: true`;`h:agent:txf_levels:latest` 手動改 `gamma_regime=STALE` — 已驗證 `GammaRegime("STALE")` 觸 ValueError → `UNKNOWN`,fail-closed,consumer 零改動即停用 gamma 規則;schema 變更經 inbox coordination 廣播 (id 1789467445920-0)。
+
+**教訓**: liveness 心跳與資料寫入是兩個不同訊號,監控讀錯欄位等於沒有監控。`restart: unless-stopped` 只對 process exit 生效、對 unhealthy 無感 — healthcheck 是能見度面,自癒必須是 collector 自己 `sys.exit(1)`。
