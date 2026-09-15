@@ -38,3 +38,78 @@ def test_wall_rows_tags_zero_gamma():
 def test_pc_ratio():
     oi = {46100: {"P": 300, "C": 100}, 46500: {"P": 100, "C": 300}}
     assert abs(ad.pc_ratio(oi) - 100.0) < 1e-9
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# None-safe 格式化 — 起源: com.lulala.dashboard 連續 crash 四個交易日 (2026-09-10~15)
+#
+# vix_daily.vix_w / wm_spread 自 2026-09-09 起因 quote-quality guard 合法為 NULL,
+# 而 vol_section_lines 用 f"{None:+.1f}" → TypeError → 08:30 dashboard 整支 exit 1,
+# 且 08:40 level map 因共用同一個 try 靜默掉波動率＋法人兩個區塊。
+# ══════════════════════════════════════════════════════════════════════════════
+import pytest  # noqa: E402
+
+
+class _FakeCur:
+    """最小 cursor stub — 只回一列 vix_daily。"""
+
+    def __init__(self, row):
+        self._row = row
+
+    def execute(self, *a, **kw):
+        pass
+
+    def fetchone(self):
+        return self._row
+
+
+class TestFmtNum:
+    def test_none_renders_na(self):
+        assert ad.fmt_num(None) == "n/a"
+        assert ad.fmt_num(None, "+.1f") == "n/a"
+
+    def test_number_uses_spec(self):
+        assert ad.fmt_num(5.24, "+.1f") == "+5.2"
+        assert ad.fmt_num(-1.0, "+.1f") == "-1.0"
+        assert ad.fmt_num(18.5) == "18.5"
+
+    def test_zero_is_not_treated_as_missing(self):
+        """0.0 是合法讀值, 不可被當成缺值 (falsy 陷阱)。"""
+        assert ad.fmt_num(0.0, "+.1f") == "+0.0"
+
+
+class TestWmLabel:
+    def test_inverted_above_threshold(self):
+        assert ad.wm_label(2.5) == "倒掛🚨"
+
+    def test_normal_below_threshold(self):
+        assert ad.wm_label(1.0) == "正常"
+        assert ad.wm_label(-3.0) == "正常"
+
+    def test_none_is_na_not_normal(self):
+        """None 必須是 n/a — 舊碼 `wm and wm > 2` 會把缺值誤報成「正常」。"""
+        assert ad.wm_label(None) == "n/a"
+
+
+class TestVolSectionNullSafety:
+    def test_null_vix_w_and_wm_does_not_crash(self):
+        """真實 fixture: vix_w / wm_spread 為 NULL (9/9 起的實際狀態)。"""
+        cur = _FakeCur((18.5, 19.2, 14.0, 5.2, None, None))
+        lines, wm = ad.vol_section_lines(None, cur, 45577.0)
+        txt = "\n".join(lines)
+        assert "n/a" in txt
+        assert "18.5" in txt          # 有值的欄位照常顯示
+        assert wm is None
+
+    def test_all_null_row_does_not_crash(self):
+        cur = _FakeCur(None)          # vix_daily 完全沒資料
+        lines, wm = ad.vol_section_lines(None, cur, 45577.0)
+        assert lines and "── 波動率 ──" in lines[0]
+        assert wm is None
+
+    def test_full_row_renders_values(self):
+        cur = _FakeCur((18.5, 19.2, 14.0, 5.2, 22.0, 2.8))
+        lines, wm = ad.vol_section_lines(None, cur, 45577.0)
+        txt = "\n".join(lines)
+        assert "+5.2" in txt and "+2.8" in txt and "倒掛" in txt
+        assert wm == 2.8

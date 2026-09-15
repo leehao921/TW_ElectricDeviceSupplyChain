@@ -100,11 +100,30 @@ def compute_gex(conn, spot: float, front_expiry
     return gex_total, gex_flip, gex_zone, iv_asof, extras
 
 
+def fmt_num(v: float | None, spec: str = ".1f", na: str = "n/a") -> str:
+    """None-safe 數值格式化 — None → 'n/a'。
+
+    vix_daily 的 vix_w / wm_spread 自 2026-09-09 起因 quote-quality guard 合法為
+    NULL(>30% 跳動+反向/比值出帶 → NULL)。直接 f"{None:+.1f}" 會 TypeError,
+    2026-09-10~15 讓 08:30 dashboard 連續 crash 四個交易日。
+    """
+    return na if v is None else format(v, spec)
+
+
+def wm_label(wm: float | None, threshold: float = 2.0) -> str:
+    """週/月 spread 倒掛判讀。None 明確回 'n/a' — 舊碼 `wm and wm > 2` 會把
+    缺值誤報成「正常」(語意錯誤: 不知道 ≠ 沒事)。"""
+    if wm is None:
+        return "n/a"
+    return "倒掛🚨" if wm > threshold else "正常"
+
+
 def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
     """── 波動率 ── 區塊 (VIX 家族 + IV curve/複合 regime, fail-soft)。
 
     Returns (lines, wm) where wm is the 週/月 spread value (used by caller
-    for the gate_iv signal).  wm is None if the vix_daily query returns no row.
+    for the gate_iv signal).  wm is None if the vix_daily query returns no row
+    or the column is NULL.  All numeric fields are rendered None-safe.
     """
     cur.execute("""SELECT vix, vix_30d, rv_21d, vrp_30d, vix_w, wm_spread
                    FROM vix_daily ORDER BY date DESC LIMIT 1""")
@@ -112,8 +131,9 @@ def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
                                  for x in (cur.fetchone() or [None] * 6)]
     L: list[str] = []
     L.append("── 波動率 ──")
-    L.append(f" VIX {vix} · CM30 {v30} · RV21 {rv} · VRP {vrp:+.1f}")
-    L.append(f" 週選 {vw} · 週/月 {wm:+.1f} ({'倒掛🚨' if wm and wm > 2 else '正常'})")
+    L.append(f" VIX {fmt_num(vix)} · CM30 {fmt_num(v30)} · RV21 {fmt_num(rv)} "
+             f"· VRP {fmt_num(vrp, '+.1f')}")
+    L.append(f" 週選 {fmt_num(vw)} · 週/月 {fmt_num(wm, '+.1f')} ({wm_label(wm)})")
     try:
         from gex_regime_monitor import (classify_regime, compute_composite,
                                         front_iv_history, iv_curve, z_windows)
