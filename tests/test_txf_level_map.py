@@ -1518,3 +1518,187 @@ class TestPublishStructNewPayload:
         monkeypatch.setattr(mod.subprocess, "run", lambda cmd, **kw: _Fail())
         result = mod._publish_struct({"as_of": "2026-09-07"})
         assert result is False
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# gex_staleness — 日曆感知的 IV 陳舊硬 gate
+#
+# 起源事故 (2026-09-14/15): options-IV collector 週一全天死亡 → 75.8h 資料空洞。
+# compute_gex 的 96h lookback 把「缺資料」轉成「靜默陳舊」, 連兩天把上週五的
+# flip=46500 當今日值發佈, 期間 spot 46070 → 45577。
+#
+# 關鍵: 判定必須「日曆感知」而非固定秒數門檻。週一 08:40 最新合法 IV 就是上週五
+# 夜盤 (~51.6h 齡), age>24h 這類固定門檻會每週一誤報。
+# ══════════════════════════════════════════════════════════════════════════════
+import pytz as _pytz  # noqa: E402
+
+from scripts.txf_level_map import gex_staleness  # noqa: E402
+
+_UTC = _pytz.UTC
+
+
+def _utc(y, m, d, hh, mm=0, ss=0):
+    return _UTC.localize(dt.datetime(y, m, d, hh, mm, ss))
+
+
+class TestGexStaleness:
+    """iv_asof 必須落在「前一個交易日」的盤中區間 (日盤起 08:45 TPE 起算) 內。"""
+
+    def test_tuesday_with_friday_iv_is_stale(self):
+        """真實事故案例: 週二 08:40, iv_asof=上週五夜盤 → 必須 STALE。
+
+        前一交易日 = 週一 9/14, 窗口起點 9/14 08:45 TPE。
+        iv_asof = 9/11 20:59 UTC = 9/12 04:59 TPE, 遠早於窗口 → STALE。
+        """
+        stale, age = gex_staleness(
+            _utc(2026, 9, 11, 20, 59, 55),
+            as_of=dt.date(2026, 9, 15),
+            now=_utc(2026, 9, 15, 0, 40),
+        )
+        assert stale is True
+        assert age is not None and age > 70          # ~75.7h
+
+    def test_monday_with_friday_night_iv_is_fresh(self):
+        """反向案例: 週一 08:40, iv_asof=上週五夜盤 → 必須 FRESH (不可誤報)。
+
+        前一交易日 = 週五 9/11, 窗口起點 9/11 08:45 TPE。
+        iv_asof = 9/12 04:59 TPE (週五夜盤尾, 夜盤跨午夜至 05:00) → 在窗口內。
+        齡達 ~51.6h 但完全合法 — 固定 24h 門檻會在此誤報。
+        """
+        stale, age = gex_staleness(
+            _utc(2026, 9, 11, 20, 59, 55),
+            as_of=dt.date(2026, 9, 14),
+            now=_utc(2026, 9, 14, 0, 40),
+        )
+        assert stale is False
+        assert age is not None and age > 24          # 齡大但不陳舊
+
+    def test_normal_weekday_previous_night_is_fresh(self):
+        """平常日: 週二 08:40 用週一夜盤 IV → FRESH。"""
+        stale, age = gex_staleness(
+            _utc(2026, 9, 14, 20, 59),               # 9/15 04:59 TPE = 週一夜盤
+            as_of=dt.date(2026, 9, 15),
+            now=_utc(2026, 9, 15, 0, 40),
+        )
+        assert stale is False
+        assert age is not None and age < 6
+
+    def test_boundary_exactly_at_window_start_is_fresh(self):
+        """邊界: iv_asof 剛好等於前一交易日日盤開盤 08:45 TPE → FRESH (含端點)。"""
+        stale, _ = gex_staleness(
+            _utc(2026, 9, 14, 0, 45),                # 9/14 08:45 TPE
+            as_of=dt.date(2026, 9, 15),
+            now=_utc(2026, 9, 15, 0, 40),
+        )
+        assert stale is False
+
+    def test_boundary_one_second_before_window_is_stale(self):
+        """邊界反例: 早窗口起點 1 秒 → STALE。"""
+        stale, _ = gex_staleness(
+            _utc(2026, 9, 14, 0, 44, 59),
+            as_of=dt.date(2026, 9, 15),
+            now=_utc(2026, 9, 15, 0, 40),
+        )
+        assert stale is True
+
+    def test_none_iv_asof_is_stale_with_no_age(self):
+        """完全沒有 IV 快照 → STALE, age=None (不可當成新鮮)。"""
+        stale, age = gex_staleness(None, as_of=dt.date(2026, 9, 15),
+                                   now=_utc(2026, 9, 15, 0, 40))
+        assert stale is True
+        assert age is None
+
+    def test_long_holiday_shifts_window_back(self):
+        """連假: 前一交易日需跳過假日 — 假日後首日用假期前最後交易日的 IV 仍 FRESH。
+
+        假設 2026-10-09 (五) 為假日, 則 2026-10-12 (一) 的前一交易日 = 10/08 (四)。
+        """
+        hols = {"2026-10-09"}
+        stale, _ = gex_staleness(
+            _utc(2026, 10, 8, 20, 30),               # 10/9 04:30 TPE = 10/8 夜盤
+            as_of=dt.date(2026, 10, 12),
+            now=_utc(2026, 10, 12, 0, 40),
+            holidays=hols,
+        )
+        assert stale is False
+        # 沒有假日表時同一筆會被判 STALE (前一交易日誤算成 10/09)
+        stale_no_hol, _ = gex_staleness(
+            _utc(2026, 10, 8, 20, 30),
+            as_of=dt.date(2026, 10, 12),
+            now=_utc(2026, 10, 12, 0, 40),
+            holidays=set(),
+        )
+        assert stale_no_hol is True
+
+    def test_naive_datetime_treated_as_utc(self):
+        """naive datetime 依 DB 儲存慣例視為 UTC, 不得拋例外。"""
+        stale, age = gex_staleness(
+            dt.datetime(2026, 9, 14, 20, 59),
+            as_of=dt.date(2026, 9, 15),
+            now=_utc(2026, 9, 15, 0, 40),
+        )
+        assert stale is False
+        assert age is not None
+
+
+class TestStructFieldsStaleGate:
+    """硬 gate: STALE 時 gamma_regime 停用, 但 flip/gex 值保留供人工判讀。"""
+
+    def _base(self, **kw):
+        defaults = dict(
+            as_of=dt.date(2026, 9, 15), spot=45577.0, day_close=45577.0,
+            flip=46500.0, gex_total=6.2e9, walls=None, hvn_result=None,
+            foreign_net=None, toshin_net=None, us=None, asia=None, fx=None,
+        )
+        defaults.update(kw)
+        return build_struct_fields(**defaults)
+
+    def test_stale_sets_regime_stale_but_keeps_values(self):
+        f = self._base(gex_stale=True, gex_age_hours=75.7)
+        assert f["gamma_regime"] == "STALE"
+        assert f["gex_stale"] == "1"
+        assert f["gex_age_hours"] == "75.7"
+        # 值保留 — 供人工判讀, 不供規則使用
+        assert f["flip"] == "46500.0"
+        assert "gex_total" in f
+
+    def test_fresh_keeps_normal_regime(self):
+        f = self._base(gex_stale=False, gex_age_hours=3.7)
+        assert f["gamma_regime"] == "BELOW_FLIP"
+        assert f["gex_stale"] == "0"
+        assert f["gex_age_hours"] == "3.7"
+
+    def test_absent_stale_flag_omits_fields_and_keeps_regime(self):
+        """未傳入 staleness 判定 → 欄位省略 (schema 慣例: 缺席=未知)。"""
+        f = self._base()
+        assert "gex_stale" not in f
+        assert "gex_age_hours" not in f
+        assert f["gamma_regime"] == "BELOW_FLIP"
+
+
+class TestBuildMsgStaleWarning:
+    """ASCII 推播需明示 GEX 陳舊 — 人看的那份不能只有 Redis 欄位知道。"""
+
+    def _msg(self, **kw):
+        base = dict(
+            as_of=dt.date(2026, 9, 15), day_close=45577.0, night_close=None,
+            night_chg=None, walls=None, flip=46500.0, foreign_net=None,
+            toshin_net=None, sox=None, vix=None, ust10y=None, brent=None,
+            dxy=None, asia=None, fx=None, gex_total=6.2e9,
+        )
+        base.update(kw)
+        return build_msg(**base)
+
+    def test_stale_emits_warning_line(self):
+        msg = self._msg(gex_stale=True, gex_age_hours=75.7)
+        assert "⚠" in msg
+        assert "75.7" in msg
+        assert "停用" in msg          # 明示規則停用, 非只標記
+        assert "46500" in msg         # flip 值仍顯示供人工判讀
+
+    def test_fresh_emits_no_warning(self):
+        msg = self._msg(gex_stale=False, gex_age_hours=3.7)
+        assert "⚠" not in msg
+
+    def test_unknown_staleness_emits_no_warning(self):
+        assert "⚠" not in self._msg()

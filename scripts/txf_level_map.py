@@ -24,6 +24,7 @@ import os
 import re
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 from typing import Any
 
@@ -302,6 +303,64 @@ def gamma_regime(spot: float | None, flip: float | None,
     return "ABOVE_FLIP" if spot > flip else "BELOW_FLIP"
 
 
+# ── IV 快照陳舊硬 gate ────────────────────────────────────────────────────────
+# 起源事故 (2026-09-14/15): options-IV collector 週一全天死亡 → iv_metrics/iv_strikes
+# 75.8h 空洞。compute_gex 的 96h lookback (原為修 2026-09-07 週一 flip=UNKNOWN 而加)
+# 把「缺資料」轉成更糟的「靜默陳舊」—— 連兩天把上週五 flip=46500 當今日值發佈,
+# 期間 spot 46070 → 45577。flip_asof 早已曝光, 但沒有任何 consumer gate 它。
+#
+# 判定必須「日曆感知」: TAIFEX 日盤 08:45–13:45 TPE、夜盤 15:00–翌日 05:00 TPE。
+# 週一 08:40 最新合法快照就是上週五夜盤 (~51.6h 齡, 對比週二中位 3.7h),
+# 任何固定秒數門檻 (如 age>24h) 都會每週一誤報。
+# 前一交易日 D 的合法窗口 = [D 08:45 TPE, D+1 05:00 TPE]; 只需檢下界,
+# 因為比 D 更新的快照只會更新鮮。
+DAY_SESSION_OPEN = dt.time(8, 45)
+_HOLIDAYS_CACHE: set[str] | None = None
+
+
+def _market_holidays() -> set[str]:
+    """TW 休市日 (YYYY-MM-DD), 讀 data/tw_market_holidays.txt — 與 margin/watchdog 同源。"""
+    global _HOLIDAYS_CACHE
+    if _HOLIDAYS_CACHE is None:
+        try:
+            from scripts.margin_morning_heal import load_holidays
+            _HOLIDAYS_CACHE = load_holidays()
+        except Exception as exc:                       # pragma: no cover - defensive
+            print(f"[warn] holiday table load failed: {exc}", file=sys.stderr)
+            _HOLIDAYS_CACHE = set()
+    return _HOLIDAYS_CACHE
+
+
+def gex_staleness(iv_asof, as_of: dt.date, now=None,
+                  holidays: set[str] | None = None) -> tuple[bool, float | None]:
+    """IV 快照是否陳舊 → (is_stale, age_hours)。
+
+    新鮮的定義: iv_asof 落在「前一個交易日的日盤開盤 (08:45 TPE)」之後。
+    iv_asof 為 None (完全沒有快照) → (True, None) — 不可當成新鮮。
+
+    naive datetime 依 DB 儲存慣例視為 UTC。age_hours 相對 now (預設當下 UTC)。
+    holidays 未給則讀 data/tw_market_holidays.txt (連假需跳過, 否則會誤判)。
+    """
+    if iv_asof is None:
+        return True, None
+
+    iv_dt = iv_asof.to_pydatetime() if hasattr(iv_asof, "to_pydatetime") else iv_asof
+    if iv_dt.tzinfo is None:
+        iv_dt = pytz.UTC.localize(iv_dt)
+    if now is None:
+        now = dt.datetime.now(pytz.UTC)
+    elif now.tzinfo is None:
+        now = pytz.UTC.localize(now)
+
+    age_hours = (now - iv_dt).total_seconds() / 3600.0
+
+    from scripts.margin_morning_heal import prev_trading_day
+    hols = _market_holidays() if holidays is None else holidays
+    prev = prev_trading_day(as_of, hols)
+    window_start = TPE_TZ.localize(dt.datetime.combine(prev, DAY_SESSION_OPEN))
+    return iv_dt < window_start, age_hours
+
+
 def bucket_age_days(bars: pd.DataFrame, levels: list[int],
                     bucket_pts: int = 100) -> dict[int, int]:
     """Return trading-day age for each requested 100-pt bucket level.
@@ -439,6 +498,8 @@ def build_msg(
     ladder_rows: list[str] | None = None,  # pre-built annotated ladder lines
     vol_lines: list[str] | None = None,    # 波動率 section lines from ascii_dashboard
     inst_lines: list[str] | None = None,   # 法人/融資 section lines from ascii_dashboard
+    gex_stale: bool | None = None,         # IV 快照陳舊 → 明示規則停用
+    gex_age_hours: float | None = None,
 ) -> str:
     """組裝多行訊息,格式照 plan;任何缺項印 N/A 不 crash。"""
 
@@ -541,6 +602,11 @@ def build_msg(
             asia_line += " | " + " ".join(fx_parts)
 
     lines = [header, oi_line, monthly_line, ladder_block, overnight_line, asia_line]
+    # IV 陳舊警告緊貼 GEX 行 — 讀的人必須在看到數字的同一屏看到「這值不能用」
+    if gex_stale:
+        age_txt = f"{gex_age_hours:.1f}h" if gex_age_hours is not None else "未知"
+        lines.insert(2, f"⚠ GEX/flip 資料陳舊 (IV 快照齡 {age_txt}) — gamma 規則停用, "
+                        f"上列數值僅供人工參考")
     return "\n".join(lines)
 
 
@@ -771,6 +837,8 @@ def build_struct_fields(
     vacuum_list: list | None = None,
     value_note: str | None = None,
     gex_extras: dict | None = None,
+    gex_stale: bool | None = None,
+    gex_age_hours: float | None = None,
 ) -> dict[str, str]:
     """Flatten the morning-map intermediates into a Redis-hash field map for
     the nautilus-shioaji trading loop (structured second sink alongside the
@@ -795,8 +863,13 @@ def build_struct_fields(
     if gex_total is not None:
         fields["gex_total"] = str(gex_total)
 
-    # gamma_regime: four-state, always present; uses pure function
-    fields["gamma_regime"] = gamma_regime(spot, flip)
+    # gamma_regime: 四態分類, 恆存在。IV 陳舊時硬 gate 成 "STALE" —
+    # consumer 見 STALE 必須停用所有 gamma 規則; flip/gex_* 值仍保留供人工判讀。
+    if gex_stale is not None:
+        fields["gex_stale"] = "1" if gex_stale else "0"
+    if gex_age_hours is not None:
+        fields["gex_age_hours"] = f"{gex_age_hours:.1f}"
+    fields["gamma_regime"] = "STALE" if gex_stale else gamma_regime(spot, flip)
 
     # front_expiry + is_settle_day
     if front_expiry is not None:
@@ -1002,6 +1075,12 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[info] total_gex={total_gex} flip={flip} zone={zone} "
           f"iv_asof={iv_asof} gex_extras={gex_extras}", file=sys.stderr)
 
+    # 3a. IV 陳舊硬 gate — 96h lookback 會靜默拿到前幾日快照 (2026-09-14/15 事故)。
+    gex_stale, gex_age_hours = gex_staleness(iv_asof, as_of=today)
+    print(f"[info] gex_stale={gex_stale} gex_age_hours="
+          f"{gex_age_hours if gex_age_hours is None else round(gex_age_hours, 1)}",
+          file=sys.stderr)
+
     # 3b. Build near-week ladder
     ladder_rows: list[str] | None = None
     oi_dict: dict[int, dict] = {}  # initialize before try block so it's always in scope
@@ -1038,8 +1117,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[warn] ladder build error: {e}", file=sys.stderr)
 
     # 3c. 波動率 + 法人/融資 sections from ascii_dashboard (fail-soft)
+    #
+    # 兩區塊各自獨立 try — 2026-09-10~15 事故: 原本共用一個 try, vol_section_lines
+    # 的 NoneType 格式化例外把法人區塊一併消滅, 且訊息被靜默吞掉四個交易日無人察覺。
+    # except 一律印 traceback, 不可只印訊息。
     vol_lines: list[str] | None = None
     inst_lines: list[str] | None = None
+    _dash_conn = None
     try:
         scripts_dir = str(Path(__file__).resolve().parent)
         if scripts_dir not in sys.path:
@@ -1049,17 +1133,26 @@ def main(argv: list[str] | None = None) -> int:
         _dash_conn = psycopg2.connect(**_DASH_DB)
         _dash_conn.autocommit = True
         _dash_cur = _dash_conn.cursor()
+
         try:
-            _vol_lines, _wm = vol_section_lines(_dash_conn, _dash_cur,
-                                                spot or 47000.0)
-            vol_lines = _vol_lines
-            _inst_lines = inst_section_lines(_dash_cur)
-            inst_lines = _inst_lines
-            print(f"[info] vol/inst sections loaded ok, wm={_wm}", file=sys.stderr)
-        finally:
-            _dash_conn.close()
+            vol_lines, _wm = vol_section_lines(_dash_conn, _dash_cur, spot or 47000.0)
+            print(f"[info] vol section loaded ok, wm={_wm}", file=sys.stderr)
+        except Exception as _vol_exc:
+            print(f"[warn] vol section failed: {_vol_exc}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+
+        try:
+            inst_lines = inst_section_lines(_dash_cur)
+            print("[info] inst section loaded ok", file=sys.stderr)
+        except Exception as _inst_exc:
+            print(f"[warn] inst section failed: {_inst_exc}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
     except Exception as _sec_exc:
-        print(f"[warn] vol/inst section load failed: {_sec_exc}", file=sys.stderr)
+        print(f"[warn] vol/inst DB connect failed: {_sec_exc}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+    finally:
+        if _dash_conn is not None:
+            _dash_conn.close()
 
     # 4. Futures OI
     print("[info] loading futures OI …", file=sys.stderr)
@@ -1112,6 +1205,8 @@ def main(argv: list[str] | None = None) -> int:
         ladder_rows=ladder_rows,
         vol_lines=vol_lines,
         inst_lines=inst_lines,
+        gex_stale=gex_stale,
+        gex_age_hours=gex_age_hours,
     )
 
     print("─" * 70)
@@ -1187,6 +1282,8 @@ def main(argv: list[str] | None = None) -> int:
         vacuum_list=vacuum_list,
         value_note=value_note_str,
         gex_extras=gex_extras,
+        gex_stale=gex_stale,
+        gex_age_hours=gex_age_hours,
     )
     # flip 快照時戳 — consumer 判斷新鮮度(週一/連假後為前一夜盤,可達 -3.5 日)
     if iv_asof is not None and "flip" in struct_fields:
@@ -1203,6 +1300,9 @@ def main(argv: list[str] | None = None) -> int:
             "gross": (gex_extras or {}).get("gross_gex"),
             "spot": spot,
             "iv_asof": str(iv_asof) if iv_asof is not None else None,
+            # 陳舊筆數必須排除於日後同 DTE 百分位取樣 — 同 IV 不同 spot 是幽靈觀測
+            "iv_stale": bool(gex_stale),
+            "iv_age_hours": round(gex_age_hours, 1) if gex_age_hours is not None else None,
         }
 
     if args.dry_run:
