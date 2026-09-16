@@ -335,3 +335,10 @@ watchdog 反覆報 `institutional heartbeat stale`(實測 age 182s-513s),每一�
 **否決的選項**:把 institutional 門檻放寬到 900s。那是為了消音而讓真正卡死的 process 多躲 15 分鐘 —— 與 D3 的教訓正面衝突。改成讓心跳在 backoff 期間照跳(30s 分段),唯一保留的沉默空窗是 `collect_day` 本身(實測 20-37s)。並補一支**反向測試**:fetch 卡死十分鐘時心跳**必須**出現空窗,防止未來有人「順手」在 collect_day 裡補心跳而把告警整個蓋掉、測試還全綠。附帶修掉 `time.sleep(300)` 不理 SIGTERM 的關機延遲。
 
 **共同教訓(三個都是同一個形狀)**:D3 是「讀錯欄位」、P0 是「設定被當不變量」、P1 是「門檻假設了一個不存在的節奏」。三者都讓儀表板全綠而系統壞掉。**任何寫進設定的外部識別碼都要問「它會不會輪替」;任何門檻都要問「我量過真實節奏嗎」** —— 本次兩個門檻(14 天 DTE、30s 心跳分段)都先跑了歷史資料/實測 log 才定。
+
+## 2026-09-16 結算日開盤事故 — shioaji 1.7.5 常數不可下標, 首單 TypeError
+- 09:03:23 reject watcher 於 45,675 開火, placer 炸 `OrderType not subscriptable` — 1.7.x 常數為 compiled type, 屬性可取、名稱下標不可
+- 昨晚三筆正常 = 舊進程舊模組; 08:40 例行重啟載新版後首筆真單引爆
+- loop session 10 分鐘內 hotfix (2c3317d enum_by_name + 450c1e0), database repo 掃描無同病
+- **我的驗證盲點 (責任歸屬)**: 9/10 simulation 關卡用「另寫的平行 smoke」驗 API 面 (屬性式全過), 沒有走生產派單路徑 (agent bridge 的名稱下標 dispatch) — 升級關卡必須 replay 生產入口, 不是枚舉我想到的 API
+- 連帶記錄: shioaji.constant.* 新 deprecation (→ sj.*), 與 api.Contracts→api.contracts 同列待辦
