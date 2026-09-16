@@ -113,3 +113,80 @@ class TestVolSectionNullSafety:
         txt = "\n".join(lines)
         assert "+5.2" in txt and "+2.8" in txt and "倒掛" in txt
         assert wm == 2.8
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 複合 regime 行的 None-safe — 起源: 2026-09-16 08:40 txf-level-map log
+#
+#   [warn] iv-curve/regime layer failed: unsupported format string passed to
+#          NoneType.__format__
+#
+# compute_composite 只在「W1+W2+M1 三腿的 net gamma 有穿零」時才有 zero-gamma;
+# 08:40 當下週選腿還沒被 collector 寫入 (weekly-root 修復 09:04 才補上),
+# 只剩兩條月選腿 → 無穿零 → zg=None → f"{None:,.0f}" TypeError。
+#
+# 例外發生在 IV curve 兩行「已經 append 之後」, 所以曲線活著、只有複合行被靜默
+# 吞掉 —— 讀報的人看不出少了一行。這是 fmt_num 已存在卻沒被套用的漏網之魚。
+# ══════════════════════════════════════════════════════════════════════════════
+class _StubRegime:
+    """把 gex_regime_monitor 的五個函式換成可控 stub。"""
+
+    @staticmethod
+    def install(monkeypatch, *, comp, raises=False):
+        import gex_regime_monitor as g
+        monkeypatch.setattr(g, "iv_curve",
+                            lambda conn, spot: [("20261021", 26.7), ("20261118", 25.0)])
+        monkeypatch.setattr(g, "front_iv_history", lambda conn: [])
+        monkeypatch.setattr(g, "z_windows",
+                            lambda v, h, **kw: {"w20": {"z": None, "n": 0}})
+        # classify_regime 不 stub — 它對 None 回傳 None 正是要一起驗的行為。
+
+        def _comp(conn, spot):
+            if raises:
+                raise RuntimeError("boom")
+            return comp
+        monkeypatch.setattr(g, "compute_composite", _comp)
+
+
+class TestCompositeLineNullSafety:
+    def _run(self, monkeypatch, capsys, **kw):
+        _StubRegime.install(monkeypatch, **kw)
+        cur = _FakeCur((18.5, 19.2, 14.0, 5.2, None, None))
+        lines, _ = ad.vol_section_lines(None, cur, 45577.0)
+        return "\n".join(lines), capsys.readouterr().err
+
+    def test_none_zero_gamma_still_renders_composite_line(self, monkeypatch, capsys):
+        """zg=None 時複合行必須降級成 n/a 而非整行消失。"""
+        txt, err = self._run(monkeypatch, capsys,
+                             comp={"zg": None, "total_gex": -1.23e10})
+        assert "複合(W1+W2+M1)" in txt, "複合行被靜默吞掉 — 正是 9/16 08:40 的症狀"
+        assert "ZG n/a" in txt
+        # classify_regime 對 None 回 None; 不可把 "None" 直接印進報告
+        assert "None" not in txt
+        assert "iv-curve/regime layer failed" not in err
+
+    def test_none_total_gex_still_renders_composite_line(self, monkeypatch, capsys):
+        txt, err = self._run(monkeypatch, capsys,
+                             comp={"zg": 46200.0, "total_gex": None})
+        assert "複合(W1+W2+M1)" in txt
+        assert "GEX n/a" in txt
+        assert "None" not in txt
+        assert "iv-curve/regime layer failed" not in err
+
+    def test_both_present_renders_numbers(self, monkeypatch, capsys):
+        """spot 45577 < ZG 46200 且 GEX<0 → 真 classify_regime 判 EXPANSION。"""
+        txt, _ = self._run(monkeypatch, capsys,
+                           comp={"zg": 46200.0, "total_gex": -1.23e10})
+        assert "EXPANSION" in txt
+        assert "ZG 46,200" in txt and "-123億/1%" in txt
+
+    def test_iv_curve_survives_when_composite_layer_breaks(self, monkeypatch, capsys):
+        """真正的例外仍 fail-soft, 但必須印出 traceback 而非只有一行訊息。
+
+        靜默吞例外正是 2026-09-10~15 dashboard crash 四天沒人發現的原因。
+        """
+        txt, err = self._run(monkeypatch, capsys, comp=None, raises=True)
+        assert "IV curve:" in txt          # 前面的行不受牽連
+        assert "複合(W1+W2+M1)" not in txt
+        assert "Traceback" in err          # 有 traceback 才 debug 得動
+        assert "boom" in err

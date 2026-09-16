@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import sys
+import traceback
 from datetime import date, datetime
 from pathlib import Path
 
@@ -146,11 +147,19 @@ def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
                 else f"{k[1:]}d n/a(n={d['n']})" for k, d in zs.items()))
         comp = compute_composite(conn, txf)
         if comp:
-            reg = classify_regime(txf, comp["zg"], comp["total_gex"])
-            L.append(f" 複合(W1+W2+M1): {reg} · ZG {comp['zg']:,.0f} · "
-                     f"GEX {comp['total_gex']/1e8:+,.0f}億/1%")
+            # zg 為 None 是合法狀態 — 三腿 net gamma 沒穿零就沒有 zero-gamma
+            # (2026-09-16 08:40: 週選腿尚未寫入, 只剩兩條月選腿)。舊碼直接
+            # f"{None:,.0f}" → TypeError → 整條複合行被 except 靜默吞掉。
+            zg, tg = comp["zg"], comp["total_gex"]
+            # classify_regime 在任一輸入缺值時回 None — 印 n/a, 別把 "None" 送進報告
+            reg = classify_regime(txf, zg, tg) or "n/a"
+            L.append(f" 複合(W1+W2+M1): {reg} · ZG {fmt_num(zg, ',.0f')} · "
+                     f"GEX {fmt_num(None if tg is None else tg / 1e8, '+,.0f')}億/1%")
     except Exception as e:
+        # 印 traceback 而非只有訊息 — 靜默吞例外正是 dashboard crash
+        # 四個交易日 (2026-09-10~15) 沒人發現的原因。
         print(f"[warn] iv-curve/regime layer failed: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
     return L, wm
 
 
