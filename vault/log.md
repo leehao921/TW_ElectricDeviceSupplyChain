@@ -351,3 +351,32 @@ watchdog 反覆報 `institutional heartbeat stale`(實測 age 182s-513s),每一�
 - **這是 D5 的漏網之魚**: `fmt_num` 就在同檔案 40 行之上, 9/10~15 那批 None-safe 修復只掃了 vix 欄位, 沒掃 regime 層。同型 bug 的第二個實例
 - **修法**: zg/total_gex 走 `fmt_num` 降級成 n/a、`classify_regime` 回 None 時印 n/a 不印字串 "None"、`except` 補 `traceback.print_exc`
 - **教訓**: 修一個 bug class 時要**掃完整個 class**, 不能只修觸發當下那一處。以及 —— **fail-soft 的 except 沒有 traceback 就是靜默**, 兩次事故 (crash 四天、複合行掉一天) 都卡在同一個空的 `except ... as e: print(e)`
+
+## 2026-09-16 vix_daily.vix_w 週選腿寫死 TX2 — 壞了 68 日中的 49 日, 零行日誌
+
+**先更正我自己先前的歸因。** 我曾在 `ascii_dashboard.py` 的 `fmt_num` docstring、`tests/test_ascii_dashboard.py` 的註解區塊, 以及本 log 的上一則條目裡寫「vix_w / wm_spread 自 2026-09-09 起因 quote-quality guard 合法為 NULL」。**三處都是錯的**, 已一併改掉:
+
+- 真正的病因是選腿 SQL 寫死 `product_code = 'TX2'`（`vix_daily.py:137`）。TAIFEX 週選 root 每週輪替（實際出現過 TX1/TX2/TX4/TXU/TXV/TXX/TXY）, TX2 只在 **7/06~9/09** 掛牌, 其餘日子 SQL 問的是一個當天不存在的 root → 無條件 NULL。
+- guard 只在 **9/01 出手過一次**, 而且那次也是對症不對因（見下）。本次回補後 `guarded 0` —— 選對腿之後 guard 根本不必出手。
+- 規模不是「六個交易日」, 是 **68 個交易日只有 19 日有值（28%）**。我把「最近一次被注意到的日期」當成了「故障起點」。
+
+**兩個改變欄位意義的重新理解:**
+
+1. **`vix_w` 從來不是「最前週選」。** 它追的是 TX2 這個 root, 而 TX2 的 DTE 在取樣期間從 0 走到 14。被寫進程式註解、當成倒掛門檻校準錨點的「7/29 週選 38 vs 月選 31, +8.23 實證」, 那天 TX2 的 **DTE = 14** —— 那是「14 天 vs 30 天」, 不是「前週 vs 30 天」。8/05 的 +10.45 同理是 DTE=7。門檻本身沒改（回補未動到這兩天）, 但它的物理意義跟大家以為的不一樣。
+2. **9/01 的「報價品質 artifact」其實是選錯腿。** 那天 TX2（DTE=8, 冷門後週, 僅 40 筆 tick）收盤窗印 12.69, 而 TX1（DTE=1, 271 筆）印 22.92, 月選 cm30 是 22.03。當時我寫 `weekly_iv_ok` guard 去擋這個 12.69 —— 擋對了症狀, 沒看見病因是讀錯合約。
+
+**靜默是怎麼維持兩個多月的:** `weekly_iv_ok` 對 `vw=None` 直接 `return True` 且不 log, 所以「查無候選」這條路徑**完全沒有輸出**。`grep -c "rejected by quote-quality guard" ~/Library/Logs/margin-vix.log` → **0**。fail-soft 少了一行 log 就是 fail-silent, 這已經是本月第三次撞同一堵牆。
+
+**下游兩個 consumer 都在說謊而不是報錯:**
+- `sf_pairs_weekly.py` 的蓋板 gate 用 `WHERE wm_spread IS NOT NULL ORDER BY date DESC LIMIT 1`, 沒有新鮮度檢查 → 六個交易日以來一直把 **9/08 的 -6.26** 當今日值印在週一交易計畫上。今日真值 **+1.40**, 差 7.66 點。已改為取最新一列 + 帶日期, 陳舊/NULL 一律標 STALE 並**停用 🚨 判定**（對齊本輪「硬 gate」原則）。順手修掉 `if r[0]` 的 falsy 陷阱（wm=0.0 會被吞成缺值）。
+- `margin_vix_daily.py` 用 `if cm30.get("vix_w") is not None:` 包住整行 → NULL 時整行消失, 讀報的人看不出少了一行。已改為永遠輸出, 缺值印 n/a, 並標上選腿: `週選IV(TXX D2) 29.1 · 週/月結構: ⚠️ 微倒掛 +1.4`。
+
+**修法與結果:** 動態選腿 = 當日全部週選 root 取 DTE 最小且 **≥1**（結算日 ATM IV 會崩到 5-6: 9/11 TXV 5.21、9/09 TX2 5.37、9/02 TX1 6.26, 而 DTE=1 樣本對 cm30 比值全在 0.79-1.05）, 同 DTE 平手取 tick 多者。全回補: 覆蓋 **19 → 23 / 68**, 改寫 3 日 + 新增 4 日, `guarded 0`。新增 `vix_w_root/dte/ticks` 三個審計欄位, 讓 NULL 的兩種成因在**表上**就分得開（root NOT NULL = 有週選列但不可用；root NULL = collector 斷線）—— 不必依賴有沒有人去讀 WARNING。
+
+**23/68 是資料上限, 不是修好了。** 45 個仍 NULL 的日子: 22 日在 7/06 前（`iv_metrics` 根本沒有週選列, 物理上不存在）、20 日 collector 未訂閱/斷線、2 日只有 DTE=0 結算腿（正確排除）、1 日只有前一天到期的隔夜殘留。三個 root 同時在線是 **9/16 09:04 weekly-root 修復之後才有**的事。
+
+**負向驗證順手抓到第二個缺陷。** 跑「門檻調到 99 應該全線缺腿」時, log 印 `DTE>=99` 卻照樣選到腿 —— `def pick_weekly_leg(legs, min_dte: int = MIN_WEEKLY_DTE)` 的預設值在 **def 時**就凍結進簽名, 事後改模組屬性無效, 而 WARNING 的門檻字串是呼叫時才格式化。**日誌宣稱的門檻 ≠ 實際套用的門檻**, 比門檻設錯更難查。改用 None 哨兵並加測試釘住。
+
+**教訓（與 9/12 那則同形, 這是第 4 處）:** 任何寫進程式的外部識別碼都要問「它會不會輪替」。已知同型清單: collector 訂閱、`IV_WEEKLY_PRODUCT_1`、`options_subscriber.py:229`（`TX5`, 目前 `WRITE_DB=false` 無實害, 列為 shioaji-broker Phase-4 切換前必修）、本次的 `vix_daily.py`。另外一條新的: **「最近一次被注意到的日期」不等於「故障起點」** —— 我用前者寫了三處註解, 全錯。
+
+詳細 diff 與逐日對照: `database/docs/2026-09-16-vix_w-backfill-diff.md`

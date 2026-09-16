@@ -104,9 +104,16 @@ def compute_gex(conn, spot: float, front_expiry
 def fmt_num(v: float | None, spec: str = ".1f", na: str = "n/a") -> str:
     """None-safe 數值格式化 — None → 'n/a'。
 
-    vix_daily 的 vix_w / wm_spread 自 2026-09-09 起因 quote-quality guard 合法為
-    NULL(>30% 跳動+反向/比值出帶 → NULL)。直接 f"{None:+.1f}" 會 TypeError,
-    2026-09-10~15 讓 08:30 dashboard 連續 crash 四個交易日。
+    vix_daily 的 vix_w / wm_spread 會合法為 NULL, 直接 f"{None:+.1f}" 會
+    TypeError, 2026-09-10~15 讓 08:30 dashboard 連續 crash 四個交易日。
+
+    歸因更正 (2026-09-16): 此處原寫「自 9/09 起因 quote-quality guard 為 NULL」,
+    是錯的。真正原因是選腿 SQL 寫死 `product_code='TX2'`, 而 TAIFEX 週選 root
+    每週輪替 —— TX2 只在 7/06~9/09 掛牌, 過後問的是當天不存在的 root。
+    guard 只在 9/01 出手過一次, 且那次也是對症不對因 (病因同樣是選錯合約)。
+    規模也不是「六個交易日」而是 68 日只有 19 日有值。已於本日改為動態選腿
+    (最近週選 DTE>=1) 並全回補至 23 日, 詳見 database repo
+    docs/2026-09-16-vix_w-backfill-diff.md。
     """
     return na if v is None else format(v, spec)
 

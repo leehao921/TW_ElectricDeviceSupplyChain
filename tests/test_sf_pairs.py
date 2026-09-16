@@ -98,3 +98,46 @@ def test_evaluate_pair_expiry_after_20d():
     assert st["status"] == "expired"
     st2 = sf.evaluate_pair(_pair(), closes, trading_days_held=19)
     assert st2["status"] == "active"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 週/月 IV 倒掛 gate 的新鮮度 — 起源: 2026-09-16 查出 product_code='TX2' 寫死
+#
+# 舊碼 `SELECT wm_spread FROM vix_daily WHERE wm_spread IS NOT NULL
+#       ORDER BY date DESC LIMIT 1` 完全沒有新鮮度檢查。vix_w 從 9/9 起連續
+# NULL, 於是這條 SQL 一路往回撈, 六個交易日以來都把 **9/08 的 -6.26** 當成
+# 「今日」印在週一交易計畫的蓋板 gate 上。今日真值是 +1.40 —— 差 7.66 點。
+#
+# 這比缺值更糟: 缺值會被看見, 冒充的舊值不會。對齊本輪已定調的
+# 「硬 gate: 標 STALE 停用規則」原則 —— 陳舊即停用判定, 不猜。
+#
+# 另外舊碼 `float(r[0]) if r and r[0] else None` 有 falsy 陷阱:
+# wm_spread 剛好 0.0 會被當成缺值。
+# ══════════════════════════════════════════════════════════════════════════════
+class TestIvGate:
+    def test_fresh_normal(self):
+        assert sf.iv_gate(-1.4, "2026-09-16", "2026-09-16") == "✅ -1.4"
+
+    def test_fresh_inverted_fires(self):
+        assert "🚨" in sf.iv_gate(8.2, "2026-07-29", "2026-07-29")
+
+    def test_zero_is_a_real_reading_not_missing(self):
+        """wm_spread == 0.0 是合法讀值 — 舊碼的 `if r[0]` 會把它吞成缺值。"""
+        assert sf.iv_gate(0.0, "2026-09-16", "2026-09-16") == "✅ +0.0"
+
+    def test_stale_value_is_disabled_not_displayed_as_current(self):
+        """實況: 9/08 的 -6.26 被當成 9/16 的值用了六個交易日。"""
+        g = sf.iv_gate(-6.26, "2026-09-08", "2026-09-16")
+        assert "STALE" in g and "2026-09-08" in g
+        assert "-6.3" not in g and "-6.26" not in g   # 不可把舊值印成現值
+
+    def test_stale_never_fires_alarm(self):
+        """陳舊的倒掛值也不可以觸發 🚨 —— 它描述的是六天前的世界。"""
+        assert "🚨" not in sf.iv_gate(8.2, "2026-09-08", "2026-09-16")
+
+    def test_null_is_disabled(self):
+        g = sf.iv_gate(None, "2026-09-16", "2026-09-16")
+        assert "🚨" not in g and "週選資料缺" in g
+
+    def test_no_row_at_all(self):
+        assert "–" in sf.iv_gate(None, None, "2026-09-16")

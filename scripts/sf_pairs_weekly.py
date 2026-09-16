@@ -264,6 +264,24 @@ def options_env_lines(row: dict) -> list:
     return out
 
 
+def iv_gate(wm: float | None, wm_date, as_of) -> str:
+    """週/月 IV 倒掛 gate 標籤 — 陳舊或缺值一律**停用判定**, 不冒充現值。
+
+    舊碼是 `WHERE wm_spread IS NOT NULL ORDER BY date DESC LIMIT 1`, 沒有任何
+    新鮮度檢查。vix_w 自 9/9 起連續 NULL (product_code='TX2' 寫死, root 每週
+    輪替), 這條 SQL 就一路往回撈, 六個交易日都把 9/08 的 -6.26 當「今日」印在
+    蓋板 gate 上; 今日真值 +1.40, 差 7.66 點。缺值會被看見, 冒充的舊值不會。
+
+    比較用字串日期: 兩邊都是 ISO-8601, 字典序即時序, 不必引入 date 型別轉換。
+    """
+    if wm is None or wm_date is None:
+        return "– (週選資料缺, 停用判定)" if wm_date is not None else "–"
+    if str(wm_date) != str(as_of):
+        # 值本身不印出來 —— 印了就等於把六天前的世界說成現在
+        return f"– (STALE: 最新僅至 {wm_date}, 停用判定)"
+    return f"🚨 倒掛 {wm:+.1f}" if wm > 2 else f"✅ {wm:+.1f}"
+
+
 # ------------------------------------------------------------------ hedge
 def hedge_plan(conn) -> list:
     """期貨/股票對沖: 現貨持倉 β 蓋板需要的微台口數 + regime gate 現況."""
@@ -278,17 +296,19 @@ def hedge_plan(conn) -> list:
                        WHERE symbol='TXF' AND bucket >= now() - interval '7 days'""")
         r = cur.fetchone()
         txf = float(r[0]) if r and r[0] else None
-        cur.execute("SELECT wm_spread FROM vix_daily WHERE wm_spread IS NOT NULL "
-                    "ORDER BY date DESC LIMIT 1")
+        # 取「最新一列」而非「最新有值的一列」, 並帶回日期讓 iv_gate 判新鮮度。
+        # 舊碼的 WHERE wm_spread IS NOT NULL 會一路往回撈, 把六天前的值當今日。
+        cur.execute("SELECT date, wm_spread FROM vix_daily ORDER BY date DESC LIMIT 1")
         r = cur.fetchone()
-        wm = float(r[0]) if r and r[0] else None
+        wm_date = r[0] if r else None
+        # `is not None` 而非 truthiness: wm_spread 剛好 0.0 是合法讀值
+        wm = float(r[1]) if r and r[1] is not None else None
     if not txf:
         return lines + ["（TXF 價格不可得）", ""]
     notional = txf * 10                                   # 微台 NT$10/點
     n_full = mv / notional
     gate_px = "🚨 跌破" if txf < 39385 else "✅ 之上"
-    gate_iv = ("🚨 倒掛" if wm is not None and wm > 2 else
-               f"✅ {wm:+.1f}" if wm is not None else "–")
+    gate_iv = iv_gate(wm, wm_date, date.today().isoformat())
     lines += [
         f"- 現貨市值 ≈ {mv/1e4:,.0f} 萬 · TXF {txf:,.0f} · 微台每口名目 ≈ {notional/1e4:,.0f} 萬",
         f"- **全蓋 ≈ {n_full:.1f} 口微台 / 半蓋 ≈ {n_full/2:.1f} 口**（β≈1 粗估，未按個股 β 加權）",

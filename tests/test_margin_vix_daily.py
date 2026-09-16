@@ -55,3 +55,51 @@ def test_render_weekly_inversion_alarm():
                      cm30={"vix_30d": 23.4, "rv_21d": None, "vrp_30d": None,
                            "vix_w": 22.9, "wm_spread": -0.6, "vrp_pct": None, "n": 5})
     assert "正價差 -0.6" in calm and "🚨" not in calm
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 週選行必須永遠出現 — 起源: 2026-09-16 查出 product_code='TX2' 寫死
+#
+# 舊碼 `if cm30 and cm30.get("vix_w") is not None:` 把整行包住, NULL 時整行消失。
+# 68 個交易日只有 19 日有 vix_w, 但讀日報的人看不出「今天少了一行」——
+# 缺值必須看得見才會有人去修, 這正是它能壞兩個多月的原因之一。
+#
+# 同時把選腿 (root + DTE) 印出來: 新口徑每週換腿, 不標的話讀者無從判斷這個
+# IV 是 D1 還是 D13 —— 而 7/29 那個 +8.2 的「實證錨點」其實是 DTE=14。
+# ══════════════════════════════════════════════════════════════════════════════
+_BASE = dict(fin_now=1e8, fin_5d_chg=0, vix=None, vix_5d_chg=None,
+             fin_up=[], fin_down=[], short_up=[])
+
+
+def test_weekly_line_survives_null_vix_w():
+    """2026-09-11 實況: 只有 DTE=0 結算腿 → vix_w NULL, 但這行不可以消失。"""
+    msg = mv.render("2026-09-11", **_BASE,
+                    cm30={"vix_30d": 26.7, "rv_21d": None, "vrp_30d": None,
+                          "vix_w": None, "wm_spread": None, "vrp_pct": None, "n": 5})
+    assert "週選IV" in msg, "NULL 時整行消失 — 正是壞了兩個月沒人發現的原因"
+    assert "n/a" in msg
+    assert "🚨" not in msg          # 不知道 ≠ 沒事, 但也不可以報警
+
+
+def test_weekly_line_shows_root_and_dte():
+    """2026-09-16 實況: TXX DTE=2, wm +1.40 → 微倒掛且標明選了哪條腿。"""
+    msg = mv.render("2026-09-16", **_BASE,
+                    cm30={"vix_30d": 27.69, "rv_21d": None, "vrp_30d": None,
+                          "vix_w": 29.09, "wm_spread": 1.40, "vrp_pct": None, "n": 5,
+                          "vix_w_root": "TXX", "vix_w_dte": 2})
+    assert "週選IV(TXX D2) 29.1" in msg
+    assert "⚠️ 微倒掛 +1.4" in msg
+
+
+def test_weekly_line_without_audit_columns_still_renders():
+    """審計欄位缺席 (舊資料列) 時退回不帶 root 的標示, 不得拋例外。"""
+    msg = mv.render("2026-07-29", **_BASE,
+                    cm30={"vix_30d": 31.2, "rv_21d": None, "vrp_30d": None,
+                          "vix_w": 39.5, "wm_spread": 8.2, "vrp_pct": None, "n": 5})
+    assert "週選IV" in msg and "39.5" in msg
+
+
+def test_weekly_line_when_cm30_missing_entirely():
+    """vix_daily 完全沒有可用列 → 仍要印出一行 n/a, 而不是靜靜少一行。"""
+    msg = mv.render("2026-09-14", **_BASE, cm30=None)
+    assert "週選IV" in msg and "n/a" in msg

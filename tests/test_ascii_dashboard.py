@@ -43,9 +43,15 @@ def test_pc_ratio():
 # ══════════════════════════════════════════════════════════════════════════════
 # None-safe 格式化 — 起源: com.lulala.dashboard 連續 crash 四個交易日 (2026-09-10~15)
 #
-# vix_daily.vix_w / wm_spread 自 2026-09-09 起因 quote-quality guard 合法為 NULL,
-# 而 vol_section_lines 用 f"{None:+.1f}" → TypeError → 08:30 dashboard 整支 exit 1,
-# 且 08:40 level map 因共用同一個 try 靜默掉波動率＋法人兩個區塊。
+# vix_daily.vix_w / wm_spread 合法為 NULL, 而 vol_section_lines 用 f"{None:+.1f}"
+# → TypeError → 08:30 dashboard 整支 exit 1, 且 08:40 level map 因共用同一個 try
+# 靜默掉波動率＋法人兩個區塊。
+#
+# 歸因更正 (2026-09-16): 原註解寫「自 9/09 起因 quote-quality guard 為 NULL」,
+# 錯的。病因是選腿 SQL 寫死 product_code='TX2' 而週選 root 每週輪替 (TX2 僅
+# 7/06~9/09 掛牌), 規模是 68 日僅 19 日有值 —— 不是六天, 也不是 guard。
+# 已改為動態選腿 (最近週選 DTE>=1)。None-safe 本身仍然必要: 9/11 這類「當日
+# 只有 DTE=0 結算腿」的日子, vix_w 依口徑就該是 NULL。
 # ══════════════════════════════════════════════════════════════════════════════
 import pytest  # noqa: E402
 
