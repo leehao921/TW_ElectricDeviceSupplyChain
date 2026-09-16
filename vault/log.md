@@ -313,3 +313,25 @@ Slice 01 補 Murata GRM011 SKU 詳表 (GRM011R60J104M 0.1µF 6.3V X5R / GRM011R6
 **善後**: `data/gex_history.json` 9/15 標 `iv_stale: true`;`h:agent:txf_levels:latest` 手動改 `gamma_regime=STALE` — 已驗證 `GammaRegime("STALE")` 觸 ValueError → `UNKNOWN`,fail-closed,consumer 零改動即停用 gamma 規則;schema 變更經 inbox coordination 廣播 (id 1789467445920-0)。
 
 **教訓**: liveness 心跳與資料寫入是兩個不同訊號,監控讀錯欄位等於沒有監控。`restart: unless-stopped` 只對 process exit 生效、對 unhealthy 無感 — healthcheck 是能見度面,自癒必須是 collector 自己 `sys.exit(1)`。
+
+### 2026-09-16 續章 — 同一次巡檢再挖出兩個「監控說謊」的變體
+
+修完上面六缺陷後追問「選擇權目前是正確的嗎」,又挖出兩個**同型**問題:設定/門檻被當成不變量,而實際節奏會變。
+
+**P0 — 週選 root 寫死,GEX front leg 全滅 (`505753d` / `c9e2365` / `079ac58`)**
+
+`docker-compose.yml` 把週選代碼釘成常數 `IV_WEEKLY_PRODUCT_1: "TX2"`、`IV_POLL_ONLY_PRODUCTS: "TX1,TXU,TXV"`。但 TAIFEX 週選 root **每週輪替**。2026-09-16 實測:設定的四個 root 在合約快取裡是 **0 筆**,實際掛牌的 TX4/TXX/TXY 各 300/304/288 筆、**全部沒訂閱**。log 連日只有 `Resolved 3 expiries: TXO@...`。2026-09-02 那筆「TX4/TX5 不存在 — 已驗證」的註解當時是對的,錯在**被當成常數固化** —— 它描述的是那一週。
+
+不能用 root 字母解碼週序:實測 TXW 掛牌 0 筆而 TXX/TXY 都在。用 TAIFEX 官方 `option_oi_daily` 對帳,履約價數量是精確指紋 (9/18=304↔TXX、9/23=300↔TX4、9/25=288↔TXY)。正解是**每輪動態列舉 + 依到期日排序**。
+
+**部署才抓到的二次缺陷**:動態列舉上線後第一輪,tick 訂閱嘗試 392 筆、Shioaji 回 `Max Num Subscriptions Exceeded` 276 次,其中 **260 次是 TXX** —— 也就是 DTE=2 的最近腿。TXO 三腿(含 DTE=35、63)照原順序先吃光 ~250 的額度,把 GEX 最需要 tick 級 IV 的 front leg 擠成 snapshot 輪詢。額度不足不是 bug,**犧牲順序錯了**才是。改近腿優先 + 自訂 240 額度後:9/18 從 424 列/10min → 2,075 列/3min (≈16×),零新增 rejection。單元測試全綠卻沒抓到這個 —— 是 live log + DB 列數抓到的。
+
+自癒判準也一併擴充:原本只認「0 expiries」,但 9/16 13:45 後的情境是**解析成功卻只剩遠腿**(最近到期跳到 10/21, DTE=35),0-expiry 永遠不會觸發。門檻 14 天不是猜的:`option_oi_daily` 2018-01-02 起 2,116 個結算日,最近到期 DTE 最大值 = **13 天**(2018/2021 農曆年),平均 2.71,>7 天僅 5 天;2024 年後 655 天內最大 6。14 天在 8.7 年歷史上零誤報。
+
+**P1 — institutional 心跳假陽性,每個交易日下午連報一小時 (`8a55cb4` / `09c112f`)**
+
+watchdog 反覆報 `institutional heartbeat stale`(實測 age 182s-513s),每一筆都是假陽性。根因是**心跳節奏,不是門檻**:T86 逐股資料約 16:15 TPE 才發布,15:15 起三次 attempt 全回 `ok=False`,而心跳只在整個 attempt loop 跑完後寫一次 → `60 + 3×collect(~22s) + 2×300 ≈ 726s` 對上 `STALE_THRESHOLD_SEC = 180`。對 HEAD~1 實跑迴圈測試確認:整輪只有 **3 次心跳,間隔 666s / 726s** —— 觀測到的 182-513s 全是落在這個空窗裡的抽樣。
+
+**否決的選項**:把 institutional 門檻放寬到 900s。那是為了消音而讓真正卡死的 process 多躲 15 分鐘 —— 與 D3 的教訓正面衝突。改成讓心跳在 backoff 期間照跳(30s 分段),唯一保留的沉默空窗是 `collect_day` 本身(實測 20-37s)。並補一支**反向測試**:fetch 卡死十分鐘時心跳**必須**出現空窗,防止未來有人「順手」在 collect_day 裡補心跳而把告警整個蓋掉、測試還全綠。附帶修掉 `time.sleep(300)` 不理 SIGTERM 的關機延遲。
+
+**共同教訓(三個都是同一個形狀)**:D3 是「讀錯欄位」、P0 是「設定被當不變量」、P1 是「門檻假設了一個不存在的節奏」。三者都讓儀表板全綠而系統壞掉。**任何寫進設定的外部識別碼都要問「它會不會輪替」;任何門檻都要問「我量過真實節奏嗎」** —— 本次兩個門檻(14 天 DTE、30s 心跳分段)都先跑了歷史資料/實測 log 才定。
