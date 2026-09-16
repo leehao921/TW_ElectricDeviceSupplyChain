@@ -342,3 +342,12 @@ watchdog 反覆報 `institutional heartbeat stale`(實測 age 182s-513s),每一�
 - loop session 10 分鐘內 hotfix (2c3317d enum_by_name + 450c1e0), database repo 掃描無同病
 - **我的驗證盲點 (責任歸屬)**: 9/10 simulation 關卡用「另寫的平行 smoke」驗 API 面 (屬性式全過), 沒有走生產派單路徑 (agent bridge 的名稱下標 dispatch) — 升級關卡必須 replay 生產入口, 不是枚舉我想到的 API
 - 連帶記錄: shioaji.constant.* 新 deprecation (→ sj.*), 與 api.Contracts→api.contracts 同列待辦
+
+## 2026-09-16 「GEX ASCII map 沒產生」— 圖一直都在, 消失的是複合行 (`4043cfb`)
+- **主訴不成立**: 08:30 dashboard / 08:40 txf-levels 兩支 ASCII 圖今日皆正常產出並推進 `claude:inbox` (exit 0、`XADD ok`、不在 forwarder blocklist)。實際掉的是 **「複合(W1+W2+M1)」單獨一行**
+- **inbox 實證**: 08:30 dashboard 有圖/無複合行、08:40 txf-levels 有圖/無複合行、20:50 dashboard 有圖**有**複合行 — 早上壞晚上好, 正好對上週選腿的寫入時點
+- **根因**: `compute_composite` 只在 W1+W2+M1 三腿 net gamma 穿零時才有 zero-gamma。08:40 當下週選腿還沒被 collector 寫入 (weekly-root 修復 09:04 才補上), 只剩兩條月選腿 → 無穿零 → `zg=None` → `f"{None:,.0f}"` TypeError
+- **為什麼四天沒人看出**: 例外發生在 IV curve 兩行**已經 append 之後**, 曲線活著、只有複合行被 `except` 吞掉 —— 少一行不像壞掉, 像沒資料
+- **這是 D5 的漏網之魚**: `fmt_num` 就在同檔案 40 行之上, 9/10~15 那批 None-safe 修復只掃了 vix 欄位, 沒掃 regime 層。同型 bug 的第二個實例
+- **修法**: zg/total_gex 走 `fmt_num` 降級成 n/a、`classify_regime` 回 None 時印 n/a 不印字串 "None"、`except` 補 `traceback.print_exc`
+- **教訓**: 修一個 bug class 時要**掃完整個 class**, 不能只修觸發當下那一處。以及 —— **fail-soft 的 except 沒有 traceback 就是靜默**, 兩次事故 (crash 四天、複合行掉一天) 都卡在同一個空的 `except ... as e: print(e)`
