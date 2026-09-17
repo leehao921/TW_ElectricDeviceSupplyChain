@@ -103,3 +103,38 @@ def test_weekly_line_when_cm30_missing_entirely():
     """vix_daily 完全沒有可用列 → 仍要印出一行 n/a, 而不是靜靜少一行。"""
     msg = mv.render("2026-09-14", **_BASE, cm30=None)
     assert "週選IV" in msg and "n/a" in msg
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# collector stderr 必須轉出到 routine log — 起源: 2026-09-17 live 驗收
+#
+# vix_daily.py 修好了「查無候選時完全靜默」(D3), 但 run_collectors 用
+# capture_output=True 且只在拋例外時 print —— 成功路徑下 collector 的
+# WARNING/ERROR 全部被吃掉。實測: grep 無可用週選腿 ~/Library/Logs/margin-vix.log
+# → 0, docker logs 也看不到 (docker exec 的輸出不進容器 log)。
+# 修了「collector 不出聲」卻沒接「出了聲沒人聽」—— 與原始 TX2 事故同族。
+# ══════════════════════════════════════════════════════════════════════════════
+import subprocess  # noqa: E402
+
+
+def test_run_collectors_forwards_stderr_on_success(monkeypatch, capsys):
+    """成功路徑: collector 的 WARNING 必須轉出, 不得因 returncode=0 而消音。"""
+    class R:
+        stderr = "[WARNING] 2026-09-15: 無可用週選腿 (DTE>=1) — vix_w=NULL\n"
+    monkeypatch.setattr(mv.subprocess, "run", lambda *a, **k: R())
+    mv.run_collectors("2026-09-17")
+    assert "無可用週選腿" in capsys.readouterr().err
+
+
+def test_run_collectors_surfaces_stderr_on_failure(monkeypatch, capsys):
+    """失敗路徑: 除了一行 [warn], 還要把 collector 的 traceback 帶出來。
+
+    只印 CalledProcessError 的 repr 等於只知道 exit code —— debug 不動。
+    """
+    def boom(cmd, *a, **k):
+        raise subprocess.CalledProcessError(1, cmd, stderr="Traceback: KeyError 'd'\n")
+    monkeypatch.setattr(mv.subprocess, "run", boom)
+    mv.run_collectors("2026-09-17")
+    err = capsys.readouterr().err
+    assert "[warn]" in err
+    assert "KeyError 'd'" in err

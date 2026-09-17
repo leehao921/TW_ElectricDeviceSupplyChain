@@ -91,11 +91,19 @@ def run_collectors(as_of: str) -> None:
                  ["scripts/collectors/margin_daily.py", "--date", as_of],
                  ["scripts/collectors/vix_daily.py"]):
         try:
-            subprocess.run(["docker", "exec", "-e", "PYTHONPATH=/opt/tmf:/opt/tmf/src",
-                            "tmf-stock-daily-collector", "python"] + args,
-                           check=True, capture_output=True, timeout=180)
+            r = subprocess.run(["docker", "exec", "-e", "PYTHONPATH=/opt/tmf:/opt/tmf/src",
+                                "tmf-stock-daily-collector", "python"] + args,
+                               check=True, capture_output=True, timeout=180, text=True)
+            # collector 的 WARNING/ERROR 一律轉出到 routine log。舊碼成功路徑
+            # 全吞 —— vix_daily 修好的「無可用週選腿」警報在 18:10 排程下無人
+            # 聽得見 (docker exec 輸出不進容器 log, capture_output 又吃掉這裡)。
+            if r.stderr:
+                sys.stderr.write(r.stderr)
         except Exception as e:
             print(f"[warn] {args[0]} {args[-1]} failed: {e}", file=sys.stderr)
+            stderr = getattr(e, "stderr", None)   # 只印 repr = 只知道 exit code
+            if stderr:
+                sys.stderr.write(stderr)
 
 
 def main() -> int:
