@@ -380,3 +380,13 @@ watchdog 反覆報 `institutional heartbeat stale`(實測 age 182s-513s),每一�
 **教訓（與 9/12 那則同形, 這是第 4 處）:** 任何寫進程式的外部識別碼都要問「它會不會輪替」。已知同型清單: collector 訂閱、`IV_WEEKLY_PRODUCT_1`、`options_subscriber.py:229`（`TX5`, 目前 `WRITE_DB=false` 無實害, 列為 shioaji-broker Phase-4 切換前必修）、本次的 `vix_daily.py`。另外一條新的: **「最近一次被注意到的日期」不等於「故障起點」** —— 我用前者寫了三處註解, 全錯。
 
 詳細 diff 與逐日對照: `database/docs/2026-09-16-vix_w-backfill-diff.md`
+
+## 2026-09-17 gex_regime IV前緣 z20 的午夜 √2 階梯 — 發現未修
+
+FOMC 夜 00:01 的 `IV_Z_CROSS z20 +0.8→+4.5` 實測為日曆假象: IV前緣取
+0918 週選 (DTE=1), 跨午夜 DTE 2→1 年化重算 ×√2。TXX 23:55=26.2 →
+00:00=37.4 零過渡瞬跳, 機械值 26.2×√2=37.0, 殘差真實買盤 <+0.5 vol pt。
+剛好穿了 FOMC 的戲服才被當真訊號。
+
+短 DTE 週選腿污染長天期比較的同族缺陷第 6 例 (TX2 寫死家族)。
+修法: gex_regime_monitor front IV z 排除 DTE<=1 腿或固定 DTE 正規化。待辦。
