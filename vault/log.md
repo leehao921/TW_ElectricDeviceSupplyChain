@@ -390,3 +390,19 @@ FOMC 夜 00:01 的 `IV_Z_CROSS z20 +0.8→+4.5` 實測為日曆假象: IV前緣�
 
 短 DTE 週選腿污染長天期比較的同族缺陷第 6 例 (TX2 寫死家族)。
 修法: gex_regime_monitor front IV z 排除 DTE<=1 腿或固定 DTE 正規化。待辦。
+
+## 2026-09-25 休市垃圾第二次 — 中秋節戳破星期制 session gate
+
+9/06 事故後掛的三處 gate (options_iv/stock_ofi/index_spot) 只看星期+時段,
+中秋 (修復後首個非週末假日) 一測即破: 08:45 起凍結快照寫庫, 清了
+iv_metrics 9,264 + stock_ofi 47,382 列; 9/24 夜盤外溢 43,966 筆真 tick
+保留 (價格域 47,835-48,437 證真)。index_spot 因 ts=payload 冪等設計毫髮無傷。
+
+根治: database repo 新共用模組 tw_holidays (TWSE 官方 2026 剩餘休市表),
+三處 gate 委派同一份邏輯。夜盤歸屬改錨定日制 (外溢看前一日); 日曆超界
+只告警不阻擋。19 測試 + CI 白名單 (順手補 test_vix_daily 上週漏編)。
+Live 負向驗證: 假日當天重啟, 4 分鐘零寫入 vs 上午同條件 ~200 列/分。
+
+教訓: 「平日」不是「交易日」。星期制假設三份副本同時錯 — 收攏成一份
+才是結構修復。**2026-12 TWSE 公告次年休市表後必須擴充 tw_holidays.py**
+(超界後 gate 失效, 有 warn-once 提醒)。
