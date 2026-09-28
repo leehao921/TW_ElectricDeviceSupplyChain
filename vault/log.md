@@ -406,3 +406,27 @@ Live 負向驗證: 假日當天重啟, 4 分鐘零寫入 vs 上午同條件 ~200
 教訓: 「平日」不是「交易日」。星期制假設三份副本同時錯 — 收攏成一份
 才是結構修復。**2026-12 TWSE 公告次年休市表後必須擴充 tw_holidays.py**
 (超界後 gate 失效, 有 warn-once 提醒)。
+
+## 2026-09-28 Shioaji 24h token — 三個 session 持有者從不在每日重啟名單
+
+`restart_trading_daemons.sh` (08:40/14:55) 只探索帶 `SHIOAJI_RESTART_TIER`
+的 plist, 且只認 `*.py` 參數。漏掉: `tmf-options-iv-collector` (Docker, 9/27
+21:38 死)、`tmf-shioaji-broker` (Docker, 9/26 08:46 起死兩天)、
+`com.lulala.tmf-tick-collector` (`python -m`, 期貨 tick 主餵送, 9/27 起死)。
+
+**更正「9/17–9/25 死了九天」**: iv_metrics 每個完整交易日 ~40k 列, 沒死。
+IV collector 每天 ~08:47 靠 tick-starvation watchdog 自殺 (3×30s 無 tick →
+exit → Docker 重登) 意外自癒 — 每天開盤 2–5 分鐘斷層, 是副作用不是設計。
+docker health 全程 healthy (liveness ≠ freshness, 又一例)。
+
+修法 (database #161 / nautilus-shioaji #530, 已部署): 容器 label
+`com.lulala.shioaji_restart_tier` 供腳本探索 (主, 08:40); 容器內 08:42
+後備自重啟 (登入日<今日才觸發, 不撞 451); tick-collector plist 補 tier;
+lint 解析 `-m module` + `--docker` 檢查。測試順帶抓到 bash 3.2 `set -u`
+空陣列 = unbound 的潛伏 bug (docker 缺席時新迴圈必中)。
+
+**9/29 驗證點**: 08:40 session_restart.log 三個 `(DOCKER data)` OK +
+tmf-tick-collector OK; 08:47 不再出現 `Exiting for Docker restart (fail_streak=3)`。
+
+教訓: 名單「自動探索」只保證探索規則涵蓋到的形狀 — `*.py` 規則看不到
+`-m`, plist 規則看不到容器。新增 session 持有者時問「重啟腳本看得到它嗎」。
