@@ -76,3 +76,102 @@ def test_zscore_windows_honest_n():
     assert out["z90"]["n"] == 30                  # 不足 90 → 用實際 n 標註
     expect = (29 - 19.5) / gm._std(list(map(float, range(10, 30))))
     assert abs(out["z20"]["z"] - expect) < 0.005   # 實作輸出 round 2 位
+
+
+# ---------------------------------------------------------------- zero-gamma (2026-09-30)
+# 9/30 09:57: published ZG 47,100 was the strike where cumulative GEX crosses
+# zero, not a price where dealer gamma flips; the settling 9/30 leg (13:30) was
+# excluded; and "no flip in range" fell through to UNKNOWN → gate fail-closed.
+from datetime import datetime as _dt, timedelta as _td, timezone as _tz  # noqa: E402
+
+_TPE = _tz(_td(hours=8))
+
+
+def test_select_legs_keeps_todays_expiry_until_settlement():
+    exps = ["20260930", "20261002", "20261007", "20261021", "20261118"]
+    morning = _dt(2026, 9, 30, 10, 0, tzinfo=_TPE)
+    assert gm.select_legs(exps, morning) == ["20260930", "20261002", "20261007", "20261021"]
+
+
+def test_select_legs_drops_todays_expiry_after_settlement():
+    exps = ["20260930", "20261002", "20261007", "20261021", "20261118"]
+    evening = _dt(2026, 9, 30, 15, 5, tzinfo=_TPE)
+    assert gm.select_legs(exps, evening) == ["20261002", "20261007", "20261021"]
+
+
+def test_select_legs_ignores_past_expiries():
+    exps = ["20260929", "20261002", "20261007", "20261021"]
+    assert gm.select_legs(exps, _dt(2026, 9, 30, 10, 0, tzinfo=_TPE)) == \
+        ["20261002", "20261007", "20261021"]
+
+
+def test_bs_gamma_peaks_at_the_money_and_is_zero_when_expired():
+    atm = gm.bs_gamma(48000, 48000, 7 / 365, 0.2)
+    otm = gm.bs_gamma(48000, 49500, 7 / 365, 0.2)
+    assert atm > otm > 0
+    assert gm.bs_gamma(48000, 48000, 0, 0.2) == 0.0
+
+
+def _opt(strike, cp, oi, T=7 / 365, iv=0.2):
+    return {"strike": strike, "cp": cp, "T": T, "iv": iv, "oi": oi}
+
+
+def test_sweep_finds_flip_between_put_and_call_mass():
+    # puts (negative gamma) clustered low, calls (positive) high → gamma flips between
+    opts = [_opt(47000, "P", 5000), _opt(49000, "C", 5000)]
+    zg, sign = gm.sweep_zero_gamma(opts, spot=48500)
+    assert zg is not None and 47000 < zg < 49000
+    assert sign > 0          # at spot 48,500 the call side dominates
+
+
+def test_sweep_reports_no_flip_when_gamma_one_signed():
+    opts = [_opt(48000, "C", 5000), _opt(48500, "C", 3000)]
+    zg, sign = gm.sweep_zero_gamma(opts, spot=48500)
+    assert zg is None and sign > 0
+
+
+def test_classify_no_flip_uses_gamma_sign_not_unknown():
+    assert gm.classify_regime(48600, None, 2.5e9, zg_status="none_in_range") == "MAGNET"
+    assert gm.classify_regime(48600, None, -2.5e9, zg_status="none_in_range") == "EXPANSION"
+    # without the explicit status a missing zg is still "can't tell"
+    assert gm.classify_regime(48600, None, 2.5e9) is None
+
+
+def test_regime_flip_event_survives_missing_zg():
+    ev = gm.detect_events(_st(regime="MIXED"), _st(regime="MAGNET", zg=None))
+    flip = [d for t, d in ev if t == "REGIME_FLIP"]
+    assert flip and "n/a" in flip[0]
+
+
+def _frame(rows):
+    import pandas as pd
+    return pd.DataFrame(rows, columns=["expiry", "strike", "call_put", "gamma", "iv", "open_interest"])
+
+
+def test_composite_publishes_both_zero_gammas_and_status():
+    now = _dt(2026, 9, 30, 10, 0, tzinfo=_TPE)
+    df = _frame([
+        ("20261021", 47000, "P", 0.0004, 0.22, 5000),
+        ("20261021", 49000, "C", 0.0004, 0.20, 5000),
+    ])
+    c = gm.composite_from_frame(df, spot=48500, now=now)
+    assert c["zg_status"] == "flip"
+    assert 47000 < c["zg"] < 49000                  # textbook sweep
+    assert c["zg_strike"] == 49000.0                # cumulative crossing at the call strike
+    assert c["expiries"] == ["20261021"]
+
+
+def test_composite_no_flip_in_range():
+    now = _dt(2026, 9, 30, 10, 0, tzinfo=_TPE)
+    df = _frame([("20261021", 48500, "C", 0.0004, 0.20, 5000)])
+    c = gm.composite_from_frame(df, spot=48500, now=now)
+    assert c["zg"] is None and c["zg_status"] == "none_in_range"
+    assert gm.classify_regime(48500, c["zg"], c["total_gex"], c["zg_status"]) == "MAGNET"
+
+
+def test_composite_uses_time_to_13_30_settlement_for_todays_leg():
+    now = _dt(2026, 9, 30, 13, 0, tzinfo=_TPE)       # 30 min before settlement
+    df = _frame([("20260930", 48500, "C", 0.0004, 0.20, 5000)])
+    c = gm.composite_from_frame(df, spot=48500, now=now)
+    assert c["expiries"] == ["20260930"]
+    assert c["zg_status"] == "none_in_range"

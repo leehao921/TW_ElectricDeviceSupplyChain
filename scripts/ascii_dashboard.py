@@ -158,9 +158,14 @@ def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
             # (2026-09-16 08:40: 週選腿尚未寫入, 只剩兩條月選腿)。舊碼直接
             # f"{None:,.0f}" → TypeError → 整條複合行被 except 靜默吞掉。
             zg, tg = comp["zg"], comp["total_gex"]
+            status = comp.get("zg_status")
             # classify_regime 在任一輸入缺值時回 None — 印 n/a, 別把 "None" 送進報告
-            reg = classify_regime(txf, zg, tg) or "n/a"
-            L.append(f" 複合(W1+W2+M1): {reg} · ZG {fmt_num(zg, ',.0f')} · "
+            reg = classify_regime(txf, zg, tg, status) or "n/a"
+            zg_txt = "範圍內無翻號" if zg is None and status == "none_in_range" \
+                else fmt_num(zg, ',.0f')
+            if comp.get("zg_strike") is not None:
+                zg_txt += f" (履約價累加 {comp['zg_strike']:,.0f})"
+            L.append(f" 複合(W1+W2+M1): {reg} · ZG {zg_txt} · "
                      f"GEX {fmt_num(None if tg is None else tg / 1e8, '+,.0f')}億/1%")
     except Exception as e:
         # 印 traceback 而非只有訊息 — 靜默吞例外正是 dashboard crash

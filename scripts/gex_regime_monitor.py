@@ -32,10 +32,15 @@ STALE_S = 600               # iv_strikes 最新列超過 10 分鐘 = 休市
 
 
 # ------------------------------------------------------------------ pure
-def classify_regime(spot, zg, total_gex):
+def classify_regime(spot, zg, total_gex, zg_status=None):
     """MAGNET: spot>ZG 且 GEX>0 (逆勢對沖/壓波動); EXPANSION: spot<ZG 且 GEX<0
-    (順勢對沖/放大); 矛盾 → MIXED (誠實標註, 不硬歸類)."""
-    if zg is None or total_gex is None:
+    (順勢對沖/放大); 矛盾 → MIXED (誠實標註, 不硬歸類).
+    zg_status="none_in_range": sweep 範圍內 gamma 不翻號 → 依符號判定, 不是「未知」."""
+    if total_gex is None:
+        return None
+    if zg is None:
+        if zg_status == "none_in_range":
+            return "MAGNET" if total_gex > 0 else "EXPANSION"
         return None
     above, positive = spot > zg, total_gex > 0
     if above and positive:
@@ -43,6 +48,56 @@ def classify_regime(spot, zg, total_gex):
     if not above and not positive:
         return "EXPANSION"
     return "MIXED"
+
+
+SETTLE_TIME = (13, 30)      # TXO 最後交易日結算時刻 (TPE)
+SWEEP_SPAN = 2500
+SWEEP_STEP = 25
+
+
+def _expiry_dt(expiry: str):
+    from datetime import timezone, timedelta
+    d = datetime.strptime(expiry, "%Y%m%d")
+    return d.replace(hour=SETTLE_TIME[0], minute=SETTLE_TIME[1],
+                     tzinfo=timezone(timedelta(hours=8)))
+
+
+def select_legs(expiries: list, now: datetime, n_future: int = 3) -> list:
+    """當日到期腿在 13:30 結算前仍在場 (常是 OI 最大腿) → 納入; 另取之後 n_future 個到期."""
+    today = now.strftime("%Y%m%d")
+    todays = [e for e in expiries if e == today and now < _expiry_dt(e)]
+    future = sorted(e for e in expiries if e > today)[:n_future]
+    return todays + future
+
+
+def bs_gamma(S: float, K: float, T: float, iv: float) -> float:
+    if T <= 0 or iv <= 0:
+        return 0.0
+    d1 = (math.log(S / K) + 0.5 * iv * iv * T) / (iv * math.sqrt(T))
+    return math.exp(-0.5 * d1 * d1) / math.sqrt(2 * math.pi) / (S * iv * math.sqrt(T))
+
+
+def _net_gamma_exposure(opts: list, S: float) -> float:
+    return sum((1.0 if o["cp"] == "C" else -1.0) * o["oi"] * bs_gamma(S, o["strike"], o["T"], o["iv"])
+               * MULTIPLIER * S * S * 0.01 for o in opts)
+
+
+def sweep_zero_gamma(opts: list, spot: float, span: int = SWEEP_SPAN,
+                     step: int = SWEEP_STEP):
+    """教科書 zero gamma: 每個假想現價以各合約 IV/T 重算 gamma 加總, 取離 spot 最近的翻號價位.
+    回傳 (zg | None, 現價處淨 gamma 符號 ±1). None = 範圍內處處同號."""
+    grid = [spot + k for k in range(-span, span + 1, step)]
+    tot = [_net_gamma_exposure(opts, S) for S in grid]
+    crossings = []
+    for i in range(1, len(grid)):
+        a, b = tot[i - 1], tot[i]
+        if (a < 0) != (b < 0):
+            crossings.append(grid[i - 1] + step * (-a) / (b - a))   # 線性內插
+    at_spot = _net_gamma_exposure(opts, spot)
+    sign = 1 if at_spot > 0 else -1
+    if not crossings:
+        return None, sign
+    return round(min(crossings, key=lambda x: abs(x - spot))), sign
 
 
 def vol_scalar(abs_gex, hist_abs: list):
@@ -82,9 +137,10 @@ def detect_events(prev: dict, curr: dict) -> list:
     ev = []
     if prev.get("regime") and curr.get("regime") \
             and prev["regime"] != curr["regime"]:
+        zg_txt = f"{curr['zg']:,.0f}" if curr.get("zg") is not None else "n/a"
         ev.append(("REGIME_FLIP",
                    f"{prev['regime']} → {curr['regime']} "
-                   f"(spot {curr['spot']:,.0f} vs ZG {curr['zg']:,.0f})"))
+                   f"(spot {curr['spot']:,.0f} vs ZG {zg_txt})"))
     for key, wall_key in (("CW_PROX", "cw"), ("PW_PROX", "pw")):
         was = _near_wall(prev.get("spot"), prev.get(wall_key))
         now = _near_wall(curr.get("spot"), curr.get(wall_key))
@@ -122,14 +178,58 @@ def market_live(cur) -> bool:
     return r[0] is not None and float(r[0]) < STALE_S
 
 
-def compute_composite(conn, spot: float) -> dict:
-    """前 3 個到期 (W1/W2/M1) 複合 GEX 廊道 → ZG/CW/PW/total."""
+def composite_from_frame(df, spot: float, now: datetime) -> dict:
+    """gamma × OI 合併表 → 複合 GEX 廊道.
+
+    zg        = 教科書 sweep (現價移到哪裡 dealer 淨 gamma 翻號); 範圍內不翻號 → None
+    zg_strike = 舊口徑: 逐履約價累加 GEX 跨零的履約價 (不是價位意義的 zero gamma)
+    zg_status = flip | none_in_range
+    """
+    df = df.dropna(subset=["gamma", "open_interest"])
+    df = df[(df.strike > spot - 3000) & (df.strike < spot + 3000)]  # 剔深尾
+    if df.empty:
+        return {}
+    sign = df.call_put.map({"C": 1.0, "P": -1.0})
+    df = df.assign(gex=df.gamma * df.open_interest * MULTIPLIER * spot * spot * 0.01 * sign)
+    by_k = df.groupby("strike").gex.sum().sort_index()
+    cum = by_k.cumsum()
+    crossings = []
+    prev_v = None
+    for k, v in cum.items():
+        if prev_v is not None and (prev_v < 0) != (v < 0):
+            crossings.append(float(k))
+        prev_v = v
+    zg_strike = min(crossings, key=lambda k: abs(k - spot)) if crossings else None
+
+    opts = []
+    for row in df.dropna(subset=["iv"]).itertuples():
+        T = (_expiry_dt(row.expiry) - now).total_seconds() / (365 * 86400)
+        if T > 0 and row.iv > 0:
+            opts.append({"strike": float(row.strike), "cp": row.call_put, "T": T,
+                         "iv": float(row.iv), "oi": float(row.open_interest)})
+    zg, _ = sweep_zero_gamma(opts, spot) if opts else (None, 0)
+
+    coi = df[df.call_put == "C"].groupby("strike").open_interest.sum()
+    poi = df[df.call_put == "P"].groupby("strike").open_interest.sum()
+    win = lambda s: s[(s.index > spot - 1500) & (s.index < spot + 1500)]  # noqa: E731
+    return {"zg": zg, "zg_strike": zg_strike,
+            "zg_status": "flip" if zg is not None else "none_in_range",
+            "total_gex": float(by_k.sum()),
+            "cw": int(win(coi).idxmax()) if len(win(coi)) else None,
+            "pw": int(win(poi).idxmax()) if len(win(poi)) else None,
+            "expiries": sorted(df.expiry.unique().tolist())}
+
+
+def compute_composite(conn, spot: float, now: datetime | None = None) -> dict:
+    """當日結算前的到期腿 + 之後 3 個到期 (W1/W2/M1) 複合 GEX 廊道."""
     import pandas as pd
+    from datetime import timezone, timedelta
+    now = now or datetime.now(timezone(timedelta(hours=8)))
     cur = conn.cursor()
     cur.execute("""SELECT DISTINCT expiry FROM iv_strikes
                    WHERE time >= now() - interval '1 day'
-                     AND expiry > to_char(now(), 'YYYYMMDD') ORDER BY 1 LIMIT 3""")
-    expiries = [r[0] for r in cur.fetchall()]
+                     AND expiry >= to_char(now() AT TIME ZONE 'Asia/Taipei', 'YYYYMMDD')""")
+    expiries = select_legs([r[0] for r in cur.fetchall()], now)
     if not expiries:
         return {}
     strikes = pd.read_sql("""
@@ -142,29 +242,10 @@ def compute_composite(conn, spot: float) -> dict:
         AND settle_date=(SELECT max(settle_date) FROM option_oi_daily)
         AND to_char(expiry,'YYYYMMDD') = ANY(%(e)s)""", conn, params={"e": expiries})
     df = strikes.merge(oi, left_on=["expiry", "strike", "call_put"],
-                       right_on=["expiry", "strike", "cp"]).dropna(
-        subset=["gamma", "open_interest"])
+                       right_on=["expiry", "strike", "cp"])
     if df.empty:
         return {}
-    df = df[(df.strike > spot - 3000) & (df.strike < spot + 3000)]  # 剔深尾
-    sign = df.call_put.map({"C": 1.0, "P": -1.0})
-    df = df.assign(gex=df.gamma * df.open_interest * MULTIPLIER * spot * spot * 0.01 * sign)
-    by_k = df.groupby("strike").gex.sum().sort_index()
-    cum = by_k.cumsum()
-    crossings = []
-    prev_v = None
-    for k, v in cum.items():
-        if prev_v is not None and (prev_v < 0) != (v < 0):
-            crossings.append(float(k))
-        prev_v = v
-    zg = min(crossings, key=lambda k: abs(k - spot)) if crossings else None  # 取最近現價的穿越
-    coi = df[df.call_put == "C"].groupby("strike").open_interest.sum()
-    poi = df[df.call_put == "P"].groupby("strike").open_interest.sum()
-    win = lambda s: s[(s.index > spot - 1500) & (s.index < spot + 1500)]  # noqa: E731
-    return {"zg": zg, "total_gex": float(by_k.sum()),
-            "cw": int(win(coi).idxmax()) if len(win(coi)) else None,
-            "pw": int(win(poi).idxmax()) if len(win(poi)) else None,
-            "expiries": expiries}
+    return composite_from_frame(df, spot, now)
 
 
 def iv_curve(conn, spot: float) -> list:
@@ -217,7 +298,7 @@ def main(argv=None) -> int:
     front_atm = curve[0][1] if curve else None
     zs = z_windows(front_atm, hist) if front_atm else {}
     z20 = (zs.get("z20") or {}).get("z")
-    regime = classify_regime(spot, comp["zg"], comp["total_gex"])
+    regime = classify_regime(spot, comp["zg"], comp["total_gex"], comp["zg_status"])
 
     curr = {"regime": regime, "spot": spot, "zg": comp["zg"],
             "cw": comp["cw"], "pw": comp["pw"], "z20": z20,
@@ -235,7 +316,9 @@ def main(argv=None) -> int:
     cd = st.get("cooldown", {})
     fire = [(t, d) for t, d in events if now_ts - cd.get(t, 0) > COOLDOWN_S]
 
-    zg_txt = f"{comp['zg']:,.0f}" if comp["zg"] else "n/a"
+    zg_txt = f"{comp['zg']:,.0f}" if comp["zg"] else f"±{SWEEP_SPAN:,}內無翻號"
+    zgs = comp.get("zg_strike")
+    zg_txt += f" (履約價累加 {zgs:,.0f})" if zgs else ""
     line = (f"{regime or '?'} · spot {spot:,.0f} · ZG {zg_txt} · "
             f"CW {comp['cw']:,} · PW {comp['pw']:,} · "
             f"GEX {comp['total_gex']/1e8:+,.0f}億/1% (scalar {scalar}) · "
@@ -253,7 +336,11 @@ def main(argv=None) -> int:
             r.hset("h:agent:gex_regime", mapping={
                 "ts": curr["ts"], "spot": spot,
                 "regime": regime or "UNKNOWN",
-                "zg": comp["zg"] or "", "cw": comp["cw"] or "",
+                "zg": comp["zg"] or "",
+                "zg_strike": comp["zg_strike"] or "",
+                "zg_status": comp["zg_status"],
+                "zg_method": "sweep",
+                "cw": comp["cw"] or "",
                 "pw": comp["pw"] or "",
                 "total_gex": round(comp["total_gex"], 0),
                 "vol_scalar": scalar if scalar is not None else "",

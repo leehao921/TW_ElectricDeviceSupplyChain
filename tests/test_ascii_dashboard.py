@@ -196,3 +196,19 @@ class TestCompositeLineNullSafety:
         assert "複合(W1+W2+M1)" not in txt
         assert "Traceback" in err          # 有 traceback 才 debug 得動
         assert "boom" in err
+
+    def test_no_flip_in_range_is_labelled_not_na(self, monkeypatch, capsys):
+        """2026-09-30: sweep 範圍內不翻號 = 處處同號, 依符號判 regime, 不是 n/a。"""
+        txt, _ = self._run(monkeypatch, capsys,
+                           comp={"zg": None, "zg_status": "none_in_range",
+                                 "zg_strike": 47100.0, "total_gex": 2.5e9})
+        assert "MAGNET" in txt
+        assert "範圍內無翻號" in txt
+        assert "履約價累加 47,100" in txt
+        assert "None" not in txt
+
+    def test_shows_both_zero_gammas_when_flip_exists(self, monkeypatch, capsys):
+        txt, _ = self._run(monkeypatch, capsys,
+                           comp={"zg": 47689, "zg_status": "flip",
+                                 "zg_strike": 46400.0, "total_gex": 5.0e10})
+        assert "ZG 47,689" in txt and "履約價累加 46,400" in txt
