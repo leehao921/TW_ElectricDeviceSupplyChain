@@ -1,0 +1,288 @@
+<title>台股產業全景</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F2; --panel:#FFFFFF; --ink:#1A1F1C; --muted:#5C655F; --faint:#8A938C; --rule:#D8DDD7;
+  --accent:#2B4C7E; --accent-ink:#FFFFFF; --chip:#E7EBE6; --sel:#1A1F1C;
+  --up:#C23A2B; --dn:#23804F; --zero:#C7CBC6;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"Noto Sans TC","PingFang TC","Heiti TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121614; --panel:#1A1F1C; --ink:#E6EAE5; --muted:#A3ACA5; --faint:#78817A; --rule:#2E3531;
+    --accent:#8FB0E0; --accent-ink:#0F1512; --chip:#242A26; --sel:#F2F4F0;
+    --up:#E0685A; --dn:#4FB27C; --zero:#4A514C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121614; --panel:#1A1F1C; --ink:#E6EAE5; --muted:#A3ACA5; --faint:#78817A; --rule:#2E3531;
+  --accent:#8FB0E0; --accent-ink:#0F1512; --chip:#242A26; --sel:#F2F4F0;
+  --up:#E0685A; --dn:#4FB27C; --zero:#4A514C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;
+  padding-inline:16px;padding-block:14px 28px}
+.wrap{max-width:1360px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 24px;justify-content:space-between}
+h1{font-size:22px;font-weight:700;margin:0;letter-spacing:.02em;text-wrap:balance}
+.sub{color:var(--muted);font-size:12.5px;margin-top:2px;overflow-wrap:anywhere}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.seg{display:inline-flex;background:var(--chip);border-radius:8px;padding:3px;gap:2px}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--muted);
+  padding:5px 12px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);font-weight:500;
+  box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+.seg button:focus-visible,.link:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg-label{font-size:12px;color:var(--faint);margin-right:2px}
+.summary{display:flex;flex-wrap:wrap;gap:6px 22px;align-items:baseline;padding:10px 14px;
+  background:var(--panel);border:1px solid var(--rule);border-radius:10px}
+.summary .k{font-size:12px;color:var(--muted);margin-right:6px}
+.summary .v{font-size:15px}
+.up{color:var(--up)} .dn{color:var(--dn)}
+main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+.map-card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px}
+#map{width:100%;height:clamp(420px,62vh,680px)}
+.legend{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);padding:8px 4px 0}
+.legend .bar{flex:0 1 220px;height:8px;border-radius:4px}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;
+  display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel h2{font-size:18px;margin:0;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.panel h2 .n{font-size:12px;color:var(--faint);font-weight:400}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.stat .k{font-size:11.5px;color:var(--faint);letter-spacing:.04em}
+.stat .v{font-size:15px}
+.stat .note{font-size:11px;color:var(--faint)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:500;color:var(--faint);font-size:11.5px;text-align:right;padding:4px 6px;
+  border-bottom:1px solid var(--rule);white-space:nowrap}
+th:nth-child(-n+2),td:nth-child(-n+2){text-align:left}
+td{padding:5px 6px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+tr.other td{color:var(--muted);font-style:normal;background:var(--chip)}
+.tag{display:inline-block;font-size:10.5px;padding:0 6px;border-radius:9px;background:var(--chip);
+  color:var(--muted);margin-left:6px;vertical-align:1px}
+tr.other .tag{background:var(--panel)}
+.wall-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.wall-head h3{font-size:13px;margin:0;font-weight:500}
+.wall-head span{font-size:11.5px;color:var(--faint)}
+.wall{display:flex;flex-wrap:wrap;gap:2px;background:var(--panel)}
+.brick{height:34px;min-width:30px;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-size:10.5px;font-family:var(--mono);overflow:hidden;white-space:nowrap;padding:0 3px}
+.brick.pos{background:var(--up);color:#fff} .brick.neg{background:var(--dn);color:#fff}
+.brick.oth{outline:1.5px dashed var(--faint);outline-offset:-1.5px;opacity:.78}
+.foot{font-size:11.5px;color:var(--faint);line-height:1.6}
+.foot b{font-weight:500;color:var(--muted)}
+.all-tbl summary{cursor:pointer;color:var(--muted);font-size:13px;padding:4px 0}
+.status{color:var(--muted);padding:40px 0;text-align:center}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>台股產業全景</h1>
+      <div class="sub">面積＝<span id="areaLbl">成交值</span>・色＝產業市值加權漲跌幅・點產業看主力貢獻與成交值排行　<span class="num" id="dateLbl"></span></div>
+    </div>
+    <div class="controls">
+      <div><span class="seg-label">市場</span>
+        <div class="seg" role="group" aria-label="市場">
+          <button id="mkt-TWSE" data-mkt="TWSE" aria-pressed="true">加權</button>
+          <button id="mkt-TPEX" data-mkt="TPEX" aria-pressed="false">櫃買</button>
+        </div></div>
+      <div><span class="seg-label">面積</span>
+        <div class="seg" role="group" aria-label="面積">
+          <button id="area-value" data-area="value" aria-pressed="true">成交值</button>
+          <button id="area-contrib" data-area="contrib" aria-pressed="false">指數貢獻</button>
+        </div></div>
+    </div>
+  </header>
+
+  <div class="summary" id="summary"></div>
+
+  <main>
+    <div class="map-card">
+      <div id="map" role="img" aria-label="產業 treemap"></div>
+      <div class="legend"><span>跌</span><span class="num">−3%</span><div class="bar" id="legendBar"></div><span class="num">+3%</span><span>漲</span></div>
+      <details class="all-tbl">
+        <summary>全部產業表格</summary>
+        <div class="tbl-wrap"><table id="allTbl"></table></div>
+      </details>
+    </div>
+
+    <section class="panel" id="panel" aria-live="polite">
+      <div class="status">載入中…</div>
+    </section>
+  </main>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script>
+(() => {
+  const S = { market: "TWSE", area: "value", rank: "contrib", sel: {}, data: null };
+  try { Object.assign(S, JSON.parse(localStorage.getItem("sectorTreemap") || "{}"), { data: null }); } catch (e) {}
+  const save = () => { try { localStorage.setItem("sectorTreemap",
+    JSON.stringify({ market: S.market, area: S.area, rank: S.rank, sel: S.sel })); } catch (e) {} };
+
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const hex = (h) => { h = h.replace("#", ""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+  const mix = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
+  const rgb = (c) => `rgb(${c[0]},${c[1]},${c[2]})`;
+  function color(ret) {
+    if (ret == null || isNaN(ret)) return css("--zero");
+    const t = Math.max(-1, Math.min(1, ret / 3));
+    const z = hex(css("--zero")), end = hex(css(t >= 0 ? "--up" : "--dn"));
+    return rgb(mix(z, end, Math.pow(Math.abs(t), 0.75)));
+  }
+  function inkOn(c) {
+    const m = c.match(/\d+/g).map(Number).map(v => v / 255).map(v => v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4));
+    return (0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]) > 0.32 ? "#1A1F1C" : "#FFFFFF";
+  }
+  const pct = (v, d = 2) => v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+  const pts = (v, d = 2) => v == null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d);
+  const yi = (v) => (v / 1e8).toLocaleString("zh-TW", { maximumFractionDigits: v >= 1e10 ? 0 : 1 }) + " 億";
+  const cls = (v) => v > 0 ? "up" : v < 0 ? "dn" : "";
+  const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  const chart = echarts.init(document.getElementById("map"), null, { renderer: "canvas" });
+  window.addEventListener("resize", () => chart.resize());
+
+  const M = () => S.data.markets[S.market];
+  const sectorOf = (code) => M().sectors.find(s => s.code === code);
+
+  function renderSummary() {
+    const m = M(), ix = m.index;
+    const name = S.market === "TWSE" ? "加權指數" : "櫃買指數";
+    document.getElementById("summary").innerHTML = `
+      <div><span class="k">${name}</span><span class="v num">${ix.close.toLocaleString("zh-TW", { minimumFractionDigits: 2 })}</span>
+        <span class="v num ${cls(ix.chg_pts)}">&nbsp;${pts(ix.chg_pts)} (${pct(ix.chg_pts / ix.prev * 100)})</span></div>
+      <div><span class="k">成交值</span><span class="v num">${yi(m.trade_value)}</span></div>
+      <div><span class="k">Σ產業貢獻</span><span class="v num ${cls(m.contrib_sum_pts)}">${pts(m.contrib_sum_pts)} 點</span>
+        <span class="k">&nbsp;與官方差 ${pts(m.residual_pts)}</span></div>
+      <div><span class="k">漲 / 跌產業</span><span class="v num"><span class="up">${m.sectors.filter(s => s.wret > 0).length}</span> / <span class="dn">${m.sectors.filter(s => s.wret < 0).length}</span></span></div>`;
+  }
+
+  function renderMap() {
+    const m = M();
+    const nodes = m.sectors.map(s => {
+      const c = color(s.wret);
+      return { name: s.name, code: s.code, value: S.area === "value" ? s.trade_value : Math.abs(s.contrib_pts),
+               wret: s.wret, contrib: s.contrib_pts, tv: s.trade_value,
+               itemStyle: { color: c, borderColor: S.sel[S.market] === s.code ? css("--sel") : css("--panel"),
+                            borderWidth: S.sel[S.market] === s.code ? 3 : 2 },
+               label: { color: inkOn(c) } };
+    });
+    chart.setOption({
+      animationDurationUpdate: 350,
+      tooltip: { confine: true, backgroundColor: css("--panel"), borderColor: css("--rule"),
+        textStyle: { color: css("--ink"), fontFamily: css("--sans") },
+        formatter: (p) => { const d = p.data; return `<b>${esc(d.name)}</b><br>加權漲跌 <b>${pct(d.wret)}</b><br>
+          指數貢獻 ${pts(d.contrib)} 點<br>成交值 ${yi(d.tv)}`; } },
+      series: [{ type: "treemap", data: nodes, roam: false, nodeClick: false, breadcrumb: { show: false },
+        left: 0, right: 0, top: 0, bottom: 0, squareRatio: 0.9,
+        itemStyle: { gapWidth: 2, borderColor: css("--panel") },
+        label: { show: true, formatter: (p) => `${p.name}\n${pct(p.data.wret)}`, fontFamily: css("--sans"),
+                 fontSize: 12, lineHeight: 16, overflow: "truncate" },
+        upperLabel: { show: false }, emphasis: { itemStyle: { borderColor: css("--sel") } } }]
+    }, true);
+  }
+
+  function rankRows(s) {
+    const byCode = Object.fromEntries(s.members.map(m => [m.code, m]));
+    return s.top[S.rank].map(c => byCode[c]);
+  }
+
+  function renderPanel() {
+    const s = sectorOf(S.sel[S.market]) || M().sectors[0];
+    S.sel[S.market] = s.code;
+    const oth = s.other[S.rank];
+    const rows = rankRows(s);
+    const offNote = s.official_ret == null ? "無官方類股指數" : `官方類股指數 ${pct(s.official_ret)}`;
+    const othTag = oth ? (oth.ret_method === "official_backout" ? "類股指數反推" : "成員加權") : "";
+    const tr = (m) => `<tr><td class="num">${esc(m.code)}</td><td>${esc(m.name)}</td>
+        <td class="num ${cls(m.ret)}">${pct(m.ret)}</td><td class="num ${cls(m.contrib_pts)}">${pts(m.contrib_pts)}</td>
+        <td class="num">${(m.trade_value / 1e8).toFixed(1)}</td></tr>`;
+    const othRow = oth ? `<tr class="other"><td></td><td>其他 ${oth.n} 檔<span class="tag">${othTag}</span></td>
+        <td class="num ${cls(oth.ret)}">${pct(oth.ret)}</td><td class="num ${cls(oth.contrib_pts)}">${pts(oth.contrib_pts)}</td>
+        <td class="num">${(oth.trade_value / 1e8).toFixed(1)}</td></tr>` : "";
+
+    const bricks = rows.map(m => ({ lbl: m.code, name: m.name, v: m.contrib_pts, oth: false }));
+    if (oth) bricks.push({ lbl: `其他${oth.n}`, name: `其他 ${oth.n} 檔 (${othTag} ${pct(oth.ret)})`, v: oth.contrib_pts, oth: true });
+    const maxAbs = Math.max(...bricks.map(b => Math.abs(b.v)), 1e-9);
+    const wall = bricks.sort((a, b) => b.v - a.v).map(b =>
+      `<div class="brick ${b.v >= 0 ? "pos" : "neg"} ${b.oth ? "oth" : ""}" style="flex:${(Math.abs(b.v) / maxAbs * 10 + 0.3).toFixed(2)} 1 0"
+        title="${esc(b.name)}　${pts(b.v)} 點">${esc(b.lbl)}</div>`).join("");
+
+    document.getElementById("panel").innerHTML = `
+      <h2>${esc(s.name)} <span class="n">${s.n} 檔</span></h2>
+      <div class="stats">
+        <div class="stat"><div class="k">市值加權漲跌</div><div class="v num ${cls(s.wret)}">${pct(s.wret)}</div><div class="note">${offNote}</div></div>
+        <div class="stat"><div class="k">指數貢獻</div><div class="v num ${cls(s.contrib_pts)}">${pts(s.contrib_pts)} 點</div>
+          <div class="note">占 Σ產業 ${M().contrib_sum_pts ? (s.contrib_pts / Math.abs(M().contrib_sum_pts) * 100).toFixed(0) + "%" : "—"}</div></div>
+        <div class="stat"><div class="k">成交值</div><div class="v num">${yi(s.trade_value)}</div>
+          <div class="note">占市場 ${(s.trade_value / M().trade_value * 100).toFixed(1)}%</div></div>
+      </div>
+      <div class="seg" role="group" aria-label="排行依據">
+        <button id="rank-contrib" data-rank="contrib" aria-pressed="${S.rank === "contrib"}">主力貢獻排行</button>
+        <button id="rank-value" data-rank="value" aria-pressed="${S.rank === "value"}">成交值排行</button>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>代號</th><th>名稱</th><th>漲跌</th><th>貢獻點</th><th>成交值(億)</th></tr></thead>
+        <tbody>${rows.map(tr).join("")}${othRow}</tbody></table></div>
+      <div class="wall-head"><h3>貢獻磚牆</h3><span>磚寬 ∝ |貢獻點|・紅正綠負・虛框＝其他成員</span></div>
+      <div class="wall" role="img" aria-label="${esc(s.name)} 成分股貢獻磚牆">${wall}</div>`;
+    document.querySelectorAll("[data-rank]").forEach(b => b.onclick = () => { S.rank = b.dataset.rank; save(); renderPanel(); });
+  }
+
+  function renderAllTable() {
+    const rows = [...M().sectors].sort((a, b) => b.contrib_pts - a.contrib_pts);
+    document.getElementById("allTbl").innerHTML = `<thead><tr><th>產業</th><th></th><th>加權漲跌</th><th>官方</th><th>貢獻點</th><th>成交值(億)</th></tr></thead>
+      <tbody>${rows.map(s => `<tr><td>${esc(s.name)}</td><td class="num">${s.n}</td><td class="num ${cls(s.wret)}">${pct(s.wret)}</td>
+      <td class="num ${cls(s.official_ret)}">${pct(s.official_ret)}</td><td class="num ${cls(s.contrib_pts)}">${pts(s.contrib_pts)}</td>
+      <td class="num">${(s.trade_value / 1e8).toFixed(0)}</td></tr>`).join("")}</tbody>`;
+  }
+
+  function renderFoot() {
+    const m = M(), ex = m.excluded;
+    document.getElementById("foot").innerHTML = `<b>方法</b>　指數貢獻點＝個股前日市值權重 × 漲跌幅 × 前日指數（權重以發行股數計，同證交所 IndexS02）。
+      「其他成員」漲跌以官方類股指數與排行內成員權重反推；無單一產業指數者改用成員直接加權。
+      未計權重：存託憑證 ${ex.tdr} 檔、缺股數 ${ex.no_shares} 檔；Σ產業貢獻與官方指數漲跌之差為權重口徑差。
+      <b>資料</b>　證交所 MI_INDEX、櫃買中心每日收盤行情與類股指數、公司基本資料 (產業別/股數)。資料日 ${esc(S.data.date)}。分析標註・不構成交易指令。`;
+  }
+
+  function renderAll() {
+    ["TWSE", "TPEX"].forEach(k => document.getElementById("mkt-" + k).setAttribute("aria-pressed", S.market === k));
+    ["value", "contrib"].forEach(k => document.getElementById("area-" + k).setAttribute("aria-pressed", S.area === k));
+    document.getElementById("areaLbl").textContent = S.area === "value" ? "成交值" : "指數貢獻 (|點數|)";
+    document.getElementById("dateLbl").textContent = S.data.date;
+    renderSummary(); renderMap(); renderPanel(); renderAllTable(); renderFoot();
+  }
+
+  document.querySelectorAll("[data-mkt]").forEach(b => b.onclick = () => { S.market = b.dataset.mkt; save(); renderAll(); });
+  document.querySelectorAll("[data-area]").forEach(b => b.onclick = () => { S.area = b.dataset.area; save(); renderAll(); });
+  chart.on("click", (p) => { if (p.data && p.data.code) { S.sel[S.market] = p.data.code; save(); renderMap(); renderPanel(); } });
+
+  const lg = document.getElementById("legendBar");
+  const paintLegend = () => { lg.style.background = `linear-gradient(90deg, ${[-3, -2, -1, 0, 1, 2, 3].map(color).join(",")})`; };
+  paintLegend();
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  const retheme = () => { paintLegend(); if (S.data) renderAll(); };
+  mq.addEventListener && mq.addEventListener("change", retheme);
+  new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  fetch("data.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
+    S.data = d;
+    if (!d.markets[S.market]) S.market = Object.keys(d.markets)[0];
+    if (!S.sel || typeof S.sel !== "object") S.sel = {};
+    renderAll();
+  }).catch(e => {
+    document.getElementById("panel").innerHTML = `<div class="status">資料載入失敗 (${esc(e.message)})。請重新整理頁面。</div>`;
+  });
+})();
+</script>

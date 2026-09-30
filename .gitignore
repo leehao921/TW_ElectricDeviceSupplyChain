@@ -56,3 +56,4 @@ data/memory_cycle_inputs.yaml
 
 # P/B percentile engine — cutoff cache (regenerates on refresh)
 data/pb_percentile_cache.json
+artifacts/sector_treemap/data.json
