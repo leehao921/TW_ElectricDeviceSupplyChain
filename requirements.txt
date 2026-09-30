@@ -28,3 +28,8 @@ pyyaml>=6.0
 pytest>=7.0
 pytest-mock>=3.10
 fakeredis>=2.20
+
+# div_buy — 除息日半自動買入 (scripts/div_buy.py); pin 與數據側 1.7.4 一致
+shioaji==1.7.4
+python-dotenv>=1.0
+requests>=2.31

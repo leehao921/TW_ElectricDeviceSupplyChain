@@ -1,0 +1,8 @@
+{
+  "note": "除息日半自動買入 — enabled=false 即 kill switch; 計畫 docs/plans/2026-09-30-div-buy-00406a.md",
+  "enabled": true,
+  "max_lots": 2,
+  "items": [
+    {"ticker": "00406A", "name": "主動中信台灣收益", "lots": 1}
+  ]
+}
