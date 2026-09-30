@@ -78,8 +78,13 @@ def bs_gamma(S: float, K: float, T: float, iv: float) -> float:
 
 
 def _net_gamma_exposure(opts: list, S: float) -> float:
-    return sum((1.0 if o["cp"] == "C" else -1.0) * o["oi"] * bs_gamma(S, o["strike"], o["T"], o["iv"])
-               * MULTIPLIER * S * S * 0.01 for o in opts)
+    """S 以 TXF 表示; 每腿標的 = S + basis (該到期 parity forward − TXF, 缺值 0)."""
+    total = 0.0
+    for o in opts:
+        s_leg = S + o.get("basis", 0.0)
+        total += ((1.0 if o["cp"] == "C" else -1.0) * o["oi"]
+                  * bs_gamma(s_leg, o["strike"], o["T"], o["iv"]) * MULTIPLIER * s_leg * s_leg * 0.01)
+    return total
 
 
 def sweep_zero_gamma(opts: list, spot: float, span: int = SWEEP_SPAN,
@@ -202,11 +207,14 @@ def composite_from_frame(df, spot: float, now: datetime) -> dict:
     zg_strike = min(crossings, key=lambda k: abs(k - spot)) if crossings else None
 
     opts = []
+    has_fwd = "forward" in df.columns
     for row in df.dropna(subset=["iv"]).itertuples():
         T = (_expiry_dt(row.expiry) - now).total_seconds() / (365 * 86400)
         if T > 0 and row.iv > 0:
+            fwd = getattr(row, "forward", None) if has_fwd else None
+            basis = float(fwd) - spot if fwd is not None and fwd == fwd else 0.0
             opts.append({"strike": float(row.strike), "cp": row.call_put, "T": T,
-                         "iv": float(row.iv), "oi": float(row.open_interest)})
+                         "iv": float(row.iv), "oi": float(row.open_interest), "basis": basis})
     zg, _ = sweep_zero_gamma(opts, spot) if opts else (None, 0)
 
     coi = df[df.call_put == "C"].groupby("strike").open_interest.sum()
@@ -245,11 +253,35 @@ def compute_composite(conn, spot: float, now: datetime | None = None) -> dict:
                        right_on=["expiry", "strike", "cp"])
     if df.empty:
         return {}
+    fwd = latest_forwards(conn)
+    df = df.assign(forward=df.expiry.map(fwd))
     return composite_from_frame(df, spot, now)
 
 
+def latest_forwards(conn) -> dict:
+    """各到期最新 parity forward (iv_metrics.forward, 2026-09-30 起); 退回 TXF 的列不算."""
+    cur = conn.cursor()
+    cur.execute("""SELECT DISTINCT ON (expiry) expiry, forward FROM iv_metrics
+                   WHERE time >= now() - interval '10 minutes' AND forward IS NOT NULL
+                     AND forward_source IN ('parity', 'parity_stale')
+                   ORDER BY expiry, time DESC""")
+    return {e: float(f) for e, f in cur.fetchall()}
+
+
+def atm_iv_by_expiry(df, spot: float, forwards: dict) -> list:
+    """各到期 ATM IV (最接近該到期 forward 的履約價 C/P 均值; 無 forward 用 spot)."""
+    out = []
+    for exp, g in df.groupby("expiry"):
+        center = forwards.get(exp, spot)
+        g = g.assign(d=(g.strike - center).abs())
+        atm = g[g.d == g.d.min()]
+        if len(atm) and atm.iv.notna().any():
+            out.append((exp, round(float(atm.iv.mean()) * 100, 1)))
+    return sorted(out)
+
+
 def iv_curve(conn, spot: float) -> list:
-    """各到期 ATM IV (現價最近履約價 C/P 均值) → [(expiry, atm_iv%)]."""
+    """各到期 ATM IV (該到期 forward 最近履約價 C/P 均值) → [(expiry, atm_iv%)]."""
     import pandas as pd
     df = pd.read_sql("""
       SELECT DISTINCT ON (expiry, strike, call_put) expiry, strike, call_put, iv
@@ -257,14 +289,8 @@ def iv_curve(conn, spot: float) -> list:
         AND expiry > to_char(now(), 'YYYYMMDD')
         AND strike BETWEEN %(lo)s AND %(hi)s
       ORDER BY expiry, strike, call_put, time DESC""",
-                     conn, params={"lo": spot - 300, "hi": spot + 300})
-    out = []
-    for exp, g in df.groupby("expiry"):
-        g = g.assign(d=(g.strike - spot).abs())
-        atm = g[g.d == g.d.min()]
-        if len(atm) and atm.iv.notna().any():
-            out.append((exp, round(float(atm.iv.mean()) * 100, 1)))
-    return sorted(out)[:5]
+                     conn, params={"lo": spot - 600, "hi": spot + 600})
+    return atm_iv_by_expiry(df, spot, latest_forwards(conn))[:5]
 
 
 def front_iv_history(conn) -> list:

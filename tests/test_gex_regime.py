@@ -175,3 +175,36 @@ def test_composite_uses_time_to_13_30_settlement_for_todays_leg():
     c = gm.composite_from_frame(df, spot=48500, now=now)
     assert c["expiries"] == ["20260930"]
     assert c["zg_status"] == "none_in_range"
+
+
+# 2026-09-30: 各到期以自身 parity forward 定價 (TXU 10/02 F 比 TXF 低 ~240 點)。
+# sweep 的假想價位以 TXF 表示, 每腿標的 = 假想價 + (F_leg − TXF)。
+
+def test_sweep_shifts_each_leg_by_its_forward_basis():
+    # single call leg struck 48,300 on a forward 240 below TXF: its gamma peak in
+    # TXF terms sits at 48,540, not 48,300
+    leg = dict(_opt(48300, "C", 5000, T=2 / 365, iv=0.18), basis=-240.0)
+    grid = range(48000, 49001, 10)
+    peak = max(grid, key=lambda S: gm._net_gamma_exposure([leg], S))
+    assert abs(peak - 48540) <= 20
+
+
+def test_composite_reads_forward_column_as_basis():
+    now = _dt(2026, 9, 30, 21, 0, tzinfo=_TPE)
+    rows = [("20261002", 48300, "P", 0.0004, 0.18, 5000),
+            ("20261002", 48800, "C", 0.0004, 0.18, 5000)]
+    df0 = _frame(rows)
+    df1 = df0.assign(forward=48567.0 - 240)
+    z0 = gm.composite_from_frame(df0, spot=48567, now=now)["zg"]
+    z1 = gm.composite_from_frame(df1, spot=48567, now=now)["zg"]
+    assert z0 is not None and z1 is not None
+    assert abs((z1 - z0) - 240) <= 30     # same flip, re-expressed in TXF terms
+
+
+def test_iv_curve_atm_nearest_forward():
+    import pandas as pd
+    df = pd.DataFrame([("20261002", 48300, "C", 0.18), ("20261002", 48300, "P", 0.18),
+                       ("20261002", 48550, "C", 0.30), ("20261002", 48550, "P", 0.30)],
+                      columns=["expiry", "strike", "call_put", "iv"])
+    assert gm.atm_iv_by_expiry(df, spot=48567, forwards={"20261002": 48320.0}) == [("20261002", 18.0)]
+    assert gm.atm_iv_by_expiry(df, spot=48567, forwards={}) == [("20261002", 30.0)]
