@@ -430,3 +430,17 @@ tmf-tick-collector OK; 08:47 不再出現 `Exiting for Docker restart (fail_stre
 
 教訓: 名單「自動探索」只保證探索規則涵蓋到的形狀 — `*.py` 規則看不到
 `-m`, plist 規則看不到容器。新增 session 持有者時問「重啟腳本看得到它嗎」。
+
+## 2026-09-30 GEX zero-gamma 口徑更正 — 發佈的 ZG 不是翻號價位 (`9c5b85a`)
+
+09:57 spot 48,597, 發佈 ZG 47,100。重算: 它是逐履約價累加 GEX 跨零的「履約價」;
+以各合約 IV/T 在假想現價重算 gamma (教科書 sweep), 同樣三腿 ±2,500 內處處正
+gamma — 沒有翻號點。另外 monitor 只取 expiry > today, 丟掉 13:30 才結算、OI
+37,938 (其餘三腿合計 2 倍多) 的當日腿; 納入後真翻號 ~47,500-47,700 = 當日 put wall。
+
+改: `zg` = sweep 值, 舊值留 `zg_strike`, 新 `zg_status` (flip/none_in_range);
+當日腿結算前納入; 無翻號依 gamma 符號判 MAGNET/EXPANSION (不再 UNKNOWN →
+gate fail-closed)。10:02 live: ZG 47,469 (舊口徑 46,400), gate 讀 MAGNET +1,160。
+
+未處理: options gate KNOWN 不含 EXPANSION (fail-closed 多單, 保守); txf_level_map
+flip 獨立計算; dealer 符號假設 (C+/P−) 未驗證; 結算日上午 vol_scalar 因含當日腿偏高。
