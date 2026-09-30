@@ -444,3 +444,26 @@ gate fail-closed)。10:02 live: ZG 47,469 (舊口徑 46,400), gate 讀 MAGNET +1
 
 未處理: options gate KNOWN 不含 EXPANSION (fail-closed 多單, 保守); txf_level_map
 flip 獨立計算; dealer 符號假設 (C+/P−) 未驗證; 結算日上午 vol_scalar 因含當日腿偏高。
+
+## 2026-09-30 選擇權買賣報價落地 + IV 改每到期 parity forward (database #162/#163, My-TW `cc0e982`, nautilus `06b6aaa`)
+
+**買賣報價**: `option_oi_daily.best_bid/best_ask` (期交所收盤最佳買賣, 9/01 起回補) +
+新表 `option_quotes` (快照 bid/ask + 最近週選 ATM±10 BidAsk 42 檔, 5 秒寫變動)。訂閱上限調回官方 200。
+夜盤驗證抓到自己的 bug: snapshot.ts 是**最後成交時間** (冷門檔停在 9/07), 當報價時間會把今天盤口寫進舊日
+(建了 15 個舊 chunk) → 改觀測時間 + 盤口未變不重寫 (`6687e42`)。477 列錯時戳待用戶確認刪除。
+
+**IV 口徑斷層 21:08**: 盤口 parity 顯示 TXU 10/02 forward 48,132 vs TXF 48,356 (−224); collector 對所有到期
+用 S=TXF+q=3.5% → TXU 平價 call/put IV 11%/27%。改每到期 parity forward + Black-76 (bs_price S=F,q=r)
++ 盤口 mid + 至 13:30 分數 T。上線後同履約價 call/put IV 差 <0.001。GEX sweep 每腿以 F 為標的:
+ZG 47,941→48,098, GEX +53億→+26億/1%。
+
+**v2 影子混讀**: broker 內 options_subscriber (parity harness) 全天候寫 `h:iv:t10:*:v2`
+(9/27 週日整天 0.252041, 佔 keyspace 73%); vol_harvest/bucket_snapshot 的「最新」永遠是 v2,
+sizing IV 分位混讀 p=0.25 vs 純 v1 p=0.70 → 合併後 sizing ×0.80。v2 writer 本身未 gate (待決)。
+
+教訓: (1) 快照 ts ≠ 報價時間 — 每個時間欄位要問「這是誰的時間」; (2) `h:iv:t10:*` 這種 glob
+沒有 schema, 影子 writer 共用 prefix 就會被當正式資料讀; (3) 盤口資料一落地, parity 立刻揭露
+存在已久的標的錯置 — 模型輸入 (S, q) 應以市場可觀測量校驗。
+
+未處理: sizing IV 分位基線含一週舊口徑樣本 (~10/7 滾完); vix_daily 9/30 口徑斷層; v2 writer gate;
+ascii_dashboard 近月 ZG 仍舊法; TX1/TXV (輪詢腿) iv_regime 只在開盤暖機有值。
