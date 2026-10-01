@@ -58,7 +58,7 @@ def build_live(snap: dict, ref: dict) -> dict:
             "markets": {m: st.build_market(rows[m], idx.get(m, {})) for m in ("TWSE", "TPEX") if rows.get(m)}}
 
 
-def is_stale(snap: dict, now: dt.datetime, max_age_s: int = 300) -> bool:
+def is_stale(snap: dict, now: dt.datetime, max_age_s: int = 420) -> bool:
     return (now - dt.datetime.fromisoformat(snap["ts"])).total_seconds() > max_age_s
 
 
