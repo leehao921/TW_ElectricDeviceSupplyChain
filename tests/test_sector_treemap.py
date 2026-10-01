@@ -89,3 +89,25 @@ def test_official_return_uses_index_points_not_rounded_pct():
     idx = {**INDEX, "24": {"close": 415.31, "change_pts": 14.57, "change_pct": 3.64}}
     semi = {s["code"]: s for s in st.build_market(ROWS, idx, top_n=2)["sectors"]}["24"]
     assert semi["official_ret"] == pytest.approx(14.57 / (415.31 - 14.57) * 100)
+
+
+# ── 15:35 routine: standalone page + inbox summary (headless claude has no Artifact tool) ──
+
+def test_standalone_embeds_data_and_skeleton():
+    page = "<title>台股產業全景</title><script>fetch('data.json')</script>"
+    html = st.render_standalone(page, {"date": "2026-09-30", "markets": {}})
+    assert html.startswith("<!doctype html>") and '<meta charset="utf-8">' in html
+    assert 'window.__SECTOR_DATA__={"date":"2026-09-30"' in html
+    assert html.index("__SECTOR_DATA__") < html.index("fetch(")     # data defined before page script
+
+
+def test_standalone_escapes_script_close_in_names():
+    html = st.render_standalone("<p></p>", {"date": "d", "markets": {"x": "</script><b>"}})
+    assert "</script><b>" not in html
+
+
+def test_summary_line_top_sectors_by_contribution():
+    m = st.build_market(ROWS, INDEX, top_n=2)
+    line = st.summary_line({"date": "2026-09-30", "markets": {"TWSE": m}})
+    assert line.startswith("2026-09-30 加權 +100.00 點")
+    assert "半導體業 +" in line and "主力 nA" in line

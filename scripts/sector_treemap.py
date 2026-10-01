@@ -121,6 +121,30 @@ def build_market(rows: list, index: dict, top_n: int = TOP_N) -> dict:
     }
 
 
+def render_standalone(page_html: str, data: dict) -> str:
+    """Self-contained local page: the artifact page with data inlined (headless claude
+    cannot republish the artifact, so the 15:35 routine writes this instead)."""
+    blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return ('<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1"></head><body>'
+            f"<script>window.__SECTOR_DATA__={blob};</script>\n{page_html}\n</body></html>")
+
+
+def summary_line(data: dict, n: int = 3) -> str:
+    """Inbox one-liner: index move + top sectors by |contribution| with their lead stock."""
+    parts = []
+    for mkt, label in (("TWSE", "加權"), ("TPEX", "櫃買")):
+        m = data["markets"].get(mkt)
+        if not m:
+            continue
+        secs = sorted(m["sectors"], key=lambda s: -abs(s["contrib_pts"]))[:n]
+        desc = "、".join(
+            f"{s['name']} {s['contrib_pts']:+.2f} (主力 {s['members'][0]['name']})"
+            for s in secs if s["members"])
+        parts.append(f"{label} {m['index']['chg_pts']:+.2f} 點｜{desc}")
+    return f"{data['date']} " + "　".join(parts)
+
+
 def load(conn, date: str) -> dict:
     cur = conn.cursor()
     cur.execute("""SELECT market, code, name, industry_code, close, change, prev_close,

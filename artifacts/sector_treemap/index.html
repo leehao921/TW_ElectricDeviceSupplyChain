@@ -276,7 +276,9 @@ tr.other .tag{background:var(--panel)}
   mq.addEventListener && mq.addEventListener("change", retheme);
   new MutationObserver(retheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  fetch("data.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => {
+  const load = window.__SECTOR_DATA__ ? Promise.resolve(window.__SECTOR_DATA__)   // local standalone copy
+    : fetch("data.json").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  load.then(d => {
     S.data = d;
     if (!d.markets[S.market]) S.market = Object.keys(d.markets)[0];
     if (!S.sel || typeof S.sel !== "object") S.sel = {};
