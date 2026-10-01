@@ -467,3 +467,16 @@ sizing IV 分位混讀 p=0.25 vs 純 v1 p=0.70 → 合併後 sizing ×0.80。v2 
 
 未處理: sizing IV 分位基線含一週舊口徑樣本 (~10/7 滾完); vix_daily 9/30 口徑斷層; v2 writer gate;
 ascii_dashboard 近月 ZG 仍舊法; TX1/TXV (輪詢腿) iv_regime 只在開盤暖機有值。
+
+## 2026-10-01 產業全景 treemap 上線 (日級 + 盤中) + v2 影子 writer gate (database #164-166, My-TW `f1bad42`/`03836ba`/`3e8f986`)
+
+日級: stock_quote_daily / sector_index_daily (15:20) → launchd sector-treemap 15:35 本機頁 + inbox;
+線上 artifact FtphAZXNDkU4K2VccBzqpH 需 session 手動重發 (headless claude 無 Artifact 工具, 實測)。
+盤中: tmf-sector-intraday-collector MIS 60 秒全市場 → Redis sector:live → sector_treemap_live.html。
+09:03 實測 1,962 檔 / 48 指數 / 0 失敗; 開盤初段 MIS z 多為 '-' (中價 1,828 vs 成交 108), Σ貢獻與指數差 ~6%。
+
+v2 (broker 內 OptionsSubscriber) 改 tw_holidays gate, 盤外不輪詢/不 flush (#165, 08:40 daily restart 已載入)。
+**未決**: broker session 訂閱超限 — v2 訂 328 檔 > 官方 200, 9/30 22:51 起 7,634 選擇權 + 1,160 個股
+topic 被拒; 實際個股 OFI 由 tmf-stock-ofi-collector 獨立 session 供應 (09:04 34 檔正常), 受影響的是 broker
+內重複的 StockOFISubscriber 與 v2 本身。broker 是下單 gateway, 調整待用戶決定。
+清理: option_quotes 舊口徑快照 658 列刪除 + 13 個空 chunk drop (用戶確認)。
