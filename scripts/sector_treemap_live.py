@@ -58,6 +58,13 @@ def build_live(snap: dict, ref: dict) -> dict:
             "markets": {m: st.build_market(rows[m], idx.get(m, {})) for m in ("TWSE", "TPEX") if rows.get(m)}}
 
 
+def renderable(data: dict) -> bool:
+    """Every market needs its main index (prev level scales contributions; the page
+    divides by it). A partial MIS cycle can drop the index batch — keep the last page."""
+    return bool(data["markets"]) and all(m["index"].get("close") is not None
+                                         for m in data["markets"].values())
+
+
 def is_stale(snap: dict, now: dt.datetime, max_age_s: int = 420) -> bool:
     return (now - dt.datetime.fromisoformat(snap["ts"])).total_seconds() > max_age_s
 
@@ -84,6 +91,9 @@ def main() -> int:
     if is_stale(snap, dt.datetime.now(TPE)):
         return 0
     data = build_live(snap, _reference())
+    if not renderable(data):
+        print(f"{data['date']} missing main index — kept previous page")
+        return 0
     OUT.write_text(st.render_standalone(PAGE.read_text(), data, refresh_s=60))
     m = data["markets"].get("TWSE")
     if m:

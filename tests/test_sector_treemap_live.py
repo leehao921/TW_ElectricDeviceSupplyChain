@@ -49,3 +49,11 @@ def test_stale_snapshot_detected():
     now = dt.datetime(2026, 10, 1, 10, 40, tzinfo=dt.timezone(dt.timedelta(hours=8)))
     assert live.is_stale(SNAP, now, max_age_s=300) is True
     assert live.is_stale(SNAP, now, max_age_s=900) is False
+
+
+def test_snapshot_without_main_index_is_not_rendered():
+    # 10/01 12:02:57: MIS failures dropped the batch holding the indices → 0 indices;
+    # the page was written with a null index and the summary print crashed.
+    snap = {**SNAP, "indices": [i for i in SNAP["indices"] if i["industry_code"] != "IX"]}
+    assert live.renderable(live.build_live(snap, REF)) is False
+    assert live.renderable(live.build_live(SNAP, REF)) is True
