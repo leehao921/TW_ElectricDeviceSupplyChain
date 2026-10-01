@@ -121,12 +121,14 @@ def build_market(rows: list, index: dict, top_n: int = TOP_N) -> dict:
     }
 
 
-def render_standalone(page_html: str, data: dict) -> str:
+def render_standalone(page_html: str, data: dict, refresh_s: int | None = None) -> str:
     """Self-contained local page: the artifact page with data inlined (headless claude
     cannot republish the artifact, so the 15:35 routine writes this instead)."""
     blob = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     return ('<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1"></head><body>'
+            '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            + (f'<meta http-equiv="refresh" content="{refresh_s}">' if refresh_s else "")
+            + '</head><body>'
             f"<script>window.__SECTOR_DATA__={blob};</script>\n{page_html}\n</body></html>")
 
 

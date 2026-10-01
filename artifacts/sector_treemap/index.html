@@ -260,7 +260,8 @@ tr.other .tag{background:var(--panel)}
     ["TWSE", "TPEX"].forEach(k => document.getElementById("mkt-" + k).setAttribute("aria-pressed", S.market === k));
     ["value", "contrib"].forEach(k => document.getElementById("area-" + k).setAttribute("aria-pressed", S.area === k));
     document.getElementById("areaLbl").textContent = S.area === "value" ? "成交值" : "指數貢獻 (|點數|)";
-    document.getElementById("dateLbl").textContent = S.data.date;
+    document.getElementById("dateLbl").textContent = S.data.date
+      + (S.data.live ? "・成交值為量 × 現價估算・每分鐘更新" : "");
     renderSummary(); renderMap(); renderPanel(); renderAllTable(); renderFoot();
   }
 

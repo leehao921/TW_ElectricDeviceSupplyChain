@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.lulala.sector-treemap-live</string>
+
+    <!-- 產業全景盤中版: 每 60 秒讀 Redis sector:live (tmf-sector-intraday-collector,
+         交易日 09:00-13:31) → analysis/sector_treemap_live.html (頁面每 60 秒自動刷新)。
+         快照超過 5 分鐘 (盤後/休市) 即靜默退出, 不產檔、不推 inbox。 -->
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
+        <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/sector_treemap_live.py</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/lulala/Documents/coding/My-TW-Coverage</string>
+    <key>StartInterval</key>
+    <integer>60</integer>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>TZ</key><string>Asia/Taipei</string>
+        <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/lulala/Library/Logs/sector-treemap-live.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/lulala/Library/Logs/sector-treemap-live.log</string>
+</dict>
+</plist>
