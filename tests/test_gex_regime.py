@@ -208,3 +208,27 @@ def test_iv_curve_atm_nearest_forward():
                       columns=["expiry", "strike", "call_put", "iv"])
     assert gm.atm_iv_by_expiry(df, spot=48567, forwards={"20261002": 48320.0}) == [("20261002", 18.0)]
     assert gm.atm_iv_by_expiry(df, spot=48567, forwards={}) == [("20261002", 30.0)]
+
+
+def test_latest_forwards_accepts_basis_carry_not_futures():
+    # database 370e30e: parity 失效時 F = TXF + 最後 parity 基差 (basis_carry) — 比純 TXF 準
+    assert "basis_carry" in gm.USABLE_FORWARD_SOURCES
+    assert "futures" not in gm.USABLE_FORWARD_SOURCES
+
+    class _Cur:
+        def execute(self, sql, params=None):
+            self.sql, self.params = sql, params
+
+        def fetchall(self):
+            return [("20261007", 48118.0)]
+
+    class _Conn:
+        def __init__(self):
+            self.c = _Cur()
+
+        def cursor(self):
+            return self.c
+
+    conn = _Conn()
+    assert gm.latest_forwards(conn) == {"20261007": 48118.0}
+    assert list(conn.c.params[0]) == list(gm.USABLE_FORWARD_SOURCES)

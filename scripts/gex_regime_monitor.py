@@ -258,13 +258,17 @@ def compute_composite(conn, spot: float, now: datetime | None = None) -> dict:
     return composite_from_frame(df, spot, now)
 
 
+# basis_carry (2026-10-03): parity 失效時 TXF + 最後 parity 基差 — 比純 TXF 少 ~200 點誤差
+USABLE_FORWARD_SOURCES = ("parity", "parity_stale", "basis_carry")
+
+
 def latest_forwards(conn) -> dict:
-    """各到期最新 parity forward (iv_metrics.forward, 2026-09-30 起); 退回 TXF 的列不算."""
+    """各到期最新 forward (iv_metrics.forward); 退回純 TXF (futures) 的列不算."""
     cur = conn.cursor()
     cur.execute("""SELECT DISTINCT ON (expiry) expiry, forward FROM iv_metrics
                    WHERE time >= now() - interval '10 minutes' AND forward IS NOT NULL
-                     AND forward_source IN ('parity', 'parity_stale')
-                   ORDER BY expiry, time DESC""")
+                     AND forward_source = ANY(%s)
+                   ORDER BY expiry, time DESC""", (list(USABLE_FORWARD_SOURCES),))
     return {e: float(f) for e, f in cur.fetchall()}
 
 
