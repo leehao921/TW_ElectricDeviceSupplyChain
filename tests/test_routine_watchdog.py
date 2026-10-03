@@ -180,3 +180,21 @@ def test_main_non_trading_day_short_circuits(tmp_path, capsys, monkeypatch):
     out = capsys.readouterr().out
     assert rc == 0
     assert "non-trading" in out.lower() or "not a trading day" in out.lower()
+
+
+# ── host health: macOS ~49.7-day TCP timer stall (2026-10-03) ────────────
+# 開機 50 天後 TIME_WAIT 不再過期 (29k 筆), 臨時埠耗盡 → Redis/TWSE/GitHub 全斷,
+# options-iv crash loop。inbox 本身也連不上, 所以告警要能退回本機通知。
+
+def test_host_health_flags_uptime_before_the_49_day_wall():
+    from routine_watchdog import host_health
+    assert host_health(44.9, 300) == []
+    msgs = host_health(45.0, 300)
+    assert len(msgs) == 1 and "重開機" in msgs[0] and "45" in msgs[0]
+
+
+def test_host_health_flags_time_wait_pileup():
+    from routine_watchdog import host_health
+    msgs = host_health(10.0, 12_000)
+    assert len(msgs) == 1 and "TIME_WAIT" in msgs[0] and "12,000" in msgs[0]
+    assert len(host_health(50.5, 29_216)) == 2

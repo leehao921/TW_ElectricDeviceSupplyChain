@@ -193,6 +193,64 @@ def save_state(state: dict, path: Path) -> None:
     path.write_text(json.dumps(state, indent=2, ensure_ascii=False))
 
 
+# --------------------------------------------------------------------------- #
+# Host health — macOS ~49.7-day TCP timer stall (2026-10-03)
+# --------------------------------------------------------------------------- #
+# After ~2^32 ms of uptime macOS stops expiring TIME_WAIT; on 10/03 (50.5 days up)
+# 29k sockets exhausted the 16,384 ephemeral ports and every new connection failed —
+# Redis, TWSE, GitHub, and the options-iv container crash-looped. Only a reboot clears it.
+UPTIME_WARN_DAYS = 45.0
+TIME_WAIT_WARN = 10_000
+
+
+def host_health(uptime_days: float, time_wait: int) -> list[str]:
+    msgs = []
+    if uptime_days >= UPTIME_WARN_DAYS:
+        msgs.append(f"🚨 Mac 已開機 {uptime_days:.0f} 天 — macOS 約 49.7 天後 TCP TIME_WAIT 不再過期、"
+                    f"臨時埠會耗盡 (2026-10-03 事故), 請於休市時重開機")
+    if time_wait >= TIME_WAIT_WARN:
+        msgs.append(f"🚨 TIME_WAIT {time_wait:,} 筆 (臨時埠共 16,384) — 連線即將/已經耗盡, 需重開機")
+    return msgs
+
+
+def _uptime_days() -> float:
+    out = subprocess.run(["sysctl", "-n", "kern.boottime"], capture_output=True, text=True).stdout
+    boot = int(out.split("sec =")[1].split(",")[0])
+    return (datetime.now().timestamp() - boot) / 86400
+
+
+def _time_wait_count() -> int:
+    out = subprocess.run(["netstat", "-an", "-p", "tcp"], capture_output=True, text=True).stdout
+    return sum(1 for line in out.splitlines() if line.rstrip().endswith("TIME_WAIT"))
+
+
+def check_host(state: dict, now: datetime, dry_run: bool) -> bool:
+    """Once a day: alert via inbox, else a local macOS notification (no TCP needed —
+    when ports are exhausted the inbox is unreachable too). Returns True if state changed."""
+    try:
+        msgs = host_health(_uptime_days(), _time_wait_count())
+    except Exception as e:  # noqa: BLE001
+        print(f"[error] host health probe failed: {e}", file=sys.stderr)
+        return False
+    today = now.date().isoformat()
+    if not msgs or state.get("host_alerted") == today:
+        return False
+    for m in msgs:
+        print(m + ("  [dry-run]" if dry_run else ""))
+    if dry_run:
+        return False
+    msg = "\n".join(msgs)
+    try:
+        make_redis_client().xadd(INBOX_STREAM, {
+            "ts": now.astimezone().isoformat(), "from": "routine_watchdog", "topic": ALERT_TOPIC,
+            "tags": "watchdog,host,alert", "as_of": today, "msg": msg})
+    except Exception:  # noqa: BLE001
+        subprocess.run(["osascript", "-e", f'display notification "{msgs[0][:180]}" '
+                        f'with title "routine-watchdog" sound name "Basso"'], capture_output=True)
+    state["host_alerted"] = today
+    return True
+
+
 def kickstart(label: str) -> bool:
     """launchctl kickstart -k gui/<uid>/<label> — force launchd to run the job now."""
     target = f"gui/{os.getuid()}/{label}"
@@ -234,6 +292,10 @@ def main(argv: list[str] | None = None) -> int:
     state_path = Path(args.state)
     holidays = load_holidays(Path(args.holidays))
     pretend = set(args.pretend_missed)
+
+    host_state = load_state(state_path)
+    if check_host(host_state, now, args.dry_run):
+        save_state(host_state, state_path)
 
     if not is_trading_day(now, holidays):
         print(f"[skip] {now.date()} is not a trading day — nothing to do.")
