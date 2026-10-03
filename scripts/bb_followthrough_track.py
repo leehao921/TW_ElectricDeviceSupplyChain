@@ -209,6 +209,47 @@ def fetch_20d_foreign(conn, ticker: str, as_of: str) -> float:
 
 
 # ------------------------------------------------------------------ #
+# 葛蘭碧 B3/B2 觀察標籤 (2026-10-03, analysis/bb_granville_verify_2026-10-03.md)
+# 小哥版四標籤驗證皆 NO-EDGE; 唯 B3 站穩 vs B2 假跌破 T+20 +8.7pt (區塊 p 0.041) 列觀察。
+# 口徑須與驗證腳本一致, 重驗才可比。不進 rules_hit (不影響 Rule 1-5 命中率)。
+# ------------------------------------------------------------------ #
+GRANVILLE_LABEL = {
+    "B3": "📐 B3 站穩上揚月線 (觀察)",
+    "B2": "📐 B2 假跌破後站回 (觀察)",
+    "S2": "📐 S2 突破下彎月線 (觀察)",
+    "below": "📐 月線下方 (觀察)",
+}
+
+
+def granville_tag(closes: list[float]) -> str | None:
+    """進場日 (含) 以前收盤序列 (舊→新) → B3 / B2 / S2 / below; 不足 25 筆 → None."""
+    if len(closes) < 25:
+        return None
+    ma = [sum(closes[i - 19:i + 1]) / 20 for i in range(19, len(closes))]
+    off = 19  # ma[k] 對應 closes[k + off]
+    t = len(closes) - 1
+    slope = (ma[t - off] - ma[t - off - 5]) / ma[t - off - 5]
+    above = closes[t] > ma[t - off]
+    if slope > 0 and above:
+        recent_below = any(closes[k] < ma[k - off] for k in range(t - 5, t))
+        return "B2" if recent_below else "B3"
+    if above:
+        return "S2"
+    return "below"
+
+
+def fetch_closes(conn, ticker: str, as_of: str, n: int = 30) -> list[float]:
+    """as_of (含) 以前 n 筆收盤, 舊→新."""
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT close FROM stock_daily_ohlcv
+             WHERE symbol=%s AND ts::date <= %s
+             ORDER BY ts DESC LIMIT %s
+        """, (ticker, as_of, n))
+        return [float(r[0]) for r in reversed(cur.fetchall())]
+
+
+# ------------------------------------------------------------------ #
 # State I/O
 # ------------------------------------------------------------------ #
 def load_state(path: Path) -> dict:
@@ -352,6 +393,7 @@ def add_new_breakouts(state: dict, today_buys: dict, as_of: str, conn, dispositi
             "foreign_1d": snap["foreign_1d_oku"], "cumret_pct": 0.0,
         })
         entry["rules_hit"] = apply_rules(entry)
+        entry["granville"] = granville_tag(fetch_closes(conn, ticker, as_of))
         state["tracked"][ticker] = entry
         added.append(ticker)
     return added
@@ -421,6 +463,7 @@ def graduate_stale(state: dict, as_of: str, dry_run: bool = False) -> list[str]:
                 "min_cumret_pct": entry.get("min_cumret_pct"),
                 "reason": entry.get("_reason_graduated"),
                 "rules_hit": entry.get("rules_hit", []),
+                "granville": entry.get("granville"),
                 "snapshots": entry.get("daily_snapshots"),
             }, HISTORY_PATH)
     state["tracked"] = keep
@@ -533,6 +576,9 @@ def build_digest(state: dict, as_of: str, added: list[str], graduated: list[str]
         f1 = last.get("foreign_1d", 0)
         rules = e.get("rules_hit", [])
         rule_tag = " · ".join(rules) if rules else ""
+        gv = GRANVILLE_LABEL.get(e.get("granville") or "")
+        if gv:
+            rule_tag = f"{rule_tag} · {gv}" if rule_tag else gv
         if d == 0:  # just_added, show entry snap
             f5 = e.get("foreign_5d_at_entry", 0)
             return f"  • **{e['ticker']} {e['name']}** ${cs:.1f} vol×{vr:.2f} 5D外資{f5:+.2f}億 → {rule_tag or '一般'}"

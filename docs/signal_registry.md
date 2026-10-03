@@ -9,7 +9,9 @@
 | # | 訊號 | 定義 | 分級 | 追蹤源 |
 |---|---|---|---|---|
 | L1 | 處置解除·外資買超組 | 解除前 20D 外資買超的處置股，解除後 +10D | **VALIDATED**（backtest +3.59%/勝 51%, n=492）| disposition history |
-| L2 | BB squeeze Buy | 波動壓縮突破，5 日 followthrough | WEAK（波段 3/19，靠大贏家；T+1 勿當沖）| bb_followthrough history |
+| L2 | BB squeeze Buy | 波動壓縮突破，5 日 followthrough | WEAK（波段 3/19，靠大贏家；T+1 勿當沖；2026-10-03 n=136: T+20 對 0050 超額均 -3.50%/中位 -7.12%/勝 31%）| bb_followthrough history |
+| L2a | BB Buy × 葛蘭碧 B3 vs B2 | B3=站穩上揚 MA20（前 5 日未收破）vs B2=假跌破後站回 | 觀察（T+20 超額 B3−B2 +8.7pt，日內區塊 permutation p=0.041，n=29/31，未過 Bonferroni；各組 T+20 n≥60 重驗，門檻 p<0.01 且方向不變）| bb_followthrough `granville` 欄位 · `analysis/bb_granville_verify_2026-10-03.md` |
+| L2b | BB Buy × 小哥版四標籤 | 月線方向回升/反彈、價漲量增、爆量換手(≥2×月均量)、法人 5D 買超 | **NO-EDGE**（10 次檢定無一過 Bonferroni；回升/價漲量增方向反而較差 = 追價負期望；爆量換手 T+20 n=4 待累積）| `analysis/bb_granville_verify_2026-10-03.md` |
 | L3 | 外資結構 hedged_accumulation | 現貨 5D z>+0.5 且期貨空單 z<-0.5（吸籌+對沖）| **反向-WEAK**（backtest 該州日 → TXF +5D -2.65% vs 中性日 +1.75%，n=13 僅 126 日樣本 — 觸發後短線偏弱，勿當多方確認）| foreign_structure 日誌 |
 | L4 | 左側賣壓竭盡 | 距高 -20%+ 且外資 5D 轉正（+P/B GREEN 加分）| **NO-EDGE**（市場級 n=1798 無超額 — 單獨無效，僅供左側 confluence 之一，需搭 P/B GREEN + 基本面）| signal-scan 觀察名單 |
 | L5 | 錯價修復 | 基本面強+籌碼冷 → 外資週買 >3 億確認 | 觀察（華航 8/27 首例觸發）| position-watch |
