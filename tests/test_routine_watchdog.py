@@ -198,3 +198,63 @@ def test_host_health_flags_time_wait_pileup():
     msgs = host_health(10.0, 12_000)
     assert len(msgs) == 1 and "TIME_WAIT" in msgs[0] and "12,000" in msgs[0]
     assert len(host_health(50.5, 29_216)) == 2
+
+
+# ------------------------------------------------------------------ #
+# discord forwarder heartbeat (2026-10-06) — alert path must NOT be Discord
+# ------------------------------------------------------------------ #
+def test_forwarder_stale_fresh_is_none():
+    now = datetime(2026, 10, 6, 16, 10)
+    health = {"heartbeat_ts": "2026-10-06T16:05:00+08:00", "status": "ok"}
+    assert rw.forwarder_stale(health, now) is None
+
+
+def test_forwarder_stale_old_heartbeat():
+    now = datetime(2026, 10, 6, 16, 30)
+    health = {"heartbeat_ts": "2026-10-06T16:05:00+08:00", "status": "ok"}
+    assert "25" in rw.forwarder_stale(health, now)
+
+
+def test_forwarder_stale_missing_heartbeat():
+    assert rw.forwarder_stale({}, datetime(2026, 10, 6, 16, 30)) is not None
+
+
+class _HealthRedis:
+    def __init__(self, health):
+        self.health = health
+        self.xadds = []
+
+    def hgetall(self, k):
+        assert k == "discord:forward:health"
+        return self.health
+
+    def xadd(self, *a, **kw):
+        self.xadds.append(a)
+
+
+def test_check_forwarder_notifies_once_per_stale_heartbeat():
+    notes = []
+    client = _HealthRedis({"heartbeat_ts": "2026-10-06T15:00:00+08:00"})
+    state = {}
+    now = datetime(2026, 10, 6, 16, 30)
+    assert rw.check_forwarder(client, state, now, dry_run=False, notify=notes.append)
+    assert not rw.check_forwarder(client, state, now, dry_run=False, notify=notes.append)
+    assert len(notes) == 1
+    assert client.xadds == []           # never via inbox→Discord
+    # recovery clears, a later stall alerts again
+    client.health = {"heartbeat_ts": "2026-10-06T16:29:00+08:00"}
+    rw.check_forwarder(client, state, now, dry_run=False, notify=notes.append)
+    assert "forwarder_alerted" not in state
+    client.health = {"heartbeat_ts": "2026-10-06T16:40:00+08:00"}
+    rw.check_forwarder(client, state, datetime(2026, 10, 6, 17, 0), dry_run=False,
+                       notify=notes.append)
+    assert len(notes) == 2
+
+
+def test_check_forwarder_dry_run_no_notify():
+    notes = []
+    client = _HealthRedis({})
+    state = {}
+    rw.check_forwarder(client, state, datetime(2026, 10, 6, 16, 30), dry_run=True,
+                       notify=notes.append)
+    assert notes == [] and state == {}

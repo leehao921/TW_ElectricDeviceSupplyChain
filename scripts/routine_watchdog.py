@@ -245,9 +245,68 @@ def check_host(state: dict, now: datetime, dry_run: bool) -> bool:
             "ts": now.astimezone().isoformat(), "from": "routine_watchdog", "topic": ALERT_TOPIC,
             "tags": "watchdog,host,alert", "as_of": today, "msg": msg})
     except Exception:  # noqa: BLE001
-        subprocess.run(["osascript", "-e", f'display notification "{msgs[0][:180]}" '
-                        f'with title "routine-watchdog" sound name "Basso"'], capture_output=True)
+        notify_local(msgs[0])
     state["host_alerted"] = today
+    return True
+
+
+def notify_local(msg: str, title: str = "routine-watchdog") -> None:
+    """macOS 通知中心 — 不依賴 TCP / Redis / Discord。"""
+    subprocess.run(["osascript", "-e", "on run argv",
+                    "-e", 'display notification (item 2 of argv) with title (item 1 of argv) '
+                          'sound name "Basso"',
+                    "-e", "end run", title, msg[:200]], capture_output=True, timeout=10)
+
+
+# --------------------------------------------------------------------------- #
+# Discord forwarder heartbeat (2026-10-06)
+# --------------------------------------------------------------------------- #
+# The forwarder daemon writes discord:forward:health.heartbeat_ts every loop (~5 s).
+# Its alert path must NOT be the inbox: inbox entries are delivered BY the forwarder.
+FORWARDER_HEALTH_KEY = "discord:forward:health"
+FORWARDER_STALE = timedelta(minutes=10)
+
+
+def forwarder_stale(health: dict, now: datetime,
+                    max_age: timedelta = FORWARDER_STALE) -> str | None:
+    """Reason string if the forwarder heartbeat is missing/older than max_age, else None."""
+    raw = (health or {}).get("heartbeat_ts")
+    if not raw:
+        return "discord-forward 無 heartbeat (discord:forward:health 缺) — daemon 未執行?"
+    try:
+        hb = datetime.fromisoformat(raw)
+    except ValueError:
+        return f"discord-forward heartbeat 無法解析: {raw!r}"
+    ref = now if now.tzinfo else now.astimezone()
+    if hb.tzinfo is None:
+        hb = hb.astimezone()
+    age = ref - hb
+    if age <= max_age:
+        return None
+    detail = f" status={health.get('status')} last_err={health.get('last_err', '')[:80]}"
+    return f"discord-forward heartbeat 停 {int(age.total_seconds() // 60)} 分鐘 ({raw}).{detail}"
+
+
+def check_forwarder(client, state: dict, now: datetime, dry_run: bool,
+                    notify=notify_local) -> bool:
+    """Stale heartbeat → ONE local notification per stale heartbeat value; fresh clears.
+    Returns True if state changed."""
+    try:
+        health = client.hgetall(FORWARDER_HEALTH_KEY)
+    except Exception as e:  # noqa: BLE001 — Redis down: host check / forwarder itself alert
+        print(f"[error] forwarder health unreadable: {e}", file=sys.stderr)
+        return False
+    reason = forwarder_stale(health, now)
+    if reason is None:
+        return state.pop("forwarder_alerted", None) is not None and not dry_run
+    marker = (health or {}).get("heartbeat_ts") or "missing"
+    if state.get("forwarder_alerted") == marker:
+        return False
+    print(f"FORWARDER {reason}" + ("  [dry-run]" if dry_run else ""))
+    if dry_run:
+        return False
+    notify(reason)
+    state["forwarder_alerted"] = marker
     return True
 
 
@@ -294,7 +353,10 @@ def main(argv: list[str] | None = None) -> int:
     pretend = set(args.pretend_missed)
 
     host_state = load_state(state_path)
-    if check_host(host_state, now, args.dry_run):
+    host_changed = check_host(host_state, now, args.dry_run)
+    if check_forwarder(make_redis_client(), host_state, now, args.dry_run):
+        host_changed = True
+    if host_changed:
         save_state(host_state, state_path)
 
     if not is_trading_day(now, holidays):
