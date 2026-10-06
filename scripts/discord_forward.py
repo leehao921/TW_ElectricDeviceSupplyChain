@@ -48,6 +48,8 @@ MAX_PER_RUN = 25                         # 一輪 XRANGE 撈取 entry 上限
 MAX_MSGS_PER_RUN = 25                    # 一輪送出訊息上限 (webhook ~30/min)
 MAX_REPORT_CHUNKS = 15                   # 全文切段上限,超過改「見附件」提示
 POST_SLEEP = 2.0
+MOBILE_W = 40                            # 手機 code block 一行約 40 等寬字 (CJK=2)
+HR_MOBILE = "━" * 10
 RATE_MAX_PER_MIN = 25                    # daemon 滑動視窗:每 60s 最多送出訊息數
 BLOCK_MS = 5000                          # daemon XREAD BLOCK
 BACKOFF_BASE_S = 5.0
@@ -147,6 +149,8 @@ def _render_table(lines) -> str:
             continue
         for j, c in enumerate(r):
             widths[j] = max(widths[j], _disp_width(c))
+    if sum(w + 3 for w in widths) + 1 > MOBILE_W:
+        return _render_cards([r for i, r in enumerate(rows) if i not in sep_idx])
     out = []
     for i, r in enumerate(rows):
         if i in sep_idx:
@@ -154,6 +158,17 @@ def _render_table(lines) -> str:
         else:
             out.append("| " + " | ".join(_pad(r[j], widths[j]) for j in range(ncol)) + " |")
     return "```\n" + "\n".join(out) + "\n```"
+
+
+def _render_cards(rows) -> str:
+    """寬表格 → 手機卡片: 每列 **首欄** + 「▸ 表頭：值」(空值略過),不進 code block。"""
+    header, data = rows[0], rows[1:]
+    cards = []
+    for r in data:
+        lines = ["**%s**" % r[0].strip("*")] if r[0] else []
+        lines += ["▸ %s：%s" % (header[j], c) for j, c in enumerate(r) if j and c]
+        cards.append("\n".join(lines))
+    return "\n\n".join(cards)
 
 
 def convert_tables(text: str) -> str:
@@ -172,6 +187,52 @@ def convert_tables(text: str) -> str:
             block = []
         out.append(ln)
     return "\n".join(out[:-1])               # 去掉哨兵
+
+
+_HEADING = re.compile(r"^(#{1,6}) (.*)$")
+
+
+def _wrap_code_line(ln: str, limit: int = MOBILE_W) -> list:
+    """code block 內過寬的行在空白處斷開,續行縮排 2 格;無空白可斷則原樣。"""
+    out = []
+    while _disp_width(ln) > limit:
+        cut, w = -1, 0
+        for i, ch in enumerate(ln):
+            w += _disp_width_char(ch)
+            if w > limit:
+                break
+            if ch == " " and ln[:i].strip():
+                cut = i
+        if cut <= 0:
+            break
+        out.append(ln[:cut].rstrip())
+        ln = "  " + ln[cut:].strip()
+    out.append(ln)
+    return out
+
+
+def mobile_format(text: str) -> str:
+    """手機排版: code block 外 → hr 改短線、標題降一級 (Discord 只有 #/##/###);
+    code block 內 → 過寬行斷行。只改排版,不改內容。"""
+    out, in_code = [], False
+    for ln in text.split("\n"):
+        if ln.strip().startswith("```"):
+            in_code = not in_code
+            out.append(ln)
+            continue
+        if in_code:
+            out.extend(_wrap_code_line(ln))
+            continue
+        if ln.strip() in ("---", "***", "___"):
+            out.append(HR_MOBILE)
+            continue
+        m = _HEADING.match(ln)
+        if m:
+            level, title = len(m.group(1)), m.group(2).strip()
+            out.append("#" * (level + 1) + " " + title if level <= 2 else "**%s**" % title.strip("*"))
+            continue
+        out.append(ln)
+    return "\n".join(out)
 
 
 def rebalance_fences(chunks) -> list:
@@ -218,12 +279,12 @@ def build_report_messages(fields: dict, report_text,
     去重:msg 已包含於全文(bb-followthrough msg==全文)→ 跳過全文段。
     全文段數超過 cap → 截斷並補一則提示(完整檔留在 analysis/)。
     """
-    summary = chunk_message(format_entry(fields), limit)
+    summary = chunk_message(mobile_format(convert_tables(format_entry(fields))), limit)
     if not report_text:
         return summary
     if (fields.get("msg") or "").strip() in report_text:
         return summary
-    body = rebalance_fences(chunk_message(convert_tables(report_text), limit))
+    body = rebalance_fences(chunk_message(mobile_format(convert_tables(report_text)), limit))
     if len(body) > max_report_chunks:
         body = body[:max_report_chunks] + ["(報告全文過長，其餘截斷 — 完整檔在 analysis/)"]
     return summary + body

@@ -248,7 +248,7 @@ class TestBuildReportMessages:
 
     def test_short_report_summary_then_body(self):
         msgs = build_report_messages(self.FIELDS, "# 報告\n完整內容")
-        assert msgs == [format_entry(self.FIELDS), "# 報告\n完整內容"]
+        assert msgs == [format_entry(self.FIELDS), "## 報告\n完整內容"]   # 手機: 標題降一級
 
     def test_long_report_chunked(self):
         report = "\n".join("row %04d" % i for i in range(1200))  # ~10KB
@@ -349,7 +349,7 @@ class TestRunOnce:
         r = FakeRedis([("1-0", {"topic": "t", "msg": "摘要", "report_path": "analysis/r.md"})])
         n = discord_forward.run_once(r, "http://x")
         assert n == 1
-        assert sent == ["**[t]** 摘要", "# 報告\n內容"]
+        assert sent == ["**[t]** 摘要", "## 報告\n內容"]   # 手機: 標題降一級
         assert r.kv["discord:forward:last_id"] == "1-0"
 
     def test_bogus_report_path_falls_back_to_summary(self, monkeypatch):
@@ -875,3 +875,43 @@ class TestResolveTargets:
         assert t["trading"] == discord_forward.BotTarget("guyu-tok", "111", "http://trade")
         assert t["reports"] == "http://base"
         assert t["system"] == "http://base"
+
+
+# ------------------------------------------------------------------ #
+# mobile layout (2026-10-06): 手機 code block 約 40 字寬
+# ------------------------------------------------------------------ #
+WIDE_TABLE = """| 標的 | 停損 | 10/05 → 10/06 | 狀態 |
+|---|---|---|---|
+| **2303 聯電** | 152 | 152.5 → 147.5 (−3.28%) | 收盤已跌破停損 |
+| 8081 致新 | 270 | 259 → 262.5 | |"""
+
+
+class TestMobileLayout:
+    def test_wide_table_becomes_cards(self):
+        out = discord_forward.convert_tables(WIDE_TABLE)
+        assert "```" not in out
+        assert "**2303 聯電**" in out and "**8081 致新**" in out
+        assert "▸ 停損：152" in out
+        assert "▸ 10/05 → 10/06：152.5 → 147.5 (−3.28%)" in out
+        assert "▸ 狀態：" not in out.split("**8081 致新**")[1]     # 空值略過
+
+    def test_narrow_table_stays_code_block(self):
+        out = discord_forward.convert_tables("| a | b |\n|---|---|\n| 1 | 2 |")
+        assert out.startswith("```") and "| 1 | 2 |" in out
+
+    def test_markdown_normalised_outside_code(self):
+        out = discord_forward.mobile_format("# 標題\n## 小節\n#### 細項\n---\n```\n# keep\n---\n```")
+        assert out.split("\n")[:4] == ["## 標題", "### 小節", "**細項**", "━━━━━━━━━━"]
+        assert "# keep\n---" in out                                  # code block 內不動
+
+    def test_long_code_line_wrapped(self):
+        long = " IV curve: 10/07:22.0 / 10/12:20.3 / 10/14:18.8 / 10/21:23.7 / 11/18:23.4"
+        out = discord_forward.mobile_format("```\n" + long + "\n  │50000│███ CW\n```")
+        body = out.split("\n")[1:-1]
+        assert all(discord_forward._disp_width(ln) <= discord_forward.MOBILE_W for ln in body)
+        assert body[-1] == "  │50000│███ CW"
+        assert " ".join(x.strip() for x in body[:-1]) == long.strip()
+
+    def test_summary_msg_gets_mobile_layout(self):
+        msgs = discord_forward.build_report_messages({"topic": "t", "msg": "摘要\n# 大標\n---"}, None)
+        assert "## 大標" in msgs[0] and "━━━━━━━━━━" in msgs[0]
