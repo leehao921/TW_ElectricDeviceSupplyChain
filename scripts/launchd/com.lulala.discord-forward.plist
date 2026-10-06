@@ -5,16 +5,21 @@
     <key>Label</key>
     <string>com.lulala.discord-forward</string>
 
-    <!-- claude:inbox → Discord webhook forwarder (每 300s,全週)。
-         Cursor 存 Redis discord:forward:last_id,無新訊息時 no-op 秒退。
-         Webhook URL fallback 讀 ../database/.env (DISCORD_WEBHOOK_URL,
-         與 Grafana alerting 同一頻道)。venv python 直跑 (TCC:不可經 bash)。
-         Plan: docs/plans/2026-07-30-discord-push.md -->
+    <!-- claude:inbox → Discord webhook forwarder,常駐 daemon (XREAD BLOCK 5s,即時)。
+         Cursor 存 Redis discord:forward:last_id;健康 hash discord:forward:health
+         (routine-watchdog 監看 heartbeat,>10 分鐘停擺 → macOS 通知)。
+         Webhook:DISCORD_WEBHOOK_URL_{TRADING,REPORTS,SYSTEM} 未設 → fallback
+         DISCORD_WEBHOOK_URL (env 或 ../database/.env)。venv python 直跑 (TCC:不可經 bash)。
+         重載:launchctl bootout gui/$UID/com.lulala.discord-forward;
+               launchctl bootstrap gui/$UID <plist>  (勿用 kickstart -k)
+         Plans: docs/plans/2026-07-30-discord-push.md,
+                docs/plans/2026-10-06-discord-forward-realtime.md -->
 
     <key>ProgramArguments</key>
     <array>
         <string>/Users/lulala/Documents/coding/My-TW-Coverage/.venv/bin/python</string>
         <string>/Users/lulala/Documents/coding/My-TW-Coverage/scripts/discord_forward.py</string>
+        <string>--daemon</string>
     </array>
 
     <key>WorkingDirectory</key>
@@ -23,8 +28,12 @@
     <key>RunAtLoad</key>
     <true/>
 
-    <key>StartInterval</key>
-    <integer>300</integer>
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- 崩潰後重啟最短間隔 (秒),避免 crash loop 洗 log -->
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
 
     <key>EnvironmentVariables</key>
     <dict>
@@ -32,6 +41,7 @@
         <key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
         <key>REDIS_HOST</key><string>localhost</string>
         <key>REDIS_PORT</key><string>6379</string>
+        <key>PYTHONUNBUFFERED</key><string>1</string>
     </dict>
 
     <key>StandardOutPath</key>

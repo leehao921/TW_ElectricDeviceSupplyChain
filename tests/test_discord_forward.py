@@ -323,6 +323,9 @@ class FakeRedis:
     def set(self, k, v):
         self.kv[k] = v
 
+    def delete(self, k):
+        self.kv.pop(k, None)
+
     def xrange(self, stream, lo, hi, count=None):
         lo_id = lo.lstrip("(")
         out = [(i, f) for i, f in self.entries if i > lo_id]
@@ -383,3 +386,298 @@ class TestRunOnce:
         assert discord_forward.run_once(r, "http://x") == 1
         assert len(sent) >= 2
         assert r.kv["discord:forward:last_id"] == "1-0"
+
+
+# ================================================================== #
+# 2026-10-06 — realtime daemon / routing / observability / chunk resume
+# ================================================================== #
+class FakeRedis2(FakeRedis):
+    """FakeRedis + delete/hset/xread + failure injection."""
+
+    def __init__(self, entries, cursor="0-0"):
+        super().__init__(entries, cursor)
+        if cursor is None:
+            self.kv.pop("discord:forward:last_id")
+        self.hashes = {}
+        self.fail_next = 0          # raise on the next N xread calls
+        self.xread_calls = []
+
+    def hset(self, k, mapping=None, **kw):
+        self.hashes.setdefault(k, {}).update(mapping or {})
+
+    def xread(self, streams, count=None, block=None):
+        self.xread_calls.append((dict(streams), count, block))
+        if self.fail_next:
+            self.fail_next -= 1
+            raise ConnectionError("Error 49 connecting: Can't assign requested address")
+        (stream, last), = streams.items()
+        out = [(i, f) for i, f in self.entries if i > last]
+        if count:
+            out = out[:count]
+        return [[stream, out]] if out else []
+
+
+URLS = {"trading": "http://trading", "reports": "http://reports", "system": "http://system"}
+
+
+# ------------------------------------------------------------------ #
+# route_topic
+# ------------------------------------------------------------------ #
+class TestRouteTopic:
+    def test_trading_topics(self):
+        for t in ("gex-regime", "position-watch", "trail_daemon", "trail-daemon",
+                  "placer_rejects", "loop_nag", "execution_agent", "armed_met",
+                  "margin_guard", "loop_anchor_harvest"):
+            assert discord_forward.route_topic({"topic": t, "msg": "x"}) == "trading", t
+
+    def test_report_topics(self):
+        for t in ("account-daily", "buy-list", "daily-review", "bb-squeeze",
+                  "routine-synthesis", "ma-touch", "news-pulse"):
+            assert discord_forward.route_topic({"topic": t, "msg": "x"}) == "reports", t
+
+    def test_report_path_routes_to_reports(self):
+        f = {"topic": "brand-new-topic", "msg": "x", "report_path": "analysis/a.md"}
+        assert discord_forward.route_topic(f) == "reports"
+
+    def test_trading_wins_over_report_path(self):
+        f = {"topic": "position-watch", "msg": "x", "report_path": "analysis/a.md"}
+        assert discord_forward.route_topic(f) == "trading"
+
+    def test_system_default(self):
+        for t in ("collector_health_watchdog", "wake_read", "routine-watchdog",
+                  "loop_autostart", "loop_down", "baseline_heal", "margin-heal", None):
+            f = {"msg": "x"} if t is None else {"topic": t, "msg": "x"}
+            assert discord_forward.route_topic(f) == "system", t
+
+
+# ------------------------------------------------------------------ #
+# resolve_webhook_urls — per-class with DISCORD_WEBHOOK_URL fallback
+# ------------------------------------------------------------------ #
+class TestResolveWebhookUrls:
+    def test_all_fall_back_to_base(self, tmp_path):
+        urls = discord_forward.resolve_webhook_urls(
+            {"DISCORD_WEBHOOK_URL": "http://base"}, tmp_path / "none.env")
+        assert urls == {"trading": "http://base", "reports": "http://base",
+                        "system": "http://base"}
+
+    def test_class_override_from_env_and_file(self, tmp_path):
+        envf = tmp_path / ".env"
+        envf.write_text("DISCORD_WEBHOOK_URL=http://base\nDISCORD_WEBHOOK_URL_REPORTS=http://rep\n")
+        urls = discord_forward.resolve_webhook_urls(
+            {"DISCORD_WEBHOOK_URL_TRADING": "http://trade"}, envf)
+        assert urls == {"trading": "http://trade", "reports": "http://rep",
+                        "system": "http://base"}
+
+    def test_missing_raises(self, tmp_path):
+        import pytest
+        with pytest.raises(RuntimeError):
+            discord_forward.resolve_webhook_urls({}, tmp_path / "none.env")
+
+
+# ------------------------------------------------------------------ #
+# forward_entries — routing + chunk-level resume
+# ------------------------------------------------------------------ #
+def _fake_post(fail_at=None):
+    calls = []
+
+    def post(url, content):
+        if fail_at is not None and len(calls) == fail_at:
+            raise ConnectionError("boom")
+        calls.append((url, content))
+    return post, calls
+
+
+class TestForwardEntries:
+    def _multi(self):
+        return [("5-0", {"topic": "account-daily", "msg": "摘要",
+                         "report_path": "analysis/r.md"})]
+
+    def test_routes_each_entry_to_its_class_url(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "gex-regime", "msg": "a"}),
+                        ("2-0", {"topic": "buy-list", "msg": "b"}),
+                        ("3-0", {"topic": "wake_read", "msg": "c"})])
+        n = discord_forward.forward_entries(r, r.entries, URLS, post=post, sleep=lambda s: None)
+        assert n == 3
+        assert [u for u, _ in calls] == ["http://trading", "http://reports", "http://system"]
+        assert r.kv["discord:forward:last_id"] == "3-0"
+
+    def test_partial_progress_persisted_and_resumed(self, monkeypatch):
+        big = "\n".join("row %04d" % i for i in range(1200))
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: big)
+        r = FakeRedis2(self._multi())
+        total = len(build_report_messages(r.entries[0][1], big))
+        assert total >= 4
+        post, calls = _fake_post(fail_at=2)
+        import pytest
+        with pytest.raises(ConnectionError):
+            discord_forward.forward_entries(r, r.entries, URLS, post=post, sleep=lambda s: None)
+        assert r.kv["discord:forward:partial"] == "5-0:2"
+        assert r.kv["discord:forward:last_id"] == "0-0"        # cursor not advanced
+        post2, calls2 = _fake_post()
+        discord_forward.forward_entries(r, r.entries, URLS, post=post2, sleep=lambda s: None)
+        expected = build_report_messages(r.entries[0][1], big)
+        assert [c for _, c in calls2] == expected[2:]           # resumed at chunk 3
+        assert r.kv["discord:forward:last_id"] == "5-0"
+        assert "discord:forward:partial" not in r.kv           # cleared on completion
+
+    def test_stale_partial_for_other_entry_ignored(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        r = FakeRedis2([("7-0", {"topic": "t", "msg": "x"})])
+        r.kv["discord:forward:partial"] = "6-0:3"
+        post, calls = _fake_post()
+        discord_forward.forward_entries(r, r.entries, URLS, post=post, sleep=lambda s: None)
+        assert [c for _, c in calls] == ["**[t]** x"]
+        assert "discord:forward:partial" not in r.kv
+
+    def test_blocked_topic_advances_cursor_without_post(self, monkeypatch):
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "wakegate", "msg": "ping"})])
+        discord_forward.forward_entries(r, r.entries, URLS, post=post, sleep=lambda s: None)
+        assert calls == []
+        assert r.kv["discord:forward:last_id"] == "1-0"
+
+    def test_limiter_acquired_per_message(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        acquired = []
+
+        class L:
+            def acquire(self):
+                acquired.append(1)
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "t", "msg": "a"}), ("2-0", {"topic": "t", "msg": "b"})])
+        discord_forward.forward_entries(r, r.entries, URLS, post=post, sleep=lambda s: None,
+                                        limiter=L())
+        assert len(acquired) == 2
+
+
+# ------------------------------------------------------------------ #
+# RateLimiter — sliding per-minute budget
+# ------------------------------------------------------------------ #
+class TestRateLimiter:
+    def test_blocks_when_window_full(self):
+        now = [0.0]
+        slept = []
+
+        def sleep(s):
+            slept.append(s)
+            now[0] += s
+        lim = discord_forward.RateLimiter(3, 60.0, clock=lambda: now[0], sleep=sleep)
+        for _ in range(3):
+            lim.acquire()
+        assert slept == []
+        lim.acquire()                       # 4th within the window → wait until slot frees
+        assert slept and abs(sum(slept) - 60.0) < 1e-6
+
+
+# ------------------------------------------------------------------ #
+# ForwardHealth — fail streak + single macOS alert per streak
+# ------------------------------------------------------------------ #
+class TestForwardHealth:
+    def _h(self, now):
+        notes = []
+        h = discord_forward.ForwardHealth(clock=lambda: now[0],
+                                          notify=lambda title, msg: notes.append(msg))
+        return h, notes
+
+    def test_alert_once_at_streak_3(self):
+        now = [1000.0]
+        h, notes = self._h(now)
+        for i in range(6):
+            now[0] += 1
+            h.record_fail(RuntimeError("dns %d" % i))
+        assert len(notes) == 1
+        assert h.fail_streak == 6
+
+    def test_alert_when_failing_over_5min_even_if_streak_low(self):
+        now = [1000.0]
+        h, notes = self._h(now)
+        h.record_fail(RuntimeError("a"))
+        now[0] += 301
+        h.record_fail(RuntimeError("b"))
+        assert len(notes) == 1
+
+    def test_recovery_clears_and_rearms(self):
+        now = [1000.0]
+        h, notes = self._h(now)
+        for _ in range(3):
+            h.record_fail(RuntimeError("x"))
+        h.record_ok()
+        assert h.fail_streak == 0
+        for _ in range(3):
+            h.record_fail(RuntimeError("y"))
+        assert len(notes) == 2
+
+    def test_snapshot_written_to_redis(self):
+        now = [1_791_273_000.0]
+        h, _ = self._h(now)
+        h.record_fail(RuntimeError("Timeout reading from socket"))
+        r = FakeRedis2([])
+        h.write(r)
+        snap = r.hashes["discord:forward:health"]
+        for k in ("status", "fail_streak", "last_ok_ts", "last_err", "last_err_ts",
+                  "heartbeat_ts"):
+            assert k in snap, k
+        assert snap["status"] == "failing"
+        assert snap["fail_streak"] == "1"
+        assert "Timeout" in snap["last_err"]
+
+
+# ------------------------------------------------------------------ #
+# daemon loop
+# ------------------------------------------------------------------ #
+class TestDaemon:
+    def test_step_forwards_new_entries_via_xread_block(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "gex-regime", "msg": "zg"})])
+        n = discord_forward.daemon_step(r, URLS, block_ms=5000, post=post,
+                                        sleep=lambda s: None)
+        assert n == 1
+        assert r.xread_calls[0][2] == 5000
+        assert r.xread_calls[0][0] == {"claude:inbox": "0-0"}
+        assert calls == [("http://trading", "**[gex-regime]** zg")]
+        assert r.kv["discord:forward:last_id"] == "1-0"
+
+    def test_step_initializes_cursor_without_backfill(self):
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "t", "msg": "old"})], cursor=None)
+        assert discord_forward.daemon_step(r, URLS, post=post, sleep=lambda s: None) == 0
+        assert r.kv["discord:forward:last_id"] == "1-0"
+        assert calls == []
+
+    def test_run_daemon_survives_errors_and_keeps_cursor(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "position-watch", "msg": "p"})])
+        r.fail_next = 3
+        notes = []
+        health = discord_forward.ForwardHealth(clock=lambda: 0.0,
+                                               notify=lambda t, m: notes.append(m))
+        slept = []
+        discord_forward.run_daemon(lambda: r, URLS, health=health, post=post,
+                                   sleep=slept.append, max_iterations=4)
+        assert len(notes) == 1                         # alerted once during the streak
+        assert calls == [("http://trading", "**[position-watch]** p")]
+        assert r.kv["discord:forward:last_id"] == "1-0"
+        assert health.fail_streak == 0                 # recovered
+        assert r.hashes["discord:forward:health"]["status"] == "ok"
+        assert slept and max(slept) <= 60
+
+    def test_run_daemon_reconnects_when_factory_fails(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        post, calls = _fake_post()
+        r = FakeRedis2([("1-0", {"topic": "t", "msg": "x"})])
+        attempts = []
+
+        def factory():
+            attempts.append(1)
+            if len(attempts) == 1:
+                raise ConnectionError("nodename nor servname provided")
+            return r
+        health = discord_forward.ForwardHealth(clock=lambda: 0.0, notify=lambda t, m: None)
+        discord_forward.run_daemon(factory, URLS, health=health, post=post,
+                                   sleep=lambda s: None, max_iterations=2)
+        assert len(attempts) == 2
+        assert len(calls) == 1
