@@ -681,3 +681,142 @@ class TestDaemon:
                                    sleep=lambda s: None, max_iterations=2)
         assert len(attempts) == 2
         assert len(calls) == 1
+
+
+# ------------------------------------------------------------------ #
+# Dead-letter: permanent 4xx must not block the queue (2026-10-06)
+# ------------------------------------------------------------------ #
+class _Resp2(_Resp):
+    def __init__(self, status_code=204, text=""):
+        super().__init__(status_code)
+        self.text = text
+
+
+class FakeRedis3(FakeRedis2):
+    def __init__(self, entries, cursor="0-0"):
+        super().__init__(entries, cursor)
+        self.lists = {}
+
+    def rpush(self, k, v):
+        self.lists.setdefault(k, []).append(v)
+
+    def ltrim(self, k, start, end):
+        self.lists[k] = self.lists.get(k, [])[start:None if end == -1 else end + 1]
+
+
+class TestPostDiscordPermanent:
+    def test_non_retryable_4xx_raises_permanent(self, monkeypatch):
+        import requests
+        for code in (400, 401, 403, 404, 413):
+            monkeypatch.setattr(requests, "post",
+                                lambda url, _c=code, **kw: _Resp2(_c, "x" * 900))
+            import pytest
+            with pytest.raises(discord_forward.PermanentPostError) as ei:
+                discord_forward.post_discord("http://x", "hello")
+            assert ei.value.status == code
+            assert len(ei.value.body) <= 500
+
+    def test_5xx_is_not_permanent(self, monkeypatch):
+        import requests
+        import pytest
+        monkeypatch.setattr(requests, "post", lambda url, **kw: _Resp2(502, "bad gateway"))
+        with pytest.raises(Exception) as ei:
+            discord_forward.post_discord("http://x", "hello")
+        assert not isinstance(ei.value, discord_forward.PermanentPostError)
+
+
+class TestDeadLetter:
+    def _notifier(self):
+        notes = []
+        return discord_forward.DeadLetterNotifier(clock=lambda: 0.0,
+                                                  notify=lambda t, m: notes.append(m)), notes
+
+    def test_permanent_chunk_retried_once_then_dead_lettered(self, monkeypatch):
+        import json
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        calls = []
+
+        def post(url, content):
+            calls.append(content)
+            if content.endswith("bad"):
+                raise discord_forward.PermanentPostError(400, '{"content":["too long"]}')
+        r = FakeRedis3([("1-0", {"topic": "t", "msg": "bad"}),
+                        ("2-0", {"topic": "gex-regime", "msg": "good"})])
+        dn, notes = self._notifier()
+        n = discord_forward.forward_entries(r, r.entries, URLS, post=post,
+                                            sleep=lambda s: None, dead_notifier=dn)
+        assert calls == ["**[t]** bad", "**[t]** bad", "**[gex-regime]** good"]  # 1 retry
+        assert r.kv["discord:forward:last_id"] == "2-0"          # queue not blocked
+        dead = [json.loads(x) for x in r.lists["discord:forward:dead"]]
+        assert len(dead) == 1
+        d = dead[0]
+        assert d["entry_id"] == "1-0" and d["chunk"] == 0 and d["status"] == 400
+        assert "too long" in d["body"] and d["ts"]
+        assert len(notes) == 1
+        assert n == 2
+
+    def test_permanent_retry_success_not_dead_lettered(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        seq = [discord_forward.PermanentPostError(404, "Unknown Webhook"), None]
+
+        def post(url, content):
+            e = seq.pop(0)
+            if e:
+                raise e
+        r = FakeRedis3([("1-0", {"topic": "t", "msg": "x"})])
+        dn, notes = self._notifier()
+        discord_forward.forward_entries(r, r.entries, URLS, post=post,
+                                        sleep=lambda s: None, dead_notifier=dn)
+        assert "discord:forward:dead" not in r.lists and notes == []
+        assert r.kv["discord:forward:last_id"] == "1-0"
+
+    def test_mid_entry_chunk_dead_lettered_and_partial_advances(self, monkeypatch):
+        import json
+        big = "\n".join("row %04d" % i for i in range(1200))
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: big)
+        fields = {"topic": "account-daily", "msg": "摘要", "report_path": "analysis/r.md"}
+        msgs = build_report_messages(fields, big)
+        bad = msgs[2]
+        sent = []
+
+        def post(url, content):
+            if content == bad:
+                raise discord_forward.PermanentPostError(413, "too large")
+            sent.append(content)
+        r = FakeRedis3([("5-0", fields)])
+        dn, notes = self._notifier()
+        discord_forward.forward_entries(r, r.entries, URLS, post=post,
+                                        sleep=lambda s: None, dead_notifier=dn)
+        assert sent == msgs[:2] + msgs[3:]
+        d = json.loads(r.lists["discord:forward:dead"][0])
+        assert d["chunk"] == 2 and d["status"] == 413
+        assert r.kv["discord:forward:last_id"] == "5-0"
+        assert "discord:forward:partial" not in r.kv
+        assert len(notes) == 1
+
+    def test_one_notification_per_entry_and_throttled(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+
+        def post(url, content):
+            raise discord_forward.PermanentPostError(404, "Unknown Webhook")
+        r = FakeRedis3([("%d-0" % i, {"topic": "t", "msg": "m%d" % i}) for i in range(1, 6)])
+        dn, notes = self._notifier()
+        discord_forward.forward_entries(r, r.entries, URLS, post=post,
+                                        sleep=lambda s: None, dead_notifier=dn)
+        assert len(r.lists["discord:forward:dead"]) == 5
+        assert len(notes) == 1                    # deleted webhook ≠ notification storm
+        assert r.kv["discord:forward:last_id"] == "5-0"
+
+    def test_network_error_still_raises_without_dead_letter(self, monkeypatch):
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        import pytest
+
+        def post(url, content):
+            raise ConnectionError("Can't assign requested address")
+        r = FakeRedis3([("1-0", {"topic": "t", "msg": "x"})])
+        dn, notes = self._notifier()
+        with pytest.raises(ConnectionError):
+            discord_forward.forward_entries(r, r.entries, URLS, post=post,
+                                            sleep=lambda s: None, dead_notifier=dn)
+        assert "discord:forward:dead" not in r.lists
+        assert r.kv["discord:forward:last_id"] == "0-0"

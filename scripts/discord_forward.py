@@ -19,6 +19,7 @@ Plans: docs/plans/2026-07-30-discord-push.md, docs/plans/2026-10-06-discord-forw
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import os
 import re
@@ -33,6 +34,10 @@ from pathlib import Path
 CURSOR_KEY = "discord:forward:last_id"
 PARTIAL_KEY = "discord:forward:partial"   # "<entry_id>:<chunks_sent>" 斷點續送
 HEALTH_KEY = "discord:forward:health"
+DEAD_KEY = "discord:forward:dead"         # 永久拒收的 chunk (JSON list)
+DEAD_MAX = 1000                          # dead-letter list 保留筆數
+PERMANENT_STATUSES = {400, 401, 403, 404, 413}   # 重送也不會成功;429/5xx 不在內
+DEAD_NOTIFY_INTERVAL_S = 600.0           # dead-letter 通知節流 (刪掉的 webhook ≠ 通知風暴)
 STREAM_KEY = "claude:inbox"
 TOPIC_BLOCKLIST = {"wakegate"}          # 高頻價位 ping,會洗版
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -295,14 +300,26 @@ def _as_urls(urls) -> dict:
     return {c: urls for c in CLASSES} if isinstance(urls, str) else urls
 
 
+class PermanentPostError(Exception):
+    """Discord 永久拒收 (400/401/403/404/413):重送同內容不會成功。"""
+
+    def __init__(self, status: int, body: str = ""):
+        self.status = int(status)
+        self.body = (body or "")[:500]
+        super().__init__("HTTP %d: %s" % (self.status, self.body))
+
+
 def post_discord(url: str, content: str) -> None:
-    """POST 一則;429 依 retry_after 退避重試一次。"""
+    """POST 一則;429 依 retry_after 退避重試一次;永久 4xx → PermanentPostError;
+    5xx/網路錯誤照舊 raise(由 daemon 退避重試)。"""
     import requests
     for attempt in range(2):
         r = requests.post(url, json={"content": content}, timeout=15)
         if r.status_code == 429 and attempt == 0:
             time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
             continue
+        if r.status_code in PERMANENT_STATUSES:
+            raise PermanentPostError(r.status_code, getattr(r, "text", "") or "")
         r.raise_for_status()
         return
 
@@ -353,14 +370,48 @@ def _read_partial(r, entry_id: str):
         return 0, True
 
 
+class DeadLetterNotifier:
+    """dead-letter 的本機通知:每 entry 至多一則,且 min_interval 內只發一則。"""
+
+    def __init__(self, clock=time.time, notify=None,
+                 min_interval: float = DEAD_NOTIFY_INTERVAL_S):
+        self.clock, self._notify, self.min_interval = clock, notify, min_interval
+        self.last_ts = None
+
+    def entry_dead(self, entry_id: str, topic, status: int, body: str) -> None:
+        now = self.clock()
+        if self.last_ts is not None and now - self.last_ts < self.min_interval:
+            log.warning("dead-letter notification throttled (%s)", entry_id)
+            return
+        self.last_ts = now
+        (self._notify or macos_notify)(
+            "discord-forward",
+            "Discord 永久拒收 HTTP %d — entry %s [%s] 已移至 %s: %s"
+            % (status, entry_id, topic, DEAD_KEY, body[:120]))
+
+
+DEAD_NOTIFIER = DeadLetterNotifier()
+
+
+def _dead_letter(r, entry_id, chunk, fields, err) -> None:
+    rec = {"entry_id": entry_id, "chunk": chunk, "status": err.status, "body": err.body,
+           "topic": fields.get("topic"),
+           "ts": datetime.now().astimezone().isoformat(timespec="seconds")}
+    r.rpush(DEAD_KEY, json.dumps(rec, ensure_ascii=False))
+    r.ltrim(DEAD_KEY, -DEAD_MAX, -1)
+    log.error("DEAD-LETTER %s chunk %d topic=%s HTTP %d: %s",
+              entry_id, chunk, fields.get("topic"), err.status, err.body)
+
+
 def forward_entries(r, entries, urls, *, budget=None, limiter=None,
-                    post=None, sleep=None, verbose=False) -> int:
+                    post=None, sleep=None, verbose=False, dead_notifier=None) -> int:
     """逐 entry:過濾→路由→組訊息→(斷點續送)→送出→前移 cursor→清 partial。
     budget(訊息數)用於一次性模式:超出的 entry 整個留給下輪(首個例外)。
     送出失敗直接 raise:partial 已記下送到第幾段,cursor 停在上一 entry。
     回傳送出的 entry 數。"""
     post = post or post_discord
     sleep = sleep or time.sleep
+    dead_notifier = dead_notifier or DEAD_NOTIFIER
     urls = _as_urls(urls)
     sent = 0
     for entry_id, fields in entries:
@@ -377,10 +428,25 @@ def forward_entries(r, entries, urls, *, budget=None, limiter=None,
                 budget -= len(remaining)
             if skip:
                 log.info("resume %s at chunk %d/%d", entry_id, skip + 1, len(msgs))
+            notified = False
             for i, content in enumerate(remaining, start=skip):
                 if limiter is not None:
                     limiter.acquire()
-                post(urls[cls], content)
+                try:
+                    try:
+                        post(urls[cls], content)
+                    except PermanentPostError as e:
+                        log.warning("HTTP %d on %s chunk %d — retrying once",
+                                    e.status, entry_id, i)
+                        sleep(POST_SLEEP)
+                        post(urls[cls], content)
+                except PermanentPostError as e:
+                    # 永久拒收:進 dead-letter,進度越過此 chunk,不卡住佇列
+                    _dead_letter(r, entry_id, i, fields, e)
+                    if not notified:
+                        dead_notifier.entry_dead(entry_id, fields.get("topic"),
+                                                 e.status, e.body)
+                        notified = True
                 if len(msgs) > 1:
                     r.set(PARTIAL_KEY, "%s:%d" % (entry_id, i + 1))
                 sleep(POST_SLEEP)
