@@ -30,6 +30,7 @@ import time
 from collections import deque
 from datetime import datetime
 from pathlib import Path
+from typing import NamedTuple
 
 CURSOR_KEY = "discord:forward:last_id"
 PARTIAL_KEY = "discord:forward:partial"   # "<entry_id>:<chunks_sent>" 斷點續送
@@ -296,6 +297,29 @@ def resolve_webhook_url() -> str:
     return resolve_webhook_urls()["system"]
 
 
+CLASS_BOT = {"trading": "GUYU", "reports": "LULU", "system": "GULI"}
+
+
+def resolve_targets(environ=None, env_file: Path = DATABASE_ENV) -> dict:
+    """每 class: DISCORD_BOT_TOKEN_<BOT> + DISCORD_CHANNEL_ID_<CLASS> 皆有 → BotTarget
+    (fallback = 該 class webhook);否則 webhook URL。"""
+    environ = os.environ if environ is None else environ
+    file_env = {}
+    if env_file is not None and Path(env_file).exists():
+        file_env = parse_env_file(Path(env_file).read_text(encoding="utf-8"))
+
+    def lookup(key):
+        return (environ.get(key, "").strip() or file_env.get(key, "").strip())
+
+    urls = resolve_webhook_urls(environ, env_file)
+    targets = {}
+    for cls in CLASSES:
+        tok = lookup("DISCORD_BOT_TOKEN_" + CLASS_BOT[cls])
+        cid = lookup("DISCORD_CHANNEL_ID_" + cls.upper())
+        targets[cls] = BotTarget(tok, cid, urls[cls]) if tok and cid else urls[cls]
+    return targets
+
+
 def _as_urls(urls) -> dict:
     return {c: urls for c in CLASSES} if isinstance(urls, str) else urls
 
@@ -309,15 +333,45 @@ class PermanentPostError(Exception):
         super().__init__("HTTP %d: %s" % (self.status, self.body))
 
 
-def post_discord(url: str, content: str) -> None:
-    """POST 一則;429 依 retry_after 退避重試一次;永久 4xx → PermanentPostError;
-    5xx/網路錯誤照舊 raise(由 daemon 退避重試)。"""
+class BotTarget(NamedTuple):
+    """以 bot 身分發到 channel;401/403 (token 被 reset/權限被拔) 時改走 fallback webhook。"""
+    token: str
+    channel_id: str
+    fallback_url: str = ""
+
+    def __repr__(self) -> str:   # 不讓 token 進 log
+        return "BotTarget(channel_id=%s, fallback=%s)" % (self.channel_id, bool(self.fallback_url))
+
+
+BOT_AUTH_FAIL = {401, 403}
+
+
+def _post_once(target, content: str):
     import requests
+    if isinstance(target, BotTarget):
+        return requests.post(
+            "https://discord.com/api/v10/channels/%s/messages" % target.channel_id,
+            json={"content": content, "allowed_mentions": {"parse": []}},
+            headers={"Authorization": "Bot " + target.token,
+                     "User-Agent": "DiscordBot (tmf-discord-forward, 1.0)"},
+            timeout=15)
+    return requests.post(target, json={"content": content}, timeout=15)
+
+
+def post_discord(target, content: str) -> None:
+    """POST 一則 (webhook URL 或 BotTarget);429 依 retry_after 退避重試一次;
+    永久 4xx → PermanentPostError;5xx/網路錯誤照舊 raise(由 daemon 退避重試)。
+    BotTarget 遇 401/403 且有 fallback_url → 該則改走 webhook。"""
     for attempt in range(2):
-        r = requests.post(url, json={"content": content}, timeout=15)
+        r = _post_once(target, content)
         if r.status_code == 429 and attempt == 0:
             time.sleep(float(r.json().get("retry_after", 2)) + 0.5)
             continue
+        if (isinstance(target, BotTarget) and r.status_code in BOT_AUTH_FAIL
+                and target.fallback_url):
+            log.warning("bot post HTTP %d on channel %s — falling back to webhook",
+                        r.status_code, target.channel_id)
+            return post_discord(target.fallback_url, content)
         if r.status_code in PERMANENT_STATUSES:
             raise PermanentPostError(r.status_code, getattr(r, "text", "") or "")
         r.raise_for_status()
@@ -621,7 +675,7 @@ def main() -> int:
     args = ap.parse_args()
     setup_logging(args.verbose)
 
-    urls = resolve_webhook_urls()
+    urls = resolve_targets()
     if args.test:
         post_discord(urls["system"],
                      "**[discord-forward]** ✅ 推送系統測試 — claude:inbox → Discord 通道已就緒")
@@ -636,8 +690,9 @@ def main() -> int:
             stop["flag"] = True
         signal.signal(signal.SIGTERM, _term)
         signal.signal(signal.SIGINT, _term)
-        distinct = len(set(urls.values()))
-        log.info("routing: %d distinct webhook(s) for %s", distinct, ",".join(CLASSES))
+        log.info("routing: %s", ", ".join(
+            "%s=%s" % (c, "bot:%s" % t.channel_id if isinstance(t, BotTarget) else "webhook")
+            for c, t in urls.items()))
         run_daemon(make_redis, urls, should_stop=lambda: stop["flag"])
         return 0
 

@@ -820,3 +820,58 @@ class TestDeadLetter:
                                             sleep=lambda s: None, dead_notifier=dn)
         assert "discord:forward:dead" not in r.lists
         assert r.kv["discord:forward:last_id"] == "0-0"
+
+
+# ------------------------------------------------------------------ #
+# bot identity (2026-10-06): 各頻道以對應 bot 發文,401/403 退回 webhook
+# ------------------------------------------------------------------ #
+class _BotResp(_Resp):
+    text = ""
+
+
+class TestBotTarget:
+    def test_bot_target_posts_to_channel_with_bot_auth(self, monkeypatch):
+        calls = []
+        import requests
+        monkeypatch.setattr(requests, "post",
+                            lambda url, **kw: calls.append((url, kw)) or _BotResp(200))
+        t = discord_forward.BotTarget("tok123", "555", "http://hook")
+        discord_forward.post_discord(t, "hello")
+        url, kw = calls[0]
+        assert url == "https://discord.com/api/v10/channels/555/messages"
+        assert kw["headers"]["Authorization"] == "Bot tok123"
+        assert kw["json"]["content"] == "hello"
+        assert kw["json"]["allowed_mentions"] == {"parse": []}
+
+    def test_bot_unauthorized_falls_back_to_webhook(self, monkeypatch):
+        calls = []
+        seq = [_BotResp(401), _BotResp(204)]
+        import requests
+        monkeypatch.setattr(requests, "post", lambda url, **kw: calls.append(url) or seq.pop(0))
+        t = discord_forward.BotTarget("revoked", "555", "http://hook")
+        discord_forward.post_discord(t, "hello")
+        assert calls == ["https://discord.com/api/v10/channels/555/messages", "http://hook"]
+
+    def test_bot_unauthorized_without_fallback_is_permanent(self, monkeypatch):
+        import pytest
+        import requests
+        monkeypatch.setattr(requests, "post", lambda url, **kw: _BotResp(403))
+        with pytest.raises(discord_forward.PermanentPostError):
+            discord_forward.post_discord(discord_forward.BotTarget("t", "555", ""), "x")
+
+    def test_bot_target_repr_hides_token(self):
+        assert "secret" not in repr(discord_forward.BotTarget("secret", "555", "http://hook"))
+
+
+class TestResolveTargets:
+    def test_bot_where_configured_else_webhook(self, tmp_path):
+        env = {
+            "DISCORD_WEBHOOK_URL": "http://base",
+            "DISCORD_WEBHOOK_URL_TRADING": "http://trade",
+            "DISCORD_BOT_TOKEN_GUYU": "guyu-tok", "DISCORD_CHANNEL_ID_TRADING": "111",
+            "DISCORD_BOT_TOKEN_GULI": "guli-tok",          # 缺 channel id → 不啟用
+        }
+        t = discord_forward.resolve_targets(env, tmp_path / "none.env")
+        assert t["trading"] == discord_forward.BotTarget("guyu-tok", "111", "http://trade")
+        assert t["reports"] == "http://base"
+        assert t["system"] == "http://base"
