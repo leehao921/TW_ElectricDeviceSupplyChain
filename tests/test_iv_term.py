@@ -15,7 +15,7 @@ FWD = {"20261007": 49817.0, "20261012": 49834.0, "20261014": 49877.0,
 
 
 def _lines():
-    return iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW)
+    return iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=set())
 
 
 def _w(s):
@@ -30,9 +30,14 @@ def test_header_and_one_row_per_expiry():
     assert [ln.split()[0] for ln in L[2:7]] == ["10/07", "10/12", "10/14", "10/21", "11/18"]
 
 
-def test_diff_vs_previous_expiry():
-    rows = [ln.split() for ln in _lines()[2:7]]
-    assert [r[3] for r in rows] == ["—", "-1.8", "+1.8", "+2.8", "+1.8"]
+def test_diff_is_trading_day_basis():
+    """差欄改交易日口徑 (2026-10-07): 10/12→10/14 日曆天 +1.8 是國慶連假假象,交易日口徑 ≈ 0。"""
+    L = iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=HOL)
+    rows = {ln.split()[0]: ln.split() for ln in L[2:7]}
+    assert rows["10/07"][3] == "—"
+    assert abs(float(rows["10/14"][3])) <= 0.3          # 日曆天是 +1.8
+    assert rows["10/12"][2] == "16.3"                    # IV 欄維持原值
+    assert L[-1] == "差=交易日口徑 (排除週末/假日)"
 
 
 def test_sigma_points_and_range_centred_on_forward():

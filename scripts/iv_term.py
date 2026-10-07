@@ -12,7 +12,8 @@
 
 形狀警示 (倒掛/凹陷/凸起) 以「交易日口徑」IV 比較 (2026-10-07): 日曆天 IV 會把跨週末/連假的
 週選壓低、把結算前一晚的前端拉高 — 10/06 的「10/07 倒掛」「10/12 凹陷」皆為此假象
-(10/09 國慶補假,10/12 只剩 3 場)。只剩結算當日一場的腿不參與判定。表格顯示值不變。
+(10/09 國慶補假,10/12 只剩 3 場)。只剩結算當日一場的腿不參與判定。
+「差」欄同樣用交易日口徑 (IV 欄維持日曆天原值,方便對照券商報價)。
 """
 from __future__ import annotations
 
@@ -75,33 +76,32 @@ def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=Non
     if not curve:
         return []
     label, ref_px = ref
-    lines = ["IV 期限 · %s %s" % (label, format(ref_px, ",.0f")),
-             "到期   天  IV   差  ±1σ 區間"]
-    prev = None
-    for exp, iv in curve:
-        f = forwards.get(exp) or ref_px
-        days = _days_to_settle(exp, now)
-        sigma = f * iv / 100 * math.sqrt(max(days, 0.01) / 365)
-        diff = "—" if prev is None else "%+.1f" % (iv - prev)
-        lines.append("%s %2d %4.1f %4s %4d %.1f-%.1fk" % (
-            exp[4:6] + "/" + exp[6:], round(days), iv, diff, round(sigma),
-            (f - sigma) / 1000, (f + sigma) / 1000))
-        prev = iv
     if holidays is None:
         holidays = load_holidays()
-    legs = []                                    # (標籤, 交易日口徑 IV)
+    lines = ["IV 期限 · %s %s" % (label, format(ref_px, ",.0f")),
+             "到期   天  IV   差  ±1σ 區間"]
+    prev_td, legs = None, []                     # legs: 參與形狀判定 (標籤, 交易日口徑 IV)
     for exp, iv in curve:
+        tag = exp[4:6] + "/" + exp[6:]
+        f = forwards.get(exp) or ref_px
+        days = _days_to_settle(exp, now)
         n = trading_sessions(exp, now, holidays)
+        iv_td = _iv_trading_basis(iv, days, n) if n else iv
+        sigma = f * iv / 100 * math.sqrt(max(days, 0.01) / 365)
+        diff = "—" if prev_td is None else "%+.1f" % (iv_td - prev_td)
+        lines.append("%s %2d %4.1f %4s %4d %.1f-%.1fk" % (
+            tag, round(days), iv, diff, round(sigma), (f - sigma) / 1000, (f + sigma) / 1000))
+        prev_td = iv_td
         if n >= MIN_SESSIONS:
-            legs.append((exp[4:6] + "/" + exp[6:],
-                         _iv_trading_basis(iv, _days_to_settle(exp, now), n)))
-    tag, ivs = [t for t, _ in legs], [v for _, v in legs]
+            legs.append((tag, iv_td))
+    tags, ivs = [t for t, _ in legs], [v for _, v in legs]
     if len(ivs) >= 2 and ivs[0] - ivs[1] >= SHAPE_MIN:
-        lines.append("⚠ 前端倒掛 %s > %s (%+.1f)" % (tag[0], tag[1], ivs[0] - ivs[1]))
+        lines.append("⚠ 前端倒掛 %s > %s (%+.1f)" % (tags[0], tags[1], ivs[0] - ivs[1]))
     for i in range(1, len(ivs) - 1):
         lo, hi = min(ivs[i - 1], ivs[i + 1]), max(ivs[i - 1], ivs[i + 1])
         if ivs[i] <= lo - SHAPE_MIN:
-            lines.append("⚠ %s 低於前後 → 凹陷" % tag[i])
+            lines.append("⚠ %s 低於前後 → 凹陷" % tags[i])
         elif ivs[i] >= hi + SHAPE_MIN:
-            lines.append("⚠ %s 高於前後 → 凸起(事件?)" % tag[i])
+            lines.append("⚠ %s 高於前後 → 凸起(事件?)" % tags[i])
+    lines.append("差=交易日口徑 (排除週末/假日)")
     return lines

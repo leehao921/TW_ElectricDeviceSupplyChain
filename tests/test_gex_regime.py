@@ -241,5 +241,5 @@ def test_inbox_iv_block_uses_term_table():
     block = g.iv_block([("20261007", 18.1), ("20261012", 16.3)],
                        {"20261007": 49817.0}, 50111.0, datetime(2026, 10, 6, 16, 40))
     assert block.startswith("```\nIV 期限 · TXF 50,111") and block.endswith("```")
-    assert "10/12  6 16.3 -1.8" in block
+    assert "10/12  6 16.3" in block and "差=交易日口徑" in block   # 差欄改交易日口徑
     assert g.iv_block([], {}, 50111.0, datetime(2026, 10, 6, 16, 40)) == ""

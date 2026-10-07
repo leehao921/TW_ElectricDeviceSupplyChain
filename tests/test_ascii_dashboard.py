@@ -223,5 +223,6 @@ class TestIvTermTable:
         txt = "\n".join(ad.vol_section_lines(None, cur, 45577.0)[0])
         assert "IV curve:" not in txt
         row = next(ln for ln in txt.split("\n") if ln.startswith("11/18"))
-        assert row.split()[3] == "-1.7"            # 25.0 − 26.7
+        assert row.split()[2] == "25.0"            # IV 欄維持原值
+        assert "差=交易日口徑 (排除週末/假日)" in txt
         assert "到期   天  IV   差  ±1σ 區間" in txt
