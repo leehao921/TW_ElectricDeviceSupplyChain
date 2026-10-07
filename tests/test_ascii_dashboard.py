@@ -192,7 +192,7 @@ class TestCompositeLineNullSafety:
         靜默吞例外正是 2026-09-10~15 dashboard crash 四天沒人發現的原因。
         """
         txt, err = self._run(monkeypatch, capsys, comp=None, raises=True)
-        assert "IV curve:" in txt          # 前面的行不受牽連
+        assert "IV 期限 · TXF 45,577" in txt   # 前面的行不受牽連 (2026-10-07 改期限表)
         assert "複合(W1+W2+M1)" not in txt
         assert "Traceback" in err          # 有 traceback 才 debug 得動
         assert "boom" in err
@@ -212,3 +212,16 @@ class TestCompositeLineNullSafety:
                            comp={"zg": 47689, "zg_status": "flip",
                                  "zg_strike": 46400.0, "total_gex": 5.0e10})
         assert "ZG 47,689" in txt and "履約價累加 46,400" in txt
+
+
+class TestIvTermTable:
+    """2026-10-07: IV curve 單行改期限表 (差 + ±1σ 區間);forward 查詢失敗不連坐。"""
+
+    def test_term_table_rendered_with_diff_and_sigma(self, monkeypatch, capsys):
+        _StubRegime.install(monkeypatch, comp={"zg": 46200.0, "total_gex": -1.23e10})
+        cur = _FakeCur((18.5, 19.2, 14.0, 5.2, None, None))
+        txt = "\n".join(ad.vol_section_lines(None, cur, 45577.0)[0])
+        assert "IV curve:" not in txt
+        row = next(ln for ln in txt.split("\n") if ln.startswith("11/18"))
+        assert row.split()[3] == "-1.7"            # 25.0 − 26.7
+        assert "到期   天  IV   差  ±1σ 區間" in txt

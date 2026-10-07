@@ -147,7 +147,15 @@ def vol_section_lines(conn, cur, txf: float) -> tuple[list[str], float | None]:
                                         front_iv_history, iv_curve, z_windows)
         curve = iv_curve(conn, txf)
         if curve:
-            L.append(" IV curve: " + " / ".join(f"{e[4:6]}/{e[6:]}:{v}" for e, v in curve))
+            # 2026-10-07: 單行 curve → 期限表 (與前一到期差 + ±1σ 點數區間)
+            from datetime import datetime as _dt
+            from iv_term import iv_term_lines
+            try:
+                from gex_regime_monitor import latest_forwards
+                fwd = latest_forwards(conn)
+            except Exception:                     # forward 查不到 → 以 TXF 為中心
+                fwd = {}
+            L.extend(iv_term_lines(curve, fwd, ("TXF", txf), _dt.now()))
             zs = z_windows(curve[0][1], front_iv_history(conn))
             L.append(" 前緣IV z: " + " · ".join(
                 f"{k[1:]}d {d['z']:+.1f}(n={d['n']})" if d["z"] is not None

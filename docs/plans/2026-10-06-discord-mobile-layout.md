@@ -18,3 +18,11 @@ MOBILE_W = 40 (顯示寬,CJK=2)。
 ## 驗證
 單元測試;以近 3 日真實 inbox 重算: code block 最寬行 ≤ 40 (無空白可斷者除外),送一則
 routine-synthesis 樣本到 #guli 實機目視。
+
+## 附: IV 期限表 (2026-10-07)
+用戶回饋「IV 數據不夠明顯，看不出價格之間的差關係」: 原本只有 `curve 1007:18.2 / 1012:16.3 / …`。
+用戶選定「表格+點數區間」: 新純函式 scripts/iv_term.py `iv_term_lines(curve, forwards, ref, now)`:
+每到期一行 `MM/DD 天 IV 差 ±1σ 區間`;σ點 = F×IV×√(距 13:30 結算天數/365),區間以該到期 forward 為中心;
+差 = 與前一到期的 vol-pt 差;內部到期比前後都低/高 ≥1.0 → ⚠ 凹陷/凸起;近 > 次 ≥1.0 → ⚠ 前端倒掛。
+每行 ≤ 40 字寬。接入 gex_regime_monitor (#guyu 事件訊息) 與 ascii_dashboard.vol_section_lines
+(dashboard / txf-levels)。h:agent:gex_regime 機器 feed 不變。

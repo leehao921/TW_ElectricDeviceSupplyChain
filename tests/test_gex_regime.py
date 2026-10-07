@@ -232,3 +232,14 @@ def test_latest_forwards_accepts_basis_carry_not_futures():
     conn = _Conn()
     assert gm.latest_forwards(conn) == {"20261007": 48118.0}
     assert list(conn.c.params[0]) == list(gm.USABLE_FORWARD_SOURCES)
+
+
+def test_inbox_iv_block_uses_term_table():
+    """2026-10-07: gex-regime 推播的 IV 由單行 curve 改為期限表 code block。"""
+    from datetime import datetime
+    import gex_regime_monitor as g
+    block = g.iv_block([("20261007", 18.1), ("20261012", 16.3)],
+                       {"20261007": 49817.0}, 50111.0, datetime(2026, 10, 6, 16, 40))
+    assert block.startswith("```\nIV 期限 · TXF 50,111") and block.endswith("```")
+    assert "10/12  6 16.3 -1.8" in block
+    assert g.iv_block([], {}, 50111.0, datetime(2026, 10, 6, 16, 40)) == ""

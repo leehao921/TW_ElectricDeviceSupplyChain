@@ -297,6 +297,13 @@ def iv_curve(conn, spot: float) -> list:
     return atm_iv_by_expiry(df, spot, latest_forwards(conn))[:5]
 
 
+def iv_block(curve, forwards: dict, spot: float, now) -> str:
+    """推播用 IV 期限表 (差 + ±1σ 區間) code block;空 curve → ""。2026-10-07"""
+    from iv_term import iv_term_lines
+    lines = iv_term_lines(curve, forwards, ("TXF", spot), now)
+    return "```\n" + "\n".join(lines) + "\n```" if lines else ""
+
+
 def front_iv_history(conn) -> list:
     cur = conn.cursor()
     cur.execute("SELECT vix FROM vix_daily WHERE vix IS NOT NULL ORDER BY date")
@@ -352,9 +359,13 @@ def main(argv=None) -> int:
     line = (f"{regime or '?'} · spot {spot:,.0f} · ZG {zg_txt} · "
             f"CW {comp['cw']:,} · PW {comp['pw']:,} · "
             f"GEX {comp['total_gex']/1e8:+,.0f}億/1% (scalar {scalar}) · "
-            f"IV前緣 {front_atm}% z20 {z20} · "
-            f"curve {' / '.join(f'{e[-4:]}:{v}' for e, v in curve)}")
-    print(("[dry] " if args.dry_run else "") + line)
+            f"IV前緣 {front_atm}% z20 {z20}")
+    try:
+        ivb = iv_block(curve, latest_forwards(conn), spot, datetime.now())
+    except Exception as e:                        # 期限表失敗不擋事件推播
+        print(f"[warn] iv term block failed: {e}", file=sys.stderr)
+        ivb = ""
+    print(("[dry] " if args.dry_run else "") + line + ("\n" + ivb if ivb else ""))
     for t, d in fire:
         print(f"  EVENT {t}: {d}")
 
@@ -395,7 +406,7 @@ def main(argv=None) -> int:
                     "ts": datetime.now().strftime("%Y-%m-%d %H:%M"),
                     "from": "gex_regime", "topic": "gex-regime",
                     "tags": "gex,regime,event", "as_of": date.today().isoformat(),
-                    "msg": f"{msg}\n{line}\n(分析標註·不構成交易指令)"})
+                    "msg": f"{msg}\n{line}\n{ivb + chr(10) if ivb else ''}(分析標註·不構成交易指令)"})
             except Exception as e:
                 print(f"[warn] inbox push failed: {e}", file=sys.stderr)
     return 0
