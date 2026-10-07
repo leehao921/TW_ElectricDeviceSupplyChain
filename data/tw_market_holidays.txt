@@ -17,3 +17,9 @@
 
 # --- 2026 lunar / bridge days: FILL FROM OFFICIAL TWSE CALENDAR ---
 # (春節、清明、端午、中秋、國慶連假補班補假 etc.)
+# --- synced from database tw_holidays.py (2026-10-07) ---
+2026-09-25
+2026-09-28
+2026-10-09
+2026-10-26
+2026-12-25

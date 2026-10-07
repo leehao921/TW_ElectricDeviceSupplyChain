@@ -1,6 +1,6 @@
 """IV 期限表 (2026-10-07): IV → 與前一到期差 + ±1σ 點數區間,手機 40 字寬內。"""
 import sys
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -42,14 +42,37 @@ def test_sigma_points_and_range_centred_on_forward():
     assert r[5] == "48.0-52.2k"
 
 
-def test_dip_flagged():
-    assert any(ln.startswith("⚠ 10/12 低於前後") for ln in _lines())
+HOL = {date(2026, 10, 9), date(2026, 10, 10)}       # 國慶補假 (五) + 國慶 (六)
 
 
-def test_front_inversion_flagged():
-    L = iv_term_lines([("20261007", 22.0), ("20261012", 20.3), ("20261021", 23.7)],
-                      {}, ("TXF", 50000.0), NOW)
-    assert any("前端倒掛" in ln for ln in L)
+def test_trading_sessions_skip_weekend_and_holiday():
+    from iv_term import trading_sessions
+    # 10/06 16:40 收盤後 → 10/07,10/08,(10/09 補假),10/12 = 3 場
+    assert trading_sessions("20261012", NOW, HOL) == 3
+    assert trading_sessions("20261007", NOW, HOL) == 1
+    # 盤中 (13:30 前) 當天算一場
+    assert trading_sessions("20261007", datetime(2026, 10, 7, 9, 0), HOL) == 1
+
+
+def test_no_false_alarm_from_expiry_eve_and_holiday_weekend():
+    """10/06 實例: 10/07 結算前一晚 + 10/12 跨國慶連假 → 交易日口徑下兩警示都不該出現。"""
+    L = iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=HOL)
+    assert not any(ln.startswith("⚠") for ln in L), L
+
+
+def test_genuine_dip_still_flagged():
+    curve = [("20261014", 18.0), ("20261021", 15.0), ("20261028", 19.0)]
+    L = iv_term_lines(curve, {}, ("TXF", 50000.0), NOW, holidays=set())
+    assert any(ln.startswith("⚠ 10/21 低於前後") for ln in L)
+
+
+def test_genuine_front_inversion_flagged_but_expiring_leg_ignored():
+    inv = [("20261014", 22.0), ("20261021", 18.0), ("20261028", 19.0)]
+    assert any("前端倒掛 10/14 > 10/21" in ln
+               for ln in iv_term_lines(inv, {}, ("TXF", 50000.0), NOW, holidays=set()))
+    expiring = [("20261007", 30.0), ("20261014", 18.0), ("20261021", 19.0)]
+    assert not any("前端倒掛" in ln
+                   for ln in iv_term_lines(expiring, {}, ("TXF", 50000.0), NOW, holidays=set()))
 
 
 def test_missing_forward_uses_ref_and_fits_mobile():
