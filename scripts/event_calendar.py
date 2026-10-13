@@ -92,7 +92,7 @@ def upsert(path: Path, rows: list) -> int:
     out = sorted(cur.values(), key=lambda r: (r["date"], r["symbol"]))
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with Path(path).open("w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDS)
+        w = csv.DictWriter(f, fieldnames=FIELDS, lineterminator="\n")
         w.writeheader()
         w.writerows(out)
     return added
