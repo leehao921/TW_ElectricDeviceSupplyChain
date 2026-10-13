@@ -14,11 +14,14 @@
 週選壓低、把結算前一晚的前端拉高 — 10/06 的「10/07 倒掛」「10/12 凹陷」皆為此假象
 (10/09 國慶補假,10/12 只剩 3 場)。只剩結算當日一場的腿不參與判定。
 「差」欄同樣用交易日口徑 (IV 欄維持日曆天原值,方便對照券商報價)。
+事件對照 (2026-10-13): data/event_calendar.csv 的 index 級事件 (台積電法說等) 標在「結算時刻 > 事件時刻」
+的到期上, 並拆出隱含事件波動 (本腿總變異 − 鄰腿推算基準)。
 """
 from __future__ import annotations
 
 import importlib.util
 import math
+import re
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 
@@ -65,12 +68,52 @@ def _iv_trading_basis(iv: float, cal_days: float, sessions: int) -> float:
     return iv * math.sqrt((max(cal_days, 0.01) / 365) / (sessions / 252))
 
 
+def event_premium(leg: tuple, neighbour: tuple):
+    """事件溢價 (點): leg/neighbour = (場數, ±1σ 點)。以無事件鄰腿推算每場 forward variance,
+    基準 = 每場變異 × 本腿場數;本腿總變異 − 基準 ≤ 0 → None (無額外溢價)。"""
+    (n_k, s_k), (n_j, s_j) = leg, neighbour
+    if n_j == n_k or n_k <= 0:
+        return None
+    rate = (s_j ** 2 - s_k ** 2) / (n_j - n_k)
+    extra = s_k ** 2 - rate * n_k
+    return math.sqrt(extra) if extra > 0 else None
+
+
+def _event_lines(curve, rows, now: datetime, events) -> list:
+    """impact=index 事件 → 落在「結算時刻 > 事件時刻」的第一個到期;附隱含事件波動。
+    rows: 與 curve 同序的 (場數, ±1σ 點, forward)。"""
+    from event_calendar import event_datetime
+    out = []
+    settles = [datetime.combine(datetime.strptime(e, "%Y%m%d").date(), SETTLE) for e, _ in curve]
+    for ev in events:
+        if ev.get("impact") != "index":
+            continue
+        t = event_datetime(ev)
+        if t < now:
+            continue
+        k = next((i for i, st in enumerate(settles) if st > t), None)
+        if k is None:
+            continue
+        tag = curve[k][0][4:6] + "/" + curve[k][0][6:]
+        # 無事件鄰腿: 優先下一腿 (結算 > 事件但不含更多事件), 否則上一腿
+        j = k + 1 if k + 1 < len(curve) else (k - 1 if k > 0 else None)
+        prem = event_premium(rows[k][:2], rows[j][:2]) if j is not None else None
+        kind = {"earnings": "法說", "investor_conf": "法說", "macro": "", "settlement": "結算"}.get(ev.get("type"), "")
+        head = "📅 %s %s%s → %s " % (ev["date"][5:].replace("-", "/"), ev.get("name", ""), kind, tag)
+        if prem:
+            out.append(head + "±%d點 %.1f%%" % (round(prem), prem / rows[k][2] * 100))   # ≤40 字寬
+        else:
+            out.append(head + "無溢價")
+    return out
+
+
 def _days_to_settle(expiry: str, now: datetime) -> float:
     settle = datetime.combine(datetime.strptime(expiry, "%Y%m%d").date(), SETTLE)
     return max((settle - now).total_seconds() / 86400, 0.0)
 
 
-def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=None) -> list:
+def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=None,
+                  events=None) -> list:
     """curve [(YYYYMMDD, atm_iv%)] 依到期排序 → 表格行 list;空 curve → []。
     ref = (標籤, 價格),無 forward 的到期以 ref 價格為中心。"""
     if not curve:
@@ -80,7 +123,7 @@ def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=Non
         holidays = load_holidays()
     lines = ["IV 期限 · %s %s" % (label, format(ref_px, ",.0f")),
              "到期   天  IV   差  ±1σ 區間"]
-    prev_td, legs = None, []                     # legs: 參與形狀判定 (標籤, 交易日口徑 IV)
+    prev_td, legs, rows = None, [], []            # legs: 形狀判定 (標籤, 交易日口徑 IV); rows: 事件溢價用
     for exp, iv in curve:
         tag = exp[4:6] + "/" + exp[6:]
         f = forwards.get(exp) or ref_px
@@ -92,6 +135,7 @@ def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=Non
         lines.append("%s %2d %4.1f %4s %4d %.1f-%.1fk" % (
             tag, round(days), iv, diff, round(sigma), (f - sigma) / 1000, (f + sigma) / 1000))
         prev_td = iv_td
+        rows.append((n, sigma, f))
         if n >= MIN_SESSIONS:
             legs.append((tag, iv_td))
     tags, ivs = [t for t, _ in legs], [v for _, v in legs]
@@ -103,5 +147,14 @@ def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=Non
             lines.append("⚠ %s 低於前後 → 凹陷" % tags[i])
         elif ivs[i] >= hi + SHAPE_MIN:
             lines.append("⚠ %s 高於前後 → 凸起(事件?)" % tags[i])
+    if events is None:
+        try:
+            from event_calendar import events_between, load_events
+            last = datetime.strptime(curve[-1][0], "%Y%m%d").date()
+            events = events_between(load_events(), now.date(), last, impact="index",
+                                    types={"earnings", "macro", "settlement"})   # 券商邀請不算
+        except Exception:
+            events = []
+    lines.extend(_event_lines(curve, rows, now, events))
     lines.append("差=交易日口徑 (排除週末/假日)")
     return lines

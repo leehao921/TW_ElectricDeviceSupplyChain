@@ -15,7 +15,7 @@ FWD = {"20261007": 49817.0, "20261012": 49834.0, "20261014": 49877.0,
 
 
 def _lines():
-    return iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=set())
+    return iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=set(), events=[])
 
 
 def _w(s):
@@ -32,7 +32,7 @@ def test_header_and_one_row_per_expiry():
 
 def test_diff_is_trading_day_basis():
     """差欄改交易日口徑 (2026-10-07): 10/12→10/14 日曆天 +1.8 是國慶連假假象,交易日口徑 ≈ 0。"""
-    L = iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=HOL)
+    L = iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=HOL, events=[])
     rows = {ln.split()[0]: ln.split() for ln in L[2:7]}
     assert rows["10/07"][3] == "—"
     assert abs(float(rows["10/14"][3])) <= 0.3          # 日曆天是 +1.8
@@ -61,7 +61,7 @@ def test_trading_sessions_skip_weekend_and_holiday():
 
 def test_no_false_alarm_from_expiry_eve_and_holiday_weekend():
     """10/06 實例: 10/07 結算前一晚 + 10/12 跨國慶連假 → 交易日口徑下兩警示都不該出現。"""
-    L = iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=HOL)
+    L = iv_term_lines(CURVE, FWD, ("TXF", 50111.0), NOW, holidays=HOL, events=[])
     assert not any(ln.startswith("⚠") for ln in L), L
 
 

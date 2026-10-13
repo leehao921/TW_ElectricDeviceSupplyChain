@@ -67,6 +67,11 @@ def main(argv=None) -> int:
     if not args.dry_run and (not (DAY_WINDOW[0] <= hm <= DAY_WINDOW[1]) or not market_live(cur)):
         return 0                                       # 非日盤 / 休市靜默
 
+    try:                                            # 事件行事曆每次先同步 MOPS 法說公告 (冪等)
+        from event_calendar import sync as _sync_events
+        _sync_events()
+    except Exception as e:                          # noqa: BLE001 — 行事曆失敗不擋快照
+        print(f"[warn] event calendar sync failed: {e}", file=sys.stderr)
     cur.execute("""SELECT last(close, bucket) FROM ohlcv_1m_txf
                    WHERE symbol='TXF' AND bucket >= now() - interval '3 days'""")
     spot = float(cur.fetchone()[0] or 0)
