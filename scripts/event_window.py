@@ -84,6 +84,12 @@ def pre_time(event_at: datetime, holidays) -> datetime:
     return event_at - PRE_LEAD
 
 
+def baseline_time(event_at: datetime, holidays) -> datetime:
+    """事件前基準時刻 = 事件前最後一個可交易分鐘 (盤中事件 = 事件前 1 分;
+    盤後事件如台積電 14:00 → 13:44,休市段無資料)。"""
+    return pre_time(event_at, holidays) + PRE_LEAD - timedelta(minutes=1)
+
+
 # --------------------------------------------------------------------------- #
 # 分類 / outcome / 訊息 (純函式)
 # --------------------------------------------------------------------------- #
@@ -150,6 +156,14 @@ def load_log(path: Path = LOG_PATH) -> list:
         return []
     with Path(path).open(encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
+
+
+def log_delete(path: Path, key: str) -> None:
+    rows = [r for r in load_log(path) if r["event_key"] != key]
+    with Path(path).open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=LOG_FIELDS, lineterminator="\n")
+        w.writeheader()
+        w.writerows(rows)
 
 
 def log_upsert(path: Path, key: str, fields: dict) -> None:
@@ -265,9 +279,10 @@ def run_stage(cur, ev: dict, stage: str, holidays, all_events: list) -> tuple:
 
     weekly = prev.get("implied_expiry") or ""
     implied = float(prev["implied_pts"]) if prev.get("implied_pts") else None
-    if not prev.get("px_pre"):                                 # 事件前基準 (反應前 6→1 分)
-        b = metrics_at(cur, react - timedelta(minutes=1), weekly, window_min=5)
-        px_pre = price_at(cur, react - timedelta(seconds=1))
+    if not prev.get("px_pre"):                                 # 事件前基準 (最後可交易 5 分鐘)
+        bt = baseline_time(at, holidays)
+        b = metrics_at(cur, bt, weekly, window_min=5)
+        px_pre = price_at(cur, bt + timedelta(seconds=59))
         base.update(px_pre=px_pre, iv_w_pre=b["iv_w"], iv_m_pre=b["iv_m"], pcr_pre=b["pcr"], skew_pre=b["skew"])
     else:
         px_pre = float(prev["px_pre"])
@@ -349,6 +364,7 @@ def backfill(start: date = date(2026, 7, 8)) -> int:
     for ev in evs:
         if stage_time(ev, "60", hol) > now:
             continue
+        log_delete(LOG_PATH, event_key(ev))                     # 重播 = 整列重算
         for stage in STAGES:
             _, fields = run_stage(cur, ev, stage, hol, evs)
             log_upsert(LOG_PATH, event_key(ev), fields)

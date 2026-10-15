@@ -149,3 +149,9 @@ def test_study_groups_by_class_and_refuses_small_n():
     assert res["groups"]["消化"]["hit"] == 1.0                 # 消化 → reversed
     assert res["base_continued"] == pytest.approx(0.5)
     assert res["verdict"] == "樣本不足,不下結論"
+
+
+def test_baseline_is_last_tradable_minute_before_event():
+    # 10/15 台積電 14:00 盤後: 休市 13:45-15:00 無資料 → 基準取日盤最後一分 13:44 (原用 14:59 → 空值)
+    assert ew.baseline_time(datetime(2026, 10, 15, 14, 0), HOL) == datetime(2026, 10, 15, 13, 44)
+    assert ew.baseline_time(datetime(2026, 10, 14, 20, 30), HOL) == datetime(2026, 10, 14, 20, 29)
