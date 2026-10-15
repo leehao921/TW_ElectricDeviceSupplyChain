@@ -114,6 +114,52 @@ def event_datetime(e: dict) -> datetime:
     return datetime.strptime(e["date"] + " " + hm, "%Y-%m-%d %H:%M")
 
 
+NAUTILUS = REPO.parent / "nautilus-shioaji"
+MACRO_KINDS = {"NFP", "CPI", "FOMC", "TW_EXPORT", "US_MIDTERM", "TW_ELECTION"}
+
+
+def macro_rows(events: list) -> list:
+    """nautilus macro_calendar.EVENTS (JSON) → calendar rows。總經 → type=macro symbol=<kind>;
+    TSMC_EARN / TW_EARN_<code> → earnings (補 MOPS 收錄前的歷史法說)。"""
+    out = []
+    for e in events:
+        kind, at = e["kind"], datetime.fromisoformat(e["at"])
+        if kind in MACRO_KINDS:
+            typ, sym = "macro", kind
+        elif kind == "TSMC_EARN":
+            typ, sym = "earnings", "2330"
+        elif kind.startswith("TW_EARN_"):
+            typ, sym = "earnings", kind[len("TW_EARN_"):]
+        else:
+            continue
+        out.append({"date": at.strftime("%Y-%m-%d"), "time": at.strftime("%H:%M"), "type": typ,
+                    "name": e["label"], "symbol": sym,
+                    "impact": "index" if (typ == "macro" or sym in INDEX_MOVERS) else "stock",
+                    "source": "nautilus:%s" % e["id"], "detail": ""})
+    return out
+
+
+def insert_missing(path: Path, rows: list) -> int:
+    """只新增不存在的 key (不覆寫 MOPS 來源的列);回傳新增筆數。"""
+    have = {_key(r) for r in load_events(path)}
+    new = [r for r in rows if _key(r) not in have]
+    return upsert(path, new) if new else 0
+
+
+def sync_macro(path: Path = CAL_PATH) -> int:
+    """以 nautilus venv 匯出 macro_calendar.EVENTS (官方來源手工維護, 一處維護) → CSV。"""
+    import json
+    import subprocess
+    code = ("import json;from nautilus_shioaji.agent import macro_calendar as mc;"
+            "print(json.dumps([{'id':e.id,'kind':e.kind,'label':e.label,"
+            "'at':mc.at_taipei(e).isoformat()} for e in mc.EVENTS]))")
+    out = subprocess.run([str(NAUTILUS / ".venv" / "bin" / "python"), "-c", code], cwd=NAUTILUS,
+                         capture_output=True, text=True, timeout=60, check=True).stdout
+    added = insert_missing(path, macro_rows(json.loads(out)))
+    print("sync-macro: %d new → %s" % (added, path))
+    return added
+
+
 # --------------------------------------------------------------------------- #
 def sync(path: Path = CAL_PATH, since_days: int = 400) -> int:
     import psycopg2
@@ -128,6 +174,10 @@ def sync(path: Path = CAL_PATH, since_days: int = 400) -> int:
                         for x in cur.fetchall()) if r]
     added = upsert(path, rows)
     print("sync: %d filings parsed, %d new → %s" % (len(rows), added, path))
+    try:
+        sync_macro(path)
+    except Exception as e:                       # noqa: BLE001 — 總經同步失敗不擋 MOPS
+        print("[warn] sync-macro failed: %s" % e, file=sys.stderr)
     return 0
 
 

@@ -1,4 +1,27 @@
 date,time,type,name,symbol,impact,source,detail
+2026-01-09,21:30,macro,非農就業,NFP,index,nautilus:NFP-2026-01-09,
+2026-01-13,21:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-01-13,
+2026-01-15,14:00,earnings,台積電法說,2330,index,nautilus:TSMC_EARN-2026-01-15,
+2026-01-29,03:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-01-28,
+2026-02-09,16:00,macro,財政部進出口,TW_EXPORT,index,nautilus:TW_EXPORT-2026-02-09,
+2026-02-11,21:30,macro,非農就業,NFP,index,nautilus:NFP-2026-02-11,
+2026-02-13,21:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-02-13,
+2026-03-06,21:30,macro,非農就業,NFP,index,nautilus:NFP-2026-03-06,
+2026-03-11,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-03-11,
+2026-03-19,02:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-03-18,
+2026-04-03,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-04-03,
+2026-04-10,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-04-10,
+2026-04-16,14:00,earnings,台積電法說,2330,index,nautilus:TSMC_EARN-2026-04-16,
+2026-04-30,02:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-04-29,
+2026-05-08,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-05-08,
+2026-05-12,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-05-12,
+2026-06-05,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-06-05,
+2026-06-10,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-06-10,
+2026-06-18,02:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-06-17,
+2026-07-02,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-07-02,
+2026-07-09,16:00,macro,財政部進出口,TW_EXPORT,index,nautilus:TW_EXPORT-2026-07-09,
+2026-07-14,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-07-14,
+2026-07-16,14:00,earnings,台積電法說,2330,index,nautilus:TSMC_EARN-2026-07-16,
 2026-07-23,14:00,investor_conf,熒茂,4729,stock,mops:tpex_mops:33ba5e43b15ae3d0,台北市中山區南京東路三段219號2樓 | 本公司受邀參加元大證券舉辦之法人說明會
 2026-07-24,14:00,investor_conf,廣隆,1537,stock,mops:twse_mops:128003c83775c483,台北市民生東路四段54號4樓(402會議室) | 本公司受邀參加2026年7月24日華南永昌證券所主辦的法人說明會，向法人投資者就公司簡介及已公開財務、業務等相關資訊做說明。
 2026-07-24,14:00,investor_conf,欣銓,3264,stock,mops:tpex_mops:07f2c15cf6445847,線上法說會
@@ -10,6 +33,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-07-29,14:30,investor_conf,順達,3211,stock,mops:tpex_mops:c1b70bfa1791f379,線上法人說明會 | 本公司受邀參加群益金鼎證券(股)公司所舉辦之線上法人說明會，說明本公司營運及未來展望。 報名網址：https://www.surveycake.com/s/pb8OV；活動內容詢問電話：(02)8780-8888 分機308
 2026-07-29,14:30,investor_conf,長科*,6548,stock,mops:tpex_mops:0ac7b67fd512aa5f,台北市中山區明水路700號12樓會議廳(凱基證券大樓) | 本公司受邀參加凱基證券所舉辦之法人說明會，就本公司財務及業務相關資訊做說明。
 2026-07-29,14:00,investor_conf,富鼎,8261,stock,mops:twse_mops:5b0d3af4bb559b8d,台北市松山區民生東路三段115號14樓 (玉山廳) | 本公司受邀參加玉山證券舉辦之法人說明會，本公司營運狀況報告。
+2026-07-30,02:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-07-29,
 2026-07-31,14:30,investor_conf,皇普,2528,stock,mops:twse_mops:9d138dffcc0a86e2,福邦證券總公司(台北市忠孝西路一段6號14樓) | 受邀參加福邦證券舉辦之法人說明會，就本公司已公開之財務業務資訊作說明。
 2026-07-31,14:00,earnings,創意,3443,stock,mops:twse_mops:7c1c95a281970449,台北市忠孝東路二段95號13樓(兆豐證券總公司十三樓) | 公布2026年第二季財務報告與營運績效
 2026-07-31,14:00,investor_conf,鋼聯,6581,stock,mops:twse_mops:e40a76e5ccb5bb05,線上法說會 | 本公司受邀參加康和證券舉辦之法人說明會，說明本公司之營運、財務及業務狀況。
@@ -41,6 +65,8 @@ date,time,type,name,symbol,impact,source,detail
 2026-08-07,14:00,investor_conf,中揚光,6668,stock,mops:twse_mops:60832a379724a670,"https://cathay.webex.com/cathay/j.php?MTID=m83b68702a39e292de02170c3491358ac | 本公司受邀參加國泰證券舉辦之線上法說會,報告本公司營運狀況。"
 2026-08-07,14:00,investor_conf,致新,8081,stock,mops:twse_mops:f95c97e5cbad12d3,線上法說會 | 公告本公司受邀參加福邦證券舉辦之法人說明會
 2026-08-07,14:00,investor_conf,勤誠,8210,stock,mops:twse_mops:819f610eb6d8f847,https://www.zucast.com/webcast/siioH0Ym | 本公司受邀參加元大證券主辦之2026年第二季線上法人說明會 會議網址：https://www.zucast.com/webcast/siioH0Ym
+2026-08-07,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-08-07,
+2026-08-07,16:00,macro,財政部進出口,TW_EXPORT,index,nautilus:TW_EXPORT-2026-08-07,
 2026-08-10,14:00,investor_conf,佳世達,2352,stock,mops:twse_mops:63531662efb46276,線上法說會 | 本公司2026年第二季財務結果及業務摘要
 2026-08-10,15:00,investor_conf,欣陸,3703,stock,mops:twse_mops:39e47eef7a02d057,線上法人說明會請造訪以下網址：https://www.zucast.com/webcast/DiifnQfG | 本公司將於8月10日召開線上法人說明會，會中報告2026年第二季經營成果。
 2026-08-10,14:30,investor_conf,定穎投控,3715,stock,mops:twse_mops:ca7d56b6777c377f,Webex線上會議 | 本公司受邀參加永豐金證券舉辦之線上法人說明會。
@@ -56,6 +82,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-08-12,14:30,investor_conf,奇鋐,3017,stock,mops:twse_mops:13d6cd76628c3dbd,台北市敦化南路一段108號B2(富邦國際會議中心) | 受邀參加富邦證券法人說明會，說明115年第二季營運結果與未來展望。
 2026-08-12,14:00,investor_conf,聯亞,3081,stock,mops:tpex_mops:116702c8a0ec6d00,線上會議
 2026-08-12,14:00,investor_conf,飛捷,6206,stock,mops:twse_mops:b52da20242101b82,凱基總部大樓12F宴會廳(台北市中山區明水路700號) | 公告本公司參加凱基證券8月12日舉辦之法人說明會
+2026-08-12,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-08-12,
 2026-08-13,14:30,investor_conf,東元,1504,stock,mops:twse_mops:912869703e18d1db,台灣證券交易所1樓資訊展示中心 (台北市信義區信義路五段7號1樓) | 說明東元電機115年第二季財務業務相關資訊。
 2026-08-13,14:00,investor_conf,長興,1717,stock,mops:twse_mops:632ea618b84c4d85,台北市松山區東興路8號15樓（統一證券大樓） | 受邀參加統一證券舉辦之法人說明會
 2026-08-13,14:00,investor_conf,郡都開發,4402,stock,mops:tpex_mops:e25eb5d80d64dd55,線上會議 | 公司受邀參加永豐金證券線上法說會，會中說明本公司概況。
@@ -268,6 +295,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-09-03,15:00,investor_conf,奧義賽博-KY創,7823,stock,mops:twse_mops:179b6d4867abd1bc,南港展覽館1館506會議室(臺北市南港區三重里經貿二路1號) | 本公司受邀參加證交所與富邦證券合辦之SEMICON Taiwan法人說明會，說明本公司營運成果以及未來展望。
 2026-09-04,11:15,investor_conf,南亞,1303,stock,mops:twse_mops:1a8de4195adf63a2,台北君悅酒店 | 本公司受邀參加統一證券舉辦之法人說明會，說明本公司之營運概況
 2026-09-04,09:00,investor_conf,台光電,2383,stock,mops:twse_mops:855500f03db8074c,台北 | 本公司受邀參加花旗證券舉辦之法人說明會，說明本公司之營運概況。
+2026-09-04,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-09-04,
 2026-09-07,09:00,investor_conf,中砂,1560,stock,mops:twse_mops:e577721f162430d5,香港港島香格里拉大飯店（金鐘法院道太古廣場) | 本公司受邀參加麥格理資本舉辦之法人說明會「Asia Technology Conference 2026」，說明本公司第二季之營運及財務概況。
 2026-09-07,10:00,investor_conf,力旺,3529,stock,mops:tpex_mops:9e963a5c5ce6719d,"Island Shangri-La Hotel, Hong Kong | 本公司受邀參加Macquarie 舉辦之Macquarie NEXT INNOVATIONS Tech Conference 2026說明本公司財務及業務相關資訊。"
 2026-09-07,09:00,investor_conf,聖暉*,5536,stock,mops:tpex_mops:fbadb5ab2ca1cddd,
@@ -284,6 +312,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-09-09,13:30,investor_conf,竹陞科技,6739,stock,mops:tpex_mops:f6388c2d26abb3ab,晶華酒店四樓 | 公告本公司受邀參加元大證券舉辦之法人說明會
 2026-09-09,09:00,investor_conf,東方風能,7786,stock,mops:twse_mops:ad2b96f5ccb893ea,北歐 | 本公司受邀參加Daiwa Securities主辦之法人說明會，向投資人說明本公司未來營運發展計劃、財務及業務等相關資訊。
 2026-09-09,14:30,investor_conf,禾榮科,7799,stock,mops:twse_mops:dcb749c986e65aa2,台北市仁愛路4段169號15樓(富邦金融大樓15樓會議室) | 本公司受邀參加富邦證券舉辦之法人說明會，會中就公司業務狀況等說明。
+2026-09-09,16:00,macro,財政部進出口,TW_EXPORT,index,nautilus:TW_EXPORT-2026-09-09,
 2026-09-10,14:30,investor_conf,漢來美食,1268,stock,mops:tpex_mops:def40ebcd73f8cfe,線上法說會 | 本公司受邀參加由凱基證券舉辦之線上法人說明會，說明截至115年上半年之營運概況、財務概況及未來展望。
 2026-09-10,15:00,investor_conf,聚陽,1477,stock,mops:twse_mops:99c98ab5439408bd,集思北科大會議中心 | 介紹本公司之營運概況及經營策略等財務業務相關資料
 2026-09-10,14:30,investor_conf,士電,1503,stock,mops:twse_mops:138d9687d26a2d0f,台北市信義區信義路五段7號1樓 (證交所101大樓1樓資訊展示中心) | 說明本公司之營運概況、財務及業務相關資訊。
@@ -309,6 +338,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-09-11,14:30,investor_conf,信實,6721,stock,mops:tpex_mops:eb77a6778d128a36,臺北市長安東路一段35號2樓(第一金證券長安大樓二樓會議室)
 2026-09-11,09:00,investor_conf,東方風能,7786,stock,mops:twse_mops:96bf96d5515af5a0,法國巴黎 | 本公司受邀參加JP Morgan主辦之法人說明會，向投資人說明本公司未來營運發展計劃、財務及業務等相關資訊。
 2026-09-11,14:30,investor_conf,康全電訊,8089,stock,mops:tpex_mops:9fe33491253d9005,線上法說會
+2026-09-11,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-09-11,
 2026-09-14,09:00,investor_conf,聯電,2303,index,mops:twse_mops:f29f65fe4193e3d7,台北W飯店 | 本公司受邀參加瑞銀證券舉辦之法人說明會「Taiwan Summit 2026」。
 2026-09-14,14:30,investor_conf,台產,2832,stock,mops:twse_mops:4d6eaad4a07dd8a7,
 2026-09-14,14:00,earnings,新產,2850,stock,mops:twse_mops:16244c029e8fe764,永豐金證券線上法人說明會 | 本公司115年第二季營運狀況
@@ -365,6 +395,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-09-17,14:00,investor_conf,福懋科,8131,stock,mops:twse_mops:8b2b4c4e38b170a7,線上法說會 | 本公司受邀參加國票綜合證券辦理之法人說明會，說明本公司之財務業務概況。
 2026-09-17,14:00,investor_conf,鈺齊-KY,9802,stock,mops:twse_mops:8a8857e8f4fa73b4,統一證券總公司15F會議室(台北市松山區東興路8號15F) | 受邀參加統一證券舉辦之法人說明會，就本公司財務及業務相關資訊做說明。
 2026-09-17,14:00,investor_conf,茂順,9942,stock,mops:twse_mops:32bb0214031c11a5,線上法說會 | 本公司受邀參加元大證券舉辦之線上法說會，報告本公司營運狀況。
+2026-09-17,02:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-09-16,
 2026-09-18,14:30,earnings,地球,1324,stock,mops:twse_mops:83cfd62641ffe566,福邦證券總公司(台北市中正區忠孝西路一段6號14樓)。 | 本公司財務報告及業績展望。
 2026-09-18,15:00,investor_conf,藍天,2362,stock,mops:twse_mops:fe0797ba6e0f08b1,統一證券總公司B203會議室(台北市松山區東興路8號) | 統一證券舉辦法人說明會 說明本公司財務及營運概況
 2026-09-18,13:30,investor_conf,中航,2612,stock,mops:twse_mops:c267771c39f9b419,線上法說會 | 說明產業現況及本公司經營績效等
@@ -469,6 +500,7 @@ date,time,type,name,symbol,impact,source,detail
 2026-10-02,14:30,investor_conf,華泰,2329,stock,mops:twse_mops:256c8884a9502ce2,凱基證券大樓12樓會議廳(台北市中山區明水路700號) | 受邀參加凱基證券舉辦之法人說明會，報告本公司營運狀況。
 2026-10-02,14:30,investor_conf,映泰,2399,stock,mops:twse_mops:7dffd9ad3b48c387,福邦證券(台北市忠孝西路一段6號14樓) | 受邀參加福邦證券舉辦之法人說明會，就本公司已公開之財務業務資訊作說明。
 2026-10-02,14:30,investor_conf,大台北,9908,stock,mops:twse_mops:f025a680de8598bf,台灣證交所一樓資訊展示中心(台北市信義路5段7號) | 本公司近期財務及營運概況說明
+2026-10-02,20:30,macro,非農就業,NFP,index,nautilus:NFP-2026-10-02,
 2026-10-05,21:00,investor_conf,台達電,2308,index,mops:twse_mops:b1ff186b8ebcba2c,美國 | 本公司受Jefferies證券邀請，將於上述時間地點，向法人投資者說明本公司115年第2季之財務報告相關資訊。
 2026-10-06,14:30,investor_conf,台星科,3265,stock,mops:tpex_mops:905e17842938e6c0,台北市中山區明水路700號 | 本公司受邀參加凱基證券(股)公司舉辦之法人說明會，說明本公司營運概況。
 2026-10-06,14:30,investor_conf,矽格,6257,stock,mops:twse_mops:2511ded8c41851c2,台北市中山區明水路700號 | 本公司受邀參加凱基證券舉辦之聯合法人說明會.說明本公司營運概況
@@ -485,9 +517,23 @@ date,time,type,name,symbol,impact,source,detail
 2026-10-08,14:30,earnings,大立光,3008,stock,mops:twse_mops:b89606046391e54f,線上法說會 | 115年第三季營運報告及說明115年第四季營運展望
 2026-10-08,14:00,investor_conf,律勝,3354,stock,mops:tpex_mops:35e0870573184579,線上法說會 | 本公司受邀參加台新證券舉辦之法人說明會，說明本公司近期營運概況。
 2026-10-08,14:00,investor_conf,信音,6126,stock,mops:tpex_mops:0bdba1d37d94233c,線上法人說明會
+2026-10-08,16:00,macro,財政部進出口,TW_EXPORT,index,nautilus:TW_EXPORT-2026-10-08,
 2026-10-12,15:00,investor_conf,南亞科,2408,stock,mops:twse_mops:53c4fb7e95d7d0c7,線上法說會
 2026-10-12,14:30,investor_conf,太極,4934,stock,mops:twse_mops:3b0301d6a47e437b,台北君悅酒店3樓凱悅二廳(台北市信義區松壽路2號)
+2026-10-13,15:00,investor_conf,南亞,1303,stock,mops:twse_mops:a821ca1c3be6b276,線上法說會 | 本公司受邀參加摩根大通舉辦之法人說明會，說明本公司之營運概況
+2026-10-13,14:00,investor_conf,大塚,3570,stock,mops:tpex_mops:6635a6f01059f199,線上直播 | 本公司受邀參加永豐金證券舉辦之線上法人說明會，說明本公司營運概況及財務業務資訊。
+2026-10-13,09:00,investor_conf,南寶,4766,stock,mops:twse_mops:a8e9f0de5d34f3f1,"香港Mandarin Oriental Hotel(5 Connaught Road, Central, Hong Kong) | 本公司受邀參加由寬量國際舉辦之法人說明會「20th QIC CEO Week」，說明本公司之營運概況、財務及業務相關資訊。"
+2026-10-13,14:30,investor_conf,威潤,6465,stock,mops:tpex_mops:f7dcb0d1e2234b26,線上法說會 | 產業狀況及公司經營績效
+2026-10-14,14:30,earnings,味王,1203,stock,mops:twse_mops:efffdeda7b10fb4c,臺灣證券交易所1樓資訊展示中心(台北市信義路五段7號) | 公司概況、財務報告及營運概況。
+2026-10-14,14:00,investor_conf,晶華,2707,stock,mops:twse_mops:a9c257bdc3c12864,Webex線上會議 | 本公司受邀參加第一金證券舉辦之線上法人說明會
+2026-10-14,14:00,investor_conf,五福,2745,stock,mops:tpex_mops:6e41e652918e8bb0,大眾財經大樓(高雄市前鎮區中山二路2號9樓之一) | 本公司受邀參加台新證券舉辦之法人說明會
+2026-10-14,14:00,investor_conf,旺旺保,2816,stock,mops:twse_mops:7f564948bf2cff03,台北市大安區忠孝東路四段219號4樓會議室 | 本公司自辦法人說明會，會中就本公司已公開發布之營運及財務業務狀況作說明。
+2026-10-14,14:30,investor_conf,鏵友益,6877,stock,mops:tpex_mops:e250811dc1ce53bd,元大金融廣場3樓 國際會議&#24304;Ｄ&#24304;(106臺北市大安區仁愛路三段157號) | 本公司受邀參加元大證券舉辦之法人說明會，報告公司經營績效與營運展望。
+2026-10-14,14:00,investor_conf,寶一,8222,stock,mops:twse_mops:80022ea3373a6b17,高雄市前鎮區中山二路2號9樓之一（大眾財金大樓） | 本公司受邀參加由台新證券舉辦之法人說明會，說明本公司之營運概況、財務及業務相關資訊。
 2026-10-14,14:00,investor_conf,冠好,8354,stock,mops:tpex_mops:ef99de7dfe25a755,實體(採實名報名制)法說會，實體法說會地點:南投市成功三路239號。 | 說明本公司營運概況
+2026-10-14,14:00,investor_conf,百和興業-KY,8404,stock,mops:twse_mops:07e9ec6048b40c4c,聯合線上法人說明會 | 本公司受邀參加富邦證券舉辦之聯合線上法人說明會，說明本公司營運成果及未來展望。
+2026-10-14,14:00,investor_conf,百和,9938,stock,mops:twse_mops:6048fa6988fe13b6,聯合線上法人說明會 | 本公司受邀參加富邦證券舉辦之聯合線上法人說明會，說明本公司財務業務狀況及經營績效
+2026-10-14,20:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-10-14,
 2026-10-15,14:00,investor_conf,喬福,1540,stock,mops:twse_mops:2024ac76792ae8bd,11049台北市信義區信義路五段7號1樓(證交所(101大樓1樓資訊展示中心) | 近期財務狀況
 2026-10-15,14:00,earnings,台積電,2330,index,mops:twse_mops:d981ea278d2bc824,線上法說會 | 公布本公司2026年第3季財務報告及2026年第4季業績展望。
 2026-10-16,14:00,investor_conf,先益,3531,stock,mops:tpex_mops:5a94c88635795933,線上法說會 | 受邀參加永豐金證券舉辦之線上法人說明會
@@ -496,9 +542,23 @@ date,time,type,name,symbol,impact,source,detail
 2026-10-21,15:00,investor_conf,杰力,5299,stock,mops:tpex_mops:a1ff6261914467f3,群益金鼎證券15樓會議室（台北市松山區民生東路三段156號） | 本公司受邀參加由群益金鼎證券舉辦之法人說明會，說明本公司之營運概況、財務及業務相關資訊。
 2026-10-23,14:00,investor_conf,穩懋,3105,stock,mops:tpex_mops:0472e4c4a0c1ba8e,網路直播
 2026-10-27,16:00,earnings,旺宏,2337,stock,mops:twse_mops:9c4cd4cff40ca28a,線上法人說明會 | 旺宏電子2026年第三季營運成果報告
+2026-10-27,14:30,investor_conf,智原,3035,stock,mops:twse_mops:4795748f16798624,線上法說會 | 115年第三季線上法人說明會
+2026-10-27,14:30,earnings,力成,6239,stock,mops:twse_mops:fac11aa8b4e88f4d,線上法說會 | 報告115年第三季營運成果及未來之營運展望
+2026-10-28,17:00,investor_conf,聯電,2303,index,mops:twse_mops:80c9ab8f71b61414,線上法說會 | 本公司2026年第三季財務暨營運報告。
 2026-10-29,14:00,investor_conf,友達,2409,stock,mops:twse_mops:498faeda1fc8b32a,線上法說會 | 115年第三季線上法人說明會
 2026-10-29,14:00,earnings,瑞儀,6176,stock,mops:twse_mops:12268dc0aecc1927,線上直播 https://www.zucast.com/webcast/FHFR0R3a | 115年第三季營運成果及公司未來展望
+2026-10-29,02:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-10-28,
 2026-11-03,08:00,investor_conf,台達電,2308,index,mops:twse_mops:6c3fcccf8e5050d1,東京 | 本公司受大和國泰證券邀請，將於上述時間地點，向法人投資者說明本公司115年第2季之財務報告相關資訊。
 2026-11-03,15:00,investor_conf,達發,6526,stock,mops:twse_mops:23473e803ac881a6,線上法說會
+2026-11-04,08:00,macro,美國期中選舉,US_MIDTERM,index,nautilus:US_MIDTERM-2026-11-03,
+2026-11-05,16:00,earnings,遠傳,4904,stock,mops:twse_mops:96b636656a83927a,本公司 | 說明本公司115年度第3季營運與財務概況
+2026-11-06,14:30,investor_conf,力智,6719,stock,mops:twse_mops:72ec6a01db2d9ff2,線上 | 本公司受邀參加福邦證券舉辦之線上法人說明會
+2026-11-06,21:30,macro,非農就業,NFP,index,nautilus:NFP-2026-11-06,
+2026-11-10,21:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-11-10,
+2026-11-12,14:00,earnings,鴻海法說,2317,index,nautilus:TW_EARN_2317-2026-11-12,
 2026-11-13,16:00,investor_conf,力旺,3529,stock,mops:tpex_mops:c986981e235e4b95,線上法說會 | 本公司將舉辦2026年第三季線上法人說明會，說明本公司財務及業務相關資訊。
 2026-11-17,14:00,investor_conf,花仙子,1730,stock,mops:twse_mops:27f95983d7bcf120,線上法說會 | 本公司受邀參加中國信託綜合證券舉辦之法人說明會
+2026-11-28,16:00,macro,台灣九合一選舉,TW_ELECTION,index,nautilus:TW_ELECTION-2026-11-28,
+2026-12-04,21:30,macro,非農就業,NFP,index,nautilus:NFP-2026-12-04,
+2026-12-10,21:30,macro,CPI 通膨,CPI,index,nautilus:CPI-2026-12-10,
+2026-12-10,03:00,macro,FOMC 利率決議,FOMC,index,nautilus:FOMC-2026-12-09,

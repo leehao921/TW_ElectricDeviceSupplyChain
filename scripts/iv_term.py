@@ -79,32 +79,59 @@ def event_premium(leg: tuple, neighbour: tuple):
     return math.sqrt(extra) if extra > 0 else None
 
 
-def _event_lines(curve, rows, now: datetime, events) -> list:
-    """impact=index 事件 → 落在「結算時刻 > 事件時刻」的第一個到期;附隱含事件波動。
-    rows: 與 curve 同序的 (場數, ±1σ 點, forward)。"""
+def implied_event_move(curve, forwards: dict, ref: tuple, now: datetime, event_at: datetime,
+                       holidays=None):
+    """事件落在「結算時刻 > 事件時刻」的第一個到期 → {expiry, pts, pct, sigma};
+    pts=None 表示無額外溢價;無到期可容納 → None。"""
+    if holidays is None:
+        holidays = load_holidays()
+    settles = [datetime.combine(datetime.strptime(e, "%Y%m%d").date(), SETTLE) for e, _ in curve]
+    k = next((i for i, st in enumerate(settles) if st > event_at), None)
+    if k is None:
+        return None
+    rows = []
+    for exp, iv in curve:
+        f = forwards.get(exp) or ref[1]
+        days = _days_to_settle(exp, now)
+        rows.append((trading_sessions(exp, now, holidays), f * iv / 100 * math.sqrt(max(days, 0.01) / 365), f))
+    j = k + 1 if k + 1 < len(curve) else (k - 1 if k > 0 else None)
+    prem = event_premium(rows[k][:2], rows[j][:2]) if j is not None else None
+    return {"expiry": curve[k][0], "pts": prem, "sigma": rows[k][1],
+            "pct": prem / rows[k][2] * 100 if prem else None}
+
+
+def _event_lines(curve, rows, now: datetime, events, holidays=None) -> list:
+    """impact=index 事件 → 期限表事件行 (共用 implied_event_move)。"""
     from event_calendar import event_datetime
     out = []
-    settles = [datetime.combine(datetime.strptime(e, "%Y%m%d").date(), SETTLE) for e, _ in curve]
+    fwd = {e: r[2] for (e, _), r in zip(curve, rows)}
     for ev in events:
         if ev.get("impact") != "index":
             continue
         t = event_datetime(ev)
         if t < now:
             continue
-        k = next((i for i, st in enumerate(settles) if st > t), None)
-        if k is None:
+        m = implied_event_move(curve, fwd, ("", rows[0][2]), now, t, holidays)
+        if m is None:
             continue
-        tag = curve[k][0][4:6] + "/" + curve[k][0][6:]
-        # 無事件鄰腿: 優先下一腿 (結算 > 事件但不含更多事件), 否則上一腿
-        j = k + 1 if k + 1 < len(curve) else (k - 1 if k > 0 else None)
-        prem = event_premium(rows[k][:2], rows[j][:2]) if j is not None else None
+        tag = m["expiry"][4:6] + "/" + m["expiry"][6:]
         kind = {"earnings": "法說", "investor_conf": "法說", "macro": "", "settlement": "結算"}.get(ev.get("type"), "")
-        head = "📅 %s %s%s → %s " % (ev["date"][5:].replace("-", "/"), ev.get("name", ""), kind, tag)
-        if prem:
-            out.append(head + "±%d點 %.1f%%" % (round(prem), prem / rows[k][2] * 100))   # ≤40 字寬
-        else:
-            out.append(head + "無溢價")
+        name = ev.get("name", "")
+        if kind and name.endswith(kind):                 # nautilus 標籤已含「法說」
+            kind = ""
+        tail = "±%d點 %.1f%%" % (round(m["pts"]), m["pct"]) if m["pts"] else "無溢價"
+        while True:                                      # 手機 ≤40 字寬: 名稱過長則截短
+            line = "📅 %s %s%s → %s %s" % (ev["date"][5:].replace("-", "/"), name, kind, tag, tail)
+            if _width(line) <= 40 or len(name) <= 2:
+                break
+            name = name[:-1]
+        out.append(line)
     return out
+
+
+def _width(s: str) -> int:
+    import unicodedata
+    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in s)
 
 
 def _days_to_settle(expiry: str, now: datetime) -> float:
@@ -155,6 +182,6 @@ def iv_term_lines(curve, forwards: dict, ref: tuple, now: datetime, holidays=Non
                                     types={"earnings", "macro", "settlement"})   # 券商邀請不算
         except Exception:
             events = []
-    lines.extend(_event_lines(curve, rows, now, events))
+    lines.extend(_event_lines(curve, rows, now, events, holidays))
     lines.append("差=交易日口徑 (排除週末/假日)")
     return lines

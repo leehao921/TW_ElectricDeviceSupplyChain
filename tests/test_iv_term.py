@@ -81,8 +81,20 @@ def test_genuine_front_inversion_flagged_but_expiring_leg_ignored():
 
 
 def test_missing_forward_uses_ref_and_fits_mobile():
-    L = iv_term_lines(CURVE, {}, ("TXF", 50111.0), NOW)
+    L = iv_term_lines(CURVE, {}, ("TXF", 50111.0), NOW, events=[])   # 不讀線上行事曆
     assert all(_w(ln) <= 40 for ln in L)
+
+
+def test_event_line_long_name_with_premium_fits_and_no_double_suffix():
+    ev = [{"date": "2026-10-29", "time": "02:00", "type": "macro", "name": "FOMC 利率決議很長的名稱",
+           "symbol": "FOMC", "impact": "index"},
+          {"date": "2026-10-15", "time": "14:00", "type": "earnings", "name": "鴻海法說",
+           "symbol": "2317", "impact": "index"}]
+    curve = [("20261016", 40.0), ("20261021", 20.0), ("20261118", 22.0)]
+    L = iv_term_lines(curve, {}, ("TXF", 50111.0), NOW, holidays=set(), events=ev)
+    lines = [ln for ln in L if ln.startswith("📅")]
+    assert lines and all(_w(ln) <= 40 for ln in lines), lines
+    assert not any("法說法說" in ln for ln in lines)
 
 
 def test_empty_curve_returns_nothing():

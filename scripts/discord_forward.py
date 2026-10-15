@@ -298,7 +298,7 @@ TRADING_TOPICS = {
     "gex-regime", "position-watch", "trail_daemon", "trail-daemon", "placer_rejects",
     "loop_nag", "execution_agent", "armed_met", "arm_drift", "loop_anchor_harvest",
     "loop_breakout_cover", "loop_trade_lock", "margin_guard", "margin-guard",
-    "margin_alert", "margin-alert", "div-buy", "coordination", "iv-snapshot",
+    "margin_alert", "margin-alert", "div-buy", "coordination", "iv-snapshot", "event-window",
 }
 TRADING_PREFIXES = ("trail_", "trail-", "margin_guard", "margin-guard", "loop_")
 # loop_* 中屬於 session 監管 (infra) 的,歸 system
