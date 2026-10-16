@@ -425,10 +425,15 @@ URLS = {"trading": "http://trading", "reports": "http://reports", "system": "htt
 # ------------------------------------------------------------------ #
 class TestRouteTopic:
     def test_trading_topics(self):
-        for t in ("gex-regime", "position-watch", "trail_daemon", "trail-daemon",
+        for t in ("gex-regime", "position-watch",
                   "placer_rejects", "loop_nag", "execution_agent", "armed_met",
                   "margin_guard", "loop_anchor_harvest"):
             assert discord_forward.route_topic({"topic": t, "msg": "x"}) == "trading", t
+
+    def test_trail_daemon_routes_to_system(self):
+        # 2026-10-16: 24h 268 則 (244 則同一 stress cap 樣板) 淹沒 #guyu → 移 #guli
+        for t in ("trail_daemon", "trail-daemon"):
+            assert discord_forward.route_topic({"topic": t, "msg": "x"}) == "system", t
 
     def test_report_topics(self):
         for t in ("account-daily", "buy-list", "daily-review", "bb-squeeze",
@@ -915,3 +920,75 @@ class TestMobileLayout:
     def test_summary_msg_gets_mobile_layout(self):
         msgs = discord_forward.build_report_messages({"topic": "t", "msg": "摘要\n# 大標\n---"}, None)
         assert "## 大標" in msgs[0] and "━━━━━━━━━━" in msgs[0]
+
+
+
+# ------------------------------------------------------------------ #
+# dedupe (2026-10-16): 同 topic 同訊息 60 分內只送一次
+# ------------------------------------------------------------------ #
+class DedupeRedis(FakeRedis):
+    def __init__(self, entries, cursor="0-0"):
+        super().__init__(entries, cursor)
+        self.h = {}
+
+    def hget(self, k, f):
+        return self.h.get(k, {}).get(f)
+
+    def hset(self, k, f, v):
+        self.h.setdefault(k, {})[f] = v
+
+    def hgetall(self, k):
+        return dict(self.h.get(k, {}))
+
+    def hdel(self, k, *fs):
+        for f in fs:
+            self.h.get(k, {}).pop(f, None)
+
+
+STRESS = "base/trend TMFJ6: 24h stress cap {a}->{b} lot (equity {e}, atr_3d 612, held 3) — post-fill book"
+
+
+class TestDedupe:
+    def test_template_topic_ignores_numbers(self):
+        a = discord_forward.dedupe_signature({"topic": "trail_daemon", "msg": STRESS.format(a=2, b=1, e="215,638")})
+        b = discord_forward.dedupe_signature({"topic": "trail_daemon", "msg": STRESS.format(a=3, b=0, e="214,000")})
+        assert a and a == b
+
+    def test_other_topics_need_exact_match(self):
+        a = discord_forward.dedupe_signature({"topic": "iv-snapshot", "msg": "前月 ATM 20.4%"})
+        b = discord_forward.dedupe_signature({"topic": "iv-snapshot", "msg": "前月 ATM 20.5%"})
+        assert a != b
+        assert a == discord_forward.dedupe_signature({"topic": "iv-snapshot", "msg": "前月 ATM 20.4%"})
+
+    def test_reports_never_deduped(self):
+        assert discord_forward.dedupe_signature({"topic": "t", "msg": "x", "report_path": "analysis/a.md"}) is None
+
+    def _run(self, monkeypatch, r, now):
+        sent = []
+        monkeypatch.setattr(discord_forward, "load_report", lambda raw: None)
+        monkeypatch.setattr(discord_forward.time, "time", lambda: now)
+        discord_forward.forward_entries(r, r.xrange("s", "(" + r.get("discord:forward:last_id"), "+"),
+                                        "http://x", post=lambda u, c: sent.append(c), sleep=lambda s: None)
+        return sent
+
+    def test_suppressed_within_window_then_count_appended(self, monkeypatch):
+        e = [("%d-0" % i, {"topic": "trail_daemon", "msg": STRESS.format(a=2, b=i % 2, e="215,638")})
+             for i in range(1, 5)]
+        r = DedupeRedis(e)
+        sent = self._run(monkeypatch, r, 1_000_000.0)
+        assert len(sent) == 1                                   # 4 則 → 只送 1
+        assert r.kv["discord:forward:last_id"] == "4-0"         # 被抑制的也前移 cursor
+        r.entries.append(("5-0", {"topic": "trail_daemon", "msg": STRESS.format(a=2, b=1, e="1")}))
+        sent = self._run(monkeypatch, r, 1_000_000.0 + 3601)
+        assert len(sent) == 1 and "(過去 60 分重複 3 次)" in sent[0].split("\n")[0]
+
+    def test_redis_failure_fails_open(self, monkeypatch):
+        class Broken(DedupeRedis):
+            def hget(self, k, f):
+                raise RuntimeError("down")
+        r = Broken([("1-0", {"topic": "trail_daemon", "msg": "a"}), ("2-0", {"topic": "trail_daemon", "msg": "a"})])
+        assert len(self._run(monkeypatch, r, 1_000_000.0)) == 2
+
+    def test_different_topics_not_merged(self, monkeypatch):
+        r = DedupeRedis([("1-0", {"topic": "gex-regime", "msg": "same"}), ("2-0", {"topic": "iv-snapshot", "msg": "same"})])
+        assert len(self._run(monkeypatch, r, 1_000_000.0)) == 2

@@ -295,12 +295,13 @@ def build_report_messages(fields: dict, report_text,
 # ------------------------------------------------------------------ #
 # trading = 即時交易警報(需要分鐘級反應);盤後日報即使來自交易系統也歸 reports。
 TRADING_TOPICS = {
-    "gex-regime", "position-watch", "trail_daemon", "trail-daemon", "placer_rejects",
+    "gex-regime", "position-watch", "placer_rejects",
     "loop_nag", "execution_agent", "armed_met", "arm_drift", "loop_anchor_harvest",
     "loop_breakout_cover", "loop_trade_lock", "margin_guard", "margin-guard",
     "margin_alert", "margin-alert", "div-buy", "coordination", "iv-snapshot", "event-window",
 }
-TRADING_PREFIXES = ("trail_", "trail-", "margin_guard", "margin-guard", "loop_")
+# trail_daemon 不在交易頻道 (2026-10-16: 24h 268 則淹沒 #guyu) → 落到 system (#guli)
+TRADING_PREFIXES = ("margin_guard", "margin-guard", "loop_")
 # loop_* 中屬於 session 監管 (infra) 的,歸 system
 SYSTEM_OVERRIDES = {"loop_autostart", "loop_down", "loop_heartbeat"}
 REPORT_TOPICS = {
@@ -518,6 +519,59 @@ def _dead_letter(r, entry_id, chunk, fields, err) -> None:
               entry_id, chunk, fields.get("topic"), err.status, err.body)
 
 
+DEDUPE_KEY = "discord:forward:dedupe"
+DEDUPE_WINDOW_S = 3600
+DEDUPE_KEEP_S = 86400
+# 這些 topic 以「數字不計」的樣板去重 (同一提醒只換數字反覆發);其餘 topic 需訊息完全相同
+TEMPLATE_DEDUPE_TOPICS = {"trail_daemon", "trail-daemon", "placer_rejects",
+                          "collector_health_watchdog", "loop_execution_agent"}
+_NUM = re.compile(r"[-+]?\d[\d,.]*")
+
+
+def dedupe_signature(fields: dict):
+    """去重簽章;報告 (report_path) 不去重 → None。iv-snapshot/gex-regime 這類固定樣板只換數字的
+    topic 不可忽略數字 (否則每則都被當重複)。"""
+    if (fields.get("report_path") or "").strip():
+        return None
+    import hashlib
+    topic = fields.get("topic") or ""
+    msg = fields.get("msg") or ""
+    if topic in TEMPLATE_DEDUPE_TOPICS:
+        msg = _NUM.sub("#", msg)
+    msg = re.sub(r"\s+", " ", msg).strip()
+    return "%s:%s" % (topic, hashlib.sha1(msg.encode("utf-8")).hexdigest()[:16])
+
+
+def _dedupe_check(r, sig, now: float):
+    """→ (送出?, 先前被抑制次數)。窗口內重複 → 抑制計數+1。Redis 失敗 → 照送。"""
+    if not sig:
+        return True, 0
+    try:
+        raw = r.hget(DEDUPE_KEY, sig)
+        st = json.loads(raw) if raw else None
+        if st and now - float(st["sent_ts"]) < DEDUPE_WINDOW_S:
+            st["suppressed"] = int(st.get("suppressed", 0)) + 1
+            r.hset(DEDUPE_KEY, sig, json.dumps(st))
+            return False, st["suppressed"]
+        return True, int(st.get("suppressed", 0)) if st else 0
+    except Exception as e:  # noqa: BLE001
+        log.warning("dedupe check failed (sending anyway): %s", e)
+        return True, 0
+
+
+def _dedupe_record(r, sig, now: float) -> None:
+    if not sig:
+        return
+    try:
+        r.hset(DEDUPE_KEY, sig, json.dumps({"sent_ts": now, "suppressed": 0}))
+        stale = [f for f, v in (r.hgetall(DEDUPE_KEY) or {}).items()
+                 if now - float(json.loads(v).get("sent_ts", 0)) > DEDUPE_KEEP_S]
+        if stale:
+            r.hdel(DEDUPE_KEY, *stale)
+    except Exception as e:  # noqa: BLE001
+        log.warning("dedupe record failed: %s", e)
+
+
 def forward_entries(r, entries, urls, *, budget=None, limiter=None,
                     post=None, sleep=None, verbose=False, dead_notifier=None) -> int:
     """逐 entry:過濾→路由→組訊息→(斷點續送)→送出→前移 cursor→清 partial。
@@ -535,6 +589,17 @@ def forward_entries(r, entries, urls, *, budget=None, limiter=None,
             cls = route_topic(fields)
             msgs = build_report_messages(fields, load_report(fields.get("report_path")))
             skip, dirty = _read_partial(r, entry_id)
+            sig = dedupe_signature(fields)
+            now_ts = time.time()
+            if not skip:
+                go, n_dup = _dedupe_check(r, sig, now_ts)
+                if not go:
+                    log.info("suppressed %s topic=%s sig=%s (dup #%d)", entry_id, fields.get("topic"), sig, n_dup)
+                    r.set(CURSOR_KEY, entry_id)
+                    continue
+                if n_dup:
+                    head, sep, rest = msgs[0].partition("\n")
+                    msgs[0] = "%s (過去 60 分重複 %d 次)%s%s" % (head, n_dup, sep, rest)
             dirty = dirty or len(msgs) > 1
             remaining = msgs[skip:]
             if budget is not None:
@@ -566,6 +631,7 @@ def forward_entries(r, entries, urls, *, budget=None, limiter=None,
                     r.set(PARTIAL_KEY, "%s:%d" % (entry_id, i + 1))
                 sleep(POST_SLEEP)
             sent += 1
+            _dedupe_record(r, sig, now_ts)
             log.info("sent %s topic=%s class=%s msgs=%d",
                     entry_id, fields.get("topic"), cls, len(remaining))
         r.set(CURSOR_KEY, entry_id)   # 送出(或略過)成功才前移
