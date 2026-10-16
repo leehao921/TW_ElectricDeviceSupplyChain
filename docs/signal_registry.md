@@ -53,6 +53,7 @@
 | VRP30 | 厚（pct>70）賣方肥 / 薄（pct<30）保險便宜 | 買保護時點 |
 | P/B 廣度 | RED 占比 >80% + DRAM S1 RED | 晚週期高熱 |
 | Regime gate | 5D 量 <1 兆降權 / TAIEX <39,385 broken | 黑天鵝 playbook 啟動線 |
+| 產業動能廣度 | 產業內通過強勢篩選 (1/3/6M 漲 ≥30% 前 25%) 的比例 + 20 日變化 | 輪動儀表（產業 IC 20 日 +0.27/t 1.6、60 日 +0.42，三個半年同號但未顯著；優於 63 日 RS，加 Martin 整理條件反而變弱；題材層/大盤層無效）。`scripts/sector_breadth.py`，treemap routine 每日寫 `data/sector_breadth_history.csv`；2027-04 重跑 `--validate`，t≥2 升觀察訊號 |
 | Brent 85/100 | <85 緩和 / >100 升溫 | 航空 vs 海運兩腿反向 |
 
 ## 追蹤機制

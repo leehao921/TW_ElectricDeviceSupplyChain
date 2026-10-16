@@ -156,6 +156,24 @@ def margin_combos(conn) -> str:
             + " | 權證佈空反指標: " + _fmt(wshort, "佈空×融資增"))
 
 
+def breadth_gauge(path: Path | None = None) -> str:
+    """產業動能廣度最新一筆 (sector_breadth.py 由 treemap routine 每日寫入)."""
+    import pandas as pd
+    import sector_breadth
+    path = path or sector_breadth.HISTORY
+    try:
+        h = pd.read_csv(path, dtype={"date": str})
+    except (OSError, ValueError):
+        return ""
+    if h.empty:
+        return ""
+    d = h["date"].max()
+    top = h[h["date"] == d].sort_values("breadth", ascending=False).head(3)
+    body = " / ".join(f"{sector_breadth.SECTOR_ZH.get(r.sector, r.sector)} {r.breadth:.1f}%"
+                      for r in top.itertuples())
+    return f"產業動能廣度 ({d}) 前3: {body}"
+
+
 def gauges(conn) -> list[str]:
     out = []
     with conn.cursor() as cur:
@@ -204,6 +222,9 @@ def main() -> int:
         lines.append(f"- [err] combos: {e}")
     lines += ["", "## 系統性儀表", ""]
     lines += ["- " + g for g in gauges(conn)]
+    bg = breadth_gauge()
+    if bg:
+        lines.append("- " + bg)
     lines += ["", "## 研究隊列", "",
               "- S3 skew +15m 樣本外 (10 月) · S4 VRP 對齊重跑 (vrp_30d 累積中) · 融資訊號滿季確認 (10 月底)",
               "", "*源: signal_ledger.py 週五 19:50 · 分級異動請改 docs/signal_registry.md*"]

@@ -1,0 +1,3389 @@
+date,sector,n,breadth
+2025-07-15,Communication Equipment,70,8.57
+2025-07-15,Computer Hardware,111,14.41
+2025-07-15,Consumer Electronics,27,7.41
+2025-07-15,Electrical Equipment & Parts,76,15.79
+2025-07-15,Electronic Components,263,11.41
+2025-07-15,Electronics & Computer Distribution,35,11.43
+2025-07-15,Scientific & Technical Instruments,13,15.38
+2025-07-15,Semiconductor Equipment & Materials,63,20.63
+2025-07-15,Semiconductors,154,7.14
+2025-07-15,Software - Infrastructure,20,10.00
+2025-07-15,Specialty Industrial Machinery,84,11.90
+2025-07-16,Communication Equipment,70,7.14
+2025-07-16,Computer Hardware,111,15.32
+2025-07-16,Consumer Electronics,27,7.41
+2025-07-16,Electrical Equipment & Parts,76,17.11
+2025-07-16,Electronic Components,263,11.79
+2025-07-16,Electronics & Computer Distribution,35,14.29
+2025-07-16,Scientific & Technical Instruments,13,15.38
+2025-07-16,Semiconductor Equipment & Materials,63,22.22
+2025-07-16,Semiconductors,154,10.39
+2025-07-16,Software - Infrastructure,20,10.00
+2025-07-16,Specialty Industrial Machinery,84,15.48
+2025-07-17,Communication Equipment,70,8.57
+2025-07-17,Computer Hardware,111,16.22
+2025-07-17,Consumer Electronics,27,7.41
+2025-07-17,Electrical Equipment & Parts,76,14.47
+2025-07-17,Electronic Components,263,10.65
+2025-07-17,Electronics & Computer Distribution,35,14.29
+2025-07-17,Scientific & Technical Instruments,13,23.08
+2025-07-17,Semiconductor Equipment & Materials,63,25.40
+2025-07-17,Semiconductors,154,11.04
+2025-07-17,Software - Infrastructure,20,10.00
+2025-07-17,Specialty Industrial Machinery,84,16.67
+2025-07-18,Communication Equipment,70,7.14
+2025-07-18,Computer Hardware,111,17.12
+2025-07-18,Consumer Electronics,27,7.41
+2025-07-18,Electrical Equipment & Parts,76,15.79
+2025-07-18,Electronic Components,263,11.79
+2025-07-18,Electronics & Computer Distribution,35,14.29
+2025-07-18,Scientific & Technical Instruments,13,23.08
+2025-07-18,Semiconductor Equipment & Materials,63,25.40
+2025-07-18,Semiconductors,154,11.04
+2025-07-18,Software - Infrastructure,20,10.00
+2025-07-18,Specialty Industrial Machinery,84,14.29
+2025-07-21,Communication Equipment,70,10.00
+2025-07-21,Computer Hardware,111,18.92
+2025-07-21,Consumer Electronics,27,7.41
+2025-07-21,Electrical Equipment & Parts,76,18.42
+2025-07-21,Electronic Components,263,14.07
+2025-07-21,Electronics & Computer Distribution,35,14.29
+2025-07-21,Scientific & Technical Instruments,13,23.08
+2025-07-21,Semiconductor Equipment & Materials,63,26.98
+2025-07-21,Semiconductors,154,11.69
+2025-07-21,Software - Infrastructure,20,10.00
+2025-07-21,Specialty Industrial Machinery,84,16.67
+2025-07-22,Communication Equipment,70,10.00
+2025-07-22,Computer Hardware,111,18.02
+2025-07-22,Consumer Electronics,27,7.41
+2025-07-22,Electrical Equipment & Parts,76,15.79
+2025-07-22,Electronic Components,263,14.45
+2025-07-22,Electronics & Computer Distribution,35,11.43
+2025-07-22,Scientific & Technical Instruments,13,23.08
+2025-07-22,Semiconductor Equipment & Materials,63,26.98
+2025-07-22,Semiconductors,154,9.74
+2025-07-22,Software - Infrastructure,20,10.00
+2025-07-22,Specialty Industrial Machinery,84,15.48
+2025-07-23,Communication Equipment,70,7.14
+2025-07-23,Computer Hardware,111,18.02
+2025-07-23,Consumer Electronics,27,7.41
+2025-07-23,Electrical Equipment & Parts,76,13.16
+2025-07-23,Electronic Components,263,12.17
+2025-07-23,Electronics & Computer Distribution,35,11.43
+2025-07-23,Scientific & Technical Instruments,13,23.08
+2025-07-23,Semiconductor Equipment & Materials,63,23.81
+2025-07-23,Semiconductors,154,7.14
+2025-07-23,Software - Infrastructure,20,10.00
+2025-07-23,Specialty Industrial Machinery,84,14.29
+2025-07-24,Communication Equipment,70,8.57
+2025-07-24,Computer Hardware,111,18.02
+2025-07-24,Consumer Electronics,27,7.41
+2025-07-24,Electrical Equipment & Parts,76,13.16
+2025-07-24,Electronic Components,263,12.55
+2025-07-24,Electronics & Computer Distribution,35,11.43
+2025-07-24,Scientific & Technical Instruments,13,15.38
+2025-07-24,Semiconductor Equipment & Materials,63,23.81
+2025-07-24,Semiconductors,154,8.44
+2025-07-24,Software - Infrastructure,20,10.00
+2025-07-24,Specialty Industrial Machinery,84,15.48
+2025-07-25,Communication Equipment,70,7.14
+2025-07-25,Computer Hardware,111,15.32
+2025-07-25,Consumer Electronics,27,7.41
+2025-07-25,Electrical Equipment & Parts,76,11.84
+2025-07-25,Electronic Components,263,12.17
+2025-07-25,Electronics & Computer Distribution,35,11.43
+2025-07-25,Scientific & Technical Instruments,13,23.08
+2025-07-25,Semiconductor Equipment & Materials,63,22.22
+2025-07-25,Semiconductors,154,6.49
+2025-07-25,Software - Infrastructure,20,10.00
+2025-07-25,Specialty Industrial Machinery,84,13.10
+2025-07-28,Communication Equipment,70,5.71
+2025-07-28,Computer Hardware,111,16.22
+2025-07-28,Consumer Electronics,27,7.41
+2025-07-28,Electrical Equipment & Parts,76,13.16
+2025-07-28,Electronic Components,263,12.17
+2025-07-28,Electronics & Computer Distribution,35,11.43
+2025-07-28,Scientific & Technical Instruments,13,23.08
+2025-07-28,Semiconductor Equipment & Materials,63,20.63
+2025-07-28,Semiconductors,154,5.19
+2025-07-28,Software - Infrastructure,20,10.00
+2025-07-28,Specialty Industrial Machinery,84,13.10
+2025-07-29,Communication Equipment,70,5.71
+2025-07-29,Computer Hardware,111,16.22
+2025-07-29,Consumer Electronics,27,11.11
+2025-07-29,Electrical Equipment & Parts,76,13.16
+2025-07-29,Electronic Components,263,12.17
+2025-07-29,Electronics & Computer Distribution,35,8.57
+2025-07-29,Scientific & Technical Instruments,13,15.38
+2025-07-29,Semiconductor Equipment & Materials,63,19.05
+2025-07-29,Semiconductors,154,5.84
+2025-07-29,Software - Infrastructure,20,10.00
+2025-07-29,Specialty Industrial Machinery,84,9.52
+2025-07-30,Communication Equipment,70,7.14
+2025-07-30,Computer Hardware,111,17.12
+2025-07-30,Consumer Electronics,27,11.11
+2025-07-30,Electrical Equipment & Parts,76,13.16
+2025-07-30,Electronic Components,263,11.79
+2025-07-30,Electronics & Computer Distribution,35,14.29
+2025-07-30,Scientific & Technical Instruments,13,15.38
+2025-07-30,Semiconductor Equipment & Materials,63,20.63
+2025-07-30,Semiconductors,154,5.84
+2025-07-30,Software - Infrastructure,20,10.00
+2025-07-30,Specialty Industrial Machinery,84,7.14
+2025-07-31,Communication Equipment,70,7.14
+2025-07-31,Computer Hardware,111,15.32
+2025-07-31,Consumer Electronics,27,11.11
+2025-07-31,Electrical Equipment & Parts,76,11.84
+2025-07-31,Electronic Components,263,12.17
+2025-07-31,Electronics & Computer Distribution,35,8.57
+2025-07-31,Scientific & Technical Instruments,13,15.38
+2025-07-31,Semiconductor Equipment & Materials,63,19.05
+2025-07-31,Semiconductors,154,5.84
+2025-07-31,Software - Infrastructure,20,10.00
+2025-07-31,Specialty Industrial Machinery,84,7.14
+2025-08-04,Communication Equipment,70,10.00
+2025-08-04,Computer Hardware,111,14.41
+2025-08-04,Consumer Electronics,27,11.11
+2025-08-04,Electrical Equipment & Parts,76,11.84
+2025-08-04,Electronic Components,263,12.17
+2025-08-04,Electronics & Computer Distribution,35,8.57
+2025-08-04,Scientific & Technical Instruments,13,23.08
+2025-08-04,Semiconductor Equipment & Materials,63,22.22
+2025-08-04,Semiconductors,154,7.79
+2025-08-04,Software - Infrastructure,20,10.00
+2025-08-04,Specialty Industrial Machinery,84,9.52
+2025-08-05,Communication Equipment,70,8.57
+2025-08-05,Computer Hardware,111,15.32
+2025-08-05,Consumer Electronics,27,11.11
+2025-08-05,Electrical Equipment & Parts,76,13.16
+2025-08-05,Electronic Components,263,13.31
+2025-08-05,Electronics & Computer Distribution,35,11.43
+2025-08-05,Scientific & Technical Instruments,13,23.08
+2025-08-05,Semiconductor Equipment & Materials,63,22.22
+2025-08-05,Semiconductors,154,6.49
+2025-08-05,Software - Infrastructure,20,15.00
+2025-08-05,Specialty Industrial Machinery,84,10.71
+2025-08-06,Communication Equipment,70,11.43
+2025-08-06,Computer Hardware,111,17.12
+2025-08-06,Consumer Electronics,27,11.11
+2025-08-06,Electrical Equipment & Parts,76,14.47
+2025-08-06,Electronic Components,263,13.69
+2025-08-06,Electronics & Computer Distribution,35,11.43
+2025-08-06,Scientific & Technical Instruments,13,30.77
+2025-08-06,Semiconductor Equipment & Materials,63,26.98
+2025-08-06,Semiconductors,154,6.49
+2025-08-06,Software - Infrastructure,20,15.00
+2025-08-06,Specialty Industrial Machinery,84,11.90
+2025-08-07,Communication Equipment,70,14.29
+2025-08-07,Computer Hardware,111,15.32
+2025-08-07,Consumer Electronics,27,11.11
+2025-08-07,Electrical Equipment & Parts,76,13.16
+2025-08-07,Electronic Components,263,13.69
+2025-08-07,Electronics & Computer Distribution,35,11.43
+2025-08-07,Scientific & Technical Instruments,13,30.77
+2025-08-07,Semiconductor Equipment & Materials,63,28.57
+2025-08-07,Semiconductors,154,7.79
+2025-08-07,Software - Infrastructure,20,15.00
+2025-08-07,Specialty Industrial Machinery,84,13.10
+2025-08-08,Communication Equipment,70,11.43
+2025-08-08,Computer Hardware,111,15.32
+2025-08-08,Consumer Electronics,27,11.11
+2025-08-08,Electrical Equipment & Parts,76,14.47
+2025-08-08,Electronic Components,263,13.69
+2025-08-08,Electronics & Computer Distribution,35,8.57
+2025-08-08,Scientific & Technical Instruments,13,30.77
+2025-08-08,Semiconductor Equipment & Materials,63,26.98
+2025-08-08,Semiconductors,154,6.49
+2025-08-08,Software - Infrastructure,20,15.00
+2025-08-08,Specialty Industrial Machinery,84,14.29
+2025-08-11,Communication Equipment,70,10.00
+2025-08-11,Computer Hardware,111,15.32
+2025-08-11,Consumer Electronics,27,11.11
+2025-08-11,Electrical Equipment & Parts,76,13.16
+2025-08-11,Electronic Components,263,13.31
+2025-08-11,Electronics & Computer Distribution,35,5.71
+2025-08-11,Scientific & Technical Instruments,13,23.08
+2025-08-11,Semiconductor Equipment & Materials,63,23.81
+2025-08-11,Semiconductors,154,6.49
+2025-08-11,Software - Infrastructure,20,15.00
+2025-08-11,Specialty Industrial Machinery,84,14.29
+2025-08-12,Communication Equipment,70,11.43
+2025-08-12,Computer Hardware,111,15.32
+2025-08-12,Consumer Electronics,27,7.41
+2025-08-12,Electrical Equipment & Parts,76,13.16
+2025-08-12,Electronic Components,263,14.07
+2025-08-12,Electronics & Computer Distribution,35,5.71
+2025-08-12,Scientific & Technical Instruments,13,23.08
+2025-08-12,Semiconductor Equipment & Materials,63,23.81
+2025-08-12,Semiconductors,154,6.49
+2025-08-12,Software - Infrastructure,20,15.00
+2025-08-12,Specialty Industrial Machinery,84,10.71
+2025-08-13,Communication Equipment,70,11.43
+2025-08-13,Computer Hardware,111,12.61
+2025-08-13,Consumer Electronics,27,3.70
+2025-08-13,Electrical Equipment & Parts,76,11.84
+2025-08-13,Electronic Components,263,14.83
+2025-08-13,Electronics & Computer Distribution,35,8.57
+2025-08-13,Scientific & Technical Instruments,13,23.08
+2025-08-13,Semiconductor Equipment & Materials,63,22.22
+2025-08-13,Semiconductors,154,7.14
+2025-08-13,Software - Infrastructure,20,15.00
+2025-08-13,Specialty Industrial Machinery,84,15.48
+2025-08-14,Communication Equipment,70,8.57
+2025-08-14,Computer Hardware,111,11.71
+2025-08-14,Consumer Electronics,27,3.70
+2025-08-14,Electrical Equipment & Parts,76,13.16
+2025-08-14,Electronic Components,263,14.07
+2025-08-14,Electronics & Computer Distribution,35,8.57
+2025-08-14,Scientific & Technical Instruments,13,23.08
+2025-08-14,Semiconductor Equipment & Materials,63,23.81
+2025-08-14,Semiconductors,154,7.14
+2025-08-14,Software - Infrastructure,20,15.00
+2025-08-14,Specialty Industrial Machinery,84,14.29
+2025-08-15,Communication Equipment,70,15.71
+2025-08-15,Computer Hardware,111,13.51
+2025-08-15,Consumer Electronics,27,7.41
+2025-08-15,Electrical Equipment & Parts,76,14.47
+2025-08-15,Electronic Components,264,15.53
+2025-08-15,Electronics & Computer Distribution,35,11.43
+2025-08-15,Scientific & Technical Instruments,13,23.08
+2025-08-15,Semiconductor Equipment & Materials,63,19.05
+2025-08-15,Semiconductors,154,7.14
+2025-08-15,Software - Infrastructure,20,10.00
+2025-08-15,Specialty Industrial Machinery,84,17.86
+2025-08-18,Communication Equipment,70,14.29
+2025-08-18,Computer Hardware,111,13.51
+2025-08-18,Consumer Electronics,27,14.81
+2025-08-18,Electrical Equipment & Parts,76,18.42
+2025-08-18,Electronic Components,264,16.29
+2025-08-18,Electronics & Computer Distribution,35,8.57
+2025-08-18,Scientific & Technical Instruments,13,23.08
+2025-08-18,Semiconductor Equipment & Materials,63,25.40
+2025-08-18,Semiconductors,154,7.79
+2025-08-18,Software - Infrastructure,20,10.00
+2025-08-18,Specialty Industrial Machinery,84,17.86
+2025-08-19,Communication Equipment,70,12.86
+2025-08-19,Computer Hardware,111,10.81
+2025-08-19,Consumer Electronics,27,11.11
+2025-08-19,Electrical Equipment & Parts,76,15.79
+2025-08-19,Electronic Components,264,17.42
+2025-08-19,Electronics & Computer Distribution,35,11.43
+2025-08-19,Scientific & Technical Instruments,13,23.08
+2025-08-19,Semiconductor Equipment & Materials,63,26.98
+2025-08-19,Semiconductors,154,7.79
+2025-08-19,Software - Infrastructure,20,10.00
+2025-08-19,Specialty Industrial Machinery,84,17.86
+2025-08-20,Communication Equipment,70,11.43
+2025-08-20,Computer Hardware,111,9.01
+2025-08-20,Consumer Electronics,27,11.11
+2025-08-20,Electrical Equipment & Parts,76,13.16
+2025-08-20,Electronic Components,264,15.15
+2025-08-20,Electronics & Computer Distribution,35,14.29
+2025-08-20,Scientific & Technical Instruments,13,23.08
+2025-08-20,Semiconductor Equipment & Materials,63,17.46
+2025-08-20,Semiconductors,154,3.90
+2025-08-20,Software - Infrastructure,20,10.00
+2025-08-20,Specialty Industrial Machinery,84,15.48
+2025-08-21,Communication Equipment,70,10.00
+2025-08-21,Computer Hardware,111,11.71
+2025-08-21,Consumer Electronics,27,11.11
+2025-08-21,Electrical Equipment & Parts,76,14.47
+2025-08-21,Electronic Components,264,17.80
+2025-08-21,Electronics & Computer Distribution,35,11.43
+2025-08-21,Scientific & Technical Instruments,13,30.77
+2025-08-21,Semiconductor Equipment & Materials,63,20.63
+2025-08-21,Semiconductors,154,6.49
+2025-08-21,Software - Infrastructure,20,10.00
+2025-08-21,Specialty Industrial Machinery,84,17.86
+2025-08-22,Communication Equipment,70,12.86
+2025-08-22,Computer Hardware,111,11.71
+2025-08-22,Consumer Electronics,27,11.11
+2025-08-22,Electrical Equipment & Parts,76,14.47
+2025-08-22,Electronic Components,264,16.29
+2025-08-22,Electronics & Computer Distribution,35,11.43
+2025-08-22,Scientific & Technical Instruments,13,23.08
+2025-08-22,Semiconductor Equipment & Materials,63,19.05
+2025-08-22,Semiconductors,154,5.19
+2025-08-22,Software - Infrastructure,20,10.00
+2025-08-22,Specialty Industrial Machinery,84,19.05
+2025-08-25,Communication Equipment,70,12.86
+2025-08-25,Computer Hardware,111,14.41
+2025-08-25,Consumer Electronics,27,11.11
+2025-08-25,Electrical Equipment & Parts,76,13.16
+2025-08-25,Electronic Components,264,18.56
+2025-08-25,Electronics & Computer Distribution,35,11.43
+2025-08-25,Scientific & Technical Instruments,13,23.08
+2025-08-25,Semiconductor Equipment & Materials,63,20.63
+2025-08-25,Semiconductors,154,7.79
+2025-08-25,Software - Infrastructure,20,10.00
+2025-08-25,Specialty Industrial Machinery,84,17.86
+2025-08-26,Communication Equipment,70,14.29
+2025-08-26,Computer Hardware,111,16.22
+2025-08-26,Consumer Electronics,27,11.11
+2025-08-26,Electrical Equipment & Parts,76,14.47
+2025-08-26,Electronic Components,264,17.80
+2025-08-26,Electronics & Computer Distribution,35,11.43
+2025-08-26,Scientific & Technical Instruments,13,46.15
+2025-08-26,Semiconductor Equipment & Materials,63,28.57
+2025-08-26,Semiconductors,154,7.14
+2025-08-26,Software - Infrastructure,20,15.00
+2025-08-26,Specialty Industrial Machinery,84,19.05
+2025-08-27,Communication Equipment,70,15.71
+2025-08-27,Computer Hardware,111,18.92
+2025-08-27,Consumer Electronics,27,11.11
+2025-08-27,Electrical Equipment & Parts,76,17.11
+2025-08-27,Electronic Components,264,20.83
+2025-08-27,Electronics & Computer Distribution,35,11.43
+2025-08-27,Scientific & Technical Instruments,13,38.46
+2025-08-27,Semiconductor Equipment & Materials,63,30.16
+2025-08-27,Semiconductors,154,8.44
+2025-08-27,Software - Infrastructure,20,15.00
+2025-08-27,Specialty Industrial Machinery,84,22.62
+2025-08-28,Communication Equipment,70,17.14
+2025-08-28,Computer Hardware,111,19.82
+2025-08-28,Consumer Electronics,27,11.11
+2025-08-28,Electrical Equipment & Parts,76,18.42
+2025-08-28,Electronic Components,264,20.08
+2025-08-28,Electronics & Computer Distribution,35,14.29
+2025-08-28,Scientific & Technical Instruments,13,38.46
+2025-08-28,Semiconductor Equipment & Materials,63,33.33
+2025-08-28,Semiconductors,154,8.44
+2025-08-28,Software - Infrastructure,20,15.00
+2025-08-28,Specialty Industrial Machinery,84,23.81
+2025-08-29,Communication Equipment,70,15.71
+2025-08-29,Computer Hardware,111,17.12
+2025-08-29,Consumer Electronics,27,11.11
+2025-08-29,Electrical Equipment & Parts,76,18.42
+2025-08-29,Electronic Components,264,23.11
+2025-08-29,Electronics & Computer Distribution,35,11.43
+2025-08-29,Scientific & Technical Instruments,13,38.46
+2025-08-29,Semiconductor Equipment & Materials,63,36.51
+2025-08-29,Semiconductors,154,11.04
+2025-08-29,Software - Infrastructure,20,15.00
+2025-08-29,Specialty Industrial Machinery,84,27.38
+2025-09-01,Communication Equipment,70,15.71
+2025-09-01,Computer Hardware,111,15.32
+2025-09-01,Consumer Electronics,27,14.81
+2025-09-01,Electrical Equipment & Parts,76,15.79
+2025-09-01,Electronic Components,264,20.83
+2025-09-01,Electronics & Computer Distribution,35,14.29
+2025-09-01,Scientific & Technical Instruments,13,46.15
+2025-09-01,Semiconductor Equipment & Materials,63,33.33
+2025-09-01,Semiconductors,154,11.04
+2025-09-01,Software - Infrastructure,20,15.00
+2025-09-01,Specialty Industrial Machinery,84,25.00
+2025-09-02,Communication Equipment,70,14.29
+2025-09-02,Computer Hardware,111,12.61
+2025-09-02,Consumer Electronics,27,7.41
+2025-09-02,Electrical Equipment & Parts,76,17.11
+2025-09-02,Electronic Components,264,18.18
+2025-09-02,Electronics & Computer Distribution,35,14.29
+2025-09-02,Scientific & Technical Instruments,13,38.46
+2025-09-02,Semiconductor Equipment & Materials,63,26.98
+2025-09-02,Semiconductors,154,9.74
+2025-09-02,Software - Infrastructure,20,10.00
+2025-09-02,Specialty Industrial Machinery,84,20.24
+2025-09-03,Communication Equipment,70,12.86
+2025-09-03,Computer Hardware,111,12.61
+2025-09-03,Consumer Electronics,27,11.11
+2025-09-03,Electrical Equipment & Parts,76,14.47
+2025-09-03,Electronic Components,264,18.94
+2025-09-03,Electronics & Computer Distribution,35,14.29
+2025-09-03,Scientific & Technical Instruments,13,46.15
+2025-09-03,Semiconductor Equipment & Materials,63,25.40
+2025-09-03,Semiconductors,154,9.74
+2025-09-03,Software - Infrastructure,20,10.00
+2025-09-03,Specialty Industrial Machinery,84,20.24
+2025-09-04,Communication Equipment,70,11.43
+2025-09-04,Computer Hardware,111,12.61
+2025-09-04,Consumer Electronics,27,11.11
+2025-09-04,Electrical Equipment & Parts,76,15.79
+2025-09-04,Electronic Components,264,19.32
+2025-09-04,Electronics & Computer Distribution,35,14.29
+2025-09-04,Scientific & Technical Instruments,13,46.15
+2025-09-04,Semiconductor Equipment & Materials,63,28.57
+2025-09-04,Semiconductors,154,8.44
+2025-09-04,Software - Infrastructure,20,5.00
+2025-09-04,Specialty Industrial Machinery,84,17.86
+2025-09-05,Communication Equipment,70,12.86
+2025-09-05,Computer Hardware,111,13.51
+2025-09-05,Consumer Electronics,27,14.81
+2025-09-05,Electrical Equipment & Parts,76,18.42
+2025-09-05,Electronic Components,264,20.08
+2025-09-05,Electronics & Computer Distribution,35,14.29
+2025-09-05,Scientific & Technical Instruments,13,38.46
+2025-09-05,Semiconductor Equipment & Materials,63,26.98
+2025-09-05,Semiconductors,154,11.04
+2025-09-05,Software - Infrastructure,20,10.00
+2025-09-05,Specialty Industrial Machinery,84,19.05
+2025-09-08,Communication Equipment,70,12.86
+2025-09-08,Computer Hardware,111,14.41
+2025-09-08,Consumer Electronics,27,18.52
+2025-09-08,Electrical Equipment & Parts,76,17.11
+2025-09-08,Electronic Components,264,18.94
+2025-09-08,Electronics & Computer Distribution,35,14.29
+2025-09-08,Scientific & Technical Instruments,13,38.46
+2025-09-08,Semiconductor Equipment & Materials,63,31.75
+2025-09-08,Semiconductors,154,11.69
+2025-09-08,Software - Infrastructure,20,5.00
+2025-09-08,Specialty Industrial Machinery,84,22.62
+2025-09-09,Communication Equipment,70,11.43
+2025-09-09,Computer Hardware,111,16.22
+2025-09-09,Consumer Electronics,27,18.52
+2025-09-09,Electrical Equipment & Parts,76,18.42
+2025-09-09,Electronic Components,264,19.70
+2025-09-09,Electronics & Computer Distribution,35,14.29
+2025-09-09,Scientific & Technical Instruments,13,38.46
+2025-09-09,Semiconductor Equipment & Materials,63,28.57
+2025-09-09,Semiconductors,154,11.04
+2025-09-09,Software - Infrastructure,20,5.00
+2025-09-09,Specialty Industrial Machinery,84,20.24
+2025-09-10,Communication Equipment,70,14.29
+2025-09-10,Computer Hardware,111,17.12
+2025-09-10,Consumer Electronics,27,18.52
+2025-09-10,Electrical Equipment & Parts,76,18.42
+2025-09-10,Electronic Components,264,20.45
+2025-09-10,Electronics & Computer Distribution,35,11.43
+2025-09-10,Scientific & Technical Instruments,13,38.46
+2025-09-10,Semiconductor Equipment & Materials,63,26.98
+2025-09-10,Semiconductors,154,11.04
+2025-09-10,Software - Infrastructure,20,5.00
+2025-09-10,Specialty Industrial Machinery,84,21.43
+2025-09-11,Communication Equipment,70,12.86
+2025-09-11,Computer Hardware,111,15.32
+2025-09-11,Consumer Electronics,27,18.52
+2025-09-11,Electrical Equipment & Parts,76,18.42
+2025-09-11,Electronic Components,264,20.08
+2025-09-11,Electronics & Computer Distribution,35,8.57
+2025-09-11,Scientific & Technical Instruments,13,38.46
+2025-09-11,Semiconductor Equipment & Materials,63,23.81
+2025-09-11,Semiconductors,154,11.04
+2025-09-11,Software - Infrastructure,20,5.00
+2025-09-11,Specialty Industrial Machinery,84,17.86
+2025-09-12,Communication Equipment,70,11.43
+2025-09-12,Computer Hardware,111,15.32
+2025-09-12,Consumer Electronics,27,18.52
+2025-09-12,Electrical Equipment & Parts,76,15.79
+2025-09-12,Electronic Components,264,19.32
+2025-09-12,Electronics & Computer Distribution,35,8.57
+2025-09-12,Scientific & Technical Instruments,13,38.46
+2025-09-12,Semiconductor Equipment & Materials,63,23.81
+2025-09-12,Semiconductors,154,11.04
+2025-09-12,Software - Infrastructure,20,5.00
+2025-09-12,Specialty Industrial Machinery,84,15.48
+2025-09-15,Communication Equipment,70,5.71
+2025-09-15,Computer Hardware,111,14.41
+2025-09-15,Consumer Electronics,27,14.81
+2025-09-15,Electrical Equipment & Parts,76,15.79
+2025-09-15,Electronic Components,264,19.32
+2025-09-15,Electronics & Computer Distribution,35,8.57
+2025-09-15,Scientific & Technical Instruments,13,38.46
+2025-09-15,Semiconductor Equipment & Materials,63,25.40
+2025-09-15,Semiconductors,154,14.29
+2025-09-15,Software - Infrastructure,20,5.00
+2025-09-15,Specialty Industrial Machinery,84,14.29
+2025-09-16,Communication Equipment,70,7.14
+2025-09-16,Computer Hardware,111,14.41
+2025-09-16,Consumer Electronics,27,14.81
+2025-09-16,Electrical Equipment & Parts,76,14.47
+2025-09-16,Electronic Components,264,18.94
+2025-09-16,Electronics & Computer Distribution,35,8.57
+2025-09-16,Scientific & Technical Instruments,13,38.46
+2025-09-16,Semiconductor Equipment & Materials,63,25.40
+2025-09-16,Semiconductors,154,13.64
+2025-09-16,Software - Infrastructure,20,5.00
+2025-09-16,Specialty Industrial Machinery,84,14.29
+2025-09-17,Communication Equipment,70,11.43
+2025-09-17,Computer Hardware,111,15.32
+2025-09-17,Consumer Electronics,27,14.81
+2025-09-17,Electrical Equipment & Parts,76,14.47
+2025-09-17,Electronic Components,264,20.08
+2025-09-17,Electronics & Computer Distribution,35,8.57
+2025-09-17,Scientific & Technical Instruments,13,38.46
+2025-09-17,Semiconductor Equipment & Materials,63,28.57
+2025-09-17,Semiconductors,154,15.58
+2025-09-17,Software - Infrastructure,20,5.00
+2025-09-17,Specialty Industrial Machinery,84,15.48
+2025-09-18,Communication Equipment,70,11.43
+2025-09-18,Computer Hardware,111,18.92
+2025-09-18,Consumer Electronics,27,14.81
+2025-09-18,Electrical Equipment & Parts,76,13.16
+2025-09-18,Electronic Components,264,22.73
+2025-09-18,Electronics & Computer Distribution,35,8.57
+2025-09-18,Scientific & Technical Instruments,13,38.46
+2025-09-18,Semiconductor Equipment & Materials,63,38.10
+2025-09-18,Semiconductors,154,20.78
+2025-09-18,Software - Infrastructure,20,5.00
+2025-09-18,Specialty Industrial Machinery,84,17.86
+2025-09-19,Communication Equipment,70,14.29
+2025-09-19,Computer Hardware,111,18.02
+2025-09-19,Consumer Electronics,27,14.81
+2025-09-19,Electrical Equipment & Parts,76,13.16
+2025-09-19,Electronic Components,264,22.73
+2025-09-19,Electronics & Computer Distribution,35,8.57
+2025-09-19,Scientific & Technical Instruments,13,38.46
+2025-09-19,Semiconductor Equipment & Materials,63,41.27
+2025-09-19,Semiconductors,154,18.83
+2025-09-19,Software - Infrastructure,20,5.00
+2025-09-19,Specialty Industrial Machinery,84,19.05
+2025-09-22,Communication Equipment,70,11.43
+2025-09-22,Computer Hardware,111,16.22
+2025-09-22,Consumer Electronics,27,14.81
+2025-09-22,Electrical Equipment & Parts,76,13.16
+2025-09-22,Electronic Components,264,22.35
+2025-09-22,Electronics & Computer Distribution,35,8.57
+2025-09-22,Scientific & Technical Instruments,13,38.46
+2025-09-22,Semiconductor Equipment & Materials,63,42.86
+2025-09-22,Semiconductors,154,17.53
+2025-09-22,Software - Infrastructure,20,5.00
+2025-09-22,Specialty Industrial Machinery,84,16.67
+2025-09-23,Communication Equipment,70,8.57
+2025-09-23,Computer Hardware,111,14.41
+2025-09-23,Consumer Electronics,27,14.81
+2025-09-23,Electrical Equipment & Parts,76,14.47
+2025-09-23,Electronic Components,264,21.97
+2025-09-23,Electronics & Computer Distribution,35,8.57
+2025-09-23,Scientific & Technical Instruments,13,46.15
+2025-09-23,Semiconductor Equipment & Materials,63,34.92
+2025-09-23,Semiconductors,154,16.23
+2025-09-23,Software - Infrastructure,20,5.00
+2025-09-23,Specialty Industrial Machinery,84,16.67
+2025-09-24,Communication Equipment,70,10.00
+2025-09-24,Computer Hardware,111,13.51
+2025-09-24,Consumer Electronics,27,18.52
+2025-09-24,Electrical Equipment & Parts,76,13.16
+2025-09-24,Electronic Components,264,22.35
+2025-09-24,Electronics & Computer Distribution,35,8.57
+2025-09-24,Scientific & Technical Instruments,13,46.15
+2025-09-24,Semiconductor Equipment & Materials,63,34.92
+2025-09-24,Semiconductors,154,16.23
+2025-09-24,Software - Infrastructure,20,5.00
+2025-09-24,Specialty Industrial Machinery,84,16.67
+2025-09-25,Communication Equipment,70,4.29
+2025-09-25,Computer Hardware,111,14.41
+2025-09-25,Consumer Electronics,27,14.81
+2025-09-25,Electrical Equipment & Parts,76,13.16
+2025-09-25,Electronic Components,264,21.97
+2025-09-25,Electronics & Computer Distribution,35,8.57
+2025-09-25,Scientific & Technical Instruments,13,38.46
+2025-09-25,Semiconductor Equipment & Materials,63,34.92
+2025-09-25,Semiconductors,154,12.34
+2025-09-25,Software - Infrastructure,20,0.00
+2025-09-25,Specialty Industrial Machinery,84,15.48
+2025-09-26,Communication Equipment,70,5.71
+2025-09-26,Computer Hardware,111,12.61
+2025-09-26,Consumer Electronics,27,14.81
+2025-09-26,Electrical Equipment & Parts,76,14.47
+2025-09-26,Electronic Components,264,21.59
+2025-09-26,Electronics & Computer Distribution,35,8.57
+2025-09-26,Scientific & Technical Instruments,13,30.77
+2025-09-26,Semiconductor Equipment & Materials,63,31.75
+2025-09-26,Semiconductors,154,12.34
+2025-09-26,Software - Infrastructure,20,0.00
+2025-09-26,Specialty Industrial Machinery,84,17.86
+2025-09-30,Communication Equipment,70,4.29
+2025-09-30,Computer Hardware,111,15.32
+2025-09-30,Consumer Electronics,27,14.81
+2025-09-30,Electrical Equipment & Parts,76,17.11
+2025-09-30,Electronic Components,264,21.21
+2025-09-30,Electronics & Computer Distribution,35,8.57
+2025-09-30,Scientific & Technical Instruments,13,38.46
+2025-09-30,Semiconductor Equipment & Materials,63,33.33
+2025-09-30,Semiconductors,154,14.29
+2025-09-30,Software - Infrastructure,20,0.00
+2025-09-30,Specialty Industrial Machinery,84,21.43
+2025-10-01,Communication Equipment,70,8.57
+2025-10-01,Computer Hardware,111,18.02
+2025-10-01,Consumer Electronics,27,18.52
+2025-10-01,Electrical Equipment & Parts,76,19.74
+2025-10-01,Electronic Components,264,20.45
+2025-10-01,Electronics & Computer Distribution,35,8.57
+2025-10-01,Scientific & Technical Instruments,13,30.77
+2025-10-01,Semiconductor Equipment & Materials,63,39.68
+2025-10-01,Semiconductors,154,16.88
+2025-10-01,Software - Infrastructure,20,0.00
+2025-10-01,Specialty Industrial Machinery,84,23.81
+2025-10-02,Communication Equipment,70,8.57
+2025-10-02,Computer Hardware,111,16.22
+2025-10-02,Consumer Electronics,27,18.52
+2025-10-02,Electrical Equipment & Parts,76,19.74
+2025-10-02,Electronic Components,264,20.08
+2025-10-02,Electronics & Computer Distribution,35,5.71
+2025-10-02,Scientific & Technical Instruments,13,30.77
+2025-10-02,Semiconductor Equipment & Materials,63,39.68
+2025-10-02,Semiconductors,154,17.53
+2025-10-02,Software - Infrastructure,20,0.00
+2025-10-02,Specialty Industrial Machinery,84,20.24
+2025-10-03,Communication Equipment,70,10.00
+2025-10-03,Computer Hardware,111,16.22
+2025-10-03,Consumer Electronics,27,18.52
+2025-10-03,Electrical Equipment & Parts,76,19.74
+2025-10-03,Electronic Components,264,21.59
+2025-10-03,Electronics & Computer Distribution,35,8.57
+2025-10-03,Scientific & Technical Instruments,13,30.77
+2025-10-03,Semiconductor Equipment & Materials,63,42.86
+2025-10-03,Semiconductors,154,16.88
+2025-10-03,Software - Infrastructure,20,0.00
+2025-10-03,Specialty Industrial Machinery,84,17.86
+2025-10-07,Communication Equipment,70,8.57
+2025-10-07,Computer Hardware,111,24.32
+2025-10-07,Consumer Electronics,27,18.52
+2025-10-07,Electrical Equipment & Parts,76,21.05
+2025-10-07,Electronic Components,264,23.11
+2025-10-07,Electronics & Computer Distribution,35,14.29
+2025-10-07,Scientific & Technical Instruments,13,30.77
+2025-10-07,Semiconductor Equipment & Materials,63,47.62
+2025-10-07,Semiconductors,154,23.38
+2025-10-07,Software - Infrastructure,20,0.00
+2025-10-07,Specialty Industrial Machinery,84,26.19
+2025-10-08,Communication Equipment,70,8.57
+2025-10-08,Computer Hardware,111,24.32
+2025-10-08,Consumer Electronics,27,18.52
+2025-10-08,Electrical Equipment & Parts,76,23.68
+2025-10-08,Electronic Components,264,22.35
+2025-10-08,Electronics & Computer Distribution,35,11.43
+2025-10-08,Scientific & Technical Instruments,13,30.77
+2025-10-08,Semiconductor Equipment & Materials,63,49.21
+2025-10-08,Semiconductors,154,25.97
+2025-10-08,Software - Infrastructure,20,0.00
+2025-10-08,Specialty Industrial Machinery,84,26.19
+2025-10-09,Communication Equipment,70,8.57
+2025-10-09,Computer Hardware,111,23.42
+2025-10-09,Consumer Electronics,27,18.52
+2025-10-09,Electrical Equipment & Parts,76,22.37
+2025-10-09,Electronic Components,264,22.35
+2025-10-09,Electronics & Computer Distribution,35,11.43
+2025-10-09,Scientific & Technical Instruments,13,30.77
+2025-10-09,Semiconductor Equipment & Materials,63,47.62
+2025-10-09,Semiconductors,154,25.32
+2025-10-09,Software - Infrastructure,20,0.00
+2025-10-09,Specialty Industrial Machinery,84,23.81
+2025-10-13,Communication Equipment,70,8.57
+2025-10-13,Computer Hardware,111,25.23
+2025-10-13,Consumer Electronics,27,11.11
+2025-10-13,Electrical Equipment & Parts,76,23.68
+2025-10-13,Electronic Components,264,21.97
+2025-10-13,Electronics & Computer Distribution,35,11.43
+2025-10-13,Scientific & Technical Instruments,13,30.77
+2025-10-13,Semiconductor Equipment & Materials,63,46.03
+2025-10-13,Semiconductors,154,23.38
+2025-10-13,Software - Infrastructure,20,0.00
+2025-10-13,Specialty Industrial Machinery,84,22.62
+2025-10-14,Communication Equipment,70,7.14
+2025-10-14,Computer Hardware,111,22.52
+2025-10-14,Consumer Electronics,27,11.11
+2025-10-14,Electrical Equipment & Parts,76,21.05
+2025-10-14,Electronic Components,264,20.83
+2025-10-14,Electronics & Computer Distribution,35,11.43
+2025-10-14,Scientific & Technical Instruments,13,30.77
+2025-10-14,Semiconductor Equipment & Materials,63,46.03
+2025-10-14,Semiconductors,154,21.43
+2025-10-14,Software - Infrastructure,20,0.00
+2025-10-14,Specialty Industrial Machinery,84,21.43
+2025-10-15,Communication Equipment,70,8.57
+2025-10-15,Computer Hardware,111,22.52
+2025-10-15,Consumer Electronics,27,11.11
+2025-10-15,Electrical Equipment & Parts,76,22.37
+2025-10-15,Electronic Components,264,21.21
+2025-10-15,Electronics & Computer Distribution,35,11.43
+2025-10-15,Scientific & Technical Instruments,13,38.46
+2025-10-15,Semiconductor Equipment & Materials,63,49.21
+2025-10-15,Semiconductors,154,21.43
+2025-10-15,Software - Infrastructure,20,0.00
+2025-10-15,Specialty Industrial Machinery,84,22.62
+2025-10-16,Communication Equipment,70,7.14
+2025-10-16,Computer Hardware,111,23.42
+2025-10-16,Consumer Electronics,27,11.11
+2025-10-16,Electrical Equipment & Parts,76,21.05
+2025-10-16,Electronic Components,264,21.21
+2025-10-16,Electronics & Computer Distribution,35,14.29
+2025-10-16,Scientific & Technical Instruments,13,38.46
+2025-10-16,Semiconductor Equipment & Materials,63,50.79
+2025-10-16,Semiconductors,154,23.38
+2025-10-16,Software - Infrastructure,20,0.00
+2025-10-16,Specialty Industrial Machinery,84,22.62
+2025-10-17,Communication Equipment,70,7.14
+2025-10-17,Computer Hardware,111,21.62
+2025-10-17,Consumer Electronics,27,11.11
+2025-10-17,Electrical Equipment & Parts,76,19.74
+2025-10-17,Electronic Components,264,21.97
+2025-10-17,Electronics & Computer Distribution,35,14.29
+2025-10-17,Scientific & Technical Instruments,13,38.46
+2025-10-17,Semiconductor Equipment & Materials,63,49.21
+2025-10-17,Semiconductors,154,23.38
+2025-10-17,Software - Infrastructure,20,0.00
+2025-10-17,Specialty Industrial Machinery,84,22.62
+2025-10-20,Communication Equipment,70,7.14
+2025-10-20,Computer Hardware,111,23.42
+2025-10-20,Consumer Electronics,27,11.11
+2025-10-20,Electrical Equipment & Parts,76,19.74
+2025-10-20,Electronic Components,264,21.97
+2025-10-20,Electronics & Computer Distribution,35,11.43
+2025-10-20,Scientific & Technical Instruments,13,38.46
+2025-10-20,Semiconductor Equipment & Materials,63,50.79
+2025-10-20,Semiconductors,154,24.68
+2025-10-20,Software - Infrastructure,20,0.00
+2025-10-20,Specialty Industrial Machinery,84,21.43
+2025-10-21,Communication Equipment,70,5.71
+2025-10-21,Computer Hardware,111,24.32
+2025-10-21,Consumer Electronics,27,11.11
+2025-10-21,Electrical Equipment & Parts,76,18.42
+2025-10-21,Electronic Components,264,22.73
+2025-10-21,Electronics & Computer Distribution,35,11.43
+2025-10-21,Scientific & Technical Instruments,13,38.46
+2025-10-21,Semiconductor Equipment & Materials,63,49.21
+2025-10-21,Semiconductors,154,23.38
+2025-10-21,Software - Infrastructure,20,5.00
+2025-10-21,Specialty Industrial Machinery,84,22.62
+2025-10-22,Communication Equipment,70,7.14
+2025-10-22,Computer Hardware,111,23.42
+2025-10-22,Consumer Electronics,27,11.11
+2025-10-22,Electrical Equipment & Parts,76,21.05
+2025-10-22,Electronic Components,264,23.48
+2025-10-22,Electronics & Computer Distribution,35,11.43
+2025-10-22,Scientific & Technical Instruments,13,46.15
+2025-10-22,Semiconductor Equipment & Materials,63,50.79
+2025-10-22,Semiconductors,154,25.32
+2025-10-22,Software - Infrastructure,20,5.00
+2025-10-22,Specialty Industrial Machinery,84,21.43
+2025-10-23,Communication Equipment,70,8.57
+2025-10-23,Computer Hardware,111,23.42
+2025-10-23,Consumer Electronics,27,14.81
+2025-10-23,Electrical Equipment & Parts,76,21.05
+2025-10-23,Electronic Components,264,24.24
+2025-10-23,Electronics & Computer Distribution,35,11.43
+2025-10-23,Scientific & Technical Instruments,13,46.15
+2025-10-23,Semiconductor Equipment & Materials,63,49.21
+2025-10-23,Semiconductors,154,25.97
+2025-10-23,Software - Infrastructure,20,5.00
+2025-10-23,Specialty Industrial Machinery,84,19.05
+2025-10-27,Communication Equipment,70,7.14
+2025-10-27,Computer Hardware,111,25.23
+2025-10-27,Consumer Electronics,27,11.11
+2025-10-27,Electrical Equipment & Parts,76,19.74
+2025-10-27,Electronic Components,264,22.73
+2025-10-27,Electronics & Computer Distribution,35,11.43
+2025-10-27,Scientific & Technical Instruments,13,38.46
+2025-10-27,Semiconductor Equipment & Materials,63,49.21
+2025-10-27,Semiconductors,154,25.32
+2025-10-27,Software - Infrastructure,20,5.00
+2025-10-27,Specialty Industrial Machinery,84,17.86
+2025-10-28,Communication Equipment,70,7.14
+2025-10-28,Computer Hardware,111,22.52
+2025-10-28,Consumer Electronics,27,11.11
+2025-10-28,Electrical Equipment & Parts,76,22.37
+2025-10-28,Electronic Components,264,22.73
+2025-10-28,Electronics & Computer Distribution,35,11.43
+2025-10-28,Scientific & Technical Instruments,13,38.46
+2025-10-28,Semiconductor Equipment & Materials,63,46.03
+2025-10-28,Semiconductors,154,26.62
+2025-10-28,Software - Infrastructure,20,5.00
+2025-10-28,Specialty Industrial Machinery,84,17.86
+2025-10-29,Communication Equipment,70,7.14
+2025-10-29,Computer Hardware,111,23.42
+2025-10-29,Consumer Electronics,27,7.41
+2025-10-29,Electrical Equipment & Parts,76,21.05
+2025-10-29,Electronic Components,264,23.48
+2025-10-29,Electronics & Computer Distribution,35,8.57
+2025-10-29,Scientific & Technical Instruments,13,38.46
+2025-10-29,Semiconductor Equipment & Materials,63,47.62
+2025-10-29,Semiconductors,154,25.32
+2025-10-29,Software - Infrastructure,20,5.00
+2025-10-29,Specialty Industrial Machinery,84,19.05
+2025-10-30,Communication Equipment,70,8.57
+2025-10-30,Computer Hardware,111,21.62
+2025-10-30,Consumer Electronics,27,7.41
+2025-10-30,Electrical Equipment & Parts,76,22.37
+2025-10-30,Electronic Components,264,22.73
+2025-10-30,Electronics & Computer Distribution,35,8.57
+2025-10-30,Scientific & Technical Instruments,13,38.46
+2025-10-30,Semiconductor Equipment & Materials,63,47.62
+2025-10-30,Semiconductors,154,23.38
+2025-10-30,Software - Infrastructure,20,5.00
+2025-10-30,Specialty Industrial Machinery,84,19.05
+2025-10-31,Communication Equipment,70,7.14
+2025-10-31,Computer Hardware,111,19.82
+2025-10-31,Consumer Electronics,27,7.41
+2025-10-31,Electrical Equipment & Parts,76,22.37
+2025-10-31,Electronic Components,264,23.11
+2025-10-31,Electronics & Computer Distribution,35,8.57
+2025-10-31,Scientific & Technical Instruments,13,38.46
+2025-10-31,Semiconductor Equipment & Materials,63,49.21
+2025-10-31,Semiconductors,154,24.03
+2025-10-31,Software - Infrastructure,20,5.00
+2025-10-31,Specialty Industrial Machinery,84,19.05
+2025-11-03,Communication Equipment,70,7.14
+2025-11-03,Computer Hardware,111,23.42
+2025-11-03,Consumer Electronics,27,11.11
+2025-11-03,Electrical Equipment & Parts,76,22.37
+2025-11-03,Electronic Components,264,23.48
+2025-11-03,Electronics & Computer Distribution,35,8.57
+2025-11-03,Scientific & Technical Instruments,13,38.46
+2025-11-03,Semiconductor Equipment & Materials,63,47.62
+2025-11-03,Semiconductors,154,26.62
+2025-11-03,Software - Infrastructure,20,5.00
+2025-11-03,Specialty Industrial Machinery,84,15.48
+2025-11-04,Communication Equipment,70,7.14
+2025-11-04,Computer Hardware,111,20.72
+2025-11-04,Consumer Electronics,27,7.41
+2025-11-04,Electrical Equipment & Parts,76,19.74
+2025-11-04,Electronic Components,264,22.73
+2025-11-04,Electronics & Computer Distribution,35,11.43
+2025-11-04,Scientific & Technical Instruments,13,30.77
+2025-11-04,Semiconductor Equipment & Materials,63,44.44
+2025-11-04,Semiconductors,154,23.38
+2025-11-04,Software - Infrastructure,20,5.00
+2025-11-04,Specialty Industrial Machinery,84,14.29
+2025-11-05,Communication Equipment,70,5.71
+2025-11-05,Computer Hardware,111,19.82
+2025-11-05,Consumer Electronics,27,11.11
+2025-11-05,Electrical Equipment & Parts,76,19.74
+2025-11-05,Electronic Components,264,25.00
+2025-11-05,Electronics & Computer Distribution,35,11.43
+2025-11-05,Scientific & Technical Instruments,13,30.77
+2025-11-05,Semiconductor Equipment & Materials,63,47.62
+2025-11-05,Semiconductors,154,24.03
+2025-11-05,Software - Infrastructure,20,5.00
+2025-11-05,Specialty Industrial Machinery,84,17.86
+2025-11-06,Communication Equipment,70,5.71
+2025-11-06,Computer Hardware,111,18.92
+2025-11-06,Consumer Electronics,27,11.11
+2025-11-06,Electrical Equipment & Parts,76,22.37
+2025-11-06,Electronic Components,264,25.38
+2025-11-06,Electronics & Computer Distribution,35,8.57
+2025-11-06,Scientific & Technical Instruments,13,30.77
+2025-11-06,Semiconductor Equipment & Materials,63,44.44
+2025-11-06,Semiconductors,154,24.03
+2025-11-06,Software - Infrastructure,20,5.00
+2025-11-06,Specialty Industrial Machinery,84,16.67
+2025-11-07,Communication Equipment,70,8.57
+2025-11-07,Computer Hardware,111,19.82
+2025-11-07,Consumer Electronics,27,7.41
+2025-11-07,Electrical Equipment & Parts,76,19.74
+2025-11-07,Electronic Components,264,22.73
+2025-11-07,Electronics & Computer Distribution,35,8.57
+2025-11-07,Scientific & Technical Instruments,13,30.77
+2025-11-07,Semiconductor Equipment & Materials,63,42.86
+2025-11-07,Semiconductors,154,24.03
+2025-11-07,Software - Infrastructure,20,5.00
+2025-11-07,Specialty Industrial Machinery,84,17.86
+2025-11-10,Communication Equipment,70,5.71
+2025-11-10,Computer Hardware,111,17.12
+2025-11-10,Consumer Electronics,27,7.41
+2025-11-10,Electrical Equipment & Parts,76,19.74
+2025-11-10,Electronic Components,264,20.45
+2025-11-10,Electronics & Computer Distribution,35,8.57
+2025-11-10,Scientific & Technical Instruments,13,30.77
+2025-11-10,Semiconductor Equipment & Materials,63,42.86
+2025-11-10,Semiconductors,154,22.73
+2025-11-10,Software - Infrastructure,20,5.00
+2025-11-10,Specialty Industrial Machinery,84,16.67
+2025-11-11,Communication Equipment,70,5.71
+2025-11-11,Computer Hardware,111,18.02
+2025-11-11,Consumer Electronics,27,7.41
+2025-11-11,Electrical Equipment & Parts,76,18.42
+2025-11-11,Electronic Components,264,23.11
+2025-11-11,Electronics & Computer Distribution,35,8.57
+2025-11-11,Scientific & Technical Instruments,13,30.77
+2025-11-11,Semiconductor Equipment & Materials,63,41.27
+2025-11-11,Semiconductors,154,22.73
+2025-11-11,Software - Infrastructure,20,5.00
+2025-11-11,Specialty Industrial Machinery,84,15.48
+2025-11-12,Communication Equipment,70,10.00
+2025-11-12,Computer Hardware,111,16.22
+2025-11-12,Consumer Electronics,27,7.41
+2025-11-12,Electrical Equipment & Parts,76,17.11
+2025-11-12,Electronic Components,264,22.35
+2025-11-12,Electronics & Computer Distribution,35,11.43
+2025-11-12,Scientific & Technical Instruments,13,30.77
+2025-11-12,Semiconductor Equipment & Materials,63,41.27
+2025-11-12,Semiconductors,154,22.73
+2025-11-12,Software - Infrastructure,20,5.00
+2025-11-12,Specialty Industrial Machinery,84,13.10
+2025-11-13,Communication Equipment,70,10.00
+2025-11-13,Computer Hardware,111,18.02
+2025-11-13,Consumer Electronics,27,7.41
+2025-11-13,Electrical Equipment & Parts,76,19.74
+2025-11-13,Electronic Components,265,23.77
+2025-11-13,Electronics & Computer Distribution,35,11.43
+2025-11-13,Scientific & Technical Instruments,13,23.08
+2025-11-13,Semiconductor Equipment & Materials,63,38.10
+2025-11-13,Semiconductors,154,23.38
+2025-11-13,Software - Infrastructure,20,5.00
+2025-11-13,Specialty Industrial Machinery,84,11.90
+2025-11-14,Communication Equipment,70,8.57
+2025-11-14,Computer Hardware,111,13.51
+2025-11-14,Consumer Electronics,27,7.41
+2025-11-14,Electrical Equipment & Parts,76,18.42
+2025-11-14,Electronic Components,265,21.13
+2025-11-14,Electronics & Computer Distribution,35,8.57
+2025-11-14,Scientific & Technical Instruments,13,23.08
+2025-11-14,Semiconductor Equipment & Materials,63,31.75
+2025-11-14,Semiconductors,154,20.13
+2025-11-14,Software - Infrastructure,20,5.00
+2025-11-14,Specialty Industrial Machinery,84,9.52
+2025-11-17,Communication Equipment,70,8.57
+2025-11-17,Computer Hardware,111,13.51
+2025-11-17,Consumer Electronics,27,7.41
+2025-11-17,Electrical Equipment & Parts,76,19.74
+2025-11-17,Electronic Components,265,20.38
+2025-11-17,Electronics & Computer Distribution,35,8.57
+2025-11-17,Scientific & Technical Instruments,13,23.08
+2025-11-17,Semiconductor Equipment & Materials,63,33.33
+2025-11-17,Semiconductors,154,21.43
+2025-11-17,Software - Infrastructure,20,0.00
+2025-11-17,Specialty Industrial Machinery,84,10.71
+2025-11-18,Communication Equipment,70,4.29
+2025-11-18,Computer Hardware,111,13.51
+2025-11-18,Consumer Electronics,27,7.41
+2025-11-18,Electrical Equipment & Parts,76,17.11
+2025-11-18,Electronic Components,265,20.00
+2025-11-18,Electronics & Computer Distribution,35,8.57
+2025-11-18,Scientific & Technical Instruments,13,15.38
+2025-11-18,Semiconductor Equipment & Materials,63,28.57
+2025-11-18,Semiconductors,154,20.13
+2025-11-18,Software - Infrastructure,20,0.00
+2025-11-18,Specialty Industrial Machinery,84,8.33
+2025-11-19,Communication Equipment,70,4.29
+2025-11-19,Computer Hardware,111,12.61
+2025-11-19,Consumer Electronics,27,7.41
+2025-11-19,Electrical Equipment & Parts,76,17.11
+2025-11-19,Electronic Components,265,19.25
+2025-11-19,Electronics & Computer Distribution,35,8.57
+2025-11-19,Scientific & Technical Instruments,13,15.38
+2025-11-19,Semiconductor Equipment & Materials,63,26.98
+2025-11-19,Semiconductors,154,20.78
+2025-11-19,Software - Infrastructure,20,0.00
+2025-11-19,Specialty Industrial Machinery,84,9.52
+2025-11-20,Communication Equipment,70,8.57
+2025-11-20,Computer Hardware,112,14.29
+2025-11-20,Consumer Electronics,27,7.41
+2025-11-20,Electrical Equipment & Parts,76,17.11
+2025-11-20,Electronic Components,265,21.13
+2025-11-20,Electronics & Computer Distribution,35,8.57
+2025-11-20,Scientific & Technical Instruments,13,23.08
+2025-11-20,Semiconductor Equipment & Materials,63,34.92
+2025-11-20,Semiconductors,154,21.43
+2025-11-20,Software - Infrastructure,20,0.00
+2025-11-20,Specialty Industrial Machinery,84,13.10
+2025-11-21,Communication Equipment,70,8.57
+2025-11-21,Computer Hardware,112,11.61
+2025-11-21,Consumer Electronics,27,7.41
+2025-11-21,Electrical Equipment & Parts,76,15.79
+2025-11-21,Electronic Components,265,19.25
+2025-11-21,Electronics & Computer Distribution,35,8.57
+2025-11-21,Scientific & Technical Instruments,13,15.38
+2025-11-21,Semiconductor Equipment & Materials,63,25.40
+2025-11-21,Semiconductors,154,18.18
+2025-11-21,Software - Infrastructure,20,0.00
+2025-11-21,Specialty Industrial Machinery,84,10.71
+2025-11-24,Communication Equipment,70,8.57
+2025-11-24,Computer Hardware,112,10.71
+2025-11-24,Consumer Electronics,27,7.41
+2025-11-24,Electrical Equipment & Parts,76,15.79
+2025-11-24,Electronic Components,265,17.74
+2025-11-24,Electronics & Computer Distribution,35,8.57
+2025-11-24,Scientific & Technical Instruments,13,15.38
+2025-11-24,Semiconductor Equipment & Materials,63,28.57
+2025-11-24,Semiconductors,154,18.83
+2025-11-24,Software - Infrastructure,20,0.00
+2025-11-24,Specialty Industrial Machinery,84,11.90
+2025-11-25,Communication Equipment,70,11.43
+2025-11-25,Computer Hardware,112,12.50
+2025-11-25,Consumer Electronics,27,7.41
+2025-11-25,Electrical Equipment & Parts,76,13.16
+2025-11-25,Electronic Components,265,19.25
+2025-11-25,Electronics & Computer Distribution,35,8.57
+2025-11-25,Scientific & Technical Instruments,13,23.08
+2025-11-25,Semiconductor Equipment & Materials,63,26.98
+2025-11-25,Semiconductors,154,19.48
+2025-11-25,Software - Infrastructure,20,0.00
+2025-11-25,Specialty Industrial Machinery,84,11.90
+2025-11-26,Communication Equipment,70,12.86
+2025-11-26,Computer Hardware,112,11.61
+2025-11-26,Consumer Electronics,27,7.41
+2025-11-26,Electrical Equipment & Parts,76,13.16
+2025-11-26,Electronic Components,265,20.00
+2025-11-26,Electronics & Computer Distribution,35,5.71
+2025-11-26,Scientific & Technical Instruments,13,23.08
+2025-11-26,Semiconductor Equipment & Materials,63,28.57
+2025-11-26,Semiconductors,154,18.83
+2025-11-26,Software - Infrastructure,20,0.00
+2025-11-26,Specialty Industrial Machinery,84,11.90
+2025-11-27,Communication Equipment,70,11.43
+2025-11-27,Computer Hardware,112,12.50
+2025-11-27,Consumer Electronics,27,7.41
+2025-11-27,Electrical Equipment & Parts,76,13.16
+2025-11-27,Electronic Components,265,20.00
+2025-11-27,Electronics & Computer Distribution,35,8.57
+2025-11-27,Scientific & Technical Instruments,13,30.77
+2025-11-27,Semiconductor Equipment & Materials,63,30.16
+2025-11-27,Semiconductors,154,20.78
+2025-11-27,Software - Infrastructure,20,5.00
+2025-11-27,Specialty Industrial Machinery,84,13.10
+2025-11-28,Communication Equipment,70,12.86
+2025-11-28,Computer Hardware,112,12.50
+2025-11-28,Consumer Electronics,27,7.41
+2025-11-28,Electrical Equipment & Parts,76,15.79
+2025-11-28,Electronic Components,265,21.13
+2025-11-28,Electronics & Computer Distribution,35,8.57
+2025-11-28,Scientific & Technical Instruments,13,30.77
+2025-11-28,Semiconductor Equipment & Materials,63,33.33
+2025-11-28,Semiconductors,154,21.43
+2025-11-28,Software - Infrastructure,20,5.00
+2025-11-28,Specialty Industrial Machinery,84,14.29
+2025-12-01,Communication Equipment,70,11.43
+2025-12-01,Computer Hardware,112,13.39
+2025-12-01,Consumer Electronics,27,3.70
+2025-12-01,Electrical Equipment & Parts,76,13.16
+2025-12-01,Electronic Components,265,20.75
+2025-12-01,Electronics & Computer Distribution,35,11.43
+2025-12-01,Scientific & Technical Instruments,13,30.77
+2025-12-01,Semiconductor Equipment & Materials,63,31.75
+2025-12-01,Semiconductors,154,21.43
+2025-12-01,Software - Infrastructure,20,5.00
+2025-12-01,Specialty Industrial Machinery,84,14.29
+2025-12-02,Communication Equipment,70,11.43
+2025-12-02,Computer Hardware,112,12.50
+2025-12-02,Consumer Electronics,27,7.41
+2025-12-02,Electrical Equipment & Parts,76,13.16
+2025-12-02,Electronic Components,265,20.75
+2025-12-02,Electronics & Computer Distribution,35,11.43
+2025-12-02,Scientific & Technical Instruments,13,30.77
+2025-12-02,Semiconductor Equipment & Materials,63,33.33
+2025-12-02,Semiconductors,154,21.43
+2025-12-02,Software - Infrastructure,20,5.00
+2025-12-02,Specialty Industrial Machinery,84,14.29
+2025-12-03,Communication Equipment,70,12.86
+2025-12-03,Computer Hardware,112,15.18
+2025-12-03,Consumer Electronics,27,7.41
+2025-12-03,Electrical Equipment & Parts,76,15.79
+2025-12-03,Electronic Components,265,21.89
+2025-12-03,Electronics & Computer Distribution,35,11.43
+2025-12-03,Scientific & Technical Instruments,13,23.08
+2025-12-03,Semiconductor Equipment & Materials,63,34.92
+2025-12-03,Semiconductors,154,24.68
+2025-12-03,Software - Infrastructure,20,5.00
+2025-12-03,Specialty Industrial Machinery,84,14.29
+2025-12-04,Communication Equipment,70,12.86
+2025-12-04,Computer Hardware,112,15.18
+2025-12-04,Consumer Electronics,27,3.70
+2025-12-04,Electrical Equipment & Parts,76,14.47
+2025-12-04,Electronic Components,265,21.89
+2025-12-04,Electronics & Computer Distribution,35,11.43
+2025-12-04,Scientific & Technical Instruments,13,30.77
+2025-12-04,Semiconductor Equipment & Materials,63,36.51
+2025-12-04,Semiconductors,154,22.73
+2025-12-04,Software - Infrastructure,20,5.00
+2025-12-04,Specialty Industrial Machinery,84,14.29
+2025-12-05,Communication Equipment,70,12.86
+2025-12-05,Computer Hardware,112,16.07
+2025-12-05,Consumer Electronics,27,7.41
+2025-12-05,Electrical Equipment & Parts,76,13.16
+2025-12-05,Electronic Components,265,21.13
+2025-12-05,Electronics & Computer Distribution,35,11.43
+2025-12-05,Scientific & Technical Instruments,13,23.08
+2025-12-05,Semiconductor Equipment & Materials,63,34.92
+2025-12-05,Semiconductors,154,22.73
+2025-12-05,Software - Infrastructure,20,5.00
+2025-12-05,Specialty Industrial Machinery,84,14.29
+2025-12-08,Communication Equipment,70,12.86
+2025-12-08,Computer Hardware,112,16.07
+2025-12-08,Consumer Electronics,27,7.41
+2025-12-08,Electrical Equipment & Parts,76,15.79
+2025-12-08,Electronic Components,265,22.26
+2025-12-08,Electronics & Computer Distribution,35,11.43
+2025-12-08,Scientific & Technical Instruments,13,23.08
+2025-12-08,Semiconductor Equipment & Materials,63,36.51
+2025-12-08,Semiconductors,154,22.73
+2025-12-08,Software - Infrastructure,20,0.00
+2025-12-08,Specialty Industrial Machinery,84,14.29
+2025-12-09,Communication Equipment,70,12.86
+2025-12-09,Computer Hardware,112,14.29
+2025-12-09,Consumer Electronics,27,11.11
+2025-12-09,Electrical Equipment & Parts,76,15.79
+2025-12-09,Electronic Components,265,22.64
+2025-12-09,Electronics & Computer Distribution,35,11.43
+2025-12-09,Scientific & Technical Instruments,13,23.08
+2025-12-09,Semiconductor Equipment & Materials,63,34.92
+2025-12-09,Semiconductors,154,23.38
+2025-12-09,Software - Infrastructure,20,0.00
+2025-12-09,Specialty Industrial Machinery,84,15.48
+2025-12-10,Communication Equipment,70,12.86
+2025-12-10,Computer Hardware,112,13.39
+2025-12-10,Consumer Electronics,27,7.41
+2025-12-10,Electrical Equipment & Parts,76,14.47
+2025-12-10,Electronic Components,265,22.26
+2025-12-10,Electronics & Computer Distribution,35,8.57
+2025-12-10,Scientific & Technical Instruments,13,15.38
+2025-12-10,Semiconductor Equipment & Materials,63,31.75
+2025-12-10,Semiconductors,154,22.08
+2025-12-10,Software - Infrastructure,20,0.00
+2025-12-10,Specialty Industrial Machinery,84,15.48
+2025-12-11,Communication Equipment,70,11.43
+2025-12-11,Computer Hardware,112,15.18
+2025-12-11,Consumer Electronics,27,7.41
+2025-12-11,Electrical Equipment & Parts,76,14.47
+2025-12-11,Electronic Components,265,21.51
+2025-12-11,Electronics & Computer Distribution,35,8.57
+2025-12-11,Scientific & Technical Instruments,13,15.38
+2025-12-11,Semiconductor Equipment & Materials,63,33.33
+2025-12-11,Semiconductors,154,20.78
+2025-12-11,Software - Infrastructure,20,0.00
+2025-12-11,Specialty Industrial Machinery,84,14.29
+2025-12-12,Communication Equipment,70,14.29
+2025-12-12,Computer Hardware,112,16.07
+2025-12-12,Consumer Electronics,27,3.70
+2025-12-12,Electrical Equipment & Parts,76,17.11
+2025-12-12,Electronic Components,265,21.89
+2025-12-12,Electronics & Computer Distribution,35,8.57
+2025-12-12,Scientific & Technical Instruments,13,15.38
+2025-12-12,Semiconductor Equipment & Materials,63,31.75
+2025-12-12,Semiconductors,154,20.13
+2025-12-12,Software - Infrastructure,20,0.00
+2025-12-12,Specialty Industrial Machinery,84,14.29
+2025-12-15,Communication Equipment,70,15.71
+2025-12-15,Computer Hardware,112,15.18
+2025-12-15,Consumer Electronics,27,7.41
+2025-12-15,Electrical Equipment & Parts,76,17.11
+2025-12-15,Electronic Components,265,23.02
+2025-12-15,Electronics & Computer Distribution,35,8.57
+2025-12-15,Scientific & Technical Instruments,13,23.08
+2025-12-15,Semiconductor Equipment & Materials,63,34.92
+2025-12-15,Semiconductors,154,22.08
+2025-12-15,Software - Infrastructure,20,0.00
+2025-12-15,Specialty Industrial Machinery,84,16.67
+2025-12-16,Communication Equipment,70,14.29
+2025-12-16,Computer Hardware,112,14.29
+2025-12-16,Consumer Electronics,27,3.70
+2025-12-16,Electrical Equipment & Parts,76,18.42
+2025-12-16,Electronic Components,265,20.75
+2025-12-16,Electronics & Computer Distribution,35,8.57
+2025-12-16,Scientific & Technical Instruments,13,23.08
+2025-12-16,Semiconductor Equipment & Materials,63,30.16
+2025-12-16,Semiconductors,154,21.43
+2025-12-16,Software - Infrastructure,20,0.00
+2025-12-16,Specialty Industrial Machinery,84,15.48
+2025-12-17,Communication Equipment,70,14.29
+2025-12-17,Computer Hardware,112,13.39
+2025-12-17,Consumer Electronics,27,3.70
+2025-12-17,Electrical Equipment & Parts,76,18.42
+2025-12-17,Electronic Components,265,22.26
+2025-12-17,Electronics & Computer Distribution,35,8.57
+2025-12-17,Scientific & Technical Instruments,13,23.08
+2025-12-17,Semiconductor Equipment & Materials,63,31.75
+2025-12-17,Semiconductors,154,20.78
+2025-12-17,Software - Infrastructure,20,0.00
+2025-12-17,Specialty Industrial Machinery,84,17.86
+2025-12-18,Communication Equipment,70,14.29
+2025-12-18,Computer Hardware,112,12.50
+2025-12-18,Consumer Electronics,27,3.70
+2025-12-18,Electrical Equipment & Parts,76,19.74
+2025-12-18,Electronic Components,265,20.38
+2025-12-18,Electronics & Computer Distribution,35,8.57
+2025-12-18,Scientific & Technical Instruments,13,15.38
+2025-12-18,Semiconductor Equipment & Materials,63,31.75
+2025-12-18,Semiconductors,154,19.48
+2025-12-18,Software - Infrastructure,20,0.00
+2025-12-18,Specialty Industrial Machinery,84,16.67
+2025-12-19,Communication Equipment,70,14.29
+2025-12-19,Computer Hardware,112,15.18
+2025-12-19,Consumer Electronics,27,7.41
+2025-12-19,Electrical Equipment & Parts,76,18.42
+2025-12-19,Electronic Components,265,21.51
+2025-12-19,Electronics & Computer Distribution,35,8.57
+2025-12-19,Scientific & Technical Instruments,13,23.08
+2025-12-19,Semiconductor Equipment & Materials,63,31.75
+2025-12-19,Semiconductors,154,20.78
+2025-12-19,Software - Infrastructure,20,0.00
+2025-12-19,Specialty Industrial Machinery,84,16.67
+2025-12-22,Communication Equipment,70,15.71
+2025-12-22,Computer Hardware,112,17.86
+2025-12-22,Consumer Electronics,27,7.41
+2025-12-22,Electrical Equipment & Parts,76,19.74
+2025-12-22,Electronic Components,265,23.40
+2025-12-22,Electronics & Computer Distribution,35,11.43
+2025-12-22,Scientific & Technical Instruments,13,23.08
+2025-12-22,Semiconductor Equipment & Materials,63,34.92
+2025-12-22,Semiconductors,154,23.38
+2025-12-22,Software - Infrastructure,20,0.00
+2025-12-22,Specialty Industrial Machinery,84,19.05
+2025-12-23,Communication Equipment,70,17.14
+2025-12-23,Computer Hardware,112,16.96
+2025-12-23,Consumer Electronics,27,11.11
+2025-12-23,Electrical Equipment & Parts,76,18.42
+2025-12-23,Electronic Components,265,23.02
+2025-12-23,Electronics & Computer Distribution,35,11.43
+2025-12-23,Scientific & Technical Instruments,13,23.08
+2025-12-23,Semiconductor Equipment & Materials,63,33.33
+2025-12-23,Semiconductors,154,22.73
+2025-12-23,Software - Infrastructure,20,0.00
+2025-12-23,Specialty Industrial Machinery,84,16.67
+2025-12-24,Communication Equipment,70,15.71
+2025-12-24,Computer Hardware,112,16.96
+2025-12-24,Consumer Electronics,27,3.70
+2025-12-24,Electrical Equipment & Parts,76,17.11
+2025-12-24,Electronic Components,265,23.02
+2025-12-24,Electronics & Computer Distribution,35,14.29
+2025-12-24,Scientific & Technical Instruments,13,23.08
+2025-12-24,Semiconductor Equipment & Materials,63,31.75
+2025-12-24,Semiconductors,155,21.29
+2025-12-24,Software - Infrastructure,20,0.00
+2025-12-24,Specialty Industrial Machinery,84,15.48
+2025-12-26,Communication Equipment,70,15.71
+2025-12-26,Computer Hardware,112,16.96
+2025-12-26,Consumer Electronics,27,3.70
+2025-12-26,Electrical Equipment & Parts,76,17.11
+2025-12-26,Electronic Components,265,23.02
+2025-12-26,Electronics & Computer Distribution,35,11.43
+2025-12-26,Scientific & Technical Instruments,13,23.08
+2025-12-26,Semiconductor Equipment & Materials,63,31.75
+2025-12-26,Semiconductors,155,22.58
+2025-12-26,Software - Infrastructure,20,0.00
+2025-12-26,Specialty Industrial Machinery,84,17.86
+2025-12-29,Communication Equipment,70,15.71
+2025-12-29,Computer Hardware,112,16.96
+2025-12-29,Consumer Electronics,27,3.70
+2025-12-29,Electrical Equipment & Parts,76,15.79
+2025-12-29,Electronic Components,265,23.02
+2025-12-29,Electronics & Computer Distribution,35,11.43
+2025-12-29,Scientific & Technical Instruments,13,23.08
+2025-12-29,Semiconductor Equipment & Materials,63,31.75
+2025-12-29,Semiconductors,155,23.87
+2025-12-29,Software - Infrastructure,20,0.00
+2025-12-29,Specialty Industrial Machinery,84,17.86
+2025-12-30,Communication Equipment,70,15.71
+2025-12-30,Computer Hardware,112,18.75
+2025-12-30,Consumer Electronics,27,3.70
+2025-12-30,Electrical Equipment & Parts,76,15.79
+2025-12-30,Electronic Components,265,21.89
+2025-12-30,Electronics & Computer Distribution,35,11.43
+2025-12-30,Scientific & Technical Instruments,13,15.38
+2025-12-30,Semiconductor Equipment & Materials,63,34.92
+2025-12-30,Semiconductors,155,24.52
+2025-12-30,Software - Infrastructure,20,0.00
+2025-12-30,Specialty Industrial Machinery,84,17.86
+2025-12-31,Communication Equipment,70,15.71
+2025-12-31,Computer Hardware,112,19.64
+2025-12-31,Consumer Electronics,27,7.41
+2025-12-31,Electrical Equipment & Parts,76,17.11
+2025-12-31,Electronic Components,265,23.40
+2025-12-31,Electronics & Computer Distribution,35,11.43
+2025-12-31,Scientific & Technical Instruments,13,23.08
+2025-12-31,Semiconductor Equipment & Materials,63,36.51
+2025-12-31,Semiconductors,155,24.52
+2025-12-31,Software - Infrastructure,20,0.00
+2025-12-31,Specialty Industrial Machinery,84,21.43
+2026-01-02,Communication Equipment,70,15.71
+2026-01-02,Computer Hardware,112,19.64
+2026-01-02,Consumer Electronics,27,7.41
+2026-01-02,Electrical Equipment & Parts,76,17.11
+2026-01-02,Electronic Components,265,23.77
+2026-01-02,Electronics & Computer Distribution,35,11.43
+2026-01-02,Scientific & Technical Instruments,13,23.08
+2026-01-02,Semiconductor Equipment & Materials,63,39.68
+2026-01-02,Semiconductors,155,23.87
+2026-01-02,Software - Infrastructure,20,0.00
+2026-01-02,Specialty Industrial Machinery,84,20.24
+2026-01-05,Communication Equipment,70,15.71
+2026-01-05,Computer Hardware,112,17.86
+2026-01-05,Consumer Electronics,27,7.41
+2026-01-05,Electrical Equipment & Parts,76,15.79
+2026-01-05,Electronic Components,265,24.15
+2026-01-05,Electronics & Computer Distribution,35,11.43
+2026-01-05,Scientific & Technical Instruments,13,15.38
+2026-01-05,Semiconductor Equipment & Materials,63,34.92
+2026-01-05,Semiconductors,155,25.16
+2026-01-05,Software - Infrastructure,20,0.00
+2026-01-05,Specialty Industrial Machinery,84,20.24
+2026-01-06,Communication Equipment,70,12.86
+2026-01-06,Computer Hardware,112,19.64
+2026-01-06,Consumer Electronics,27,7.41
+2026-01-06,Electrical Equipment & Parts,76,14.47
+2026-01-06,Electronic Components,265,24.15
+2026-01-06,Electronics & Computer Distribution,35,11.43
+2026-01-06,Scientific & Technical Instruments,13,15.38
+2026-01-06,Semiconductor Equipment & Materials,63,36.51
+2026-01-06,Semiconductors,155,25.16
+2026-01-06,Software - Infrastructure,20,0.00
+2026-01-06,Specialty Industrial Machinery,84,19.05
+2026-01-07,Communication Equipment,70,12.86
+2026-01-07,Computer Hardware,112,21.43
+2026-01-07,Consumer Electronics,27,7.41
+2026-01-07,Electrical Equipment & Parts,76,15.79
+2026-01-07,Electronic Components,265,23.77
+2026-01-07,Electronics & Computer Distribution,35,11.43
+2026-01-07,Scientific & Technical Instruments,13,15.38
+2026-01-07,Semiconductor Equipment & Materials,63,39.68
+2026-01-07,Semiconductors,155,27.10
+2026-01-07,Software - Infrastructure,20,0.00
+2026-01-07,Specialty Industrial Machinery,84,20.24
+2026-01-08,Communication Equipment,70,12.86
+2026-01-08,Computer Hardware,112,19.64
+2026-01-08,Consumer Electronics,27,7.41
+2026-01-08,Electrical Equipment & Parts,76,14.47
+2026-01-08,Electronic Components,265,24.15
+2026-01-08,Electronics & Computer Distribution,35,11.43
+2026-01-08,Scientific & Technical Instruments,13,15.38
+2026-01-08,Semiconductor Equipment & Materials,63,34.92
+2026-01-08,Semiconductors,155,26.45
+2026-01-08,Software - Infrastructure,20,0.00
+2026-01-08,Specialty Industrial Machinery,84,20.24
+2026-01-09,Communication Equipment,70,12.86
+2026-01-09,Computer Hardware,112,18.75
+2026-01-09,Consumer Electronics,27,7.41
+2026-01-09,Electrical Equipment & Parts,76,14.47
+2026-01-09,Electronic Components,265,23.77
+2026-01-09,Electronics & Computer Distribution,35,11.43
+2026-01-09,Scientific & Technical Instruments,13,15.38
+2026-01-09,Semiconductor Equipment & Materials,63,36.51
+2026-01-09,Semiconductors,155,25.81
+2026-01-09,Software - Infrastructure,20,0.00
+2026-01-09,Specialty Industrial Machinery,84,20.24
+2026-01-12,Communication Equipment,70,12.86
+2026-01-12,Computer Hardware,112,18.75
+2026-01-12,Consumer Electronics,27,7.41
+2026-01-12,Electrical Equipment & Parts,76,14.47
+2026-01-12,Electronic Components,265,26.04
+2026-01-12,Electronics & Computer Distribution,35,11.43
+2026-01-12,Scientific & Technical Instruments,13,15.38
+2026-01-12,Semiconductor Equipment & Materials,63,39.68
+2026-01-12,Semiconductors,155,27.74
+2026-01-12,Software - Infrastructure,20,0.00
+2026-01-12,Specialty Industrial Machinery,84,20.24
+2026-01-13,Communication Equipment,70,12.86
+2026-01-13,Computer Hardware,112,19.64
+2026-01-13,Consumer Electronics,27,7.41
+2026-01-13,Electrical Equipment & Parts,76,14.47
+2026-01-13,Electronic Components,265,25.66
+2026-01-13,Electronics & Computer Distribution,35,11.43
+2026-01-13,Scientific & Technical Instruments,13,15.38
+2026-01-13,Semiconductor Equipment & Materials,63,41.27
+2026-01-13,Semiconductors,155,27.74
+2026-01-13,Software - Infrastructure,20,0.00
+2026-01-13,Specialty Industrial Machinery,84,20.24
+2026-01-14,Communication Equipment,70,14.29
+2026-01-14,Computer Hardware,112,19.64
+2026-01-14,Consumer Electronics,27,7.41
+2026-01-14,Electrical Equipment & Parts,76,14.47
+2026-01-14,Electronic Components,265,26.42
+2026-01-14,Electronics & Computer Distribution,35,11.43
+2026-01-14,Scientific & Technical Instruments,13,15.38
+2026-01-14,Semiconductor Equipment & Materials,63,39.68
+2026-01-14,Semiconductors,155,28.39
+2026-01-14,Software - Infrastructure,20,0.00
+2026-01-14,Specialty Industrial Machinery,84,20.24
+2026-01-15,Communication Equipment,70,15.71
+2026-01-15,Computer Hardware,112,18.75
+2026-01-15,Consumer Electronics,27,7.41
+2026-01-15,Electrical Equipment & Parts,76,14.47
+2026-01-15,Electronic Components,265,26.04
+2026-01-15,Electronics & Computer Distribution,35,14.29
+2026-01-15,Scientific & Technical Instruments,13,15.38
+2026-01-15,Semiconductor Equipment & Materials,63,39.68
+2026-01-15,Semiconductors,155,27.74
+2026-01-15,Software - Infrastructure,20,0.00
+2026-01-15,Specialty Industrial Machinery,84,21.43
+2026-01-16,Communication Equipment,70,12.86
+2026-01-16,Computer Hardware,112,17.86
+2026-01-16,Consumer Electronics,27,7.41
+2026-01-16,Electrical Equipment & Parts,76,15.79
+2026-01-16,Electronic Components,265,24.91
+2026-01-16,Electronics & Computer Distribution,35,11.43
+2026-01-16,Scientific & Technical Instruments,13,15.38
+2026-01-16,Semiconductor Equipment & Materials,63,39.68
+2026-01-16,Semiconductors,155,28.39
+2026-01-16,Software - Infrastructure,20,0.00
+2026-01-16,Specialty Industrial Machinery,84,21.43
+2026-01-19,Communication Equipment,70,12.86
+2026-01-19,Computer Hardware,112,18.75
+2026-01-19,Consumer Electronics,27,11.11
+2026-01-19,Electrical Equipment & Parts,76,15.79
+2026-01-19,Electronic Components,265,24.15
+2026-01-19,Electronics & Computer Distribution,35,11.43
+2026-01-19,Scientific & Technical Instruments,13,15.38
+2026-01-19,Semiconductor Equipment & Materials,63,39.68
+2026-01-19,Semiconductors,155,28.39
+2026-01-19,Software - Infrastructure,20,0.00
+2026-01-19,Specialty Industrial Machinery,84,22.62
+2026-01-20,Communication Equipment,70,18.57
+2026-01-20,Computer Hardware,112,18.75
+2026-01-20,Consumer Electronics,27,11.11
+2026-01-20,Electrical Equipment & Parts,76,18.42
+2026-01-20,Electronic Components,265,25.28
+2026-01-20,Electronics & Computer Distribution,35,11.43
+2026-01-20,Scientific & Technical Instruments,13,15.38
+2026-01-20,Semiconductor Equipment & Materials,63,39.68
+2026-01-20,Semiconductors,155,29.03
+2026-01-20,Software - Infrastructure,20,0.00
+2026-01-20,Specialty Industrial Machinery,84,21.43
+2026-01-21,Communication Equipment,70,18.57
+2026-01-21,Computer Hardware,112,16.07
+2026-01-21,Consumer Electronics,27,3.70
+2026-01-21,Electrical Equipment & Parts,76,18.42
+2026-01-21,Electronic Components,265,23.40
+2026-01-21,Electronics & Computer Distribution,35,11.43
+2026-01-21,Scientific & Technical Instruments,13,15.38
+2026-01-21,Semiconductor Equipment & Materials,63,38.10
+2026-01-21,Semiconductors,155,29.68
+2026-01-21,Software - Infrastructure,20,0.00
+2026-01-21,Specialty Industrial Machinery,84,19.05
+2026-01-22,Communication Equipment,70,15.71
+2026-01-22,Computer Hardware,112,16.07
+2026-01-22,Consumer Electronics,27,3.70
+2026-01-22,Electrical Equipment & Parts,76,22.37
+2026-01-22,Electronic Components,265,24.53
+2026-01-22,Electronics & Computer Distribution,35,11.43
+2026-01-22,Scientific & Technical Instruments,13,15.38
+2026-01-22,Semiconductor Equipment & Materials,63,36.51
+2026-01-22,Semiconductors,155,28.39
+2026-01-22,Software - Infrastructure,20,0.00
+2026-01-22,Specialty Industrial Machinery,84,19.05
+2026-01-23,Communication Equipment,70,17.14
+2026-01-23,Computer Hardware,112,16.96
+2026-01-23,Consumer Electronics,27,7.41
+2026-01-23,Electrical Equipment & Parts,76,23.68
+2026-01-23,Electronic Components,265,24.15
+2026-01-23,Electronics & Computer Distribution,35,11.43
+2026-01-23,Scientific & Technical Instruments,13,15.38
+2026-01-23,Semiconductor Equipment & Materials,63,34.92
+2026-01-23,Semiconductors,155,27.74
+2026-01-23,Software - Infrastructure,20,0.00
+2026-01-23,Specialty Industrial Machinery,84,17.86
+2026-01-26,Communication Equipment,70,18.57
+2026-01-26,Computer Hardware,112,16.96
+2026-01-26,Consumer Electronics,27,3.70
+2026-01-26,Electrical Equipment & Parts,76,23.68
+2026-01-26,Electronic Components,265,24.15
+2026-01-26,Electronics & Computer Distribution,35,14.29
+2026-01-26,Scientific & Technical Instruments,13,15.38
+2026-01-26,Semiconductor Equipment & Materials,63,38.10
+2026-01-26,Semiconductors,155,30.32
+2026-01-26,Software - Infrastructure,20,0.00
+2026-01-26,Specialty Industrial Machinery,84,20.24
+2026-01-27,Communication Equipment,70,20.00
+2026-01-27,Computer Hardware,112,17.86
+2026-01-27,Consumer Electronics,27,3.70
+2026-01-27,Electrical Equipment & Parts,76,19.74
+2026-01-27,Electronic Components,265,24.91
+2026-01-27,Electronics & Computer Distribution,35,14.29
+2026-01-27,Scientific & Technical Instruments,13,15.38
+2026-01-27,Semiconductor Equipment & Materials,63,38.10
+2026-01-27,Semiconductors,155,30.97
+2026-01-27,Software - Infrastructure,20,0.00
+2026-01-27,Specialty Industrial Machinery,84,20.24
+2026-01-28,Communication Equipment,70,17.14
+2026-01-28,Computer Hardware,112,18.75
+2026-01-28,Consumer Electronics,27,0.00
+2026-01-28,Electrical Equipment & Parts,76,21.05
+2026-01-28,Electronic Components,265,25.66
+2026-01-28,Electronics & Computer Distribution,35,14.29
+2026-01-28,Scientific & Technical Instruments,13,15.38
+2026-01-28,Semiconductor Equipment & Materials,63,39.68
+2026-01-28,Semiconductors,155,32.26
+2026-01-28,Software - Infrastructure,20,0.00
+2026-01-28,Specialty Industrial Machinery,84,20.24
+2026-01-29,Communication Equipment,70,17.14
+2026-01-29,Computer Hardware,112,16.96
+2026-01-29,Consumer Electronics,27,3.70
+2026-01-29,Electrical Equipment & Parts,76,19.74
+2026-01-29,Electronic Components,265,24.53
+2026-01-29,Electronics & Computer Distribution,35,14.29
+2026-01-29,Scientific & Technical Instruments,13,15.38
+2026-01-29,Semiconductor Equipment & Materials,63,38.10
+2026-01-29,Semiconductors,155,30.97
+2026-01-29,Software - Infrastructure,20,0.00
+2026-01-29,Specialty Industrial Machinery,84,21.43
+2026-01-30,Communication Equipment,70,14.29
+2026-01-30,Computer Hardware,112,17.86
+2026-01-30,Consumer Electronics,27,3.70
+2026-01-30,Electrical Equipment & Parts,76,15.79
+2026-01-30,Electronic Components,265,23.40
+2026-01-30,Electronics & Computer Distribution,35,14.29
+2026-01-30,Scientific & Technical Instruments,13,15.38
+2026-01-30,Semiconductor Equipment & Materials,63,38.10
+2026-01-30,Semiconductors,155,32.26
+2026-01-30,Software - Infrastructure,20,0.00
+2026-01-30,Specialty Industrial Machinery,84,22.62
+2026-02-02,Communication Equipment,70,18.57
+2026-02-02,Computer Hardware,112,16.96
+2026-02-02,Consumer Electronics,27,3.70
+2026-02-02,Electrical Equipment & Parts,76,13.16
+2026-02-02,Electronic Components,265,22.64
+2026-02-02,Electronics & Computer Distribution,35,14.29
+2026-02-02,Scientific & Technical Instruments,13,23.08
+2026-02-02,Semiconductor Equipment & Materials,63,36.51
+2026-02-02,Semiconductors,155,30.97
+2026-02-02,Software - Infrastructure,20,0.00
+2026-02-02,Specialty Industrial Machinery,84,22.62
+2026-02-03,Communication Equipment,70,18.57
+2026-02-03,Computer Hardware,112,18.75
+2026-02-03,Consumer Electronics,27,0.00
+2026-02-03,Electrical Equipment & Parts,76,15.79
+2026-02-03,Electronic Components,265,22.64
+2026-02-03,Electronics & Computer Distribution,35,14.29
+2026-02-03,Scientific & Technical Instruments,13,15.38
+2026-02-03,Semiconductor Equipment & Materials,63,41.27
+2026-02-03,Semiconductors,155,30.97
+2026-02-03,Software - Infrastructure,20,5.00
+2026-02-03,Specialty Industrial Machinery,84,23.81
+2026-02-04,Communication Equipment,70,20.00
+2026-02-04,Computer Hardware,112,19.64
+2026-02-04,Consumer Electronics,27,3.70
+2026-02-04,Electrical Equipment & Parts,76,15.79
+2026-02-04,Electronic Components,265,23.77
+2026-02-04,Electronics & Computer Distribution,35,14.29
+2026-02-04,Scientific & Technical Instruments,13,15.38
+2026-02-04,Semiconductor Equipment & Materials,63,39.68
+2026-02-04,Semiconductors,155,30.97
+2026-02-04,Software - Infrastructure,20,5.00
+2026-02-04,Specialty Industrial Machinery,84,22.62
+2026-02-05,Communication Equipment,70,17.14
+2026-02-05,Computer Hardware,112,16.96
+2026-02-05,Consumer Electronics,27,3.70
+2026-02-05,Electrical Equipment & Parts,76,10.53
+2026-02-05,Electronic Components,265,22.64
+2026-02-05,Electronics & Computer Distribution,35,11.43
+2026-02-05,Scientific & Technical Instruments,13,15.38
+2026-02-05,Semiconductor Equipment & Materials,63,39.68
+2026-02-05,Semiconductors,155,29.03
+2026-02-05,Software - Infrastructure,21,4.76
+2026-02-05,Specialty Industrial Machinery,84,20.24
+2026-02-06,Communication Equipment,70,18.57
+2026-02-06,Computer Hardware,112,16.07
+2026-02-06,Consumer Electronics,27,0.00
+2026-02-06,Electrical Equipment & Parts,76,11.84
+2026-02-06,Electronic Components,265,20.75
+2026-02-06,Electronics & Computer Distribution,35,11.43
+2026-02-06,Scientific & Technical Instruments,13,15.38
+2026-02-06,Semiconductor Equipment & Materials,63,38.10
+2026-02-06,Semiconductors,155,27.10
+2026-02-06,Software - Infrastructure,21,4.76
+2026-02-06,Specialty Industrial Machinery,84,19.05
+2026-02-09,Communication Equipment,70,17.14
+2026-02-09,Computer Hardware,112,15.18
+2026-02-09,Consumer Electronics,27,0.00
+2026-02-09,Electrical Equipment & Parts,76,11.84
+2026-02-09,Electronic Components,265,21.89
+2026-02-09,Electronics & Computer Distribution,35,11.43
+2026-02-09,Scientific & Technical Instruments,13,15.38
+2026-02-09,Semiconductor Equipment & Materials,63,33.33
+2026-02-09,Semiconductors,155,28.39
+2026-02-09,Software - Infrastructure,21,4.76
+2026-02-09,Specialty Industrial Machinery,84,19.05
+2026-02-10,Communication Equipment,70,18.57
+2026-02-10,Computer Hardware,112,15.18
+2026-02-10,Consumer Electronics,27,0.00
+2026-02-10,Electrical Equipment & Parts,76,11.84
+2026-02-10,Electronic Components,265,21.13
+2026-02-10,Electronics & Computer Distribution,35,11.43
+2026-02-10,Scientific & Technical Instruments,13,15.38
+2026-02-10,Semiconductor Equipment & Materials,63,38.10
+2026-02-10,Semiconductors,155,29.03
+2026-02-10,Software - Infrastructure,21,4.76
+2026-02-10,Specialty Industrial Machinery,84,17.86
+2026-02-11,Communication Equipment,70,17.14
+2026-02-11,Computer Hardware,112,15.18
+2026-02-11,Consumer Electronics,27,0.00
+2026-02-11,Electrical Equipment & Parts,76,13.16
+2026-02-11,Electronic Components,265,20.00
+2026-02-11,Electronics & Computer Distribution,35,11.43
+2026-02-11,Scientific & Technical Instruments,13,7.69
+2026-02-11,Semiconductor Equipment & Materials,63,34.92
+2026-02-11,Semiconductors,155,30.32
+2026-02-11,Software - Infrastructure,21,4.76
+2026-02-11,Specialty Industrial Machinery,84,17.86
+2026-02-23,Communication Equipment,70,20.00
+2026-02-23,Computer Hardware,112,15.18
+2026-02-23,Consumer Electronics,27,3.70
+2026-02-23,Electrical Equipment & Parts,76,14.47
+2026-02-23,Electronic Components,265,23.77
+2026-02-23,Electronics & Computer Distribution,35,11.43
+2026-02-23,Scientific & Technical Instruments,13,15.38
+2026-02-23,Semiconductor Equipment & Materials,63,38.10
+2026-02-23,Semiconductors,155,30.97
+2026-02-23,Software - Infrastructure,21,4.76
+2026-02-23,Specialty Industrial Machinery,84,17.86
+2026-02-24,Communication Equipment,70,20.00
+2026-02-24,Computer Hardware,112,17.86
+2026-02-24,Consumer Electronics,27,3.70
+2026-02-24,Electrical Equipment & Parts,76,15.79
+2026-02-24,Electronic Components,265,26.04
+2026-02-24,Electronics & Computer Distribution,35,11.43
+2026-02-24,Scientific & Technical Instruments,13,23.08
+2026-02-24,Semiconductor Equipment & Materials,63,39.68
+2026-02-24,Semiconductors,155,34.19
+2026-02-24,Software - Infrastructure,21,4.76
+2026-02-24,Specialty Industrial Machinery,84,19.05
+2026-02-25,Communication Equipment,70,18.57
+2026-02-25,Computer Hardware,112,17.86
+2026-02-25,Consumer Electronics,27,3.70
+2026-02-25,Electrical Equipment & Parts,76,17.11
+2026-02-25,Electronic Components,265,26.79
+2026-02-25,Electronics & Computer Distribution,35,11.43
+2026-02-25,Scientific & Technical Instruments,13,23.08
+2026-02-25,Semiconductor Equipment & Materials,63,42.86
+2026-02-25,Semiconductors,155,33.55
+2026-02-25,Software - Infrastructure,21,4.76
+2026-02-25,Specialty Industrial Machinery,84,19.05
+2026-02-26,Communication Equipment,70,22.86
+2026-02-26,Computer Hardware,112,16.07
+2026-02-26,Consumer Electronics,27,3.70
+2026-02-26,Electrical Equipment & Parts,76,17.11
+2026-02-26,Electronic Components,265,27.55
+2026-02-26,Electronics & Computer Distribution,35,11.43
+2026-02-26,Scientific & Technical Instruments,13,30.77
+2026-02-26,Semiconductor Equipment & Materials,63,47.62
+2026-02-26,Semiconductors,155,36.77
+2026-02-26,Software - Infrastructure,21,4.76
+2026-02-26,Specialty Industrial Machinery,84,20.24
+2026-03-02,Communication Equipment,70,28.57
+2026-03-02,Computer Hardware,112,16.07
+2026-03-02,Consumer Electronics,27,3.70
+2026-03-02,Electrical Equipment & Parts,76,17.11
+2026-03-02,Electronic Components,265,28.30
+2026-03-02,Electronics & Computer Distribution,35,11.43
+2026-03-02,Scientific & Technical Instruments,13,23.08
+2026-03-02,Semiconductor Equipment & Materials,63,46.03
+2026-03-02,Semiconductors,155,36.77
+2026-03-02,Software - Infrastructure,21,4.76
+2026-03-02,Specialty Industrial Machinery,84,19.05
+2026-03-03,Communication Equipment,70,25.71
+2026-03-03,Computer Hardware,112,16.96
+2026-03-03,Consumer Electronics,27,3.70
+2026-03-03,Electrical Equipment & Parts,76,17.11
+2026-03-03,Electronic Components,265,25.66
+2026-03-03,Electronics & Computer Distribution,35,11.43
+2026-03-03,Scientific & Technical Instruments,13,23.08
+2026-03-03,Semiconductor Equipment & Materials,63,42.86
+2026-03-03,Semiconductors,155,36.13
+2026-03-03,Software - Infrastructure,21,4.76
+2026-03-03,Specialty Industrial Machinery,84,19.05
+2026-03-04,Communication Equipment,70,25.71
+2026-03-04,Computer Hardware,112,16.07
+2026-03-04,Consumer Electronics,27,3.70
+2026-03-04,Electrical Equipment & Parts,76,14.47
+2026-03-04,Electronic Components,265,23.02
+2026-03-04,Electronics & Computer Distribution,35,8.57
+2026-03-04,Scientific & Technical Instruments,13,23.08
+2026-03-04,Semiconductor Equipment & Materials,63,44.44
+2026-03-04,Semiconductors,155,33.55
+2026-03-04,Software - Infrastructure,21,4.76
+2026-03-04,Specialty Industrial Machinery,84,19.05
+2026-03-05,Communication Equipment,70,27.14
+2026-03-05,Computer Hardware,112,16.07
+2026-03-05,Consumer Electronics,27,3.70
+2026-03-05,Electrical Equipment & Parts,76,15.79
+2026-03-05,Electronic Components,265,24.15
+2026-03-05,Electronics & Computer Distribution,35,11.43
+2026-03-05,Scientific & Technical Instruments,13,23.08
+2026-03-05,Semiconductor Equipment & Materials,63,49.21
+2026-03-05,Semiconductors,155,34.84
+2026-03-05,Software - Infrastructure,21,4.76
+2026-03-05,Specialty Industrial Machinery,84,16.67
+2026-03-06,Communication Equipment,70,25.71
+2026-03-06,Computer Hardware,112,16.96
+2026-03-06,Consumer Electronics,27,3.70
+2026-03-06,Electrical Equipment & Parts,76,15.79
+2026-03-06,Electronic Components,265,24.91
+2026-03-06,Electronics & Computer Distribution,35,11.43
+2026-03-06,Scientific & Technical Instruments,13,23.08
+2026-03-06,Semiconductor Equipment & Materials,63,46.03
+2026-03-06,Semiconductors,155,34.84
+2026-03-06,Software - Infrastructure,21,4.76
+2026-03-06,Specialty Industrial Machinery,84,15.48
+2026-03-09,Communication Equipment,70,21.43
+2026-03-09,Computer Hardware,112,13.39
+2026-03-09,Consumer Electronics,27,0.00
+2026-03-09,Electrical Equipment & Parts,76,14.47
+2026-03-09,Electronic Components,265,18.49
+2026-03-09,Electronics & Computer Distribution,35,8.57
+2026-03-09,Scientific & Technical Instruments,13,23.08
+2026-03-09,Semiconductor Equipment & Materials,63,36.51
+2026-03-09,Semiconductors,155,27.74
+2026-03-09,Software - Infrastructure,21,4.76
+2026-03-09,Specialty Industrial Machinery,84,14.29
+2026-03-10,Communication Equipment,70,20.00
+2026-03-10,Computer Hardware,112,14.29
+2026-03-10,Consumer Electronics,27,0.00
+2026-03-10,Electrical Equipment & Parts,76,14.47
+2026-03-10,Electronic Components,265,20.75
+2026-03-10,Electronics & Computer Distribution,35,5.71
+2026-03-10,Scientific & Technical Instruments,13,23.08
+2026-03-10,Semiconductor Equipment & Materials,63,34.92
+2026-03-10,Semiconductors,155,28.39
+2026-03-10,Software - Infrastructure,21,4.76
+2026-03-10,Specialty Industrial Machinery,84,14.29
+2026-03-11,Communication Equipment,70,22.86
+2026-03-11,Computer Hardware,112,15.18
+2026-03-11,Consumer Electronics,27,0.00
+2026-03-11,Electrical Equipment & Parts,76,14.47
+2026-03-11,Electronic Components,265,21.89
+2026-03-11,Electronics & Computer Distribution,35,5.71
+2026-03-11,Scientific & Technical Instruments,13,23.08
+2026-03-11,Semiconductor Equipment & Materials,63,44.44
+2026-03-11,Semiconductors,155,29.68
+2026-03-11,Software - Infrastructure,21,4.76
+2026-03-11,Specialty Industrial Machinery,84,14.29
+2026-03-12,Communication Equipment,70,24.29
+2026-03-12,Computer Hardware,112,16.07
+2026-03-12,Consumer Electronics,27,0.00
+2026-03-12,Electrical Equipment & Parts,76,14.47
+2026-03-12,Electronic Components,265,22.64
+2026-03-12,Electronics & Computer Distribution,35,8.57
+2026-03-12,Scientific & Technical Instruments,13,23.08
+2026-03-12,Semiconductor Equipment & Materials,63,46.03
+2026-03-12,Semiconductors,155,30.32
+2026-03-12,Software - Infrastructure,21,4.76
+2026-03-12,Specialty Industrial Machinery,84,16.67
+2026-03-13,Communication Equipment,70,21.43
+2026-03-13,Computer Hardware,112,16.96
+2026-03-13,Consumer Electronics,27,0.00
+2026-03-13,Electrical Equipment & Parts,76,15.79
+2026-03-13,Electronic Components,265,24.15
+2026-03-13,Electronics & Computer Distribution,35,11.43
+2026-03-13,Scientific & Technical Instruments,13,23.08
+2026-03-13,Semiconductor Equipment & Materials,63,47.62
+2026-03-13,Semiconductors,155,32.90
+2026-03-13,Software - Infrastructure,21,0.00
+2026-03-13,Specialty Industrial Machinery,84,16.67
+2026-03-16,Communication Equipment,70,21.43
+2026-03-16,Computer Hardware,112,16.07
+2026-03-16,Consumer Electronics,27,0.00
+2026-03-16,Electrical Equipment & Parts,76,15.79
+2026-03-16,Electronic Components,265,26.42
+2026-03-16,Electronics & Computer Distribution,35,8.57
+2026-03-16,Scientific & Technical Instruments,13,23.08
+2026-03-16,Semiconductor Equipment & Materials,63,47.62
+2026-03-16,Semiconductors,155,34.19
+2026-03-16,Software - Infrastructure,21,0.00
+2026-03-16,Specialty Industrial Machinery,84,19.05
+2026-03-17,Communication Equipment,70,27.14
+2026-03-17,Computer Hardware,112,19.64
+2026-03-17,Consumer Electronics,27,0.00
+2026-03-17,Electrical Equipment & Parts,76,15.79
+2026-03-17,Electronic Components,265,27.17
+2026-03-17,Electronics & Computer Distribution,35,11.43
+2026-03-17,Scientific & Technical Instruments,13,23.08
+2026-03-17,Semiconductor Equipment & Materials,63,47.62
+2026-03-17,Semiconductors,155,34.84
+2026-03-17,Software - Infrastructure,21,0.00
+2026-03-17,Specialty Industrial Machinery,84,19.05
+2026-03-18,Communication Equipment,70,27.14
+2026-03-18,Computer Hardware,112,16.96
+2026-03-18,Consumer Electronics,27,0.00
+2026-03-18,Electrical Equipment & Parts,76,14.47
+2026-03-18,Electronic Components,265,26.79
+2026-03-18,Electronics & Computer Distribution,35,20.00
+2026-03-18,Scientific & Technical Instruments,13,23.08
+2026-03-18,Semiconductor Equipment & Materials,63,50.79
+2026-03-18,Semiconductors,155,36.13
+2026-03-18,Software - Infrastructure,21,0.00
+2026-03-18,Specialty Industrial Machinery,84,19.05
+2026-03-19,Communication Equipment,70,32.86
+2026-03-19,Computer Hardware,112,16.96
+2026-03-19,Consumer Electronics,27,0.00
+2026-03-19,Electrical Equipment & Parts,76,14.47
+2026-03-19,Electronic Components,265,28.30
+2026-03-19,Electronics & Computer Distribution,35,17.14
+2026-03-19,Scientific & Technical Instruments,13,23.08
+2026-03-19,Semiconductor Equipment & Materials,63,50.79
+2026-03-19,Semiconductors,155,36.13
+2026-03-19,Software - Infrastructure,21,4.76
+2026-03-19,Specialty Industrial Machinery,84,17.86
+2026-03-20,Communication Equipment,70,27.14
+2026-03-20,Computer Hardware,112,16.96
+2026-03-20,Consumer Electronics,27,0.00
+2026-03-20,Electrical Equipment & Parts,76,14.47
+2026-03-20,Electronic Components,265,27.55
+2026-03-20,Electronics & Computer Distribution,35,14.29
+2026-03-20,Scientific & Technical Instruments,13,23.08
+2026-03-20,Semiconductor Equipment & Materials,63,50.79
+2026-03-20,Semiconductors,155,36.13
+2026-03-20,Software - Infrastructure,21,9.52
+2026-03-20,Specialty Industrial Machinery,84,16.67
+2026-03-23,Communication Equipment,70,24.29
+2026-03-23,Computer Hardware,112,15.18
+2026-03-23,Consumer Electronics,27,0.00
+2026-03-23,Electrical Equipment & Parts,76,13.16
+2026-03-23,Electronic Components,265,24.15
+2026-03-23,Electronics & Computer Distribution,35,8.57
+2026-03-23,Scientific & Technical Instruments,13,23.08
+2026-03-23,Semiconductor Equipment & Materials,63,46.03
+2026-03-23,Semiconductors,155,35.48
+2026-03-23,Software - Infrastructure,21,4.76
+2026-03-23,Specialty Industrial Machinery,84,16.67
+2026-03-24,Communication Equipment,70,24.29
+2026-03-24,Computer Hardware,112,16.07
+2026-03-24,Consumer Electronics,27,0.00
+2026-03-24,Electrical Equipment & Parts,76,14.47
+2026-03-24,Electronic Components,265,24.15
+2026-03-24,Electronics & Computer Distribution,35,14.29
+2026-03-24,Scientific & Technical Instruments,13,23.08
+2026-03-24,Semiconductor Equipment & Materials,63,49.21
+2026-03-24,Semiconductors,155,36.77
+2026-03-24,Software - Infrastructure,21,4.76
+2026-03-24,Specialty Industrial Machinery,84,16.67
+2026-03-25,Communication Equipment,70,27.14
+2026-03-25,Computer Hardware,112,16.96
+2026-03-25,Consumer Electronics,27,0.00
+2026-03-25,Electrical Equipment & Parts,76,14.47
+2026-03-25,Electronic Components,265,25.66
+2026-03-25,Electronics & Computer Distribution,35,17.14
+2026-03-25,Scientific & Technical Instruments,13,23.08
+2026-03-25,Semiconductor Equipment & Materials,63,53.97
+2026-03-25,Semiconductors,155,36.13
+2026-03-25,Software - Infrastructure,21,4.76
+2026-03-25,Specialty Industrial Machinery,84,20.24
+2026-03-26,Communication Equipment,70,30.00
+2026-03-26,Computer Hardware,112,16.07
+2026-03-26,Consumer Electronics,27,0.00
+2026-03-26,Electrical Equipment & Parts,76,13.16
+2026-03-26,Electronic Components,265,26.42
+2026-03-26,Electronics & Computer Distribution,35,14.29
+2026-03-26,Scientific & Technical Instruments,13,23.08
+2026-03-26,Semiconductor Equipment & Materials,63,50.79
+2026-03-26,Semiconductors,155,34.19
+2026-03-26,Software - Infrastructure,21,4.76
+2026-03-26,Specialty Industrial Machinery,84,17.86
+2026-03-27,Communication Equipment,70,31.43
+2026-03-27,Computer Hardware,112,15.18
+2026-03-27,Consumer Electronics,27,0.00
+2026-03-27,Electrical Equipment & Parts,76,13.16
+2026-03-27,Electronic Components,265,25.66
+2026-03-27,Electronics & Computer Distribution,35,14.29
+2026-03-27,Scientific & Technical Instruments,13,23.08
+2026-03-27,Semiconductor Equipment & Materials,63,50.79
+2026-03-27,Semiconductors,155,35.48
+2026-03-27,Software - Infrastructure,21,4.76
+2026-03-27,Specialty Industrial Machinery,84,19.05
+2026-03-30,Communication Equipment,70,31.43
+2026-03-30,Computer Hardware,112,12.50
+2026-03-30,Consumer Electronics,27,0.00
+2026-03-30,Electrical Equipment & Parts,76,14.47
+2026-03-30,Electronic Components,265,24.91
+2026-03-30,Electronics & Computer Distribution,35,11.43
+2026-03-30,Scientific & Technical Instruments,13,23.08
+2026-03-30,Semiconductor Equipment & Materials,63,42.86
+2026-03-30,Semiconductors,155,31.61
+2026-03-30,Software - Infrastructure,21,0.00
+2026-03-30,Specialty Industrial Machinery,84,19.05
+2026-03-31,Communication Equipment,70,28.57
+2026-03-31,Computer Hardware,112,12.50
+2026-03-31,Consumer Electronics,27,0.00
+2026-03-31,Electrical Equipment & Parts,76,11.84
+2026-03-31,Electronic Components,265,23.02
+2026-03-31,Electronics & Computer Distribution,35,11.43
+2026-03-31,Scientific & Technical Instruments,13,23.08
+2026-03-31,Semiconductor Equipment & Materials,63,39.68
+2026-03-31,Semiconductors,155,30.32
+2026-03-31,Software - Infrastructure,21,4.76
+2026-03-31,Specialty Industrial Machinery,84,19.05
+2026-04-01,Communication Equipment,70,32.86
+2026-04-01,Computer Hardware,112,12.50
+2026-04-01,Consumer Electronics,27,0.00
+2026-04-01,Electrical Equipment & Parts,76,11.84
+2026-04-01,Electronic Components,265,23.77
+2026-04-01,Electronics & Computer Distribution,35,11.43
+2026-04-01,Scientific & Technical Instruments,13,23.08
+2026-04-01,Semiconductor Equipment & Materials,63,46.03
+2026-04-01,Semiconductors,155,32.26
+2026-04-01,Software - Infrastructure,21,4.76
+2026-04-01,Specialty Industrial Machinery,84,19.05
+2026-04-02,Communication Equipment,70,27.14
+2026-04-02,Computer Hardware,112,12.50
+2026-04-02,Consumer Electronics,27,0.00
+2026-04-02,Electrical Equipment & Parts,76,9.21
+2026-04-02,Electronic Components,265,22.64
+2026-04-02,Electronics & Computer Distribution,35,11.43
+2026-04-02,Scientific & Technical Instruments,13,23.08
+2026-04-02,Semiconductor Equipment & Materials,63,42.86
+2026-04-02,Semiconductors,155,31.61
+2026-04-02,Software - Infrastructure,21,4.76
+2026-04-02,Specialty Industrial Machinery,84,19.05
+2026-04-07,Communication Equipment,70,28.57
+2026-04-07,Computer Hardware,112,12.50
+2026-04-07,Consumer Electronics,27,0.00
+2026-04-07,Electrical Equipment & Parts,76,9.21
+2026-04-07,Electronic Components,265,21.51
+2026-04-07,Electronics & Computer Distribution,35,11.43
+2026-04-07,Scientific & Technical Instruments,13,23.08
+2026-04-07,Semiconductor Equipment & Materials,63,46.03
+2026-04-07,Semiconductors,155,32.26
+2026-04-07,Software - Infrastructure,21,9.52
+2026-04-07,Specialty Industrial Machinery,84,20.24
+2026-04-08,Communication Equipment,70,30.00
+2026-04-08,Computer Hardware,112,16.07
+2026-04-08,Consumer Electronics,27,0.00
+2026-04-08,Electrical Equipment & Parts,76,11.84
+2026-04-08,Electronic Components,265,23.40
+2026-04-08,Electronics & Computer Distribution,35,11.43
+2026-04-08,Scientific & Technical Instruments,13,30.77
+2026-04-08,Semiconductor Equipment & Materials,63,49.21
+2026-04-08,Semiconductors,155,34.84
+2026-04-08,Software - Infrastructure,21,9.52
+2026-04-08,Specialty Industrial Machinery,84,20.24
+2026-04-09,Communication Equipment,70,30.00
+2026-04-09,Computer Hardware,112,13.39
+2026-04-09,Consumer Electronics,27,0.00
+2026-04-09,Electrical Equipment & Parts,76,14.47
+2026-04-09,Electronic Components,265,26.79
+2026-04-09,Electronics & Computer Distribution,35,14.29
+2026-04-09,Scientific & Technical Instruments,13,30.77
+2026-04-09,Semiconductor Equipment & Materials,63,53.97
+2026-04-09,Semiconductors,155,34.84
+2026-04-09,Software - Infrastructure,21,9.52
+2026-04-09,Specialty Industrial Machinery,84,26.19
+2026-04-10,Communication Equipment,70,28.57
+2026-04-10,Computer Hardware,112,15.18
+2026-04-10,Consumer Electronics,27,0.00
+2026-04-10,Electrical Equipment & Parts,76,13.16
+2026-04-10,Electronic Components,265,25.28
+2026-04-10,Electronics & Computer Distribution,35,17.14
+2026-04-10,Scientific & Technical Instruments,13,30.77
+2026-04-10,Semiconductor Equipment & Materials,63,50.79
+2026-04-10,Semiconductors,155,35.48
+2026-04-10,Software - Infrastructure,21,14.29
+2026-04-10,Specialty Industrial Machinery,84,25.00
+2026-04-13,Communication Equipment,70,30.00
+2026-04-13,Computer Hardware,112,15.18
+2026-04-13,Consumer Electronics,27,0.00
+2026-04-13,Electrical Equipment & Parts,76,11.84
+2026-04-13,Electronic Components,265,28.30
+2026-04-13,Electronics & Computer Distribution,35,20.00
+2026-04-13,Scientific & Technical Instruments,13,30.77
+2026-04-13,Semiconductor Equipment & Materials,63,53.97
+2026-04-13,Semiconductors,155,35.48
+2026-04-13,Software - Infrastructure,21,9.52
+2026-04-13,Specialty Industrial Machinery,84,27.38
+2026-04-14,Communication Equipment,70,30.00
+2026-04-14,Computer Hardware,112,15.18
+2026-04-14,Consumer Electronics,27,0.00
+2026-04-14,Electrical Equipment & Parts,76,13.16
+2026-04-14,Electronic Components,265,28.30
+2026-04-14,Electronics & Computer Distribution,35,17.14
+2026-04-14,Scientific & Technical Instruments,13,30.77
+2026-04-14,Semiconductor Equipment & Materials,63,52.38
+2026-04-14,Semiconductors,155,36.13
+2026-04-14,Software - Infrastructure,21,9.52
+2026-04-14,Specialty Industrial Machinery,84,30.95
+2026-04-15,Communication Equipment,70,30.00
+2026-04-15,Computer Hardware,112,15.18
+2026-04-15,Consumer Electronics,27,0.00
+2026-04-15,Electrical Equipment & Parts,76,13.16
+2026-04-15,Electronic Components,265,28.30
+2026-04-15,Electronics & Computer Distribution,35,17.14
+2026-04-15,Scientific & Technical Instruments,13,30.77
+2026-04-15,Semiconductor Equipment & Materials,63,52.38
+2026-04-15,Semiconductors,155,34.84
+2026-04-15,Software - Infrastructure,21,9.52
+2026-04-15,Specialty Industrial Machinery,84,28.57
+2026-04-16,Communication Equipment,70,30.00
+2026-04-16,Computer Hardware,112,15.18
+2026-04-16,Consumer Electronics,27,0.00
+2026-04-16,Electrical Equipment & Parts,76,11.84
+2026-04-16,Electronic Components,265,28.30
+2026-04-16,Electronics & Computer Distribution,35,17.14
+2026-04-16,Scientific & Technical Instruments,13,30.77
+2026-04-16,Semiconductor Equipment & Materials,63,53.97
+2026-04-16,Semiconductors,155,36.77
+2026-04-16,Software - Infrastructure,21,9.52
+2026-04-16,Specialty Industrial Machinery,84,28.57
+2026-04-17,Communication Equipment,70,28.57
+2026-04-17,Computer Hardware,112,14.29
+2026-04-17,Consumer Electronics,27,0.00
+2026-04-17,Electrical Equipment & Parts,76,13.16
+2026-04-17,Electronic Components,265,27.92
+2026-04-17,Electronics & Computer Distribution,35,17.14
+2026-04-17,Scientific & Technical Instruments,13,30.77
+2026-04-17,Semiconductor Equipment & Materials,63,55.56
+2026-04-17,Semiconductors,155,35.48
+2026-04-17,Software - Infrastructure,21,9.52
+2026-04-17,Specialty Industrial Machinery,84,30.95
+2026-04-20,Communication Equipment,70,27.14
+2026-04-20,Computer Hardware,112,14.29
+2026-04-20,Consumer Electronics,27,0.00
+2026-04-20,Electrical Equipment & Parts,76,14.47
+2026-04-20,Electronic Components,265,28.30
+2026-04-20,Electronics & Computer Distribution,35,11.43
+2026-04-20,Scientific & Technical Instruments,13,38.46
+2026-04-20,Semiconductor Equipment & Materials,63,53.97
+2026-04-20,Semiconductors,155,36.13
+2026-04-20,Software - Infrastructure,21,9.52
+2026-04-20,Specialty Industrial Machinery,84,30.95
+2026-04-21,Communication Equipment,70,25.71
+2026-04-21,Computer Hardware,112,15.18
+2026-04-21,Consumer Electronics,27,0.00
+2026-04-21,Electrical Equipment & Parts,76,13.16
+2026-04-21,Electronic Components,265,28.68
+2026-04-21,Electronics & Computer Distribution,35,11.43
+2026-04-21,Scientific & Technical Instruments,13,38.46
+2026-04-21,Semiconductor Equipment & Materials,63,58.73
+2026-04-21,Semiconductors,155,36.77
+2026-04-21,Software - Infrastructure,21,14.29
+2026-04-21,Specialty Industrial Machinery,84,29.76
+2026-04-22,Communication Equipment,70,25.71
+2026-04-22,Computer Hardware,112,15.18
+2026-04-22,Consumer Electronics,27,0.00
+2026-04-22,Electrical Equipment & Parts,76,13.16
+2026-04-22,Electronic Components,265,28.30
+2026-04-22,Electronics & Computer Distribution,35,11.43
+2026-04-22,Scientific & Technical Instruments,13,38.46
+2026-04-22,Semiconductor Equipment & Materials,63,57.14
+2026-04-22,Semiconductors,155,39.35
+2026-04-22,Software - Infrastructure,21,14.29
+2026-04-22,Specialty Industrial Machinery,84,32.14
+2026-04-23,Communication Equipment,70,24.29
+2026-04-23,Computer Hardware,112,14.29
+2026-04-23,Consumer Electronics,27,0.00
+2026-04-23,Electrical Equipment & Parts,76,11.84
+2026-04-23,Electronic Components,265,28.68
+2026-04-23,Electronics & Computer Distribution,35,11.43
+2026-04-23,Scientific & Technical Instruments,13,38.46
+2026-04-23,Semiconductor Equipment & Materials,63,55.56
+2026-04-23,Semiconductors,155,38.71
+2026-04-23,Software - Infrastructure,21,14.29
+2026-04-23,Specialty Industrial Machinery,84,30.95
+2026-04-24,Communication Equipment,70,22.86
+2026-04-24,Computer Hardware,112,14.29
+2026-04-24,Consumer Electronics,27,0.00
+2026-04-24,Electrical Equipment & Parts,76,10.53
+2026-04-24,Electronic Components,265,28.30
+2026-04-24,Electronics & Computer Distribution,35,11.43
+2026-04-24,Scientific & Technical Instruments,13,38.46
+2026-04-24,Semiconductor Equipment & Materials,63,58.73
+2026-04-24,Semiconductors,155,43.87
+2026-04-24,Software - Infrastructure,21,9.52
+2026-04-24,Specialty Industrial Machinery,84,30.95
+2026-04-27,Communication Equipment,70,22.86
+2026-04-27,Computer Hardware,112,16.07
+2026-04-27,Consumer Electronics,27,0.00
+2026-04-27,Electrical Equipment & Parts,76,11.84
+2026-04-27,Electronic Components,265,27.92
+2026-04-27,Electronics & Computer Distribution,35,11.43
+2026-04-27,Scientific & Technical Instruments,13,30.77
+2026-04-27,Semiconductor Equipment & Materials,63,55.56
+2026-04-27,Semiconductors,155,41.29
+2026-04-27,Software - Infrastructure,21,9.52
+2026-04-27,Specialty Industrial Machinery,84,29.76
+2026-04-28,Communication Equipment,70,22.86
+2026-04-28,Computer Hardware,112,16.96
+2026-04-28,Consumer Electronics,27,0.00
+2026-04-28,Electrical Equipment & Parts,76,9.21
+2026-04-28,Electronic Components,265,29.43
+2026-04-28,Electronics & Computer Distribution,35,11.43
+2026-04-28,Scientific & Technical Instruments,13,38.46
+2026-04-28,Semiconductor Equipment & Materials,63,57.14
+2026-04-28,Semiconductors,155,38.06
+2026-04-28,Software - Infrastructure,21,9.52
+2026-04-28,Specialty Industrial Machinery,84,29.76
+2026-04-29,Communication Equipment,70,22.86
+2026-04-29,Computer Hardware,112,16.07
+2026-04-29,Consumer Electronics,27,0.00
+2026-04-29,Electrical Equipment & Parts,76,9.21
+2026-04-29,Electronic Components,265,29.43
+2026-04-29,Electronics & Computer Distribution,35,8.57
+2026-04-29,Scientific & Technical Instruments,13,30.77
+2026-04-29,Semiconductor Equipment & Materials,63,55.56
+2026-04-29,Semiconductors,155,38.06
+2026-04-29,Software - Infrastructure,21,9.52
+2026-04-29,Specialty Industrial Machinery,84,29.76
+2026-04-30,Communication Equipment,70,21.43
+2026-04-30,Computer Hardware,112,18.75
+2026-04-30,Consumer Electronics,27,0.00
+2026-04-30,Electrical Equipment & Parts,76,11.84
+2026-04-30,Electronic Components,265,29.06
+2026-04-30,Electronics & Computer Distribution,35,14.29
+2026-04-30,Scientific & Technical Instruments,13,38.46
+2026-04-30,Semiconductor Equipment & Materials,63,60.32
+2026-04-30,Semiconductors,155,40.65
+2026-04-30,Software - Infrastructure,21,9.52
+2026-04-30,Specialty Industrial Machinery,84,35.71
+2026-05-04,Communication Equipment,70,22.86
+2026-05-04,Computer Hardware,112,22.32
+2026-05-04,Consumer Electronics,27,0.00
+2026-05-04,Electrical Equipment & Parts,76,11.84
+2026-05-04,Electronic Components,265,29.06
+2026-05-04,Electronics & Computer Distribution,35,14.29
+2026-05-04,Scientific & Technical Instruments,13,38.46
+2026-05-04,Semiconductor Equipment & Materials,63,65.08
+2026-05-04,Semiconductors,155,43.23
+2026-05-04,Software - Infrastructure,21,9.52
+2026-05-04,Specialty Industrial Machinery,84,36.90
+2026-05-05,Communication Equipment,70,21.43
+2026-05-05,Computer Hardware,112,21.43
+2026-05-05,Consumer Electronics,27,0.00
+2026-05-05,Electrical Equipment & Parts,76,11.84
+2026-05-05,Electronic Components,265,30.94
+2026-05-05,Electronics & Computer Distribution,35,11.43
+2026-05-05,Scientific & Technical Instruments,13,38.46
+2026-05-05,Semiconductor Equipment & Materials,63,66.67
+2026-05-05,Semiconductors,155,43.87
+2026-05-05,Software - Infrastructure,21,14.29
+2026-05-05,Specialty Industrial Machinery,84,38.10
+2026-05-06,Communication Equipment,70,21.43
+2026-05-06,Computer Hardware,112,20.54
+2026-05-06,Consumer Electronics,27,3.70
+2026-05-06,Electrical Equipment & Parts,76,11.84
+2026-05-06,Electronic Components,265,30.94
+2026-05-06,Electronics & Computer Distribution,35,14.29
+2026-05-06,Scientific & Technical Instruments,13,38.46
+2026-05-06,Semiconductor Equipment & Materials,63,66.67
+2026-05-06,Semiconductors,155,43.23
+2026-05-06,Software - Infrastructure,21,14.29
+2026-05-06,Specialty Industrial Machinery,84,33.33
+2026-05-07,Communication Equipment,70,21.43
+2026-05-07,Computer Hardware,112,21.43
+2026-05-07,Consumer Electronics,27,3.70
+2026-05-07,Electrical Equipment & Parts,76,11.84
+2026-05-07,Electronic Components,265,32.45
+2026-05-07,Electronics & Computer Distribution,35,11.43
+2026-05-07,Scientific & Technical Instruments,13,38.46
+2026-05-07,Semiconductor Equipment & Materials,63,65.08
+2026-05-07,Semiconductors,155,46.45
+2026-05-07,Software - Infrastructure,21,14.29
+2026-05-07,Specialty Industrial Machinery,84,33.33
+2026-05-08,Communication Equipment,70,21.43
+2026-05-08,Computer Hardware,112,19.64
+2026-05-08,Consumer Electronics,27,3.70
+2026-05-08,Electrical Equipment & Parts,76,10.53
+2026-05-08,Electronic Components,265,27.55
+2026-05-08,Electronics & Computer Distribution,35,11.43
+2026-05-08,Scientific & Technical Instruments,13,38.46
+2026-05-08,Semiconductor Equipment & Materials,63,58.73
+2026-05-08,Semiconductors,155,46.45
+2026-05-08,Software - Infrastructure,21,14.29
+2026-05-08,Specialty Industrial Machinery,84,32.14
+2026-05-11,Communication Equipment,70,21.43
+2026-05-11,Computer Hardware,112,21.43
+2026-05-11,Consumer Electronics,27,7.41
+2026-05-11,Electrical Equipment & Parts,76,13.16
+2026-05-11,Electronic Components,265,29.06
+2026-05-11,Electronics & Computer Distribution,35,11.43
+2026-05-11,Scientific & Technical Instruments,13,38.46
+2026-05-11,Semiconductor Equipment & Materials,63,61.90
+2026-05-11,Semiconductors,155,49.03
+2026-05-11,Software - Infrastructure,21,14.29
+2026-05-11,Specialty Industrial Machinery,84,32.14
+2026-05-12,Communication Equipment,70,22.86
+2026-05-12,Computer Hardware,112,20.54
+2026-05-12,Consumer Electronics,27,7.41
+2026-05-12,Electrical Equipment & Parts,76,11.84
+2026-05-12,Electronic Components,265,29.43
+2026-05-12,Electronics & Computer Distribution,35,11.43
+2026-05-12,Scientific & Technical Instruments,13,30.77
+2026-05-12,Semiconductor Equipment & Materials,63,65.08
+2026-05-12,Semiconductors,155,51.61
+2026-05-12,Software - Infrastructure,21,14.29
+2026-05-12,Specialty Industrial Machinery,84,32.14
+2026-05-13,Communication Equipment,70,21.43
+2026-05-13,Computer Hardware,112,20.54
+2026-05-13,Consumer Electronics,27,3.70
+2026-05-13,Electrical Equipment & Parts,76,10.53
+2026-05-13,Electronic Components,265,31.70
+2026-05-13,Electronics & Computer Distribution,35,11.43
+2026-05-13,Scientific & Technical Instruments,13,30.77
+2026-05-13,Semiconductor Equipment & Materials,63,63.49
+2026-05-13,Semiconductors,155,48.39
+2026-05-13,Software - Infrastructure,21,14.29
+2026-05-13,Specialty Industrial Machinery,84,32.14
+2026-05-14,Communication Equipment,70,21.43
+2026-05-14,Computer Hardware,112,18.75
+2026-05-14,Consumer Electronics,27,3.70
+2026-05-14,Electrical Equipment & Parts,76,11.84
+2026-05-14,Electronic Components,265,31.70
+2026-05-14,Electronics & Computer Distribution,35,14.29
+2026-05-14,Scientific & Technical Instruments,13,30.77
+2026-05-14,Semiconductor Equipment & Materials,63,61.90
+2026-05-14,Semiconductors,155,49.03
+2026-05-14,Software - Infrastructure,21,9.52
+2026-05-14,Specialty Industrial Machinery,84,29.76
+2026-05-15,Communication Equipment,70,22.86
+2026-05-15,Computer Hardware,112,15.18
+2026-05-15,Consumer Electronics,27,3.70
+2026-05-15,Electrical Equipment & Parts,76,11.84
+2026-05-15,Electronic Components,265,31.70
+2026-05-15,Electronics & Computer Distribution,35,17.14
+2026-05-15,Scientific & Technical Instruments,13,30.77
+2026-05-15,Semiconductor Equipment & Materials,63,63.49
+2026-05-15,Semiconductors,155,45.81
+2026-05-15,Software - Infrastructure,21,9.52
+2026-05-15,Specialty Industrial Machinery,84,30.95
+2026-05-18,Communication Equipment,70,24.29
+2026-05-18,Computer Hardware,112,14.29
+2026-05-18,Consumer Electronics,27,3.70
+2026-05-18,Electrical Equipment & Parts,76,10.53
+2026-05-18,Electronic Components,265,30.94
+2026-05-18,Electronics & Computer Distribution,35,14.29
+2026-05-18,Scientific & Technical Instruments,13,30.77
+2026-05-18,Semiconductor Equipment & Materials,63,63.49
+2026-05-18,Semiconductors,155,45.16
+2026-05-18,Software - Infrastructure,21,9.52
+2026-05-18,Specialty Industrial Machinery,84,28.57
+2026-05-19,Communication Equipment,70,24.29
+2026-05-19,Computer Hardware,112,14.29
+2026-05-19,Consumer Electronics,27,3.70
+2026-05-19,Electrical Equipment & Parts,76,11.84
+2026-05-19,Electronic Components,265,30.94
+2026-05-19,Electronics & Computer Distribution,35,11.43
+2026-05-19,Scientific & Technical Instruments,13,30.77
+2026-05-19,Semiconductor Equipment & Materials,63,61.90
+2026-05-19,Semiconductors,155,41.94
+2026-05-19,Software - Infrastructure,21,9.52
+2026-05-19,Specialty Industrial Machinery,84,29.76
+2026-05-20,Communication Equipment,70,22.86
+2026-05-20,Computer Hardware,112,12.50
+2026-05-20,Consumer Electronics,27,3.70
+2026-05-20,Electrical Equipment & Parts,76,11.84
+2026-05-20,Electronic Components,265,30.94
+2026-05-20,Electronics & Computer Distribution,35,14.29
+2026-05-20,Scientific & Technical Instruments,13,30.77
+2026-05-20,Semiconductor Equipment & Materials,63,60.32
+2026-05-20,Semiconductors,155,43.87
+2026-05-20,Software - Infrastructure,21,9.52
+2026-05-20,Specialty Industrial Machinery,84,27.38
+2026-05-21,Communication Equipment,70,22.86
+2026-05-21,Computer Hardware,112,14.29
+2026-05-21,Consumer Electronics,27,3.70
+2026-05-21,Electrical Equipment & Parts,76,11.84
+2026-05-21,Electronic Components,265,33.96
+2026-05-21,Electronics & Computer Distribution,35,14.29
+2026-05-21,Scientific & Technical Instruments,13,23.08
+2026-05-21,Semiconductor Equipment & Materials,63,60.32
+2026-05-21,Semiconductors,155,45.81
+2026-05-21,Software - Infrastructure,21,9.52
+2026-05-21,Specialty Industrial Machinery,84,26.19
+2026-05-22,Communication Equipment,70,21.43
+2026-05-22,Computer Hardware,112,16.96
+2026-05-22,Consumer Electronics,27,3.70
+2026-05-22,Electrical Equipment & Parts,76,10.53
+2026-05-22,Electronic Components,265,35.09
+2026-05-22,Electronics & Computer Distribution,35,17.14
+2026-05-22,Scientific & Technical Instruments,13,30.77
+2026-05-22,Semiconductor Equipment & Materials,63,60.32
+2026-05-22,Semiconductors,155,43.23
+2026-05-22,Software - Infrastructure,21,9.52
+2026-05-22,Specialty Industrial Machinery,84,27.38
+2026-05-25,Communication Equipment,70,22.86
+2026-05-25,Computer Hardware,112,23.21
+2026-05-25,Consumer Electronics,27,0.00
+2026-05-25,Electrical Equipment & Parts,76,13.16
+2026-05-25,Electronic Components,265,36.98
+2026-05-25,Electronics & Computer Distribution,35,14.29
+2026-05-25,Scientific & Technical Instruments,13,38.46
+2026-05-25,Semiconductor Equipment & Materials,63,65.08
+2026-05-25,Semiconductors,155,47.74
+2026-05-25,Software - Infrastructure,21,9.52
+2026-05-25,Specialty Industrial Machinery,84,30.95
+2026-05-26,Communication Equipment,70,25.71
+2026-05-26,Computer Hardware,112,22.32
+2026-05-26,Consumer Electronics,27,0.00
+2026-05-26,Electrical Equipment & Parts,76,17.11
+2026-05-26,Electronic Components,265,35.85
+2026-05-26,Electronics & Computer Distribution,35,14.29
+2026-05-26,Scientific & Technical Instruments,13,30.77
+2026-05-26,Semiconductor Equipment & Materials,63,66.67
+2026-05-26,Semiconductors,155,43.87
+2026-05-26,Software - Infrastructure,21,9.52
+2026-05-26,Specialty Industrial Machinery,84,30.95
+2026-05-27,Communication Equipment,70,25.71
+2026-05-27,Computer Hardware,112,23.21
+2026-05-27,Consumer Electronics,27,0.00
+2026-05-27,Electrical Equipment & Parts,76,13.16
+2026-05-27,Electronic Components,265,34.72
+2026-05-27,Electronics & Computer Distribution,35,17.14
+2026-05-27,Scientific & Technical Instruments,13,30.77
+2026-05-27,Semiconductor Equipment & Materials,63,66.67
+2026-05-27,Semiconductors,155,47.10
+2026-05-27,Software - Infrastructure,21,4.76
+2026-05-27,Specialty Industrial Machinery,84,29.76
+2026-05-28,Communication Equipment,70,24.29
+2026-05-28,Computer Hardware,112,19.64
+2026-05-28,Consumer Electronics,27,0.00
+2026-05-28,Electrical Equipment & Parts,76,13.16
+2026-05-28,Electronic Components,265,35.47
+2026-05-28,Electronics & Computer Distribution,35,17.14
+2026-05-28,Scientific & Technical Instruments,13,38.46
+2026-05-28,Semiconductor Equipment & Materials,63,65.08
+2026-05-28,Semiconductors,155,46.45
+2026-05-28,Software - Infrastructure,21,4.76
+2026-05-28,Specialty Industrial Machinery,84,26.19
+2026-05-29,Communication Equipment,70,27.14
+2026-05-29,Computer Hardware,112,23.21
+2026-05-29,Consumer Electronics,27,0.00
+2026-05-29,Electrical Equipment & Parts,76,14.47
+2026-05-29,Electronic Components,265,36.60
+2026-05-29,Electronics & Computer Distribution,35,17.14
+2026-05-29,Scientific & Technical Instruments,13,30.77
+2026-05-29,Semiconductor Equipment & Materials,63,66.67
+2026-05-29,Semiconductors,155,45.16
+2026-05-29,Software - Infrastructure,21,4.76
+2026-05-29,Specialty Industrial Machinery,84,23.81
+2026-06-01,Communication Equipment,70,27.14
+2026-06-01,Computer Hardware,112,29.46
+2026-06-01,Consumer Electronics,27,0.00
+2026-06-01,Electrical Equipment & Parts,76,15.79
+2026-06-01,Electronic Components,265,37.74
+2026-06-01,Electronics & Computer Distribution,35,20.00
+2026-06-01,Scientific & Technical Instruments,13,38.46
+2026-06-01,Semiconductor Equipment & Materials,63,65.08
+2026-06-01,Semiconductors,155,43.87
+2026-06-01,Software - Infrastructure,21,4.76
+2026-06-01,Specialty Industrial Machinery,84,25.00
+2026-06-02,Communication Equipment,70,24.29
+2026-06-02,Computer Hardware,112,32.14
+2026-06-02,Consumer Electronics,27,0.00
+2026-06-02,Electrical Equipment & Parts,76,13.16
+2026-06-02,Electronic Components,265,36.23
+2026-06-02,Electronics & Computer Distribution,35,22.86
+2026-06-02,Scientific & Technical Instruments,13,30.77
+2026-06-02,Semiconductor Equipment & Materials,63,61.90
+2026-06-02,Semiconductors,155,41.29
+2026-06-02,Software - Infrastructure,21,4.76
+2026-06-02,Specialty Industrial Machinery,84,23.81
+2026-06-03,Communication Equipment,70,24.29
+2026-06-03,Computer Hardware,112,27.68
+2026-06-03,Consumer Electronics,27,0.00
+2026-06-03,Electrical Equipment & Parts,76,11.84
+2026-06-03,Electronic Components,265,36.98
+2026-06-03,Electronics & Computer Distribution,35,20.00
+2026-06-03,Scientific & Technical Instruments,13,30.77
+2026-06-03,Semiconductor Equipment & Materials,63,58.73
+2026-06-03,Semiconductors,155,41.94
+2026-06-03,Software - Infrastructure,21,4.76
+2026-06-03,Specialty Industrial Machinery,84,25.00
+2026-06-04,Communication Equipment,70,24.29
+2026-06-04,Computer Hardware,112,27.68
+2026-06-04,Consumer Electronics,27,0.00
+2026-06-04,Electrical Equipment & Parts,76,15.79
+2026-06-04,Electronic Components,265,36.60
+2026-06-04,Electronics & Computer Distribution,35,22.86
+2026-06-04,Scientific & Technical Instruments,13,23.08
+2026-06-04,Semiconductor Equipment & Materials,63,60.32
+2026-06-04,Semiconductors,155,40.00
+2026-06-04,Software - Infrastructure,21,9.52
+2026-06-04,Specialty Industrial Machinery,84,25.00
+2026-06-05,Communication Equipment,70,22.86
+2026-06-05,Computer Hardware,112,22.32
+2026-06-05,Consumer Electronics,27,0.00
+2026-06-05,Electrical Equipment & Parts,76,13.16
+2026-06-05,Electronic Components,265,36.60
+2026-06-05,Electronics & Computer Distribution,35,20.00
+2026-06-05,Scientific & Technical Instruments,13,30.77
+2026-06-05,Semiconductor Equipment & Materials,63,60.32
+2026-06-05,Semiconductors,155,38.06
+2026-06-05,Software - Infrastructure,21,9.52
+2026-06-05,Specialty Industrial Machinery,84,23.81
+2026-06-08,Communication Equipment,70,21.43
+2026-06-08,Computer Hardware,112,18.75
+2026-06-08,Consumer Electronics,27,0.00
+2026-06-08,Electrical Equipment & Parts,76,14.47
+2026-06-08,Electronic Components,265,33.58
+2026-06-08,Electronics & Computer Distribution,35,20.00
+2026-06-08,Scientific & Technical Instruments,13,30.77
+2026-06-08,Semiconductor Equipment & Materials,63,57.14
+2026-06-08,Semiconductors,155,37.42
+2026-06-08,Software - Infrastructure,21,14.29
+2026-06-08,Specialty Industrial Machinery,84,23.81
+2026-06-09,Communication Equipment,70,21.43
+2026-06-09,Computer Hardware,112,17.86
+2026-06-09,Consumer Electronics,27,0.00
+2026-06-09,Electrical Equipment & Parts,76,14.47
+2026-06-09,Electronic Components,265,33.21
+2026-06-09,Electronics & Computer Distribution,35,17.14
+2026-06-09,Scientific & Technical Instruments,13,30.77
+2026-06-09,Semiconductor Equipment & Materials,63,58.73
+2026-06-09,Semiconductors,155,36.13
+2026-06-09,Software - Infrastructure,21,14.29
+2026-06-09,Specialty Industrial Machinery,84,22.62
+2026-06-10,Communication Equipment,70,20.00
+2026-06-10,Computer Hardware,112,17.86
+2026-06-10,Consumer Electronics,27,0.00
+2026-06-10,Electrical Equipment & Parts,76,13.16
+2026-06-10,Electronic Components,265,31.70
+2026-06-10,Electronics & Computer Distribution,35,20.00
+2026-06-10,Scientific & Technical Instruments,13,38.46
+2026-06-10,Semiconductor Equipment & Materials,63,57.14
+2026-06-10,Semiconductors,155,37.42
+2026-06-10,Software - Infrastructure,21,14.29
+2026-06-10,Specialty Industrial Machinery,84,22.62
+2026-06-11,Communication Equipment,70,20.00
+2026-06-11,Computer Hardware,112,17.86
+2026-06-11,Consumer Electronics,27,0.00
+2026-06-11,Electrical Equipment & Parts,76,15.79
+2026-06-11,Electronic Components,265,31.70
+2026-06-11,Electronics & Computer Distribution,35,20.00
+2026-06-11,Scientific & Technical Instruments,13,38.46
+2026-06-11,Semiconductor Equipment & Materials,63,53.97
+2026-06-11,Semiconductors,155,38.06
+2026-06-11,Software - Infrastructure,21,19.05
+2026-06-11,Specialty Industrial Machinery,84,22.62
+2026-06-12,Communication Equipment,70,20.00
+2026-06-12,Computer Hardware,112,18.75
+2026-06-12,Consumer Electronics,27,0.00
+2026-06-12,Electrical Equipment & Parts,76,15.79
+2026-06-12,Electronic Components,265,31.32
+2026-06-12,Electronics & Computer Distribution,35,17.14
+2026-06-12,Scientific & Technical Instruments,13,38.46
+2026-06-12,Semiconductor Equipment & Materials,63,55.56
+2026-06-12,Semiconductors,155,38.06
+2026-06-12,Software - Infrastructure,21,14.29
+2026-06-12,Specialty Industrial Machinery,84,22.62
+2026-06-15,Communication Equipment,70,20.00
+2026-06-15,Computer Hardware,112,20.54
+2026-06-15,Consumer Electronics,27,0.00
+2026-06-15,Electrical Equipment & Parts,76,18.42
+2026-06-15,Electronic Components,265,33.21
+2026-06-15,Electronics & Computer Distribution,35,17.14
+2026-06-15,Scientific & Technical Instruments,13,38.46
+2026-06-15,Semiconductor Equipment & Materials,63,55.56
+2026-06-15,Semiconductors,155,38.06
+2026-06-15,Software - Infrastructure,21,14.29
+2026-06-15,Specialty Industrial Machinery,84,21.43
+2026-06-16,Communication Equipment,70,18.57
+2026-06-16,Computer Hardware,112,18.75
+2026-06-16,Consumer Electronics,27,0.00
+2026-06-16,Electrical Equipment & Parts,76,18.42
+2026-06-16,Electronic Components,265,32.45
+2026-06-16,Electronics & Computer Distribution,35,17.14
+2026-06-16,Scientific & Technical Instruments,13,38.46
+2026-06-16,Semiconductor Equipment & Materials,63,55.56
+2026-06-16,Semiconductors,155,39.35
+2026-06-16,Software - Infrastructure,21,14.29
+2026-06-16,Specialty Industrial Machinery,84,21.43
+2026-06-17,Communication Equipment,70,17.14
+2026-06-17,Computer Hardware,112,17.86
+2026-06-17,Consumer Electronics,27,0.00
+2026-06-17,Electrical Equipment & Parts,76,19.74
+2026-06-17,Electronic Components,265,35.09
+2026-06-17,Electronics & Computer Distribution,35,17.14
+2026-06-17,Scientific & Technical Instruments,13,38.46
+2026-06-17,Semiconductor Equipment & Materials,63,57.14
+2026-06-17,Semiconductors,155,41.29
+2026-06-17,Software - Infrastructure,21,14.29
+2026-06-17,Specialty Industrial Machinery,84,21.43
+2026-06-18,Communication Equipment,70,18.57
+2026-06-18,Computer Hardware,112,16.96
+2026-06-18,Consumer Electronics,27,0.00
+2026-06-18,Electrical Equipment & Parts,76,21.05
+2026-06-18,Electronic Components,265,34.34
+2026-06-18,Electronics & Computer Distribution,35,14.29
+2026-06-18,Scientific & Technical Instruments,13,38.46
+2026-06-18,Semiconductor Equipment & Materials,63,60.32
+2026-06-18,Semiconductors,155,42.58
+2026-06-18,Software - Infrastructure,21,14.29
+2026-06-18,Specialty Industrial Machinery,84,22.62
+2026-06-22,Communication Equipment,70,18.57
+2026-06-22,Computer Hardware,112,14.29
+2026-06-22,Consumer Electronics,27,0.00
+2026-06-22,Electrical Equipment & Parts,76,19.74
+2026-06-22,Electronic Components,265,32.45
+2026-06-22,Electronics & Computer Distribution,35,17.14
+2026-06-22,Scientific & Technical Instruments,13,38.46
+2026-06-22,Semiconductor Equipment & Materials,63,57.14
+2026-06-22,Semiconductors,155,48.39
+2026-06-22,Software - Infrastructure,21,9.52
+2026-06-22,Specialty Industrial Machinery,84,21.43
+2026-06-23,Communication Equipment,70,18.57
+2026-06-23,Computer Hardware,112,15.18
+2026-06-23,Consumer Electronics,27,0.00
+2026-06-23,Electrical Equipment & Parts,76,17.11
+2026-06-23,Electronic Components,265,31.32
+2026-06-23,Electronics & Computer Distribution,35,20.00
+2026-06-23,Scientific & Technical Instruments,13,30.77
+2026-06-23,Semiconductor Equipment & Materials,63,57.14
+2026-06-23,Semiconductors,155,47.74
+2026-06-23,Software - Infrastructure,21,9.52
+2026-06-23,Specialty Industrial Machinery,84,26.19
+2026-06-24,Communication Equipment,70,17.14
+2026-06-24,Computer Hardware,112,15.18
+2026-06-24,Consumer Electronics,27,0.00
+2026-06-24,Electrical Equipment & Parts,76,17.11
+2026-06-24,Electronic Components,265,30.94
+2026-06-24,Electronics & Computer Distribution,35,17.14
+2026-06-24,Scientific & Technical Instruments,13,30.77
+2026-06-24,Semiconductor Equipment & Materials,63,60.32
+2026-06-24,Semiconductors,155,47.74
+2026-06-24,Software - Infrastructure,21,9.52
+2026-06-24,Specialty Industrial Machinery,84,23.81
+2026-06-25,Communication Equipment,70,18.57
+2026-06-25,Computer Hardware,112,15.18
+2026-06-25,Consumer Electronics,27,0.00
+2026-06-25,Electrical Equipment & Parts,76,17.11
+2026-06-25,Electronic Components,265,30.57
+2026-06-25,Electronics & Computer Distribution,35,17.14
+2026-06-25,Scientific & Technical Instruments,13,30.77
+2026-06-25,Semiconductor Equipment & Materials,63,60.32
+2026-06-25,Semiconductors,155,45.16
+2026-06-25,Software - Infrastructure,21,4.76
+2026-06-25,Specialty Industrial Machinery,84,22.62
+2026-06-26,Communication Equipment,70,18.57
+2026-06-26,Computer Hardware,112,16.96
+2026-06-26,Consumer Electronics,27,0.00
+2026-06-26,Electrical Equipment & Parts,76,17.11
+2026-06-26,Electronic Components,265,29.81
+2026-06-26,Electronics & Computer Distribution,35,22.86
+2026-06-26,Scientific & Technical Instruments,13,30.77
+2026-06-26,Semiconductor Equipment & Materials,63,57.14
+2026-06-26,Semiconductors,155,47.10
+2026-06-26,Software - Infrastructure,21,4.76
+2026-06-26,Specialty Industrial Machinery,84,22.62
+2026-06-29,Communication Equipment,70,17.14
+2026-06-29,Computer Hardware,112,18.75
+2026-06-29,Consumer Electronics,27,0.00
+2026-06-29,Electrical Equipment & Parts,76,17.11
+2026-06-29,Electronic Components,265,30.94
+2026-06-29,Electronics & Computer Distribution,35,22.86
+2026-06-29,Scientific & Technical Instruments,13,30.77
+2026-06-29,Semiconductor Equipment & Materials,63,53.97
+2026-06-29,Semiconductors,155,45.16
+2026-06-29,Software - Infrastructure,21,0.00
+2026-06-29,Specialty Industrial Machinery,84,21.43
+2026-06-30,Communication Equipment,70,17.14
+2026-06-30,Computer Hardware,112,19.64
+2026-06-30,Consumer Electronics,27,0.00
+2026-06-30,Electrical Equipment & Parts,76,17.11
+2026-06-30,Electronic Components,265,29.81
+2026-06-30,Electronics & Computer Distribution,35,22.86
+2026-06-30,Scientific & Technical Instruments,13,30.77
+2026-06-30,Semiconductor Equipment & Materials,63,53.97
+2026-06-30,Semiconductors,155,43.23
+2026-06-30,Software - Infrastructure,21,0.00
+2026-06-30,Specialty Industrial Machinery,84,23.81
+2026-07-01,Communication Equipment,70,17.14
+2026-07-01,Computer Hardware,112,16.07
+2026-07-01,Consumer Electronics,27,0.00
+2026-07-01,Electrical Equipment & Parts,76,17.11
+2026-07-01,Electronic Components,265,30.94
+2026-07-01,Electronics & Computer Distribution,35,25.71
+2026-07-01,Scientific & Technical Instruments,13,30.77
+2026-07-01,Semiconductor Equipment & Materials,63,53.97
+2026-07-01,Semiconductors,155,44.52
+2026-07-01,Software - Infrastructure,21,9.52
+2026-07-01,Specialty Industrial Machinery,84,22.62
+2026-07-02,Communication Equipment,70,15.71
+2026-07-02,Computer Hardware,112,17.86
+2026-07-02,Consumer Electronics,27,0.00
+2026-07-02,Electrical Equipment & Parts,76,17.11
+2026-07-02,Electronic Components,265,29.81
+2026-07-02,Electronics & Computer Distribution,35,22.86
+2026-07-02,Scientific & Technical Instruments,13,30.77
+2026-07-02,Semiconductor Equipment & Materials,63,57.14
+2026-07-02,Semiconductors,155,44.52
+2026-07-02,Software - Infrastructure,21,4.76
+2026-07-02,Specialty Industrial Machinery,84,21.43
+2026-07-03,Communication Equipment,70,17.14
+2026-07-03,Computer Hardware,112,17.86
+2026-07-03,Consumer Electronics,27,0.00
+2026-07-03,Electrical Equipment & Parts,76,17.11
+2026-07-03,Electronic Components,265,29.81
+2026-07-03,Electronics & Computer Distribution,35,25.71
+2026-07-03,Scientific & Technical Instruments,13,23.08
+2026-07-03,Semiconductor Equipment & Materials,63,55.56
+2026-07-03,Semiconductors,155,42.58
+2026-07-03,Software - Infrastructure,21,4.76
+2026-07-03,Specialty Industrial Machinery,84,22.62
+2026-07-06,Communication Equipment,70,17.14
+2026-07-06,Computer Hardware,112,15.18
+2026-07-06,Consumer Electronics,27,3.70
+2026-07-06,Electrical Equipment & Parts,76,17.11
+2026-07-06,Electronic Components,265,29.81
+2026-07-06,Electronics & Computer Distribution,35,25.71
+2026-07-06,Scientific & Technical Instruments,13,23.08
+2026-07-06,Semiconductor Equipment & Materials,63,55.56
+2026-07-06,Semiconductors,155,42.58
+2026-07-06,Software - Infrastructure,21,4.76
+2026-07-06,Specialty Industrial Machinery,84,22.62
+2026-07-07,Communication Equipment,70,15.71
+2026-07-07,Computer Hardware,112,21.43
+2026-07-07,Consumer Electronics,27,0.00
+2026-07-07,Electrical Equipment & Parts,76,18.42
+2026-07-07,Electronic Components,265,29.06
+2026-07-07,Electronics & Computer Distribution,35,25.71
+2026-07-07,Scientific & Technical Instruments,13,23.08
+2026-07-07,Semiconductor Equipment & Materials,63,52.38
+2026-07-07,Semiconductors,155,43.23
+2026-07-07,Software - Infrastructure,21,4.76
+2026-07-07,Specialty Industrial Machinery,84,22.62
+2026-07-08,Communication Equipment,70,18.57
+2026-07-08,Computer Hardware,112,22.32
+2026-07-08,Consumer Electronics,27,3.70
+2026-07-08,Electrical Equipment & Parts,76,19.74
+2026-07-08,Electronic Components,265,29.43
+2026-07-08,Electronics & Computer Distribution,35,25.71
+2026-07-08,Scientific & Technical Instruments,13,23.08
+2026-07-08,Semiconductor Equipment & Materials,63,53.97
+2026-07-08,Semiconductors,155,42.58
+2026-07-08,Software - Infrastructure,21,4.76
+2026-07-08,Specialty Industrial Machinery,84,21.43
+2026-07-09,Communication Equipment,70,18.57
+2026-07-09,Computer Hardware,112,22.32
+2026-07-09,Consumer Electronics,27,3.70
+2026-07-09,Electrical Equipment & Parts,76,18.42
+2026-07-09,Electronic Components,265,28.30
+2026-07-09,Electronics & Computer Distribution,35,25.71
+2026-07-09,Scientific & Technical Instruments,13,23.08
+2026-07-09,Semiconductor Equipment & Materials,63,53.97
+2026-07-09,Semiconductors,155,43.23
+2026-07-09,Software - Infrastructure,21,0.00
+2026-07-09,Specialty Industrial Machinery,84,22.62
+2026-07-10,Communication Equipment,70,18.57
+2026-07-10,Computer Hardware,112,21.43
+2026-07-10,Consumer Electronics,27,3.70
+2026-07-10,Electrical Equipment & Parts,76,18.42
+2026-07-10,Electronic Components,265,29.06
+2026-07-10,Electronics & Computer Distribution,35,25.71
+2026-07-10,Scientific & Technical Instruments,13,23.08
+2026-07-10,Semiconductor Equipment & Materials,63,53.97
+2026-07-10,Semiconductors,155,44.52
+2026-07-10,Software - Infrastructure,21,0.00
+2026-07-10,Specialty Industrial Machinery,84,22.62
+2026-07-13,Communication Equipment,70,20.00
+2026-07-13,Computer Hardware,112,20.54
+2026-07-13,Consumer Electronics,27,3.70
+2026-07-13,Electrical Equipment & Parts,76,17.11
+2026-07-13,Electronic Components,265,29.81
+2026-07-13,Electronics & Computer Distribution,35,22.86
+2026-07-13,Scientific & Technical Instruments,13,23.08
+2026-07-13,Semiconductor Equipment & Materials,63,53.97
+2026-07-13,Semiconductors,155,44.52
+2026-07-13,Software - Infrastructure,21,0.00
+2026-07-13,Specialty Industrial Machinery,84,22.62
+2026-07-14,Communication Equipment,70,20.00
+2026-07-14,Computer Hardware,112,19.64
+2026-07-14,Consumer Electronics,27,3.70
+2026-07-14,Electrical Equipment & Parts,76,14.47
+2026-07-14,Electronic Components,265,29.06
+2026-07-14,Electronics & Computer Distribution,35,25.71
+2026-07-14,Scientific & Technical Instruments,13,23.08
+2026-07-14,Semiconductor Equipment & Materials,63,53.97
+2026-07-14,Semiconductors,155,42.58
+2026-07-14,Software - Infrastructure,21,0.00
+2026-07-14,Specialty Industrial Machinery,84,22.62
+2026-07-15,Communication Equipment,70,20.00
+2026-07-15,Computer Hardware,112,19.64
+2026-07-15,Consumer Electronics,27,3.70
+2026-07-15,Electrical Equipment & Parts,76,14.47
+2026-07-15,Electronic Components,265,29.43
+2026-07-15,Electronics & Computer Distribution,35,22.86
+2026-07-15,Scientific & Technical Instruments,13,23.08
+2026-07-15,Semiconductor Equipment & Materials,63,52.38
+2026-07-15,Semiconductors,155,44.52
+2026-07-15,Software - Infrastructure,21,0.00
+2026-07-15,Specialty Industrial Machinery,84,22.62
+2026-07-16,Communication Equipment,70,18.57
+2026-07-16,Computer Hardware,112,19.64
+2026-07-16,Consumer Electronics,27,3.70
+2026-07-16,Electrical Equipment & Parts,76,15.79
+2026-07-16,Electronic Components,265,28.68
+2026-07-16,Electronics & Computer Distribution,35,20.00
+2026-07-16,Scientific & Technical Instruments,13,30.77
+2026-07-16,Semiconductor Equipment & Materials,63,52.38
+2026-07-16,Semiconductors,155,39.35
+2026-07-16,Software - Infrastructure,21,0.00
+2026-07-16,Specialty Industrial Machinery,84,20.24
+2026-07-17,Communication Equipment,70,17.14
+2026-07-17,Computer Hardware,112,13.39
+2026-07-17,Consumer Electronics,27,0.00
+2026-07-17,Electrical Equipment & Parts,76,13.16
+2026-07-17,Electronic Components,265,25.28
+2026-07-17,Electronics & Computer Distribution,35,14.29
+2026-07-17,Scientific & Technical Instruments,13,30.77
+2026-07-17,Semiconductor Equipment & Materials,63,50.79
+2026-07-17,Semiconductors,155,36.13
+2026-07-17,Software - Infrastructure,21,0.00
+2026-07-17,Specialty Industrial Machinery,84,21.43
+2026-07-20,Communication Equipment,70,18.57
+2026-07-20,Computer Hardware,112,14.29
+2026-07-20,Consumer Electronics,27,0.00
+2026-07-20,Electrical Equipment & Parts,76,11.84
+2026-07-20,Electronic Components,265,25.66
+2026-07-20,Electronics & Computer Distribution,35,14.29
+2026-07-20,Scientific & Technical Instruments,13,30.77
+2026-07-20,Semiconductor Equipment & Materials,63,46.03
+2026-07-20,Semiconductors,155,33.55
+2026-07-20,Software - Infrastructure,21,0.00
+2026-07-20,Specialty Industrial Machinery,84,21.43
+2026-07-21,Communication Equipment,70,18.57
+2026-07-21,Computer Hardware,112,16.07
+2026-07-21,Consumer Electronics,27,0.00
+2026-07-21,Electrical Equipment & Parts,76,13.16
+2026-07-21,Electronic Components,265,25.66
+2026-07-21,Electronics & Computer Distribution,35,14.29
+2026-07-21,Scientific & Technical Instruments,13,30.77
+2026-07-21,Semiconductor Equipment & Materials,63,46.03
+2026-07-21,Semiconductors,155,34.19
+2026-07-21,Software - Infrastructure,21,0.00
+2026-07-21,Specialty Industrial Machinery,84,20.24
+2026-07-22,Communication Equipment,70,17.14
+2026-07-22,Computer Hardware,112,16.07
+2026-07-22,Consumer Electronics,27,0.00
+2026-07-22,Electrical Equipment & Parts,76,13.16
+2026-07-22,Electronic Components,265,25.28
+2026-07-22,Electronics & Computer Distribution,35,14.29
+2026-07-22,Scientific & Technical Instruments,13,30.77
+2026-07-22,Semiconductor Equipment & Materials,63,49.21
+2026-07-22,Semiconductors,155,34.84
+2026-07-22,Software - Infrastructure,21,0.00
+2026-07-22,Specialty Industrial Machinery,84,20.24
+2026-07-23,Communication Equipment,70,20.00
+2026-07-23,Computer Hardware,112,18.75
+2026-07-23,Consumer Electronics,27,0.00
+2026-07-23,Electrical Equipment & Parts,76,15.79
+2026-07-23,Electronic Components,265,26.42
+2026-07-23,Electronics & Computer Distribution,35,17.14
+2026-07-23,Scientific & Technical Instruments,13,30.77
+2026-07-23,Semiconductor Equipment & Materials,63,47.62
+2026-07-23,Semiconductors,155,34.19
+2026-07-23,Software - Infrastructure,21,0.00
+2026-07-23,Specialty Industrial Machinery,84,20.24
+2026-07-24,Communication Equipment,70,18.57
+2026-07-24,Computer Hardware,112,20.54
+2026-07-24,Consumer Electronics,27,0.00
+2026-07-24,Electrical Equipment & Parts,76,13.16
+2026-07-24,Electronic Components,265,26.42
+2026-07-24,Electronics & Computer Distribution,35,17.14
+2026-07-24,Scientific & Technical Instruments,13,30.77
+2026-07-24,Semiconductor Equipment & Materials,63,47.62
+2026-07-24,Semiconductors,155,34.19
+2026-07-24,Software - Infrastructure,21,0.00
+2026-07-24,Specialty Industrial Machinery,84,20.24
+2026-07-27,Communication Equipment,70,18.57
+2026-07-27,Computer Hardware,112,19.64
+2026-07-27,Consumer Electronics,27,0.00
+2026-07-27,Electrical Equipment & Parts,76,11.84
+2026-07-27,Electronic Components,265,25.66
+2026-07-27,Electronics & Computer Distribution,35,11.43
+2026-07-27,Scientific & Technical Instruments,13,23.08
+2026-07-27,Semiconductor Equipment & Materials,63,46.03
+2026-07-27,Semiconductors,155,35.48
+2026-07-27,Software - Infrastructure,21,0.00
+2026-07-27,Specialty Industrial Machinery,84,21.43
+2026-07-28,Communication Equipment,70,17.14
+2026-07-28,Computer Hardware,112,18.75
+2026-07-28,Consumer Electronics,27,0.00
+2026-07-28,Electrical Equipment & Parts,76,11.84
+2026-07-28,Electronic Components,265,23.40
+2026-07-28,Electronics & Computer Distribution,35,11.43
+2026-07-28,Scientific & Technical Instruments,13,23.08
+2026-07-28,Semiconductor Equipment & Materials,63,42.86
+2026-07-28,Semiconductors,155,30.32
+2026-07-28,Software - Infrastructure,21,0.00
+2026-07-28,Specialty Industrial Machinery,84,19.05
+2026-07-29,Communication Equipment,70,14.29
+2026-07-29,Computer Hardware,112,17.86
+2026-07-29,Consumer Electronics,27,0.00
+2026-07-29,Electrical Equipment & Parts,76,11.84
+2026-07-29,Electronic Components,265,20.00
+2026-07-29,Electronics & Computer Distribution,35,14.29
+2026-07-29,Scientific & Technical Instruments,13,23.08
+2026-07-29,Semiconductor Equipment & Materials,63,39.68
+2026-07-29,Semiconductors,155,27.10
+2026-07-29,Software - Infrastructure,21,0.00
+2026-07-29,Specialty Industrial Machinery,84,15.48
+2026-07-30,Communication Equipment,70,14.29
+2026-07-30,Computer Hardware,112,16.07
+2026-07-30,Consumer Electronics,27,0.00
+2026-07-30,Electrical Equipment & Parts,76,7.89
+2026-07-30,Electronic Components,265,17.74
+2026-07-30,Electronics & Computer Distribution,35,14.29
+2026-07-30,Scientific & Technical Instruments,13,23.08
+2026-07-30,Semiconductor Equipment & Materials,63,31.75
+2026-07-30,Semiconductors,155,22.58
+2026-07-30,Software - Infrastructure,21,0.00
+2026-07-30,Specialty Industrial Machinery,84,15.48
+2026-07-31,Communication Equipment,70,14.29
+2026-07-31,Computer Hardware,112,19.64
+2026-07-31,Consumer Electronics,27,0.00
+2026-07-31,Electrical Equipment & Parts,76,10.53
+2026-07-31,Electronic Components,265,20.38
+2026-07-31,Electronics & Computer Distribution,35,14.29
+2026-07-31,Scientific & Technical Instruments,13,23.08
+2026-07-31,Semiconductor Equipment & Materials,63,38.10
+2026-07-31,Semiconductors,155,29.03
+2026-07-31,Software - Infrastructure,21,0.00
+2026-07-31,Specialty Industrial Machinery,84,16.67
+2026-08-03,Communication Equipment,70,14.29
+2026-08-03,Computer Hardware,112,22.32
+2026-08-03,Consumer Electronics,27,0.00
+2026-08-03,Electrical Equipment & Parts,76,10.53
+2026-08-03,Electronic Components,265,23.02
+2026-08-03,Electronics & Computer Distribution,35,14.29
+2026-08-03,Scientific & Technical Instruments,13,23.08
+2026-08-03,Semiconductor Equipment & Materials,63,39.68
+2026-08-03,Semiconductors,155,30.32
+2026-08-03,Software - Infrastructure,21,0.00
+2026-08-03,Specialty Industrial Machinery,84,16.67
+2026-08-04,Communication Equipment,70,15.71
+2026-08-04,Computer Hardware,112,23.21
+2026-08-04,Consumer Electronics,27,0.00
+2026-08-04,Electrical Equipment & Parts,76,9.21
+2026-08-04,Electronic Components,265,23.02
+2026-08-04,Electronics & Computer Distribution,35,17.14
+2026-08-04,Scientific & Technical Instruments,13,30.77
+2026-08-04,Semiconductor Equipment & Materials,63,41.27
+2026-08-04,Semiconductors,155,28.39
+2026-08-04,Software - Infrastructure,21,0.00
+2026-08-04,Specialty Industrial Machinery,84,17.86
+2026-08-05,Communication Equipment,70,17.14
+2026-08-05,Computer Hardware,112,24.11
+2026-08-05,Consumer Electronics,27,0.00
+2026-08-05,Electrical Equipment & Parts,76,9.21
+2026-08-05,Electronic Components,265,21.89
+2026-08-05,Electronics & Computer Distribution,35,14.29
+2026-08-05,Scientific & Technical Instruments,13,23.08
+2026-08-05,Semiconductor Equipment & Materials,63,42.86
+2026-08-05,Semiconductors,155,27.74
+2026-08-05,Software - Infrastructure,21,0.00
+2026-08-05,Specialty Industrial Machinery,84,17.86
+2026-08-06,Communication Equipment,70,17.14
+2026-08-06,Computer Hardware,112,24.11
+2026-08-06,Consumer Electronics,27,0.00
+2026-08-06,Electrical Equipment & Parts,76,7.89
+2026-08-06,Electronic Components,265,23.02
+2026-08-06,Electronics & Computer Distribution,35,14.29
+2026-08-06,Scientific & Technical Instruments,13,15.38
+2026-08-06,Semiconductor Equipment & Materials,63,42.86
+2026-08-06,Semiconductors,155,29.03
+2026-08-06,Software - Infrastructure,21,0.00
+2026-08-06,Specialty Industrial Machinery,84,17.86
+2026-08-07,Communication Equipment,70,17.14
+2026-08-07,Computer Hardware,112,25.00
+2026-08-07,Consumer Electronics,27,0.00
+2026-08-07,Electrical Equipment & Parts,76,10.53
+2026-08-07,Electronic Components,265,20.38
+2026-08-07,Electronics & Computer Distribution,35,14.29
+2026-08-07,Scientific & Technical Instruments,13,15.38
+2026-08-07,Semiconductor Equipment & Materials,63,41.27
+2026-08-07,Semiconductors,155,27.10
+2026-08-07,Software - Infrastructure,21,0.00
+2026-08-07,Specialty Industrial Machinery,84,16.67
+2026-08-10,Communication Equipment,70,17.14
+2026-08-10,Computer Hardware,112,23.21
+2026-08-10,Consumer Electronics,27,0.00
+2026-08-10,Electrical Equipment & Parts,76,13.16
+2026-08-10,Electronic Components,265,21.13
+2026-08-10,Electronics & Computer Distribution,35,11.43
+2026-08-10,Scientific & Technical Instruments,13,15.38
+2026-08-10,Semiconductor Equipment & Materials,63,44.44
+2026-08-10,Semiconductors,155,27.74
+2026-08-10,Software - Infrastructure,21,0.00
+2026-08-10,Specialty Industrial Machinery,84,15.48
+2026-08-11,Communication Equipment,70,14.29
+2026-08-11,Computer Hardware,112,22.32
+2026-08-11,Consumer Electronics,27,0.00
+2026-08-11,Electrical Equipment & Parts,76,13.16
+2026-08-11,Electronic Components,265,20.38
+2026-08-11,Electronics & Computer Distribution,35,14.29
+2026-08-11,Scientific & Technical Instruments,13,15.38
+2026-08-11,Semiconductor Equipment & Materials,63,41.27
+2026-08-11,Semiconductors,155,27.74
+2026-08-11,Software - Infrastructure,21,0.00
+2026-08-11,Specialty Industrial Machinery,84,16.67
+2026-08-12,Communication Equipment,70,14.29
+2026-08-12,Computer Hardware,112,22.32
+2026-08-12,Consumer Electronics,27,0.00
+2026-08-12,Electrical Equipment & Parts,76,11.84
+2026-08-12,Electronic Components,265,21.51
+2026-08-12,Electronics & Computer Distribution,35,14.29
+2026-08-12,Scientific & Technical Instruments,13,23.08
+2026-08-12,Semiconductor Equipment & Materials,63,46.03
+2026-08-12,Semiconductors,155,24.52
+2026-08-12,Software - Infrastructure,21,0.00
+2026-08-12,Specialty Industrial Machinery,84,17.86
+2026-08-13,Communication Equipment,70,12.86
+2026-08-13,Computer Hardware,112,22.32
+2026-08-13,Consumer Electronics,27,0.00
+2026-08-13,Electrical Equipment & Parts,76,13.16
+2026-08-13,Electronic Components,265,22.26
+2026-08-13,Electronics & Computer Distribution,35,14.29
+2026-08-13,Scientific & Technical Instruments,13,23.08
+2026-08-13,Semiconductor Equipment & Materials,63,46.03
+2026-08-13,Semiconductors,155,26.45
+2026-08-13,Software - Infrastructure,21,0.00
+2026-08-13,Specialty Industrial Machinery,84,17.86
+2026-08-14,Communication Equipment,70,12.86
+2026-08-14,Computer Hardware,112,19.64
+2026-08-14,Consumer Electronics,27,0.00
+2026-08-14,Electrical Equipment & Parts,76,11.84
+2026-08-14,Electronic Components,265,22.26
+2026-08-14,Electronics & Computer Distribution,35,17.14
+2026-08-14,Scientific & Technical Instruments,13,15.38
+2026-08-14,Semiconductor Equipment & Materials,63,44.44
+2026-08-14,Semiconductors,155,27.74
+2026-08-14,Software - Infrastructure,21,0.00
+2026-08-14,Specialty Industrial Machinery,84,16.67
+2026-08-17,Communication Equipment,70,12.86
+2026-08-17,Computer Hardware,112,22.32
+2026-08-17,Consumer Electronics,27,3.70
+2026-08-17,Electrical Equipment & Parts,76,13.16
+2026-08-17,Electronic Components,265,21.89
+2026-08-17,Electronics & Computer Distribution,35,14.29
+2026-08-17,Scientific & Technical Instruments,13,23.08
+2026-08-17,Semiconductor Equipment & Materials,63,46.03
+2026-08-17,Semiconductors,155,27.74
+2026-08-17,Software - Infrastructure,21,0.00
+2026-08-17,Specialty Industrial Machinery,84,16.67
+2026-08-18,Communication Equipment,70,11.43
+2026-08-18,Computer Hardware,112,22.32
+2026-08-18,Consumer Electronics,27,0.00
+2026-08-18,Electrical Equipment & Parts,76,13.16
+2026-08-18,Electronic Components,265,22.26
+2026-08-18,Electronics & Computer Distribution,35,14.29
+2026-08-18,Scientific & Technical Instruments,13,23.08
+2026-08-18,Semiconductor Equipment & Materials,63,46.03
+2026-08-18,Semiconductors,155,27.74
+2026-08-18,Software - Infrastructure,21,0.00
+2026-08-18,Specialty Industrial Machinery,84,17.86
+2026-08-19,Communication Equipment,70,11.43
+2026-08-19,Computer Hardware,112,20.54
+2026-08-19,Consumer Electronics,27,0.00
+2026-08-19,Electrical Equipment & Parts,76,13.16
+2026-08-19,Electronic Components,265,22.26
+2026-08-19,Electronics & Computer Distribution,35,14.29
+2026-08-19,Scientific & Technical Instruments,13,23.08
+2026-08-19,Semiconductor Equipment & Materials,63,47.62
+2026-08-19,Semiconductors,155,28.39
+2026-08-19,Software - Infrastructure,21,0.00
+2026-08-19,Specialty Industrial Machinery,84,16.67
+2026-08-20,Communication Equipment,70,11.43
+2026-08-20,Computer Hardware,112,20.54
+2026-08-20,Consumer Electronics,27,0.00
+2026-08-20,Electrical Equipment & Parts,76,11.84
+2026-08-20,Electronic Components,265,22.64
+2026-08-20,Electronics & Computer Distribution,35,8.57
+2026-08-20,Scientific & Technical Instruments,13,23.08
+2026-08-20,Semiconductor Equipment & Materials,63,47.62
+2026-08-20,Semiconductors,155,27.74
+2026-08-20,Software - Infrastructure,21,0.00
+2026-08-20,Specialty Industrial Machinery,84,15.48
+2026-08-21,Communication Equipment,70,10.00
+2026-08-21,Computer Hardware,112,19.64
+2026-08-21,Consumer Electronics,27,0.00
+2026-08-21,Electrical Equipment & Parts,76,11.84
+2026-08-21,Electronic Components,265,22.64
+2026-08-21,Electronics & Computer Distribution,35,14.29
+2026-08-21,Scientific & Technical Instruments,13,23.08
+2026-08-21,Semiconductor Equipment & Materials,63,46.03
+2026-08-21,Semiconductors,155,27.74
+2026-08-21,Software - Infrastructure,21,0.00
+2026-08-21,Specialty Industrial Machinery,84,15.48
+2026-08-24,Communication Equipment,70,10.00
+2026-08-24,Computer Hardware,112,20.54
+2026-08-24,Consumer Electronics,27,0.00
+2026-08-24,Electrical Equipment & Parts,76,13.16
+2026-08-24,Electronic Components,265,22.64
+2026-08-24,Electronics & Computer Distribution,35,14.29
+2026-08-24,Scientific & Technical Instruments,13,23.08
+2026-08-24,Semiconductor Equipment & Materials,63,42.86
+2026-08-24,Semiconductors,155,28.39
+2026-08-24,Software - Infrastructure,21,0.00
+2026-08-24,Specialty Industrial Machinery,84,15.48
+2026-08-25,Communication Equipment,70,8.57
+2026-08-25,Computer Hardware,112,21.43
+2026-08-25,Consumer Electronics,27,0.00
+2026-08-25,Electrical Equipment & Parts,76,14.47
+2026-08-25,Electronic Components,265,22.64
+2026-08-25,Electronics & Computer Distribution,35,14.29
+2026-08-25,Scientific & Technical Instruments,13,23.08
+2026-08-25,Semiconductor Equipment & Materials,63,39.68
+2026-08-25,Semiconductors,155,27.74
+2026-08-25,Software - Infrastructure,21,0.00
+2026-08-25,Specialty Industrial Machinery,84,16.67
+2026-08-26,Communication Equipment,70,10.00
+2026-08-26,Computer Hardware,112,23.21
+2026-08-26,Consumer Electronics,27,0.00
+2026-08-26,Electrical Equipment & Parts,76,15.79
+2026-08-26,Electronic Components,265,23.77
+2026-08-26,Electronics & Computer Distribution,35,17.14
+2026-08-26,Scientific & Technical Instruments,13,23.08
+2026-08-26,Semiconductor Equipment & Materials,63,39.68
+2026-08-26,Semiconductors,155,29.03
+2026-08-26,Software - Infrastructure,21,0.00
+2026-08-26,Specialty Industrial Machinery,84,17.86
+2026-08-27,Communication Equipment,70,14.29
+2026-08-27,Computer Hardware,112,21.43
+2026-08-27,Consumer Electronics,27,0.00
+2026-08-27,Electrical Equipment & Parts,76,17.11
+2026-08-27,Electronic Components,265,26.04
+2026-08-27,Electronics & Computer Distribution,35,14.29
+2026-08-27,Scientific & Technical Instruments,13,23.08
+2026-08-27,Semiconductor Equipment & Materials,63,46.03
+2026-08-27,Semiconductors,155,33.55
+2026-08-27,Software - Infrastructure,21,0.00
+2026-08-27,Specialty Industrial Machinery,84,19.05
+2026-08-28,Communication Equipment,70,17.14
+2026-08-28,Computer Hardware,109,23.85
+2026-08-28,Consumer Electronics,26,0.00
+2026-08-28,Electrical Equipment & Parts,75,21.33
+2026-08-28,Electronic Components,265,29.06
+2026-08-28,Electronics & Computer Distribution,35,20.00
+2026-08-28,Scientific & Technical Instruments,13,15.38
+2026-08-28,Semiconductor Equipment & Materials,63,49.21
+2026-08-28,Semiconductors,155,38.71
+2026-08-28,Software - Infrastructure,21,0.00
+2026-08-28,Specialty Industrial Machinery,84,21.43
+2026-08-31,Communication Equipment,70,14.29
+2026-08-31,Computer Hardware,112,23.21
+2026-08-31,Consumer Electronics,27,0.00
+2026-08-31,Electrical Equipment & Parts,76,15.79
+2026-08-31,Electronic Components,265,26.79
+2026-08-31,Electronics & Computer Distribution,35,17.14
+2026-08-31,Scientific & Technical Instruments,13,7.69
+2026-08-31,Semiconductor Equipment & Materials,63,44.44
+2026-08-31,Semiconductors,155,30.32
+2026-08-31,Software - Infrastructure,21,0.00
+2026-08-31,Specialty Industrial Machinery,84,20.24
+2026-09-01,Communication Equipment,70,12.86
+2026-09-01,Computer Hardware,112,24.11
+2026-09-01,Consumer Electronics,27,0.00
+2026-09-01,Electrical Equipment & Parts,76,13.16
+2026-09-01,Electronic Components,265,26.04
+2026-09-01,Electronics & Computer Distribution,35,20.00
+2026-09-01,Scientific & Technical Instruments,13,7.69
+2026-09-01,Semiconductor Equipment & Materials,63,46.03
+2026-09-01,Semiconductors,155,30.97
+2026-09-01,Software - Infrastructure,21,0.00
+2026-09-01,Specialty Industrial Machinery,84,17.86
+2026-09-02,Communication Equipment,70,12.86
+2026-09-02,Computer Hardware,112,24.11
+2026-09-02,Consumer Electronics,27,0.00
+2026-09-02,Electrical Equipment & Parts,76,11.84
+2026-09-02,Electronic Components,265,24.53
+2026-09-02,Electronics & Computer Distribution,35,14.29
+2026-09-02,Scientific & Technical Instruments,13,0.00
+2026-09-02,Semiconductor Equipment & Materials,63,46.03
+2026-09-02,Semiconductors,155,30.32
+2026-09-02,Software - Infrastructure,21,0.00
+2026-09-02,Specialty Industrial Machinery,84,19.05
+2026-09-03,Communication Equipment,70,8.57
+2026-09-03,Computer Hardware,112,22.32
+2026-09-03,Consumer Electronics,27,0.00
+2026-09-03,Electrical Equipment & Parts,76,10.53
+2026-09-03,Electronic Components,265,23.40
+2026-09-03,Electronics & Computer Distribution,35,17.14
+2026-09-03,Scientific & Technical Instruments,13,0.00
+2026-09-03,Semiconductor Equipment & Materials,63,46.03
+2026-09-03,Semiconductors,155,28.39
+2026-09-03,Software - Infrastructure,21,0.00
+2026-09-03,Specialty Industrial Machinery,84,17.86
+2026-09-04,Communication Equipment,70,8.57
+2026-09-04,Computer Hardware,112,23.21
+2026-09-04,Consumer Electronics,26,0.00
+2026-09-04,Electrical Equipment & Parts,76,9.21
+2026-09-04,Electronic Components,265,24.53
+2026-09-04,Electronics & Computer Distribution,35,8.57
+2026-09-04,Scientific & Technical Instruments,13,7.69
+2026-09-04,Semiconductor Equipment & Materials,63,47.62
+2026-09-04,Semiconductors,155,29.03
+2026-09-04,Software - Infrastructure,21,0.00
+2026-09-04,Specialty Industrial Machinery,84,19.05
+2026-09-07,Communication Equipment,70,7.14
+2026-09-07,Computer Hardware,112,22.32
+2026-09-07,Consumer Electronics,26,0.00
+2026-09-07,Electrical Equipment & Parts,76,10.53
+2026-09-07,Electronic Components,265,24.53
+2026-09-07,Electronics & Computer Distribution,35,8.57
+2026-09-07,Scientific & Technical Instruments,13,7.69
+2026-09-07,Semiconductor Equipment & Materials,63,50.79
+2026-09-07,Semiconductors,155,29.03
+2026-09-07,Software - Infrastructure,21,0.00
+2026-09-07,Specialty Industrial Machinery,84,19.05
+2026-09-08,Communication Equipment,70,5.71
+2026-09-08,Computer Hardware,112,19.64
+2026-09-08,Consumer Electronics,26,0.00
+2026-09-08,Electrical Equipment & Parts,76,9.21
+2026-09-08,Electronic Components,265,24.15
+2026-09-08,Electronics & Computer Distribution,35,14.29
+2026-09-08,Scientific & Technical Instruments,13,7.69
+2026-09-08,Semiconductor Equipment & Materials,63,47.62
+2026-09-08,Semiconductors,155,28.39
+2026-09-08,Software - Infrastructure,21,0.00
+2026-09-08,Specialty Industrial Machinery,84,19.05
+2026-09-09,Communication Equipment,70,4.29
+2026-09-09,Computer Hardware,112,19.64
+2026-09-09,Consumer Electronics,26,0.00
+2026-09-09,Electrical Equipment & Parts,76,9.21
+2026-09-09,Electronic Components,265,24.15
+2026-09-09,Electronics & Computer Distribution,35,8.57
+2026-09-09,Scientific & Technical Instruments,13,7.69
+2026-09-09,Semiconductor Equipment & Materials,63,46.03
+2026-09-09,Semiconductors,155,30.97
+2026-09-09,Software - Infrastructure,21,0.00
+2026-09-09,Specialty Industrial Machinery,84,17.86
+2026-09-10,Communication Equipment,70,5.71
+2026-09-10,Computer Hardware,112,19.64
+2026-09-10,Consumer Electronics,26,0.00
+2026-09-10,Electrical Equipment & Parts,76,9.21
+2026-09-10,Electronic Components,265,23.77
+2026-09-10,Electronics & Computer Distribution,35,11.43
+2026-09-10,Scientific & Technical Instruments,13,7.69
+2026-09-10,Semiconductor Equipment & Materials,63,46.03
+2026-09-10,Semiconductors,155,27.74
+2026-09-10,Software - Infrastructure,21,0.00
+2026-09-10,Specialty Industrial Machinery,84,17.86
+2026-09-11,Communication Equipment,70,7.14
+2026-09-11,Computer Hardware,112,21.43
+2026-09-11,Consumer Electronics,26,0.00
+2026-09-11,Electrical Equipment & Parts,76,9.21
+2026-09-11,Electronic Components,265,22.64
+2026-09-11,Electronics & Computer Distribution,35,11.43
+2026-09-11,Scientific & Technical Instruments,13,7.69
+2026-09-11,Semiconductor Equipment & Materials,63,42.86
+2026-09-11,Semiconductors,155,27.10
+2026-09-11,Software - Infrastructure,21,0.00
+2026-09-11,Specialty Industrial Machinery,84,19.05
+2026-09-14,Communication Equipment,70,8.57
+2026-09-14,Computer Hardware,112,21.43
+2026-09-14,Consumer Electronics,26,0.00
+2026-09-14,Electrical Equipment & Parts,76,9.21
+2026-09-14,Electronic Components,265,23.02
+2026-09-14,Electronics & Computer Distribution,35,5.71
+2026-09-14,Scientific & Technical Instruments,13,7.69
+2026-09-14,Semiconductor Equipment & Materials,63,44.44
+2026-09-14,Semiconductors,155,27.10
+2026-09-14,Software - Infrastructure,21,0.00
+2026-09-14,Specialty Industrial Machinery,84,15.48
+2026-09-15,Communication Equipment,70,8.57
+2026-09-15,Computer Hardware,112,21.43
+2026-09-15,Consumer Electronics,26,0.00
+2026-09-15,Electrical Equipment & Parts,76,7.89
+2026-09-15,Electronic Components,265,21.89
+2026-09-15,Electronics & Computer Distribution,35,5.71
+2026-09-15,Scientific & Technical Instruments,13,7.69
+2026-09-15,Semiconductor Equipment & Materials,63,46.03
+2026-09-15,Semiconductors,155,26.45
+2026-09-15,Software - Infrastructure,21,0.00
+2026-09-15,Specialty Industrial Machinery,84,16.67
+2026-09-16,Communication Equipment,70,10.00
+2026-09-16,Computer Hardware,112,19.64
+2026-09-16,Consumer Electronics,26,0.00
+2026-09-16,Electrical Equipment & Parts,76,10.53
+2026-09-16,Electronic Components,265,23.40
+2026-09-16,Electronics & Computer Distribution,35,5.71
+2026-09-16,Scientific & Technical Instruments,13,7.69
+2026-09-16,Semiconductor Equipment & Materials,63,44.44
+2026-09-16,Semiconductors,155,27.10
+2026-09-16,Software - Infrastructure,21,0.00
+2026-09-16,Specialty Industrial Machinery,84,17.86
+2026-09-17,Communication Equipment,70,8.57
+2026-09-17,Computer Hardware,112,21.43
+2026-09-17,Consumer Electronics,26,0.00
+2026-09-17,Electrical Equipment & Parts,76,9.21
+2026-09-17,Electronic Components,265,23.40
+2026-09-17,Electronics & Computer Distribution,35,5.71
+2026-09-17,Scientific & Technical Instruments,13,0.00
+2026-09-17,Semiconductor Equipment & Materials,63,44.44
+2026-09-17,Semiconductors,155,28.39
+2026-09-17,Software - Infrastructure,21,0.00
+2026-09-17,Specialty Industrial Machinery,84,17.86
+2026-09-18,Communication Equipment,70,7.14
+2026-09-18,Computer Hardware,112,21.43
+2026-09-18,Consumer Electronics,26,0.00
+2026-09-18,Electrical Equipment & Parts,76,13.16
+2026-09-18,Electronic Components,265,23.77
+2026-09-18,Electronics & Computer Distribution,35,5.71
+2026-09-18,Scientific & Technical Instruments,13,7.69
+2026-09-18,Semiconductor Equipment & Materials,63,49.21
+2026-09-18,Semiconductors,155,29.68
+2026-09-18,Software - Infrastructure,21,0.00
+2026-09-18,Specialty Industrial Machinery,84,17.86
+2026-09-20,Communication Equipment,55,9.09
+2026-09-20,Computer Hardware,93,23.66
+2026-09-20,Consumer Electronics,17,0.00
+2026-09-20,Electrical Equipment & Parts,66,12.12
+2026-09-20,Electronic Components,221,25.79
+2026-09-20,Electronics & Computer Distribution,33,6.06
+2026-09-20,Scientific & Technical Instruments,11,0.00
+2026-09-20,Semiconductor Equipment & Materials,58,48.28
+2026-09-20,Semiconductors,141,29.08
+2026-09-20,Software - Infrastructure,14,0.00
+2026-09-20,Specialty Industrial Machinery,69,21.74
+2026-09-21,Communication Equipment,70,7.14
+2026-09-21,Computer Hardware,112,21.43
+2026-09-21,Consumer Electronics,26,0.00
+2026-09-21,Electrical Equipment & Parts,76,9.21
+2026-09-21,Electronic Components,265,22.64
+2026-09-21,Electronics & Computer Distribution,35,8.57
+2026-09-21,Scientific & Technical Instruments,13,7.69
+2026-09-21,Semiconductor Equipment & Materials,63,46.03
+2026-09-21,Semiconductors,155,28.39
+2026-09-21,Software - Infrastructure,21,0.00
+2026-09-21,Specialty Industrial Machinery,84,20.24
+2026-09-22,Communication Equipment,70,7.14
+2026-09-22,Computer Hardware,112,23.21
+2026-09-22,Consumer Electronics,26,0.00
+2026-09-22,Electrical Equipment & Parts,76,9.21
+2026-09-22,Electronic Components,265,23.02
+2026-09-22,Electronics & Computer Distribution,35,8.57
+2026-09-22,Scientific & Technical Instruments,13,7.69
+2026-09-22,Semiconductor Equipment & Materials,63,44.44
+2026-09-22,Semiconductors,155,30.32
+2026-09-22,Software - Infrastructure,21,0.00
+2026-09-22,Specialty Industrial Machinery,84,16.67
+2026-09-23,Communication Equipment,70,8.57
+2026-09-23,Computer Hardware,111,25.23
+2026-09-23,Consumer Electronics,26,0.00
+2026-09-23,Electrical Equipment & Parts,76,10.53
+2026-09-23,Electronic Components,265,21.51
+2026-09-23,Electronics & Computer Distribution,35,8.57
+2026-09-23,Scientific & Technical Instruments,13,7.69
+2026-09-23,Semiconductor Equipment & Materials,63,42.86
+2026-09-23,Semiconductors,155,30.32
+2026-09-23,Software - Infrastructure,21,4.76
+2026-09-23,Specialty Industrial Machinery,84,15.48
+2026-09-24,Communication Equipment,70,7.14
+2026-09-24,Computer Hardware,111,24.32
+2026-09-24,Consumer Electronics,26,0.00
+2026-09-24,Electrical Equipment & Parts,76,10.53
+2026-09-24,Electronic Components,265,21.13
+2026-09-24,Electronics & Computer Distribution,35,8.57
+2026-09-24,Scientific & Technical Instruments,13,7.69
+2026-09-24,Semiconductor Equipment & Materials,63,41.27
+2026-09-24,Semiconductors,155,29.03
+2026-09-24,Software - Infrastructure,21,4.76
+2026-09-24,Specialty Industrial Machinery,84,17.86
+2026-09-29,Communication Equipment,70,5.71
+2026-09-29,Computer Hardware,111,25.23
+2026-09-29,Consumer Electronics,26,0.00
+2026-09-29,Electrical Equipment & Parts,76,9.21
+2026-09-29,Electronic Components,265,21.89
+2026-09-29,Electronics & Computer Distribution,35,8.57
+2026-09-29,Scientific & Technical Instruments,13,0.00
+2026-09-29,Semiconductor Equipment & Materials,63,44.44
+2026-09-29,Semiconductors,155,29.03
+2026-09-29,Software - Infrastructure,21,4.76
+2026-09-29,Specialty Industrial Machinery,84,17.86
+2026-09-30,Communication Equipment,70,7.14
+2026-09-30,Computer Hardware,111,23.42
+2026-09-30,Consumer Electronics,26,0.00
+2026-09-30,Electrical Equipment & Parts,76,10.53
+2026-09-30,Electronic Components,265,21.89
+2026-09-30,Electronics & Computer Distribution,35,8.57
+2026-09-30,Scientific & Technical Instruments,13,0.00
+2026-09-30,Semiconductor Equipment & Materials,63,44.44
+2026-09-30,Semiconductors,155,32.26
+2026-09-30,Software - Infrastructure,21,4.76
+2026-09-30,Specialty Industrial Machinery,84,20.24
+2026-10-01,Communication Equipment,70,7.14
+2026-10-01,Computer Hardware,111,23.42
+2026-10-01,Consumer Electronics,26,0.00
+2026-10-01,Electrical Equipment & Parts,76,7.89
+2026-10-01,Electronic Components,265,23.40
+2026-10-01,Electronics & Computer Distribution,35,8.57
+2026-10-01,Scientific & Technical Instruments,13,0.00
+2026-10-01,Semiconductor Equipment & Materials,63,41.27
+2026-10-01,Semiconductors,155,30.97
+2026-10-01,Software - Infrastructure,21,4.76
+2026-10-01,Specialty Industrial Machinery,84,16.67
+2026-10-02,Communication Equipment,70,8.57
+2026-10-02,Computer Hardware,111,21.62
+2026-10-02,Consumer Electronics,26,0.00
+2026-10-02,Electrical Equipment & Parts,76,9.21
+2026-10-02,Electronic Components,265,23.77
+2026-10-02,Electronics & Computer Distribution,35,8.57
+2026-10-02,Scientific & Technical Instruments,13,0.00
+2026-10-02,Semiconductor Equipment & Materials,63,42.86
+2026-10-02,Semiconductors,155,30.97
+2026-10-02,Software - Infrastructure,21,4.76
+2026-10-02,Specialty Industrial Machinery,84,16.67
+2026-10-05,Communication Equipment,70,10.00
+2026-10-05,Computer Hardware,111,21.62
+2026-10-05,Consumer Electronics,26,0.00
+2026-10-05,Electrical Equipment & Parts,76,7.89
+2026-10-05,Electronic Components,265,26.42
+2026-10-05,Electronics & Computer Distribution,35,8.57
+2026-10-05,Scientific & Technical Instruments,13,15.38
+2026-10-05,Semiconductor Equipment & Materials,63,42.86
+2026-10-05,Semiconductors,155,30.97
+2026-10-05,Software - Infrastructure,21,4.76
+2026-10-05,Specialty Industrial Machinery,84,17.86
+2026-10-06,Communication Equipment,70,10.00
+2026-10-06,Computer Hardware,111,21.62
+2026-10-06,Consumer Electronics,26,0.00
+2026-10-06,Electrical Equipment & Parts,76,9.21
+2026-10-06,Electronic Components,264,25.38
+2026-10-06,Electronics & Computer Distribution,35,8.57
+2026-10-06,Scientific & Technical Instruments,13,15.38
+2026-10-06,Semiconductor Equipment & Materials,63,41.27
+2026-10-06,Semiconductors,155,30.32
+2026-10-06,Software - Infrastructure,21,4.76
+2026-10-06,Specialty Industrial Machinery,83,15.66
+2026-10-07,Communication Equipment,70,11.43
+2026-10-07,Computer Hardware,111,22.52
+2026-10-07,Consumer Electronics,26,0.00
+2026-10-07,Electrical Equipment & Parts,76,7.89
+2026-10-07,Electronic Components,264,25.38
+2026-10-07,Electronics & Computer Distribution,35,11.43
+2026-10-07,Scientific & Technical Instruments,13,30.77
+2026-10-07,Semiconductor Equipment & Materials,63,38.10
+2026-10-07,Semiconductors,155,30.32
+2026-10-07,Software - Infrastructure,21,4.76
+2026-10-07,Specialty Industrial Machinery,83,14.46
+2026-10-08,Communication Equipment,70,11.43
+2026-10-08,Computer Hardware,111,21.62
+2026-10-08,Consumer Electronics,26,0.00
+2026-10-08,Electrical Equipment & Parts,76,7.89
+2026-10-08,Electronic Components,264,25.00
+2026-10-08,Electronics & Computer Distribution,35,8.57
+2026-10-08,Scientific & Technical Instruments,13,23.08
+2026-10-08,Semiconductor Equipment & Materials,63,46.03
+2026-10-08,Semiconductors,155,31.61
+2026-10-08,Software - Infrastructure,21,4.76
+2026-10-08,Specialty Industrial Machinery,83,14.46
+2026-10-12,Communication Equipment,70,12.86
+2026-10-12,Computer Hardware,111,22.52
+2026-10-12,Consumer Electronics,26,0.00
+2026-10-12,Electrical Equipment & Parts,75,9.33
+2026-10-12,Electronic Components,262,26.72
+2026-10-12,Electronics & Computer Distribution,35,8.57
+2026-10-12,Scientific & Technical Instruments,13,15.38
+2026-10-12,Semiconductor Equipment & Materials,62,48.39
+2026-10-12,Semiconductors,155,31.61
+2026-10-12,Software - Infrastructure,21,4.76
+2026-10-12,Specialty Industrial Machinery,83,18.07
+2026-10-13,Communication Equipment,70,12.86
+2026-10-13,Computer Hardware,111,25.23
+2026-10-13,Consumer Electronics,26,0.00
+2026-10-13,Electrical Equipment & Parts,76,9.21
+2026-10-13,Electronic Components,264,25.76
+2026-10-13,Electronics & Computer Distribution,35,8.57
+2026-10-13,Scientific & Technical Instruments,13,15.38
+2026-10-13,Semiconductor Equipment & Materials,63,46.03
+2026-10-13,Semiconductors,155,29.03
+2026-10-13,Software - Infrastructure,21,9.52
+2026-10-13,Specialty Industrial Machinery,83,16.87
+2026-10-14,Communication Equipment,70,10.00
+2026-10-14,Computer Hardware,111,25.23
+2026-10-14,Consumer Electronics,26,0.00
+2026-10-14,Electrical Equipment & Parts,76,10.53
+2026-10-14,Electronic Components,264,27.65
+2026-10-14,Electronics & Computer Distribution,35,8.57
+2026-10-14,Scientific & Technical Instruments,13,15.38
+2026-10-14,Semiconductor Equipment & Materials,63,47.62
+2026-10-14,Semiconductors,155,31.61
+2026-10-14,Software - Infrastructure,21,9.52
+2026-10-14,Specialty Industrial Machinery,83,13.25
+2026-10-15,Communication Equipment,70,10.00
+2026-10-15,Computer Hardware,111,23.42
+2026-10-15,Consumer Electronics,26,0.00
+2026-10-15,Electrical Equipment & Parts,76,9.21
+2026-10-15,Electronic Components,264,26.14
+2026-10-15,Electronics & Computer Distribution,35,11.43
+2026-10-15,Scientific & Technical Instruments,13,7.69
+2026-10-15,Semiconductor Equipment & Materials,63,41.27
+2026-10-15,Semiconductors,155,24.52
+2026-10-15,Software - Infrastructure,21,9.52
+2026-10-15,Specialty Industrial Machinery,83,12.05
+2026-10-16,Communication Equipment,68,13.24
+2026-10-16,Computer Hardware,110,25.45
+2026-10-16,Consumer Electronics,26,0.00
+2026-10-16,Electrical Equipment & Parts,74,8.11
+2026-10-16,Electronic Components,263,27.00
+2026-10-16,Electronics & Computer Distribution,35,14.29
+2026-10-16,Scientific & Technical Instruments,13,7.69
+2026-10-16,Semiconductor Equipment & Materials,62,41.94
+2026-10-16,Semiconductors,155,26.45
+2026-10-16,Software - Infrastructure,21,4.76
+2026-10-16,Specialty Industrial Machinery,82,17.07

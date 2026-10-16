@@ -37,6 +37,17 @@ def _xadd(msg: str, tags: str, as_of: str) -> None:
                     "as_of", as_of, "msg", msg], check=True, capture_output=True)
 
 
+def breadth_line(write: bool) -> str:
+    """附掛產業動能廣度 (plan 2026-10-16-sector-momentum-breadth); 失敗回空字串, 不影響 treemap."""
+    try:
+        import sector_breadth
+        _, df = sector_breadth.today(write=write)
+        return "📊 " + sector_breadth.format_line(df)
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] sector breadth skipped: {e}", file=sys.stderr)
+        return ""
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="build + print, no files or inbox")
@@ -59,7 +70,9 @@ def main(argv=None) -> int:
         return 1
     line = st.summary_line(data)
     stale = latest != today
+    breadth = breadth_line(write=not args.dry_run)
     msg = (f"🗺️ 產業全景 {line}" + (f"\n⚠️ 資料日 {latest} ≠ 今日 {today} (休市或 15:20 來源未出)" if stale else "")
+           + (f"\n{breadth}" if breadth else "")
            + f"\n本機: analysis/sector_treemap_{latest}.html・線上 {ARTIFACT_URL} 需在 session 說「更新產業全景」重新發佈"
            + "\n(分析標註·不構成交易指令)")
     print(msg)
