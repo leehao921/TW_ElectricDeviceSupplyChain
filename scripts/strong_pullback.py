@@ -197,7 +197,13 @@ def is_first_retest(df: pd.DataFrame, zone_low: float, zone_high: float,
     today = df.iloc[-1]
     if not (today["Low"] <= zone_high * (1 + touch_tol) and today["Close"] >= zone_low):
         return False
-    hist = df.iloc[-lookback - 1:-1]
+    return is_untested(df.iloc[:-1], zone_low, zone_high, lookback, touch_tol)
+
+
+def is_untested(hist: pd.DataFrame, zone_low: float, zone_high: float,
+                lookback: int = 30, touch_tol: float = 0.005) -> bool:
+    """hist (不含今日) 內: 最近一次收在 zone 下方之後, 沒有任何 low 碰過 zone."""
+    hist = hist.iloc[-lookback:]
     below = np.flatnonzero(hist["Close"].to_numpy() < zone_low)
     if len(below) == 0:
         return False                   # 視窗內沒有「從下方站上」的過程
@@ -218,8 +224,7 @@ def simulate_trade(df: pd.DataFrame, signal_pos: int, cost_pct: float = COST_PCT
     nxt = signal_pos + 1
     if nxt >= len(df):
         return None
-    o, h, l, c = (df[col].to_numpy() for col in ("Open", "High", "Low", "Close"))
-    ema9 = df["ema9"].to_numpy()
+    o, h, l = (df[col].to_numpy() for col in ("Open", "High", "Low"))
     if h[nxt] <= h[signal_pos]:
         return None
     entry = max(o[nxt], h[signal_pos])
@@ -230,33 +235,117 @@ def simulate_trade(df: pd.DataFrame, signal_pos: int, cost_pct: float = COST_PCT
     target = entry + partial_r * risk
 
     legs: list[tuple[float, float]] = []   # (weight, exit_px)
-    remaining, reason, exit_pos = 1.0, "open", None
     last = min(len(df) - 1, nxt + max_hold)
-    for j in range(nxt, last + 1):
-        if j > nxt and o[j] <= stop:
-            legs.append((remaining, o[j])); remaining, reason = 0.0, "gap_stop"
-        elif l[j] <= stop:
-            legs.append((remaining, stop)); remaining, reason = 0.0, "stop"
-        if remaining == 0:
-            exit_pos = j
-            break
-        if remaining == 1.0 and h[j] >= target:
-            px = o[j] if (j > nxt and o[j] >= target) else target
-            legs.append((0.5, px)); remaining = 0.5
-        if j > nxt and c[j] < ema9[j]:
-            legs.append((remaining, c[j])); remaining, reason, exit_pos = 0.0, "ema9", j
-            break
-    if remaining > 0:
-        legs.append((remaining, c[last]))
-        exit_pos = last
-        reason = "time" if last == nxt + max_hold else "open"
+    remaining, reason, exit_pos = _manage_daily(df, nxt, last, entry, stop, target, 1.0, legs,
+                                                entry_day=nxt)
+    return _close_trade(df, legs, remaining, reason, exit_pos, last, nxt, max_hold,
+                        entry, stop, cost_pct, df.index[nxt])
 
+
+def _manage_daily(df: pd.DataFrame, j_from: int, last: int, entry: float, stop: float,
+                  target: float, remaining: float, legs: list,
+                  entry_day: int | None = None) -> tuple[float, str, int | None]:
+    """日線出場管理: 停損 (跳空以開盤) → 觸 target 出半 → 收盤破 EMA9 全出.
+
+    entry_day 當天: 不判跳空、不判 EMA9 (盤中才進場)。
+    """
+    o, h, l, c = (df[col].to_numpy() for col in ("Open", "High", "Low", "Close"))
+    ema9 = df["ema9"].to_numpy()
+    for j in range(j_from, last + 1):
+        first = j == entry_day
+        if not first and o[j] <= stop:
+            legs.append((remaining, o[j]))
+            return 0.0, "gap_stop", j
+        if l[j] <= stop:
+            legs.append((remaining, stop))
+            return 0.0, "stop", j
+        if remaining == 1.0 and h[j] >= target:
+            px = o[j] if (not first and o[j] >= target) else target
+            legs.append((0.5, px))
+            remaining = 0.5
+        if not first and c[j] < ema9[j]:
+            legs.append((remaining, c[j]))
+            return 0.0, "ema9", j
+    return remaining, "open", None
+
+
+def _close_trade(df, legs, remaining, reason, exit_pos, last, start, max_hold,
+                 entry, stop, cost_pct, entry_date) -> dict:
+    risk = entry - stop
+    if remaining > 0:
+        legs.append((remaining, float(df["Close"].iloc[last])))
+        exit_pos = last
+        reason = "time" if last == start + max_hold else "open"
     r_gross = sum(w * (px - entry) / risk for w, px in legs)
     cost_r = cost_pct / 100 * entry / risk
     return {"entry": float(entry), "stop": float(stop), "stop_pct": float(risk / entry * 100),
             "r_gross": float(r_gross), "r_net": float(r_gross - cost_r),
-            "exit_reason": reason, "hold_days": int(exit_pos - nxt),
-            "entry_date": df.index[nxt]}
+            "exit_reason": reason, "hold_days": int(exit_pos - start),
+            "entry_date": entry_date}
+
+
+# --------------------------------------------------------------------------- #
+# v2 — 分鐘圖觸發 (pure)
+# --------------------------------------------------------------------------- #
+def resample_bars(bars: pd.DataFrame, minutes: int) -> pd.DataFrame:
+    """1 分 K (結束標籤) → N 分 K (結束標籤)."""
+    out = bars.resample(f"{minutes}min", closed="right", label="right").agg(
+        {"Open": "first", "High": "max", "Low": "min", "Close": "last"})
+    return out.dropna()
+
+
+def intraday_trigger(bars: pd.DataFrame, zone_low: float, zone_high: float,
+                     touch_tol: float = 0.005, breach_pct: float = 2.0) -> dict | None:
+    """下探入 zone 後, 某根 K 突破前一根高點 → 進場 (價 = max(開, 前K高)).
+
+    停損 = 觸區後至前一根 K 的最低; 觸區後最低跌破 zone_low × (1 − breach_pct%) → 失效。
+    """
+    touched, low_since = False, np.inf
+    o, h, l = (bars[c].to_numpy() for c in ("Open", "High", "Low"))
+    for i in range(len(bars)):
+        entry = max(o[i], h[i - 1]) if i else 0.0
+        if touched and h[i] > h[i - 1] and entry > low_since:
+            return {"entry": float(entry), "stop": float(low_since),
+                    "stop_pct": float((entry - low_since) / entry * 100),
+                    "entry_ts": bars.index[i], "entry_i": i}
+        if l[i] <= zone_high * (1 + touch_tol):
+            touched = True
+        if touched:
+            low_since = min(low_since, l[i])
+            if low_since < zone_low * (1 - breach_pct / 100):
+                return None
+    return None
+
+
+def simulate_intraday_trade(df: pd.DataFrame, pos: int, bars_after_entry: pd.DataFrame,
+                            entry: float, stop: float, cost_pct: float = COST_PCT,
+                            partial_r: float = 3.0, max_hold: int = 30) -> dict:
+    """T=pos 盤中進場: 進場後分 K 判停損/3R, 收盤後從 T+1 交給日線出場管理."""
+    risk = entry - stop
+    target = entry + partial_r * risk
+    legs: list[tuple[float, float]] = []
+    remaining, reason, exit_pos = 1.0, "open", None
+    for lo, hi in zip(bars_after_entry["Low"].to_numpy(), bars_after_entry["High"].to_numpy()):
+        if lo <= stop:
+            legs.append((remaining, stop))
+            remaining, reason, exit_pos = 0.0, "stop", pos
+            break
+        if remaining == 1.0 and hi >= target:
+            legs.append((0.5, target))
+            remaining = 0.5
+    last = min(len(df) - 1, pos + max_hold)
+    if remaining > 0 and pos + 1 <= last:
+        remaining, reason, exit_pos = _manage_daily(df, pos + 1, last, entry, stop, target,
+                                                    remaining, legs)
+    return _close_trade(df, legs, remaining, reason, exit_pos, last, pos, max_hold,
+                        entry, stop, cost_pct, df.index[pos])
+
+
+def kbars_requests(cands: pd.DataFrame) -> list[str]:
+    """候選 (symbol, date) → stock-ofi kbars 佇列 payload (單日)."""
+    import json
+    return [json.dumps({"symbol": r.symbol, "start": r.date.strftime("%Y-%m-%d"),
+                        "end": r.date.strftime("%Y-%m-%d")}) for r in cands.itertuples()]
 
 
 def trade_stats(trades: pd.DataFrame) -> dict:
@@ -504,6 +593,155 @@ def backtest(out_path: Path) -> str:
     return text
 
 
+# --------------------------------------------------------------------------- #
+# v2 — 分鐘圖觸發回測
+# --------------------------------------------------------------------------- #
+def find_touch_candidates(inds: dict[str, pd.DataFrame], mom: pd.DataFrame,
+                          band_pct: float = ZONE_BAND_PCT, min_members: int = ZONE_MIN_MEMBERS,
+                          window: int = SETUP_WINDOW) -> pd.DataFrame:
+    """T-1 仍在觀察名單 + T-1 資料算出的 zone 尚未被回測過 + T 日 low 觸 zone.
+
+    不看 T 收盤 (盤中進場時未知), 進出場交給分 K。
+    """
+    rows = []
+    for sym, ind in inds.items():
+        if len(ind) < 130 or sym not in mom.columns:
+            continue
+        s1 = stage1_frame(ind)["pass"] & mom[sym].reindex(ind.index).fillna(False)
+        low = ind["Low"].to_numpy()
+        for pos in np.flatnonzero(setup_active(s1, window).to_numpy()[:-1]):
+            t = pos + 1
+            if pos < 130:
+                continue
+            hist = ind.iloc[:t]
+            zone = confluence_zone(support_levels(hist), float(hist["Close"].iloc[-1]),
+                                   band_pct, min_members)
+            if (zone and low[t] <= zone["high"] * 1.005
+                    and is_untested(hist, zone["low"], zone["high"])):
+                rows.append({"symbol": sym, "date": ind.index[t], "pos": t,
+                             "zone_low": zone["low"], "zone_high": zone["high"],
+                             "members": "/".join(zone["members"])})
+    return pd.DataFrame(rows)
+
+
+def _load_inputs():
+    import psycopg2
+    conn = psycopg2.connect(**DB)
+    try:
+        panel = load_panel(conn, "2025-01-01")
+    finally:
+        conn.close()
+    mom, close = universe_filters(panel)
+    inds = {s: add_indicators(d) for s, d in panel.items() if len(d) >= 130}
+    return inds, mom, close
+
+
+def enqueue_kbars(dry_run: bool = False) -> str:
+    import redis
+    inds, mom, _ = _load_inputs()
+    cands = find_touch_candidates(inds, mom)
+    r = redis.Redis()
+    done = {k.decode() for k in r.hkeys("h:kbars:done")}
+    todo = [p for p in kbars_requests(cands)
+            if "{symbol}:{start}:{end}".format(**__import__("json").loads(p)) not in done]
+    if not dry_run and todo:
+        r.rpush("q:kbars:requests", *todo)
+    return (f"候選 {len(cands)} 檔日 | 已有 {len(cands) - len(todo)} | "
+            f"{'將' if dry_run else '已'}排入 {len(todo)} (stock-ofi 盤外每 10s 處理 5 筆)")
+
+
+def load_kbars(conn, symbol: str, day: pd.Timestamp) -> pd.DataFrame:
+    df = pd.read_sql(
+        """SELECT (ts AT TIME ZONE 'Asia/Taipei') AS t, open, high, low, close, volume
+           FROM stock_kbars_1m WHERE symbol = %s
+             AND ts >= %s::date AT TIME ZONE 'Asia/Taipei'
+             AND ts < (%s::date + 1) AT TIME ZONE 'Asia/Taipei' ORDER BY ts""",
+        conn, params=(symbol, day.date(), day.date()), index_col="t")
+    df.index = pd.to_datetime(df.index)
+    return df.rename(columns=str.capitalize)
+
+
+def backtest_intraday(out_path: Path, minutes: tuple[int, ...] = (5, 1, 15)) -> str:
+    import psycopg2
+    import signal_backtest as sb
+
+    inds, mom, close = _load_inputs()
+    cands = find_touch_candidates(inds, mom)
+    conn = psycopg2.connect(**DB)
+    try:
+        bars = {(c.symbol, c.date): load_kbars(conn, c.symbol, c.date) for c in cands.itertuples()}
+    finally:
+        conn.close()
+    have = sum(1 for b in bars.values() if len(b))
+    mkt20 = ((close.shift(-20) / close - 1) * 100).median(axis=1)
+
+    lines = [f"# 強勢整理回測 v2 — 分鐘圖觸發 ({date.today()})", "",
+             f"候選 (T-1 名單內 + zone 未回測 + T 日 low 觸區, 不看 T 收盤) {len(cands)};"
+             f" 有 1 分 K {have}。", f"zone {ZONE_BAND_PCT}% / ≥{ZONE_MIN_MEMBERS} 位 / 名單 {SETUP_WINDOW} 日;"
+             f" 觸發 = 觸區後 K 棒突破前K高; 跌破 zone_low 2% 失效; 停損 = 觸區後最低。", ""]
+    def run(m: int, min_stop_pct: float = 0.0):
+        trades, wide, none = [], 0, 0
+        for c in cands.itertuples():
+            b = bars[(c.symbol, c.date)]
+            if b.empty:
+                continue
+            bb = resample_bars(b, m) if m > 1 else b[["Open", "High", "Low", "Close"]]
+            trg = intraday_trigger(bb, c.zone_low, c.zone_high)
+            if trg is None:
+                none += 1
+                continue
+            stop = min(trg["stop"], trg["entry"] * (1 - min_stop_pct / 100))
+            if (trg["entry"] - stop) / trg["entry"] * 100 > 3.0:
+                wide += 1
+                continue
+            after = bb.iloc[trg["entry_i"]:]
+            t = simulate_intraday_trade(inds[c.symbol], c.pos, after, trg["entry"], stop)
+            r20 = sb.forward_ret(close, c.symbol, c.date, 20)
+            trades.append({**t, "symbol": c.symbol, "signal_date": c.date,
+                           "entry_ts": trg["entry_ts"], "members": c.members,
+                           "fwd20": r20, "mkt20": mkt20.get(c.date)})
+        return pd.DataFrame(trades), wide, none
+
+    all_trades = {}
+    for m in minutes:
+        tr, wide, none = run(m)
+        all_trades[m] = tr
+        closed = tr[tr.exit_reason != "open"] if len(tr) else tr
+        lines += [f"## {m} 分 K 觸發", "",
+                  f"- 無觸發/失效 {none} | 停損 >3% 放棄 {wide} | 成交 {len(tr)} | 已結束 {len(closed)}",
+                  f"- 交易層: {_fmt_trades(trade_stats(closed)) if len(closed) else 'n=0'}"]
+        if len(closed):
+            lines.append("- 停損距離 10/50/90 分位: "
+                         + " / ".join(f"{v:.2f}%" for v in closed.stop_pct.quantile([.1, .5, .9])))
+            lines.append(f"- 出場原因: {closed.exit_reason.value_counts().to_dict()}")
+            half = closed.signal_date.dt.year.astype(str) + "H" + ((closed.signal_date.dt.month > 6) + 1).astype(str)
+            for hf, g in closed.groupby(half):
+                lines.append(f"  - {hf}: {_fmt_trades(trade_stats(g))}")
+            ev = closed.dropna(subset=["fwd20", "mkt20"]).rename(columns={"fwd20": "ret", "mkt20": "mkt"})
+            st = sb.event_stats(ev) if len(ev) else {"n": 0}
+            st["grade"] = sb.grade_daily(st)
+            lines.append(f"- 事件層 {_fmt_event(20, st)}")
+        lines.append("")
+    lines += ["## 停損寬度敏感度 (5 分 K; 停損 = min(觸區後最低, 進場價 × (1 − 下限)))", "",
+              "| 停損下限 | n | 停損中位 | 勝率 | 平均 R (毛) | 平均 R (淨) | 每筆淨報酬 |",
+              "|---:|---:|---:|---:|---:|---:|---:|"]
+    for floor in (0.0, 1.5, 2.5):
+        t, _, _ = run(5, floor)
+        if len(t):
+            lines.append(f"| {floor}% | {len(t)} | {t.stop_pct.median():.2f}% | {(t.r_net > 0).mean():.0%} | "
+                         f"{t.r_gross.mean():+.2f} | {t.r_net.mean():+.2f} | "
+                         f"{(t.r_gross * t.stop_pct - COST_PCT).mean():+.2f}% |")
+    lines.append("")
+    lines += ["*盤中分 K 進場, 收盤後轉日線管理 (3R 出半、EMA9 追蹤、跳空以開盤價出);"
+              "成本 0.585% 換算 R;非交易指令。*"]
+    text = "\n".join(lines)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(text + "\n")
+    if len(all_trades.get(5, [])):
+        all_trades[5].to_csv(out_path.with_suffix(".csv"), index=False)
+    return text
+
+
 def push_inbox(msg: str) -> None:
     import subprocess
     from datetime import datetime
@@ -523,12 +761,21 @@ def main(argv: list[str] | None = None) -> int:
     b = sub.add_parser("backtest")
     b.add_argument("--out", type=Path,
                    default=REPO / "analysis" / f"strong_pullback_backtest_{date.today()}.md")
+    k = sub.add_parser("kbars-enqueue")
+    k.add_argument("--dry-run", action="store_true")
+    bi = sub.add_parser("backtest-intraday")
+    bi.add_argument("--out", type=Path,
+                    default=REPO / "analysis" / f"strong_pullback_intraday_{date.today()}.md")
     a = ap.parse_args(argv)
     if a.cmd == "scan":
         text = scan(a.as_of)
         print(text)
         if a.push:
             push_inbox(text)
+    elif a.cmd == "kbars-enqueue":
+        print(enqueue_kbars(a.dry_run))
+    elif a.cmd == "backtest-intraday":
+        print(backtest_intraday(a.out))
     else:
         print(backtest(a.out))
     return 0

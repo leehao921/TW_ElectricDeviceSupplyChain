@@ -249,3 +249,97 @@ def test_setup_active_persists_for_window():
 def test_setup_active_window_one_is_identity():
     s1 = pd.Series([False, True, False], index=pd.bdate_range("2025-03-03", periods=3))
     assert sp.setup_active(s1, window=1).tolist() == [False, True, False]
+
+
+# --------------------------------------------------------------------------- #
+# v2 — 分鐘圖觸發 (plan 2026-10-16 v2)
+# --------------------------------------------------------------------------- #
+def test_is_untested_since_cross():
+    hist = _ohlc([95, 96, 103, 106, 108], lows=[94, 95, 102.5, 105, 107])
+    assert sp.is_untested(hist, zone_low=100.0, zone_high=101.0)
+    hist2 = _ohlc([95, 103, 106, 102, 106], lows=[94, 102.5, 105, 100.8, 105])
+    assert not sp.is_untested(hist2, zone_low=100.0, zone_high=101.0)
+
+
+def _bars(rows, day="2026-10-15"):
+    """rows: (HH:MM 結束標籤, open, high, low, close)."""
+    idx = pd.to_datetime([f"{day} {r[0]}" for r in rows])
+    return pd.DataFrame([r[1:] for r in rows], index=idx,
+                        columns=["Open", "High", "Low", "Close"])
+
+
+def test_trigger_after_dip_into_zone_then_break_prev_high():
+    b = _bars([("09:05", 104, 104.5, 103, 103.2),
+               ("09:10", 103.2, 103.4, 100.6, 100.9),   # 下探入 zone (≤101.5)
+               ("09:15", 100.9, 101.2, 100.4, 101.0),   # 回升, 高 101.2
+               ("09:20", 101.0, 102.0, 100.9, 101.8)])  # 破前K高 101.2 → 進場
+    t = sp.intraday_trigger(b, zone_low=100.0, zone_high=101.0)
+    assert t["entry"] == pytest.approx(101.2)
+    assert t["stop"] == pytest.approx(100.4)            # 觸區後至前K的最低
+    assert t["entry_ts"] == b.index[3]
+
+
+def test_no_trigger_without_touching_zone():
+    b = _bars([("09:05", 104, 104.5, 103, 103.2), ("09:10", 103.2, 105, 103.1, 104.8)])
+    assert sp.intraday_trigger(b, zone_low=100.0, zone_high=101.0) is None
+
+
+def test_trigger_invalid_after_slicing_through_support():
+    b = _bars([("09:05", 101, 101.2, 97.5, 97.8),         # 跌破 zone_low 2% 以上
+               ("09:10", 97.8, 99.0, 97.6, 98.8),
+               ("09:15", 98.8, 100.5, 98.7, 100.2)])
+    assert sp.intraday_trigger(b, zone_low=100.0, zone_high=101.0) is None
+
+
+def test_resample_to_5min_uses_end_labels():
+    idx = pd.date_range("2026-10-15 09:01", periods=10, freq="1min")
+    one = pd.DataFrame({"Open": range(10), "High": range(10), "Low": range(10),
+                        "Close": range(10)}, index=idx, dtype=float)
+    five = sp.resample_bars(one, 5)
+    assert list(five.index.strftime("%H:%M")) == ["09:05", "09:10"]
+    assert five.iloc[0].tolist() == [0, 4, 0, 4]
+
+
+def test_intraday_trade_stopped_same_day():
+    day = pd.DataFrame(
+        [[100, 101, 99, 100, 99], [100.5, 102, 98, 99, 100]],
+        columns=["Open", "High", "Low", "Close", "ema9"],
+        index=pd.bdate_range("2026-10-14", periods=2))
+    bars = _bars([("09:20", 100, 101.0, 100.2, 100.8), ("09:25", 100.8, 100.9, 99.0, 99.2)])
+    t = sp.simulate_intraday_trade(day, pos=1, bars_after_entry=bars, entry=100.5, stop=99.5,
+                                   cost_pct=0.0)
+    assert t["r_gross"] == pytest.approx(-1.0)
+    assert t["exit_reason"] == "stop"
+
+
+def test_intraday_trade_carries_to_daily_management():
+    day = pd.DataFrame(
+        [[100, 101, 99, 100, 99],
+         [100.5, 102, 100, 101.8, 100],       # T: 進場 101, 停損 100 (R=1)
+         [102, 104.5, 101.5, 104, 101],       # T+1 觸 3R=104 出一半
+         [104, 104.2, 102, 102.5, 103]],      # 收 102.5 < ema9 103 → 出 (+1.5R)
+        columns=["Open", "High", "Low", "Close", "ema9"],
+        index=pd.bdate_range("2026-10-13", periods=4))
+    bars = _bars([("09:30", 101, 101.5, 100.6, 101.4)])
+    t = sp.simulate_intraday_trade(day, pos=1, bars_after_entry=bars, entry=101.0, stop=100.0,
+                                   cost_pct=0.0)
+    assert t["r_gross"] == pytest.approx(0.5 * 3 + 0.5 * 1.5)
+    assert t["exit_reason"] == "ema9"
+
+
+def test_kbars_request_payloads():
+    cands = pd.DataFrame({"symbol": ["2357", "3406"],
+                          "date": pd.to_datetime(["2026-10-15", "2026-10-14"])})
+    reqs = sp.kbars_requests(cands)
+    assert reqs[0] == '{"symbol": "2357", "start": "2026-10-15", "end": "2026-10-15"}'
+    assert len(reqs) == 2
+
+
+def test_trigger_skips_zero_risk_flat_bar():
+    b = _bars([("09:01", 101, 101, 100.5, 100.5),      # 觸區
+               ("09:02", 100.5, 100.5, 100.5, 100.5),  # 平盤 K: 高=低=觸區後最低
+               ("09:03", 100.5, 100.8, 100.5, 100.7),  # 破前K高 → entry 100.5 = stop → 跳過
+               ("09:04", 100.7, 101.2, 100.6, 101.1)]) # 破 100.8 → entry 100.8, stop 100.5
+    t = sp.intraday_trigger(b, zone_low=100.0, zone_high=101.0)
+    assert t["entry"] == pytest.approx(100.8)
+    assert t["stop"] == pytest.approx(100.5)
