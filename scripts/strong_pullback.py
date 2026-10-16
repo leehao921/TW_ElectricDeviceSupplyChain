@@ -244,13 +244,14 @@ def simulate_trade(df: pd.DataFrame, signal_pos: int, cost_pct: float = COST_PCT
 
 def _manage_daily(df: pd.DataFrame, j_from: int, last: int, entry: float, stop: float,
                   target: float, remaining: float, legs: list,
-                  entry_day: int | None = None) -> tuple[float, str, int | None]:
-    """日線出場管理: 停損 (跳空以開盤) → 觸 target 出半 → 收盤破 EMA9 全出.
+                  entry_day: int | None = None,
+                  exit_ema: str | None = "ema9") -> tuple[float, str, int | None]:
+    """日線出場管理: 停損 (跳空以開盤) → 觸 target 出半 → 收盤破 exit_ema 全出.
 
     entry_day 當天: 不判跳空、不判 EMA9 (盤中才進場)。
     """
     o, h, l, c = (df[col].to_numpy() for col in ("Open", "High", "Low", "Close"))
-    ema9 = df["ema9"].to_numpy()
+    trail = df[exit_ema].to_numpy() if exit_ema else None
     for j in range(j_from, last + 1):
         first = j == entry_day
         if not first and o[j] <= stop:
@@ -263,9 +264,9 @@ def _manage_daily(df: pd.DataFrame, j_from: int, last: int, entry: float, stop: 
             px = o[j] if (not first and o[j] >= target) else target
             legs.append((0.5, px))
             remaining = 0.5
-        if not first and c[j] < ema9[j]:
+        if trail is not None and not first and c[j] < trail[j]:
             legs.append((remaining, c[j]))
-            return 0.0, "ema9", j
+            return 0.0, exit_ema, j
     return remaining, "open", None
 
 
@@ -319,7 +320,8 @@ def intraday_trigger(bars: pd.DataFrame, zone_low: float, zone_high: float,
 
 def simulate_intraday_trade(df: pd.DataFrame, pos: int, bars_after_entry: pd.DataFrame,
                             entry: float, stop: float, cost_pct: float = COST_PCT,
-                            partial_r: float = 3.0, max_hold: int = 30) -> dict:
+                            partial_r: float = 3.0, max_hold: int = 30,
+                            exit_ema: str | None = "ema9") -> dict:
     """T=pos 盤中進場: 進場後分 K 判停損/3R, 收盤後從 T+1 交給日線出場管理."""
     risk = entry - stop
     target = entry + partial_r * risk
@@ -336,16 +338,59 @@ def simulate_intraday_trade(df: pd.DataFrame, pos: int, bars_after_entry: pd.Dat
     last = min(len(df) - 1, pos + max_hold)
     if remaining > 0 and pos + 1 <= last:
         remaining, reason, exit_pos = _manage_daily(df, pos + 1, last, entry, stop, target,
-                                                    remaining, legs)
+                                                    remaining, legs, exit_ema=exit_ema)
     return _close_trade(df, legs, remaining, reason, exit_pos, last, pos, max_hold,
                         entry, stop, cost_pct, df.index[pos])
 
 
-def kbars_requests(cands: pd.DataFrame) -> list[str]:
-    """候選 (symbol, date) → stock-ofi kbars 佇列 payload (單日)."""
+def chunk_bars(df: pd.DataFrame, size: int) -> pd.DataFrame:
+    """自第一列起每 size 根日 K 合成一根 (標籤 = 區塊最後一天)."""
+    g = np.arange(len(df)) // size
+    out = df.groupby(g).agg({"Open": "first", "High": "max", "Low": "min", "Close": "last"})
+    out.index = df.index[df.groupby(g).cumcount(ascending=False).to_numpy() == 0]
+    return out
+
+
+def multi_bar_trigger(daily: pd.DataFrame, zone_low: float, zone_high: float,
+                      size: int) -> dict | None:
+    """日線 / N 日 K 版觸發: 以 size 日區塊判「觸區 → 破前一區塊高」, 以日 K 定成交日與價.
+
+    daily 第一列 = 觸區日 T; entry_offset = 成交日相對 T 的位置。
+    """
+    ch = chunk_bars(daily, size) if size > 1 else daily[["Open", "High", "Low", "Close"]]
+    trg = intraday_trigger(ch, zone_low, zone_high)
+    if trg is None:
+        return None
+    k = trg["entry_i"]
+    prev_high = float(ch["High"].iloc[k - 1])
+    for d in range(k * size, min((k + 1) * size, len(daily))):
+        if daily["High"].iloc[d] > prev_high:
+            entry = max(float(daily["Open"].iloc[d]), prev_high)
+            return {"entry": entry, "stop": trg["stop"], "prev_high": prev_high,
+                    "stop_pct": (entry - trg["stop"]) / entry * 100, "entry_offset": d}
+    return None
+
+
+def refine_entry(minutes: pd.DataFrame, prev_high: float) -> dict | None:
+    """用 1 分 K 找出突破 prev_high 的那一分鐘: 進場價 = max(開, prev_high), 之後分 K 供停損判斷."""
+    hit = np.flatnonzero(minutes["High"].to_numpy() > prev_high)
+    if len(hit) == 0:
+        return None
+    i = hit[0]
+    return {"entry": max(float(minutes["Open"].iloc[i]), prev_high), "after": minutes.iloc[i:]}
+
+
+def kbars_requests(cands: pd.DataFrame, span_days: int = 0,
+                   today: pd.Timestamp | None = None) -> list[str]:
+    """候選 (symbol, date) → stock-ofi kbars 佇列 payload; 涵蓋 date..date+span_days (不超過今天)."""
     import json
-    return [json.dumps({"symbol": r.symbol, "start": r.date.strftime("%Y-%m-%d"),
-                        "end": r.date.strftime("%Y-%m-%d")}) for r in cands.itertuples()]
+    today = today if today is not None else pd.Timestamp(date.today())
+    out = []
+    for r in cands.itertuples():
+        end = min(r.date + pd.Timedelta(days=span_days), today)
+        out.append(json.dumps({"symbol": r.symbol, "start": r.date.strftime("%Y-%m-%d"),
+                               "end": end.strftime("%Y-%m-%d")}))
+    return out
 
 
 def trade_stats(trades: pd.DataFrame) -> dict:
@@ -636,13 +681,13 @@ def _load_inputs():
     return inds, mom, close
 
 
-def enqueue_kbars(dry_run: bool = False) -> str:
+def enqueue_kbars(dry_run: bool = False, span_days: int = 0) -> str:
     import redis
     inds, mom, _ = _load_inputs()
     cands = find_touch_candidates(inds, mom)
     r = redis.Redis()
     done = {k.decode() for k in r.hkeys("h:kbars:done")}
-    todo = [p for p in kbars_requests(cands)
+    todo = [p for p in kbars_requests(cands, span_days)
             if "{symbol}:{start}:{end}".format(**__import__("json").loads(p)) not in done]
     if not dry_run and todo:
         r.rpush("q:kbars:requests", *todo)
@@ -742,6 +787,148 @@ def backtest_intraday(out_path: Path, minutes: tuple[int, ...] = (5, 1, 15)) -> 
     return text
 
 
+TRIGGER_WAIT_DAYS = 5          # 觸區後最多等 5 個交易日觸發 (3 日 K = 3 根 = 9 日)
+LONG_MAX_HOLD = 60
+
+
+def load_kbars_range(conn, symbol: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    df = pd.read_sql(
+        """SELECT (ts AT TIME ZONE 'Asia/Taipei') AS t, open, high, low, close
+           FROM stock_kbars_1m WHERE symbol = %s
+             AND ts >= %s::date AT TIME ZONE 'Asia/Taipei'
+             AND ts < (%s::date + 1) AT TIME ZONE 'Asia/Taipei' ORDER BY ts""",
+        conn, params=(symbol, start.date(), end.date()), index_col="t")
+    df.index = pd.to_datetime(df.index)
+    return df.rename(columns=str.capitalize)
+
+
+def _with_minutes(trg: dict, minutes: pd.DataFrame | None) -> dict:
+    """成交日有 1 分 K → 以突破那一分鐘進場, 之後分 K 判停損 (resolved=True); 否則保守沿用."""
+    if minutes is None or minutes.empty:
+        return {**trg, "resolved": False}
+    r = refine_entry(minutes, trg["prev_high"])
+    if r is None or r["entry"] <= trg["stop"]:
+        return {**trg, "resolved": False}
+    return {**trg, "entry": r["entry"], "after": r["after"], "resolved": True,
+            "stop_pct": (r["entry"] - trg["stop"]) / r["entry"] * 100}
+
+
+def long_tf_triggers(cands: pd.DataFrame, inds: dict[str, pd.DataFrame],
+                     minute_bars: dict) -> dict[str, list[dict]]:
+    """每個候選在 60 分 / 1 日 / 3 日 K 的觸發 (entry_pos = 成交日在日 K 的位置)."""
+    out = {"60m": [], "1d": [], "3d": []}
+    for c in cands.itertuples():
+        ind = inds[c.symbol]
+        b = minute_bars.get((c.symbol, c.date))
+        b = b if b is not None else pd.DataFrame()
+        days = b.index.normalize() if len(b) else pd.DatetimeIndex([])
+        for tf, size, wait in (("1d", 1, TRIGGER_WAIT_DAYS + 1), ("3d", 3, 9)):
+            sl = ind.iloc[c.pos:c.pos + wait]
+            trg = multi_bar_trigger(sl, c.zone_low, c.zone_high, size)
+            if trg:
+                ep = c.pos + trg["entry_offset"]
+                base = {**trg, "cand": c, "entry_pos": ep,
+                        "after": ind.iloc[[ep]][["Open", "High", "Low", "Close"]]}
+                out[tf].append(_with_minutes(base, b[days == ind.index[ep]] if len(b) else None))
+        if b.empty:
+            continue
+        last_day = ind.index[min(c.pos + TRIGGER_WAIT_DAYS - 1, len(ind) - 1)]
+        b5 = b[days <= last_day]
+        h60 = resample_bars(b5, 60)
+        trg = intraday_trigger(h60, c.zone_low, c.zone_high)
+        if trg:
+            day = trg["entry_ts"].normalize()
+            if day in ind.index:
+                prev_end = h60.index[trg["entry_i"] - 1]
+                mins = b5[(b5.index > prev_end) & (b5.index.normalize() == day)]
+                base = {**trg, "cand": c, "entry_pos": ind.index.get_loc(day),
+                        "prev_high": float(h60["High"].iloc[trg["entry_i"] - 1]),
+                        "after": h60.iloc[trg["entry_i"]:][lambda x: x.index.normalize() == day]}
+                out["60m"].append(_with_minutes(base, mins))
+    return out
+
+
+def backtest_long(out_path: Path) -> str:
+    import psycopg2
+    import signal_backtest as sb
+
+    inds, mom, close = _load_inputs()
+    cands = find_touch_candidates(inds, mom)
+    conn = psycopg2.connect(**DB)
+    try:
+        mb = {}
+        for c in cands.itertuples():
+            ind_end = inds[c.symbol].index[min(c.pos + TRIGGER_WAIT_DAYS - 1,
+                                               len(inds[c.symbol]) - 1)]
+            mb[(c.symbol, c.date)] = load_kbars_range(conn, c.symbol, c.date, ind_end)
+    finally:
+        conn.close()
+    trig = long_tf_triggers(cands, inds, mb)
+    mkt = {h: ((close.shift(-h) / close - 1) * 100).median(axis=1) for h in (20, 60)}
+
+    lines = [f"# 強勢整理回測 v3 — 中長週期觸發 ({date.today()})", "",
+             f"候選 {len(cands)} (同 v2: T-1 名單 + zone 未回測 + T 日觸區)。觸發 = 觸區後 K 棒破前一根高;"
+             f" 等待 ≤{TRIGGER_WAIT_DAYS} 交易日 (3 日 K ≤3 根);停損 = 觸區後最低;最長持有 {LONG_MAX_HOLD} 日。",
+             "成交日有 1 分 K → 以突破那一分鐘進場、其後分 K 判停損;無分 K (3 日 K 第 6 日後) → 成交日低點 ≤ 停損視為停損 (保守)。",
+             "出場: ema9 / ema21 = 收盤跌破該均線全出;hold60 = 不追蹤, 只有停損或 60 日到期。", "",
+             "| 週期 | 停損上限 | 出場 | n | 勝率 | 平均淨 R | 中位 R | 每筆淨報酬 | 合計 R | 持有中位 |",
+             "|---|---:|---|---:|---:|---:|---:|---:|---:|---:|"]
+    best_csv = []
+    for tf in ("60m", "1d", "3d"):
+        for cap in (3.0, 5.0, 8.0):
+            for ema in ("ema9", "ema21", None):
+                rows = []
+                for t in trig[tf]:
+                    if t["stop_pct"] > cap:
+                        continue
+                    c = t["cand"]
+                    tr = simulate_intraday_trade(inds[c.symbol], t["entry_pos"], t["after"],
+                                                 t["entry"], t["stop"], max_hold=LONG_MAX_HOLD,
+                                                 exit_ema=ema)
+                    rows.append({**tr, "symbol": c.symbol, "signal_date": c.date, "tf": tf,
+                                 "cap": cap, "exit": ema or "hold60",
+                                 "resolved": t["resolved"]})
+                df = pd.DataFrame(rows)
+                if df.empty:
+                    lines.append(f"| {tf} | {cap:.0f}% | {ema or 'hold60'} | 0 | — | — | — | — | — | — |")
+                    continue
+                df = df[df.exit_reason != "open"]
+                st = trade_stats(df)
+                ret = (df.r_gross * df.stop_pct - COST_PCT).mean()
+                lines.append(f"| {tf} | {cap:.0f}% | {ema or 'hold60'} | {st['n']} | {st['win_rate']:.0%} | "
+                             f"{st['mean_r']:+.2f} | {st['median_r']:+.2f} | {ret:+.2f}% | "
+                             f"{st['total_r']:+.1f} | {df.hold_days.median():.0f} |")
+                best_csv.append(df)
+    lines += ["", "## 觸發統計", ""]
+    for tf in ("60m", "1d", "3d"):
+        sp_ = pd.Series([t["stop_pct"] for t in trig[tf]])
+        amb = sum(1 for t in trig[tf] if float(t["after"]["Low"].min()) <= t["stop"])
+        res = sum(1 for t in trig[tf] if t["resolved"])
+        lines.append(f"- {tf}: 觸發 {len(trig[tf])}/{len(cands)} | 1 分 K 定進場 {res} | 停損距離 10/50/90 分位 "
+                     + (" / ".join(f"{v:.1f}%" for v in sp_.quantile([.1, .5, .9])) if len(sp_) else "—")
+                     + f" | 進場後當日即觸停損 {amb}")
+    lines += ["", "## 事件層 (成交日收盤 → +20/+60 日, 對同日全池中位; 不設停損的純持有)", ""]
+    for tf in ("60m", "1d", "3d"):
+        for h in (20, 60):
+            ev = []
+            for t in trig[tf]:
+                d = inds[t["cand"].symbol].index[t["entry_pos"]]
+                r = sb.forward_ret(close, t["cand"].symbol, d, h)
+                m = mkt[h].get(d)
+                if r is not None and pd.notna(m):
+                    ev.append({"ret": r, "mkt": m})
+            st = sb.event_stats(pd.DataFrame(ev)) if ev else {"n": 0}
+            st["grade"] = sb.grade_daily(st)
+            lines.append(f"- {tf} {_fmt_event(h, st)}")
+    lines += ["", "*成本 0.585% 換算 R;3R 出半;非交易指令。*"]
+    text = "\n".join(lines)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(text + "\n")
+    if best_csv:
+        pd.concat(best_csv).to_csv(out_path.with_suffix(".csv"), index=False)
+    return text
+
+
 def push_inbox(msg: str) -> None:
     import subprocess
     from datetime import datetime
@@ -763,9 +950,13 @@ def main(argv: list[str] | None = None) -> int:
                    default=REPO / "analysis" / f"strong_pullback_backtest_{date.today()}.md")
     k = sub.add_parser("kbars-enqueue")
     k.add_argument("--dry-run", action="store_true")
+    k.add_argument("--span-days", type=int, default=0, help="每筆涵蓋觸區日起 N 個日曆日")
     bi = sub.add_parser("backtest-intraday")
     bi.add_argument("--out", type=Path,
                     default=REPO / "analysis" / f"strong_pullback_intraday_{date.today()}.md")
+    bl = sub.add_parser("backtest-long")
+    bl.add_argument("--out", type=Path,
+                    default=REPO / "analysis" / f"strong_pullback_long_{date.today()}.md")
     a = ap.parse_args(argv)
     if a.cmd == "scan":
         text = scan(a.as_of)
@@ -773,7 +964,9 @@ def main(argv: list[str] | None = None) -> int:
         if a.push:
             push_inbox(text)
     elif a.cmd == "kbars-enqueue":
-        print(enqueue_kbars(a.dry_run))
+        print(enqueue_kbars(a.dry_run, a.span_days))
+    elif a.cmd == "backtest-long":
+        print(backtest_long(a.out))
     elif a.cmd == "backtest-intraday":
         print(backtest_intraday(a.out))
     else:

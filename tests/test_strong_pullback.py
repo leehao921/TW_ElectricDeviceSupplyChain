@@ -343,3 +343,90 @@ def test_trigger_skips_zero_risk_flat_bar():
     t = sp.intraday_trigger(b, zone_low=100.0, zone_high=101.0)
     assert t["entry"] == pytest.approx(100.8)
     assert t["stop"] == pytest.approx(100.5)
+
+
+# --------------------------------------------------------------------------- #
+# v3 — 中長週期觸發 (60 分 / 1 日 / 3 日)
+# --------------------------------------------------------------------------- #
+def _daily(rows, start="2026-03-02"):
+    df = pd.DataFrame(rows, columns=["Open", "High", "Low", "Close"])
+    df.index = pd.bdate_range(start, periods=len(df))
+    return df
+
+
+def test_chunk_bars_groups_from_first_row():
+    d = _daily([[10, 11, 9, 10], [10, 12, 9.5, 11], [11, 13, 10, 12],
+                [12, 12.5, 11, 11.5], [11.5, 14, 11, 13]])
+    c = sp.chunk_bars(d, 3)
+    assert len(c) == 2
+    assert c.iloc[0][["Open", "High", "Low", "Close"]].tolist() == [10, 13, 9, 12]
+    assert c.index[0] == d.index[2]                     # 標籤 = 區塊最後一天
+    assert c.iloc[1][["Open", "High", "Low", "Close"]].tolist() == [12, 14, 11, 13]
+
+
+def test_daily_trigger_size1_breaks_prior_day_high():
+    d = _daily([[103, 103.5, 100.6, 101.0],    # T: 觸區
+                [101.0, 101.4, 100.3, 100.8],  # 未破 103.5
+                [100.8, 102.0, 100.7, 101.9]]) # 破前日高 101.4 → 進場
+    t = sp.multi_bar_trigger(d, zone_low=100.0, zone_high=101.0, size=1)
+    assert t["entry_offset"] == 2
+    assert t["entry"] == pytest.approx(101.4)
+    assert t["stop"] == pytest.approx(100.3)
+
+
+def test_three_day_trigger_executes_on_first_breaking_day():
+    d = _daily([[103, 104, 100.5, 101],        # 區塊 0: 觸區, 高 104, 低 100.2
+                [101, 102, 100.2, 101.5],
+                [101.5, 103, 101, 102.5],
+                [102.5, 103.8, 102, 103.5],    # 區塊 1: 第 1 天未破 104
+                [103.5, 105, 103, 104.8],      # 第 2 天破 104 → 進場 104
+                [104.8, 106, 104.5, 105.5]])
+    t = sp.multi_bar_trigger(d, zone_low=100.0, zone_high=101.0, size=3)
+    assert t["entry_offset"] == 4
+    assert t["entry"] == pytest.approx(104.0)
+    assert t["stop"] == pytest.approx(100.2)
+
+
+def test_manage_daily_can_trail_ema21():
+    df = pd.DataFrame(
+        [[100, 101, 99, 100, 99, 95],
+         [100.5, 102, 100, 101.8, 100, 96],
+         [101.5, 102, 100.8, 100.9, 101, 97]],     # 收 100.9 < ema9 101 但 > ema21 97
+        columns=["Open", "High", "Low", "Close", "ema9", "ema21"],
+        index=pd.bdate_range("2026-03-02", periods=3))
+    legs = []
+    rem, reason, _ = sp._manage_daily(df, 2, 2, entry=101.0, stop=100.0, target=104.0,
+                                      remaining=1.0, legs=legs, exit_ema="ema21")
+    assert rem == 1.0 and reason == "open"
+
+
+def test_kbars_request_span_days_capped_at_today():
+    cands = pd.DataFrame({"symbol": ["2357"], "date": pd.to_datetime(["2026-10-13"])})
+    reqs = sp.kbars_requests(cands, span_days=7, today=pd.Timestamp("2026-10-16"))
+    assert reqs[0] == '{"symbol": "2357", "start": "2026-10-13", "end": "2026-10-16"}'
+
+
+def test_refine_entry_finds_breakout_minute():
+    m = _bars([("10:01", 101.0, 101.1, 99.8, 100.0),   # 低點在突破前 → 不算停損
+               ("10:02", 100.0, 101.3, 100.0, 101.2),  # 破 101.2 → 進場
+               ("10:03", 101.2, 101.6, 101.0, 101.5)])
+    r = sp.refine_entry(m, prev_high=101.2)
+    assert r["entry"] == pytest.approx(101.2)
+    assert r["after"].index[0] == m.index[1]
+    assert r["after"]["Low"].min() == pytest.approx(100.0)
+
+
+def test_refine_entry_none_when_never_breaks():
+    m = _bars([("10:01", 101.0, 101.1, 100.8, 101.0)])
+    assert sp.refine_entry(m, prev_high=101.2) is None
+
+
+def test_manage_daily_without_trailing_exit():
+    df = pd.DataFrame(
+        [[100, 101, 99, 100, 99], [100.5, 102, 100.5, 100.6, 101]],   # 收 < ema9 但不追蹤
+        columns=["Open", "High", "Low", "Close", "ema9"],
+        index=pd.bdate_range("2026-03-02", periods=2))
+    legs = []
+    rem, reason, _ = sp._manage_daily(df, 1, 1, entry=101.0, stop=100.0, target=104.0,
+                                      remaining=1.0, legs=legs, exit_ema=None)
+    assert rem == 1.0 and reason == "open"
