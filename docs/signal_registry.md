@@ -19,6 +19,7 @@
 | L7 | 融資急增 top10% | 橫斷面融資增速前 10% | WEAK（+5D 61% 贏大盤、絕對報酬負）| margin_daily 週跑 |
 | L8 | 00891 回檔帶 | 距 ATH -20/-30/-35%（存股加碼，非交易）| VALIDATED（歷史三谷全收復）| etf-00891 watch |
 | L9 | 隔日沖·鎖停尾盤買 | 漲停鎖死尾盤買→隔開賣 | VALIDATED 但**不可執行**（買不到；勿追）| 回測存檔 |
+| L10 | 強勢整理第一次回測 (Martin) | 1/3/6M 漲 ≥30% 前 25% + BB squeeze/低點墊高/站上 EMA9·21 → 10 日內首次回測 EMA21/EMA50/AVWAP/前高/缺口 疊合區 → T+1 破 T 高 | WEAK（2025-07→2026-10 n=76 事件: T+20 超額中位 +2.53%/beat 54%；日線代理停損中位 6.2% 遠寬於原法 2.5–3%，交易層 n=18 平均 +0.23R 樣本不足；Martin 原規格 1.5%/3 位 n=5 無法評估；**未進 routine**，待分鐘圖觸發版重驗）| `scripts/strong_pullback.py` · `analysis/strong_pullback_backtest_2026-10-16.md` |
 
 ## 做空訊號
 
