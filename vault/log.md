@@ -480,3 +480,9 @@ v2 (broker 內 OptionsSubscriber) 改 tw_holidays gate, 盤外不輪詢/不 flus
 topic 被拒; 實際個股 OFI 由 tmf-stock-ofi-collector 獨立 session 供應 (09:04 34 檔正常), 受影響的是 broker
 內重複的 StockOFISubscriber 與 v2 本身。broker 是下單 gateway, 調整待用戶決定。
 清理: option_quotes 舊口徑快照 658 列刪除 + 13 個空 chunk drop (用戶確認)。
+
+## 2026-10-21 交易檢討: 10/6 歷史高點未減碼 → 新增「歷史高點紀律」playbook
+
+本人檢討: 高點情緒衝高時應砍短期權證、停止加多、獲利轉現金、有限風險轉空防禦，等恐慌再進場;「不能看對方向死在波動當中」。
+對照 routine_synthesis_2026-10-06: 廣度 319/536、投信 −158.5 億、P/B RED 73%、memory RED、BB 命中 29%、Avoid 6/10 逢高出貨、週選 IV 17.9 → 6/7 燈已亮未執行;TXF 隨後 −8.1%、週選 IV 衝 38。
+落地: vault/trading/reviews.md (新)、playbooks.md 新增 7 項 checklist + 動作序、preferences.md 補充「過熱 checklist 屬資料觸發」。門檻 n=1 待回填。

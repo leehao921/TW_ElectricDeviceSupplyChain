@@ -38,7 +38,8 @@ Content-oriented catalog. Every vault page listed here with one-line summary. **
 ## Trading
 
 - [positions](trading/positions.md) — 00763U @ 31.47 cost · take-profit ladder 36.5/37.5/39/41 · stop 34/33/31
-- [playbooks](trading/playbooks.md) — TWD breach 31.80 · DXY macro sensitivity (β −1.47) · Basis extreme short · 00763U ladder · Pair trade rules
+- [playbooks](trading/playbooks.md) — TWD breach 31.80 · DXY macro sensitivity (β −1.47) · Basis extreme short · 00763U ladder · Pair trade rules · **歷史高點紀律 (情緒過熱 7 項 checklist)**
+- [reviews](trading/reviews.md) — 交易檢討紀錄: 2026-10-21 10/6 高點未減碼 (系統亮 6/7 燈未執行 → TXF −8.1%)
 
 ## Research (詳細研究 slice, subordinate to concepts)
 
@@ -96,7 +97,7 @@ Vault `entities/` holds 1-line stubs that link back to `../Pilot_Reports/{Indust
 | user | 3 |
 | projects | 3 |
 | concepts | 9 |
-| trading | 2 |
+| trading | 3 |
 | inbox | 0 (dynamic) |
 | meta | 2 |
 | entities | 0 (on-demand) |
