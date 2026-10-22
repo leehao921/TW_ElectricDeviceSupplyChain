@@ -1,0 +1,37 @@
+name: Valuation Anomaly Tests
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "scripts/valuation_snapshot.py"
+      - "scripts/detect_valuation_anomaly.py"
+      - "scripts/update_valuation.py"
+      - "tests/test_valuation_anomaly.py"
+      - ".github/workflows/valuation-anomaly-tests.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "scripts/valuation_snapshot.py"
+      - "scripts/detect_valuation_anomaly.py"
+      - "scripts/update_valuation.py"
+      - "tests/test_valuation_anomaly.py"
+      - ".github/workflows/valuation-anomaly-tests.yml"
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pytest
+
+      - name: Run anomaly detection tests
+        run: pytest tests/test_valuation_anomaly.py -v
