@@ -63,7 +63,7 @@ class Check:
 _REGISTRY = [
     # topic, label-suffix, sched, window_end
     ("pb-lights", "pb-lights", time(8, 35), time(13, 30)),
-    ("disposition-alert", "disposition-daily", time(8, 35), time(13, 30)),
+    # disposition-alert 僅在持股/BB 交集時推 → 非心跳, 不列管; 由每次必推的 track 證明執行
     ("disposition-track", "disposition-daily", time(8, 35), time(13, 30)),
     ("ddr-price", "ddr-price", time(8, 20), time(13, 30)),
     ("brent-watch", "brent-watch", time(8, 25), time(13, 30)),

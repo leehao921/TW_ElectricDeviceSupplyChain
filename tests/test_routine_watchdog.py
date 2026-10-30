@@ -40,11 +40,11 @@ def test_is_trading_day_normal_weekday_true():
 def test_build_checks_expands_ma_touch_slots():
     checks = rw.build_checks()
     keys = {c.key for c in checks}
-    # 21 registry topics, but ma-touch → 3 slot checks ⇒ 24 total
-    assert len(checks) == 24
+    # 20 registry topics, but ma-touch → 3 slot checks ⇒ 23 total
+    assert len(checks) == 23
     assert {"ma-touch:preopen", "ma-touch:noon", "ma-touch:close"} <= keys
     assert {"bb-squeeze", "bb-followthrough", "etf-smart-money",
-            "disposition-alert", "disposition-track", "buy-list", "pb-lights",
+            "disposition-track", "buy-list", "pb-lights",
             "memory-cycle", "routine-synthesis", "news-pulse",
             "foreign-structure", "ddr-price", "geo-composite", "txf-levels"} <= keys
     labels = {c.key: c.label for c in checks}
@@ -53,6 +53,14 @@ def test_build_checks_expands_ma_touch_slots():
     assert labels["memory-cycle"] == "com.lulala.memory-cycle"
     assert labels["bb-squeeze"] == "com.lulala.bb-squeeze"
     assert labels["routine-synthesis"] == "com.lulala.daily-synthesis"
+
+
+def test_disposition_alert_not_a_heartbeat():
+    # disposition-alert 只在持股/BB 交集時才推 (無交集 = [skip]) → 不能當每日心跳,
+    # 否則無交集日被誤判漏跑、整天每 30 分 kickstart (2026-10-30 誤報)。
+    # 執行證明改由每次都推的 disposition-track 承擔。
+    keys = {c.key for c in rw.build_checks()}
+    assert "disposition-alert" not in keys
 
 
 def test_disposition_track_registered_same_label():
