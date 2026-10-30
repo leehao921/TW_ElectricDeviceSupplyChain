@@ -371,13 +371,27 @@ def record_post(entry: dict, snap: dict, days_since_release: int,
     """
     base = entry.get("release_close")
     close = snap.get("close")
-    if not base or not close:
+    if not base:
         return
+    # 晨跑時當日收盤未入庫 (close=None) 仍要走 hist 回查, 不可整段提前 return
     for c, key in ((1, "t1"), (5, "t5"), (20, "t20")):
         if days_since_release >= c and entry["post"].get(key) is None:
             hist = hist_close_fn(c) if hist_close_fn else None
             px = hist if hist else close
-            entry["post"][key] = round((px - base) / base * 100, 2)
+            if px:
+                entry["post"][key] = round((px - base) / base * 100, 2)
+
+
+def heal_closes(entry: dict, ticker: str, market_fn) -> None:
+    """晨跑記錄的 enter_close / during[].close 為 None (當日收盤未入庫) → 以日期回查補值。"""
+    if entry.get("enter_close") is None and entry.get("enter_date"):
+        entry["enter_close"] = (market_fn(ticker, entry["enter_date"]) or {}).get("close")
+    base = entry.get("enter_close")
+    for s in entry.get("during", []):
+        if s.get("close") is None:
+            s["close"] = (market_fn(ticker, s["d"]) or {}).get("close")
+        if base and s.get("close"):
+            s["cumret_pct"] = round((s["close"] - base) / base * 100, 2)
 
 
 def _grp(e):
@@ -488,6 +502,7 @@ def update_tracking(state: dict, active: dict, history: list, market_fn, as_of: 
     graduated = []
     for ticker, entry in list(tracked.items()):
         m = market_fn(ticker, as_of) or {}
+        heal_closes(entry, ticker, market_fn)
         still_disposed = ticker in active
         if not entry.get("release_date"):
             if still_disposed:

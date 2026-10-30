@@ -198,3 +198,47 @@ def test_release_close_self_heals_on_later_run():
     e = state["tracked"]["1815"]
     assert e["release_close"] == 111.0                      # 自癒為解除日收盤
     assert e["post"]["t1"] == round((113.0/111.0-1)*100, 2)  # T+1 隨之可算
+
+
+def test_record_post_morning_run_without_today_close_uses_hist():
+    # 2026-10-30: 晨跑 08:35 當日收盤尚未入庫 → snap close=None。舊邏輯
+    # `if not close: return` 先退出, hist_close_fn 從未被用 → 47 檔 T+N 全 None。
+    e = {"release_date": "2026-10-12", "release_close": 179.0,
+         "post": {"t1": None, "t5": None, "t20": None}}
+    hist = {1: 168.0, 5: 151.0}
+    dt.record_post(e, {"close": None}, days_since_release=8,
+                   hist_close_fn=lambda c: hist.get(c))
+    assert e["post"]["t1"] == round((168.0 / 179.0 - 1) * 100, 2)
+    assert e["post"]["t5"] == round((151.0 / 179.0 - 1) * 100, 2)
+    assert e["post"]["t20"] is None
+
+
+def test_record_post_no_close_no_hist_stays_none():
+    e = {"release_date": "2026-10-12", "release_close": 179.0,
+         "post": {"t1": None, "t5": None, "t20": None}}
+    dt.record_post(e, {"close": None}, days_since_release=1,
+                   hist_close_fn=lambda c: None)
+    assert e["post"]["t1"] is None   # 不可用 None 價硬算
+
+
+def test_enter_and_during_closes_self_heal_on_later_run():
+    # 晨跑記錄的 enter_close / during[].close 為 None (當日未入庫) → 後續 run 回查補值。
+    tracked = {"3016": {"enter_date": "2026-10-01", "enter_close": None,
+                        "release_date": None,
+                        "during": [{"d": "2026-10-01", "close": None, "cumret_pct": 0.0,
+                                    "foreign_1d": None},
+                                   {"d": "2026-10-02", "close": None, "cumret_pct": None,
+                                    "foreign_1d": None}],
+                        "post": {"t1": None, "t5": None, "t20": None}}}
+    state = {"tracked": tracked}
+    closes = {("3016", "2026-10-01"): 100.0, ("3016", "2026-10-02"): 110.0}
+
+    def market_fn(t, d):
+        return {"close": closes.get((t, d))}
+
+    dt.update_tracking(state, active={"3016": {}}, history=[], market_fn=market_fn,
+                       as_of="2026-10-05")
+    e = state["tracked"]["3016"]
+    assert e["enter_close"] == 100.0
+    assert e["during"][0]["close"] == 100.0 and e["during"][0]["cumret_pct"] == 0.0
+    assert e["during"][1]["close"] == 110.0 and e["during"][1]["cumret_pct"] == 10.0
